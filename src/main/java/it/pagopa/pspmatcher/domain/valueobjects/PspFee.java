@@ -6,7 +6,10 @@ import java.util.Objects;
 
 import org.springframework.lang.NonNull;
 
+import lombok.EqualsAndHashCode;
+
 @ValueObjects
+@EqualsAndHashCode
 public class PspFee implements Serializable {
 
     private final BigDecimal fee;
@@ -18,22 +21,5 @@ public class PspFee implements Serializable {
 
     public @NonNull BigDecimal value() {
         return fee;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-            PspFee that = (PspFee) o;
-        return fee.equals(that.fee);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return fee.hashCode();
     }
 }

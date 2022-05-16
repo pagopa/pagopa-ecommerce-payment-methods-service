@@ -5,7 +5,10 @@ import java.util.Objects;
 
 import org.springframework.lang.NonNull;
 
+import lombok.EqualsAndHashCode;
+
 @ValueObjects
+@EqualsAndHashCode
 public class PspID implements Serializable {
 
     private final String id;
@@ -18,22 +21,5 @@ public class PspID implements Serializable {
     public @NonNull String value() {
 
         return id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-            PspID that = (PspID) o;
-        return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return id.hashCode();
     }
 }
