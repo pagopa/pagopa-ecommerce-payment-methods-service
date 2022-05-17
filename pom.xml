@@ -7,11 +7,11 @@
 		<version>2.6.7</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>it.pagopa</groupId>
-	<artifactId>pspmatcher</artifactId>
+	<groupId>it.pagopa.ecommerce</groupId>
+	<artifactId>payment-instruments-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>pspmatcher</name>
-	<description>psp-matcher micro service</description>
+	<name>payment-instruments-service</name>
+	<description>payment instruments micro service</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -98,10 +98,10 @@
 							<generateApiTests>false</generateApiTests>
 							<generateModelTests>false</generateModelTests>
 							<configOptions>
-								<basePackage>it.pagopa.payment.instruments.server</basePackage>
-								<modelPackage>it.pagopa.payment.instruments.server.model</modelPackage>
-								<apiPackage>it.pagopa.payment.instruments.server.api</apiPackage>
-								<configPackage>it.pagopa.payment.instruments.server.config</configPackage>
+								<basePackage>it.pagopa.ecommerce.payment.instruments.server</basePackage>
+								<modelPackage>it.pagopa.ecommerce.payment.instruments.server.model</modelPackage>
+								<apiPackage>it.pagopa.ecommerce.payment.instruments.server.api</apiPackage>
+								<configPackage>it.pagopa.ecommerce.payment.instruments.server.config</configPackage>
 								<interfaceOnly>true</interfaceOnly>
 								<hideGenerationTimestamp>true</hideGenerationTimestamp>
 								<skipDefaultInterface>true</skipDefaultInterface>
