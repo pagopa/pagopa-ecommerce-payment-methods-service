@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  version: 0.1.0
+  title: Pagopa eCommerce payment instruments service
+  description: This microservice handles payment instruments.
+paths:
+  /payment-instruments:
+    post:
+      operationId: newPaymentInstrument
+      summary: Make a new payment instruments
+      requestBody:
+        $ref: "#/components/requestBodies/PaymentInstrumentRequest"
+      responses:
+        '200':
+          description: New payment instrument successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInstrumentResponse'
+    get:
+      operationId: getAllPaymentInstruments
+      summary: Retrive all Payment Instruments
+      responses:
+        '200':
+          description: Payment instrument successfully retrived
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentInstrumentResponse'
+  /payment-instruments/{id}:
+    patch:
+      operationId: patchPaymentInstrument
+      summary: Update payment instruments
+      parameters:
+        - name: id  
+          in: path
+          description: Payment Instrument ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/PatchPaymentInstrumentRequest"
+      responses:
+        '200':
+          description: Payment instrument successfully retrived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInstrumentResponse'
+    get:
+      operationId: getPaymentInstrument
+      summary: Retrive payment instrument by ID
+      parameters:
+        - name: id  
+          in: path
+          description: Payment Instrument ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: New payment instrument successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInstrumentResponse'            
+components:
+  schemas:
+    PaymentInstrumentRequest:
+      type: object
+      description: New Payment Instrument Request
+      properties:
+        name:
+          type: string  
+        description:
+          type: string  
+        enabled:
+          type: boolean    
+      required:
+        - name
+        - description
+        - enabled
+    PatchPaymentInstrumentRequest:
+      type: object
+      description: Patch Payment Instrument Request
+      properties:
+        enabled:
+          type: boolean    
+      required:
+        - enabled    
+    PaymentInstrumentResponse:
+      type: object
+      description: New Payment Instrument Response
+      properties:
+        id:
+          type: string  
+        name:
+          type: string  
+        description:
+          type: string  
+        enabled:
+          type: boolean    
+      required:
+        - id
+        - name
+        - description
+        - enabled    
+  requestBodies:
+    PaymentInstrumentRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PaymentInstrumentRequest"
+    PatchPaymentInstrumentRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PatchPaymentInstrumentRequest"        
