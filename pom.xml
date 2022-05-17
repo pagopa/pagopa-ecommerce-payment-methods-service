@@ -8,9 +8,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>it.pagopa.ecommerce</groupId>
-	<artifactId>payment-instruments-service</artifactId>
+	<artifactId>pagopa-ecommerce-payment-instruments-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>payment-instruments-service</name>
+	<name>pagopa-ecommerce-payment-instruments-service</name>
 	<description>payment instruments micro service</description>
 	<properties>
 		<java.version>17</java.version>
