@@ -1,10 +1,10 @@
-package it.pagopa.pspmatcher;
+package it.pagopa.ecommerce.payment.instruments;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class PspmatcherApplicationTests {
+class PaymentInstrumentsApplicationTests {
 
 	@Test
 	void contextLoads() {

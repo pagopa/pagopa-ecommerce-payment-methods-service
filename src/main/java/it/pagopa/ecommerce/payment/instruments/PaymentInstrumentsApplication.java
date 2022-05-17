@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PspmatcherApplication {
+public class PaymentInstrumentsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PspmatcherApplication.class, args);
+		SpringApplication.run(PaymentInstrumentsApplication.class, args);
 	}
 
 }

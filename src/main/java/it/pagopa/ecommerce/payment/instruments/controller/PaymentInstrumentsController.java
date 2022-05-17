@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
 import it.pagopa.ecommerce.payment.instruments.application.PaymentInstrumentService;
-import it.pagopa.payment.instruments.server.api.PaymentInstrumentsApi;
-import it.pagopa.payment.instruments.server.model.PatchPaymentInstrumentRequestDto;
-import it.pagopa.payment.instruments.server.model.PaymentInstrumentRequestDto;
-import it.pagopa.payment.instruments.server.model.PaymentInstrumentResponseDto;
+import it.pagopa.ecommerce.payment.instruments.server.api.PaymentInstrumentsApi;
+import it.pagopa.ecommerce.payment.instruments.server.model.PatchPaymentInstrumentRequestDto;
+import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentRequestDto;
+import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
