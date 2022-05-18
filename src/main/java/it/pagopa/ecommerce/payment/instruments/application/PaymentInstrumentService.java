@@ -95,6 +95,26 @@ public class PaymentInstrumentService {
                                     .valueOf(document.getPaymentInstrumentStatus())));
                     paymentInstrument.enablePaymentInstrument(new PaymentInstrumentStatus(enable));
                     return paymentInstrument;
+                }).flatMap(
+                        p -> paymentInstrumentRepository
+                                .save(new PaymentInstrumentDocument(
+                                        p.getPaymentInstrumentID().value().toString(),
+                                        p.getPaymentInstrumentName().value(),
+                                        p.getPaymentInstrumentDescription().value(),
+                                        p.getPsp(),
+                                        p.getPaymentInstrumentStatus().value().toString())))
+                .map(document -> {
+                    PaymentInstrument paymentInstrument = new PaymentInstrument(
+                            new PaymentInstrumentID(
+                                    UUID.fromString(document
+                                            .getPaymentInstrumentID())),
+                            new PaymentInstrumentName(document.getPaymentInstrumentName()),
+                            new PaymentInstrumentDescription(
+                                    document.getPaymentInstrumentDescription()),
+                            new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
+                                    .valueOf(document.getPaymentInstrumentStatus())));
+                    paymentInstrument.enablePaymentInstrument(new PaymentInstrumentStatus(enable));
+                    return paymentInstrument;
                 });
     }
 

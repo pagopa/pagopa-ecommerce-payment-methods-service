@@ -1,8 +1,8 @@
 version: "3.9"
 
 services:
-  pagopa-ecommerce-psp-matcher-service:
-    container_name: pagopa-ecommerce-psp-matcher-service
+  pagopa-ecommerce-payment-instruments-service:
+    container_name: pagopa-ecommerce-payment-instruments-service
     build:
       context: .
     ports:
