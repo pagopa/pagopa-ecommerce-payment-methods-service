@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentDescription;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentEnabled;
+import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentStatus;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentID;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentName;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.Psp;
@@ -20,7 +20,7 @@ public class PaymentInstrument {
     private final PaymentInstrumentName paymentInstrumentName;
     private final PaymentInstrumentDescription paymentInstrumentDescription;
     private final List<Psp> psp;
-    private PaymentInstrumentEnabled paymentInstrumentEnabled;
+    private PaymentInstrumentStatus paymentInstrumentStatus;
 
     @AggregateID
     public PaymentInstrumentID paymentInstrumentID() {
@@ -29,16 +29,16 @@ public class PaymentInstrument {
 
     public PaymentInstrument(PaymentInstrumentID paymentInstrumentID, PaymentInstrumentName paymentInstrumentName,
             PaymentInstrumentDescription paymentInstrumentDescription,
-            PaymentInstrumentEnabled paymentInstrumentEnabled) {
+            PaymentInstrumentStatus paymentInstrumentStatus) {
         this.paymentInstrumentID = paymentInstrumentID;
         this.paymentInstrumentName = paymentInstrumentName;
         this.paymentInstrumentDescription = paymentInstrumentDescription;
-        this.paymentInstrumentEnabled = paymentInstrumentEnabled;
+        this.paymentInstrumentStatus = paymentInstrumentStatus;
         this.psp = new ArrayList<>();
     }
 
-    public void enablePaymentInstrument(PaymentInstrumentEnabled paymentInstrumentEnabled) {
+    public void enablePaymentInstrument(PaymentInstrumentStatus paymentInstrumentStatus) {
 
-        this.paymentInstrumentEnabled = paymentInstrumentEnabled;
+        this.paymentInstrumentStatus = paymentInstrumentStatus;
     }
 }
