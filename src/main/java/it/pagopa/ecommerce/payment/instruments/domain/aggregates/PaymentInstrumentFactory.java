@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentDescription;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentEnabled;
+import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentStatus;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentID;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentName;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentInstrumentRepository;
@@ -23,7 +23,7 @@ public class PaymentInstrumentFactory {
     public Mono<PaymentInstrument> newPaymentInstrument(PaymentInstrumentID paymentInstrumentID,
             PaymentInstrumentName paymentInstrumentName,
             PaymentInstrumentDescription paymentInstrumentDescription,
-            PaymentInstrumentEnabled paymentInstrumentEnabled) {
+            PaymentInstrumentStatus paymentInstrumentEnabled) {
 
         return paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()).hasElements()
                 .map(hasPaymentInstrument -> {

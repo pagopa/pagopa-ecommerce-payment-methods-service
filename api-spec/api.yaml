@@ -76,20 +76,22 @@ components:
           type: string  
         description:
           type: string  
-        enabled:
-          type: boolean    
+        status:
+          type: string
+          enum: ["ENABLED","DISABLED","INCOMING"]    
       required:
         - name
         - description
-        - enabled
+        - status
     PatchPaymentInstrumentRequest:
       type: object
       description: Patch Payment Instrument Request
       properties:
-        enabled:
-          type: boolean    
+        status:
+          type: string
+          enum: ["ENABLED","DISABLED","INCOMING"]     
       required:
-        - enabled    
+        - status    
     PaymentInstrumentResponse:
       type: object
       description: New Payment Instrument Response
@@ -100,13 +102,14 @@ components:
           type: string  
         description:
           type: string  
-        enabled:
-          type: boolean    
+        status:
+          type: string
+          enum: ["ENABLED","DISABLED","INCOMING"]  
       required:
         - id
         - name
         - description
-        - enabled    
+        - status    
   requestBodies:
     PaymentInstrumentRequest:
       required: true

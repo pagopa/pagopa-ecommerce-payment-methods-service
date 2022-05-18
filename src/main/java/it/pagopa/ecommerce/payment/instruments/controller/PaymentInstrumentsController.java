@@ -12,6 +12,8 @@ import it.pagopa.ecommerce.payment.instruments.server.api.PaymentInstrumentsApi;
 import it.pagopa.ecommerce.payment.instruments.server.model.PatchPaymentInstrumentRequestDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentRequestDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto;
+import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto.StatusEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,7 +34,8 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
                     response.setName(paymentInstrument.getPaymentInstrumentName().value());
                     response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
-                    response.setEnabled(paymentInstrument.getPaymentInstrumentEnabled().value());
+                    response.setStatus(
+                            StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
                     return ResponseEntity.ok(response);
                 });
     }
@@ -47,7 +50,8 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
                     response.setName(paymentInstrument.getPaymentInstrumentName().value());
                     response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
-                    response.setEnabled(paymentInstrument.getPaymentInstrumentEnabled().value());
+                    response.setStatus(
+                            StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
                     return response;
                 })));
     }
@@ -61,7 +65,8 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
                     response.setName(paymentInstrument.getPaymentInstrumentName().value());
                     response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
-                    response.setEnabled(paymentInstrument.getPaymentInstrumentEnabled().value());
+                    response.setStatus(
+                            StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
                     return ResponseEntity.ok(response);
                 });
     }
@@ -70,13 +75,16 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
     public Mono<ResponseEntity<PaymentInstrumentResponseDto>> patchPaymentInstrument(String id,
             @Valid Mono<PatchPaymentInstrumentRequestDto> paymentInstrumentRequestDto, ServerWebExchange exchange) {
         return paymentInstrumentRequestDto
-                .flatMap(request -> paymentInstrumentService.patchPaymentInstrument(id, request.getEnabled())
+                .flatMap(request -> paymentInstrumentService
+                        .patchPaymentInstrument(id, PaymentInstrumentStatusEnum.valueOf(request.getStatus().getValue()))
                         .map(paymentInstrument -> {
                             PaymentInstrumentResponseDto response = new PaymentInstrumentResponseDto();
                             response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
                             response.setName(paymentInstrument.getPaymentInstrumentName().value());
                             response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
-                            response.setEnabled(paymentInstrument.getPaymentInstrumentEnabled().value());
+                            response.setStatus(
+                                    StatusEnum.valueOf(
+                                            paymentInstrument.getPaymentInstrumentStatus().value().toString()));
                             return ResponseEntity.ok(response);
                         }));
     }

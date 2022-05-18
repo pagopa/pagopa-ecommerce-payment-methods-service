@@ -19,5 +19,5 @@ public class PaymentInstrumentDocument {
     private String paymentInstrumentName;
     private String paymentInstrumentDescription;
     private List<Psp> psp;
-    private Boolean paymentInstrumentEnabled;
+    private String paymentInstrumentStatus;
 }
