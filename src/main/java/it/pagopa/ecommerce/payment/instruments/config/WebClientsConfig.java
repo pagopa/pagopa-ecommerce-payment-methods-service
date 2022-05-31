@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit;
 public class WebClientsConfig {
 
     @Bean(name = "apiConfigWebClient")
-    public PaymentServiceProvidersApi apiConfigWebClient(@Value("${ecommerceSessions.uri}") String apiConfigWebClientUri,
-                               @Value("${ecommerceSessions.readTimeout}") int apiConfigWebClientReadTimeout,
-                               @Value("${ecommerceSessions.connectionTimeout}") int apiConfigWebClientConnectionTimeout) {
+    public PaymentServiceProvidersApi apiConfigWebClient(@Value("${apiConfig.uri}") String apiConfigWebClientUri,
+                               @Value("${apiConfig.readTimeout}") int apiConfigWebClientReadTimeout,
+                               @Value("${apiConfig.connectionTimeout}") int apiConfigWebClientConnectionTimeout) {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, apiConfigWebClientConnectionTimeout)
                 .doOnConnected(connection ->
