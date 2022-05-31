@@ -12,7 +12,7 @@ import java.util.Date;
 public class ScheduledPSPUpdate {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    @Scheduled(cron = "0 0 * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void updatePSPs(){
         log.info("Starting PSPs scheduled update. Time: {}", dateFormat.format(new Date()));
     }
