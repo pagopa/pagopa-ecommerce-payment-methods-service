@@ -6,14 +6,14 @@ import it.pagopa.generated.ecommerce.apiconfig.v1.ApiClient;
 import it.pagopa.generated.ecommerce.apiconfig.v1.api.PaymentServiceProvidersApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.util.concurrent.TimeUnit;
-
+@Configuration
 public class WebClientsConfig {
-
     @Bean(name = "apiConfigWebClient")
     public PaymentServiceProvidersApi apiConfigWebClient(@Value("${apiConfig.uri}") String apiConfigWebClientUri,
                                @Value("${apiConfig.readTimeout}") int apiConfigWebClientReadTimeout,

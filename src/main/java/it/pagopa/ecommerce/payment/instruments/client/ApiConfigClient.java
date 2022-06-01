@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 
-@Component
 @Slf4j
+@Component
 public class ApiConfigClient {
 
     @Autowired
