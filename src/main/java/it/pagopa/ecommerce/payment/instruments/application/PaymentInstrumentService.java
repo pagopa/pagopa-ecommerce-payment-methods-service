@@ -1,7 +1,12 @@
 package it.pagopa.ecommerce.payment.instruments.application;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import it.pagopa.ecommerce.payment.instruments.exception.PaymentInstrumentAlreadyInUseException;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +23,8 @@ import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static it.pagopa.ecommerce.payment.instruments.exception.PaymentInstrumentAlreadyInUseException.paymentInstrumentAlreadyInUse;
 
 @Service
 @ApplicationService
@@ -58,6 +65,44 @@ public class PaymentInstrumentService {
                                 document.getPaymentInstrumentDescription()),
                         new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                 .valueOf(document.getPaymentInstrumentStatus()))));
+    }
+
+    public Flux<PaymentInstrument> createPaymentInstrument(ServicesDto servicesDto) {
+
+        log.debug("[Payment instrument Aggregate] Create new Aggregates");
+        List<Mono<PaymentInstrument>> instruments = new ArrayList<>();
+
+        for(ServiceDto serviceDto: servicesDto.getServices()) {
+            try {
+                Mono<PaymentInstrument> paymentInstrument = paymentInstrumentFactory.newPaymentInstrument(
+                        new PaymentInstrumentID(UUID.randomUUID()),
+                        new PaymentInstrumentName(serviceDto.getServiceName()),
+                        new PaymentInstrumentDescription(serviceDto.getServiceDescription()),
+                        new PaymentInstrumentStatus(PaymentInstrumentStatusEnum.ENABLED));
+
+                instruments.add(paymentInstrument.flatMap(
+                                p -> paymentInstrumentRepository
+                                        .save(new PaymentInstrumentDocument(
+                                                p.getPaymentInstrumentID().value().toString(),
+                                                p.getPaymentInstrumentName().value(),
+                                                p.getPaymentInstrumentDescription().value(),
+                                                p.getPsp(),
+                                                p.getPaymentInstrumentStatus().value().toString())))
+                        .map(document -> new PaymentInstrument(
+                                new PaymentInstrumentID(
+                                        UUID.fromString(document.getPaymentInstrumentID())),
+                                new PaymentInstrumentName(document.getPaymentInstrumentName()),
+                                new PaymentInstrumentDescription(
+                                        document.getPaymentInstrumentDescription()),
+                                new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
+                                        .valueOf(document.getPaymentInstrumentStatus()))))
+                );
+            } catch (PaymentInstrumentAlreadyInUseException paymentInstrumentAlreadyInUseException) {
+                log.info("[Payment instrument Aggregate] Cannot add {}, payment instrument already exists.", serviceDto.getServiceName());
+            }
+        }
+
+       return Flux.concat(instruments);
     }
 
     public Flux<PaymentInstrument> retrivePaymentInstruments() {
