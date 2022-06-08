@@ -9,11 +9,11 @@ import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode
-public class PspID implements Serializable {
+public class PspCode implements Serializable {
 
     private final String id;
 
-    public PspID(@NonNull String id) {
+    public PspCode(@NonNull String id) {
 
         this.id = Objects.requireNonNull(id);
     }

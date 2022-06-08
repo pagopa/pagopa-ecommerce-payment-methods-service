@@ -2,6 +2,8 @@ package it.pagopa.ecommerce.payment.instruments.controller;
 
 import javax.validation.Valid;
 
+import it.pagopa.ecommerce.payment.instruments.application.PspService;
+import it.pagopa.ecommerce.payment.instruments.server.model.PutPspResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +24,9 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
     @Autowired
     private PaymentInstrumentService paymentInstrumentService;
+
+    @Autowired
+    private PspService pspService;
 
     @Override
     public Mono<ResponseEntity<PaymentInstrumentResponseDto>> newPaymentInstrument(
@@ -89,4 +94,18 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                         }));
     }
 
+    @Override
+    public Mono<ResponseEntity<Void>> putPSPs(ServerWebExchange exchange) {
+        return null;
+    }
+
+    @Override
+    public Mono<ResponseEntity<PutPspResponseDto>> getPSPs(ServerWebExchange exchange) {
+        return pspService.retrivePsps().collectList().flatMap(pspDtos -> {
+            PutPspResponseDto responseDto = new PutPspResponseDto();
+            responseDto.setPsp(pspDtos);
+
+            return Mono.just(ResponseEntity.ok(responseDto));
+        });
+    }
 }

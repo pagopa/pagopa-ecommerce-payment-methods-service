@@ -11,7 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Aggregate
 public class Psp {
-    private final PspID pspID;
+    private final PspCode pspCode;
     private final PaymentInstrumentID paymentInstrumentID;
     private PspStatus pspStatus;
     private final PspBusinessName pspBusinessName;
@@ -20,15 +20,17 @@ public class Psp {
     private final List<Language> pspLangagues;
     private final List<String> pspRanges;
 
+    private final PspPaymentInstrumentType pspPaymentInstrumentType;
+
     @AggregateID
     public PaymentInstrumentID paymentInstrumentID() {
         return this.paymentInstrumentID;
     }
 
-    public Psp(PspID pspID, PaymentInstrumentID paymentInstrumentID, PspStatus pspStatus,
+    public Psp(PspCode pspCode, PaymentInstrumentID paymentInstrumentID, PspStatus pspStatus,
                PspBusinessName pspBusinessName, PspBrokerName pspBrokerName,
-               PspDescription pspDescription) {
-        this.pspID = pspID;
+               PspDescription pspDescription, PspPaymentInstrumentType pspPaymentInstrumentType) {
+        this.pspCode = pspCode;
         this.paymentInstrumentID = paymentInstrumentID;
         this.pspStatus = pspStatus;
         this.pspBusinessName = pspBusinessName;
@@ -36,6 +38,7 @@ public class Psp {
         this.pspDescription = pspDescription;
         this.pspLangagues = new ArrayList();
         this.pspRanges = new ArrayList();
+        this.pspPaymentInstrumentType = pspPaymentInstrumentType;
     }
 
     public void enablePsp(PspStatus pspStatus) {

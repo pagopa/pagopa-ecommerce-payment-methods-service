@@ -13,13 +13,13 @@ import java.util.List;
 public class PspDocument {
 
     @Id
-    private String code;
+    private String pspCode;
     private String paymentInstrumentID;
-    private String status;
-    private String type;
-    private String PSPName;
-    private String brokerName;
-    private String description;
-    private List<String> languages;
-    private List<String> ranges;
+    private String pspStatus;
+    private String pspType;
+    private String pspName;
+    private String pspBrokerName;
+    private String pspDescription;
+    private List<String> pspLanguages;
+    private List<String> pspRanges;
 }

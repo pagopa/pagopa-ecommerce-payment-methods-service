@@ -1,9 +1,11 @@
 package it.pagopa.ecommerce.payment.instruments.task;
 
 import it.pagopa.ecommerce.payment.instruments.application.PaymentInstrumentService;
+import it.pagopa.ecommerce.payment.instruments.application.PspService;
 import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -17,15 +19,12 @@ public class ScheduledPSPUpdate {
     @Autowired
     private ApiConfigClient apiConfigClient;
     @Autowired
-    private PaymentInstrumentService paymentInstrumentService;
-
-    @Scheduled(cron = "0 0 * * * *")
+    private PspService pspService;
+    @Scheduled(cron = "${apiConfig.psp.update.cronString}")
     public void updatePSPs(){
         log.info("Starting PSPs scheduled update. Time: {}", dateFormat.format(new Date()));
         apiConfigClient.getPSPs().subscribe(
-                instruments -> {
-                    paymentInstrumentService.createPaymentInstrument(instruments);
-                },
+                instruments -> pspService.updatePSPs(instruments),
                 error -> log.error("[ScheduledPSPUpdate] Error: " + error)
         );
     }

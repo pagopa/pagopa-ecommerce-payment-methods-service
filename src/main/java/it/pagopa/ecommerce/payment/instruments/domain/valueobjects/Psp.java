@@ -13,13 +13,13 @@ import lombok.Getter;
 @Getter
 public class Psp implements Serializable {
 
-    private final PspID pspId;
+    private final PspCode pspCode;
     private final PspDescription pspDescription;
     private final PspFee pspFee;
 
-    public Psp(@NonNull PspID pspId, @NonNull PspDescription pspDescription, @NonNull PspFee pspFee) {
+    public Psp(@NonNull PspCode pspCode, @NonNull PspDescription pspDescription, @NonNull PspFee pspFee) {
 
-        this.pspId = Objects.requireNonNull(pspId);
+        this.pspCode = Objects.requireNonNull(pspCode);
         this.pspDescription = Objects.requireNonNull(pspDescription);
         this.pspFee = Objects.requireNonNull(pspFee);
     }

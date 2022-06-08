@@ -4,5 +4,5 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
 public interface PspRepository extends ReactiveCrudRepository<PspDocument, String> {
-    Flux<PspDocument> findByPSPName(String businessName);
+    Flux<PspDocument> findByPspCode(String pspCode);
 }
