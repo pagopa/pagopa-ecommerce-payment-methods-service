@@ -3,6 +3,7 @@ package it.pagopa.ecommerce.payment.instruments.controller;
 import javax.validation.Valid;
 
 import it.pagopa.ecommerce.payment.instruments.application.PspService;
+import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.instruments.server.model.PutPspResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
     @Autowired
     private PspService pspService;
+
+    @Autowired
+    private ApiConfigClient apiConfigClient;
 
     @Override
     public Mono<ResponseEntity<PaymentInstrumentResponseDto>> newPaymentInstrument(
@@ -96,7 +100,12 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
     @Override
     public Mono<ResponseEntity<Void>> putPSPs(ServerWebExchange exchange) {
-        return null;
+        return apiConfigClient.getPSPs().map(
+                services -> {
+                    pspService.updatePSPs(services);
+                    return ResponseEntity.accepted().build();
+                }
+        );
     }
 
     @Override

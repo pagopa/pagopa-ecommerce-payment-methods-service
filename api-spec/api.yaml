@@ -71,7 +71,7 @@ paths:
       operationId: putPSPs
       summary: Update psps list
       responses:
-        '200':
+        '202':
           description: Update successfully scheduled
     get:
       operationId: getPSPs

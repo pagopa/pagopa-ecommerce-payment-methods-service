@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -17,14 +17,13 @@ public class ApiConfigClient {
     @Qualifier("apiConfigWebClient")
     private PaymentServiceProvidersApi apiConfigClient;
 
-    // Just a placeholder for now
-    public Flux<ServicesDto> getPSPs() {
+    public Mono<ServicesDto> getPSPs() {
         return apiConfigClient
                 .getApiClient()
                 .getWebClient()
                 .get()
                 .retrieve()
-                .bodyToFlux(ServicesDto.class)
+                .bodyToMono(ServicesDto.class)
                 .doOnError(ResponseStatusException.class,
                         error -> log.error("ResponseStatus Error : {}", new Object[] { error }))
                 .doOnError(Exception.class,

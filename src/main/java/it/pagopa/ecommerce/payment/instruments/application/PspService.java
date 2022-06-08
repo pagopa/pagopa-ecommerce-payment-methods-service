@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.instruments.application;
 
+import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.Psp;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PspFactory;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
@@ -12,6 +13,8 @@ import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.server.EntityResponse;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +32,9 @@ public class PspService {
 
     @Autowired
     private PspFactory pspFactory;
+
+    @Autowired
+    private ApiConfigClient apiConfigClient;
 
     public void updatePSPs(ServicesDto servicesDto) {
         servicesDto.getServices().forEach(service -> {
