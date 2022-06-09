@@ -1,14 +1,11 @@
 package it.pagopa.ecommerce.payment.instruments.domain.aggregates;
 
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
-import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspRepository;
-import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
 
 import static it.pagopa.ecommerce.payment.instruments.exception.PspAlreadyInUseException.pspAlreadyInUseException;
 
@@ -20,15 +17,22 @@ public class PspFactory {
     private PspRepository pspRepository;
 
     @AggregateFactory(Psp.class)
-    public Mono<Psp> newPsp(PspCode pspCode, PaymentInstrumentID paymentInstrumentID, PspStatus pspStatus,
+    public Mono<Psp> newPsp(PspCode pspCode, PspPaymentInstrumentType pspPaymentInstrumentType, PspStatus pspStatus,
                             PspBusinessName pspBusinessName, PspBrokerName pspBrokerName,
-                            PspDescription pspDescription, PspPaymentInstrumentType pspPaymentInstrumentType) {
+                            PspDescription pspDescription, PspLanguage pspLanguage,
+                            PspAmount pspMinAmount, PspAmount pspMaxAmount,
+                            PspChannelCode pspChannelCode, PspFee pspFixedCost) {
 
-        return pspRepository.findByPspCode(pspCode.value()).hasElements()
+        return pspRepository.findByPspDocumentKey(
+                        pspCode.value(),
+                        pspPaymentInstrumentType.value(),
+                        pspChannelCode.value()
+                ).hasElements()
                 .map(hasPsp -> {
                     if (!hasPsp) {
-                       return new Psp(pspCode, paymentInstrumentID, pspStatus, pspBusinessName,
-                                pspBrokerName, pspDescription, pspPaymentInstrumentType);
+                        return new Psp(pspCode, pspPaymentInstrumentType, pspStatus, pspBusinessName,
+                                pspBrokerName, pspDescription, pspLanguage, pspMinAmount, pspMaxAmount,
+                                pspChannelCode, pspFixedCost);
                     } else {
                         throw pspAlreadyInUseException(pspCode);
                     }

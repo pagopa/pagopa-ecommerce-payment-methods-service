@@ -1,8 +1,5 @@
 package it.pagopa.ecommerce.payment.instruments.domain.aggregates;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,33 +9,48 @@ import lombok.Getter;
 @Aggregate
 public class Psp {
     private final PspCode pspCode;
-    private final PaymentInstrumentID paymentInstrumentID;
+    private final PspPaymentInstrumentType pspPaymentInstrumentType;
     private PspStatus pspStatus;
     private final PspBusinessName pspBusinessName;
     private final PspBrokerName pspBrokerName;
     private final PspDescription pspDescription;
-    private final List<Language> pspLangagues;
-    private final List<String> pspRanges;
+    private final PspLanguage pspLanguage;
 
-    private final PspPaymentInstrumentType pspPaymentInstrumentType;
+    private final PspAmount pspMinAmount;
+
+    private final PspAmount pspMaxAmount;
+
+    private final PspFee pspFixedCost;
+
+    private final PspChannelCode pspChannelCode;
+
 
     @AggregateID
-    public PaymentInstrumentID paymentInstrumentID() {
-        return this.paymentInstrumentID;
+    public PspCode pspCode() {
+        return this.pspCode;
     }
 
-    public Psp(PspCode pspCode, PaymentInstrumentID paymentInstrumentID, PspStatus pspStatus,
+    public Psp(PspCode pspCode, PspPaymentInstrumentType pspPaymentInstrumentType, PspStatus pspStatus,
                PspBusinessName pspBusinessName, PspBrokerName pspBrokerName,
-               PspDescription pspDescription, PspPaymentInstrumentType pspPaymentInstrumentType) {
+               PspDescription pspDescription, PspLanguage pspLanguage,
+               PspAmount pspMinAmount, PspAmount pspMaxAmount,
+               PspChannelCode pspChannelCode, PspFee pspFixedCost) {
+
+        if (pspMinAmount.value().compareTo(pspMaxAmount.value()) == 1){
+            throw new IllegalArgumentException("Invalid amount range");
+        }
+
         this.pspCode = pspCode;
-        this.paymentInstrumentID = paymentInstrumentID;
+        this.pspPaymentInstrumentType = pspPaymentInstrumentType;
         this.pspStatus = pspStatus;
         this.pspBusinessName = pspBusinessName;
         this.pspBrokerName = pspBrokerName;
         this.pspDescription = pspDescription;
-        this.pspLangagues = new ArrayList();
-        this.pspRanges = new ArrayList();
-        this.pspPaymentInstrumentType = pspPaymentInstrumentType;
+        this.pspLanguage = pspLanguage;
+        this.pspMinAmount = pspMinAmount;
+        this.pspMaxAmount = pspMaxAmount;
+        this.pspChannelCode = pspChannelCode;
+        this.pspFixedCost = pspFixedCost;
     }
 
     public void enablePsp(PspStatus pspStatus) {

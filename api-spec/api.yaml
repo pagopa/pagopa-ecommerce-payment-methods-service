@@ -68,10 +68,10 @@ paths:
                 $ref: '#/components/schemas/PaymentInstrumentResponse'
   /payment-instruments/psps:
     put:
-      operationId: putPSPs
+      operationId: scheduleUpdatePSPs
       summary: Update psps list
       responses:
-        '202':
+        '200':
           description: Update successfully scheduled
     get:
       operationId: getPSPs
@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PutPspResponse'
+                $ref: '#/components/schemas/PSPsResponse'
 
 components:
   schemas:
@@ -128,7 +128,7 @@ components:
         - name
         - description
         - status
-    PutPspResponse:
+    PSPsResponse:
       type: object
       description: Get available PSP list Response
       properties:
@@ -142,31 +142,36 @@ components:
       properties:
         code:
           type: string
-        paymentInstrumentID:
+        paymentTypeCode:
+          type: string
+        channelCode:
           type: string
         description:
           type: string
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
-        type:
-          type: string
-        name:
+        businessName:
           type: string
         brokerName:
           type: string
-        languages:
-          type: array
-          items:
-            type: string
-            enum:
-              - IT
-              - EN
-              - FR
-              - DE
-              - SL
-        ranges:
+        language:
           type: string
+          enum:
+            - IT
+            - EN
+            - FR
+            - DE
+            - SL
+        minAmount:
+          type: number
+          format: double
+        maxAmount:
+          type: number
+          format: double
+        fixedCost:
+          type: number
+          format: double
       required:
         - code
         - paymentInstrumentID
@@ -175,8 +180,10 @@ components:
         - type
         - name
         - brokerName
-        - languages
-        - ranges
+        - language
+        - minAmount
+        - maxAmount
+        - fixedCost
   requestBodies:
     PaymentInstrumentRequest:
       required: true

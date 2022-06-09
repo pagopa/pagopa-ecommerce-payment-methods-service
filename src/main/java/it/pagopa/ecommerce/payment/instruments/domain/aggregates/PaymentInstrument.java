@@ -28,8 +28,8 @@ public class PaymentInstrument {
     }
 
     public PaymentInstrument(PaymentInstrumentID paymentInstrumentID, PaymentInstrumentName paymentInstrumentName,
-            PaymentInstrumentDescription paymentInstrumentDescription,
-            PaymentInstrumentStatus paymentInstrumentStatus) {
+                             PaymentInstrumentDescription paymentInstrumentDescription,
+                             PaymentInstrumentStatus paymentInstrumentStatus) {
         this.paymentInstrumentID = paymentInstrumentID;
         this.paymentInstrumentName = paymentInstrumentName;
         this.paymentInstrumentDescription = paymentInstrumentDescription;

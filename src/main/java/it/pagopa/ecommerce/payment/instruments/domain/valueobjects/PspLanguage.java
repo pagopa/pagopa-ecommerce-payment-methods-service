@@ -9,10 +9,10 @@ import java.util.Objects;
 
 @ValueObjects
 @EqualsAndHashCode
-public class Language implements Serializable {
+public class PspLanguage implements Serializable {
     private final LanguageEnum language;
 
-    public Language(@NonNull LanguageEnum language) {
+    public PspLanguage(@NonNull LanguageEnum language) {
 
         this.language = Objects.requireNonNull(language);
     }

@@ -1,13 +1,8 @@
 package it.pagopa.ecommerce.payment.instruments.application;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
-import it.pagopa.ecommerce.payment.instruments.exception.PaymentInstrumentAlreadyInUseException;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +15,6 @@ import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import static it.pagopa.ecommerce.payment.instruments.exception.PaymentInstrumentAlreadyInUseException.paymentInstrumentAlreadyInUse;
 
 @Service
 @ApplicationService

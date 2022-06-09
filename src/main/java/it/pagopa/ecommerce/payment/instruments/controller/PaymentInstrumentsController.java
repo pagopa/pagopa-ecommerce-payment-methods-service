@@ -1,24 +1,23 @@
 package it.pagopa.ecommerce.payment.instruments.controller;
 
-import javax.validation.Valid;
-
+import it.pagopa.ecommerce.payment.instruments.application.PaymentInstrumentService;
 import it.pagopa.ecommerce.payment.instruments.application.PspService;
 import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
-import it.pagopa.ecommerce.payment.instruments.server.model.PutPspResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ServerWebExchange;
-
-import it.pagopa.ecommerce.payment.instruments.application.PaymentInstrumentService;
 import it.pagopa.ecommerce.payment.instruments.server.api.PaymentInstrumentsApi;
+import it.pagopa.ecommerce.payment.instruments.server.model.PSPsResponseDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PatchPaymentInstrumentRequestDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentRequestDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto.StatusEnum;
 import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 @RestController
 public class PaymentInstrumentsController implements PaymentInstrumentsApi {
@@ -98,8 +97,9 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                         }));
     }
 
+
     @Override
-    public Mono<ResponseEntity<Void>> putPSPs(ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Void>> scheduleUpdatePSPs(ServerWebExchange exchange) {
         return apiConfigClient.getPSPs().map(
                 services -> {
                     pspService.updatePSPs(services);
@@ -109,9 +109,9 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PutPspResponseDto>> getPSPs(ServerWebExchange exchange) {
+    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(ServerWebExchange exchange) {
         return pspService.retrivePsps().collectList().flatMap(pspDtos -> {
-            PutPspResponseDto responseDto = new PutPspResponseDto();
+            PSPsResponseDto responseDto = new PSPsResponseDto();
             responseDto.setPsp(pspDtos);
 
             return Mono.just(ResponseEntity.ok(responseDto));

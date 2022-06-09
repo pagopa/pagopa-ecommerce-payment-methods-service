@@ -21,9 +21,9 @@ public class PaymentInstrumentFactory {
 
     @AggregateFactory(PaymentInstrument.class)
     public Mono<PaymentInstrument> newPaymentInstrument(PaymentInstrumentID paymentInstrumentID,
-            PaymentInstrumentName paymentInstrumentName,
-            PaymentInstrumentDescription paymentInstrumentDescription,
-            PaymentInstrumentStatus paymentInstrumentEnabled) {
+                                                        PaymentInstrumentName paymentInstrumentName,
+                                                        PaymentInstrumentDescription paymentInstrumentDescription,
+                                                        PaymentInstrumentStatus paymentInstrumentEnabled) {
 
         return paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()).hasElements()
                 .map(hasPaymentInstrument -> {
