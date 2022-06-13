@@ -10,6 +10,8 @@ import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentReq
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto.StatusEnum;
 import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 public class PaymentInstrumentsController implements PaymentInstrumentsApi {
@@ -100,9 +103,21 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
     @Override
     public Mono<ResponseEntity<Void>> scheduleUpdatePSPs(ServerWebExchange exchange) {
-        return apiConfigClient.getPSPs().map(
+        AtomicReference<Integer> currentPage = new AtomicReference<>(0);
+
+        return apiConfigClient.getPSPs(0, 500, null).expand(
+                servicesDto -> {
+                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get())) {
+                        return Mono.empty();
+                    }
+                    return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);
+                }
+        ).collectList().map(
                 services -> {
-                    pspService.updatePSPs(services);
+                    for (ServicesDto service: services){
+                        pspService.updatePSPs(service);
+                    }
+
                     return ResponseEntity.accepted().build();
                 }
         );

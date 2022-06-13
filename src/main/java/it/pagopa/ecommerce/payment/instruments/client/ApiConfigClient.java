@@ -17,11 +17,15 @@ public class ApiConfigClient {
     @Qualifier("apiConfigWebClient")
     private PaymentServiceProvidersApi apiConfigClient;
 
-    public Mono<ServicesDto> getPSPs() {
+    public Mono<ServicesDto> getPSPs(Integer page, Integer limit, String paymentTypeCode) {
         return apiConfigClient
                 .getApiClient()
                 .getWebClient()
                 .get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("page", page)
+                        .queryParam("limit", limit)
+                        .build())
                 .retrieve()
                 .bodyToMono(ServicesDto.class)
                 .doOnError(ResponseStatusException.class,
