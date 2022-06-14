@@ -48,7 +48,7 @@ services:
         target: /config
         read_only: true
     ports:
-      - "${APICONFIG_PORT}:3000"
+      - "8084:3000"
     networks:
       - pagopa-ecommerce
 

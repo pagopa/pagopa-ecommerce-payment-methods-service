@@ -4,6 +4,6 @@ WORKDIR /usr/src/app
 
 RUN yarn global add json-server
 
-EXPOSE ${APICONFIG_PORT}
+EXPOSE 8084
 
 CMD ["json-server", "/config/api-config-server.json", "--routes", "/config/routes.json", "--host", "0.0.0.0"]
