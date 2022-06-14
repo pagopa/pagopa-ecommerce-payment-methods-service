@@ -2,14 +2,14 @@ version: "3.9"
 
 services:
   pagopa-ecommerce-payment-instruments-service:
-    container_name: pagopa-ecommerce-payment-instruments-service
     build:
       context: .
+    container_name: pagopa-ecommerce-payment-instruments-service
     ports:
       - "8080:8080"
     networks:
       - pagopa-ecommerce
-    env_file: .env
+    env_file: .env.example
 
   mongo:
     container_name: pagopa-ecommerce-mongo
@@ -36,6 +36,21 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+
+  pagopa-api-config-mock:
+    build:
+      context: .
+      dockerfile: api-config-mock/Dockerfile.api-config-mock
+    container_name: pagopa-api-config-mock
+    volumes:
+      - type: bind
+        source: ./api-config-mock
+        target: /config
+        read_only: true
+    ports:
+      - "${APICONFIG_PORT}:3000"
+    networks:
+      - pagopa-ecommerce
 
 networks:
   pagopa-ecommerce:
