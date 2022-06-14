@@ -40,7 +40,8 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
         return paymentInstrumentRequestDto.flatMap(request -> paymentInstrumentService.createPaymentInstrument(
                 request.getName(),
-                request.getDescription())).map(paymentInstrument -> {
+                request.getDescription(),
+                request.getType())).map(paymentInstrument -> {
                     PaymentInstrumentResponseDto response = new PaymentInstrumentResponseDto();
                     response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
                     response.setName(paymentInstrument.getPaymentInstrumentName().value());

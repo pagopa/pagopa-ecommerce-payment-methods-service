@@ -1,13 +1,6 @@
 package it.pagopa.ecommerce.payment.instruments.domain.aggregates;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentDescription;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentStatus;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentID;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentName;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.Psp;
+import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,7 +12,7 @@ public class PaymentInstrument {
     private final PaymentInstrumentID paymentInstrumentID;
     private final PaymentInstrumentName paymentInstrumentName;
     private final PaymentInstrumentDescription paymentInstrumentDescription;
-    private final List<Psp> psp;
+    private final PaymentInstrumentType paymentInstrumentType;
     private PaymentInstrumentStatus paymentInstrumentStatus;
 
     @AggregateID
@@ -29,12 +22,12 @@ public class PaymentInstrument {
 
     public PaymentInstrument(PaymentInstrumentID paymentInstrumentID, PaymentInstrumentName paymentInstrumentName,
                              PaymentInstrumentDescription paymentInstrumentDescription,
-                             PaymentInstrumentStatus paymentInstrumentStatus) {
+                             PaymentInstrumentStatus paymentInstrumentStatus, PaymentInstrumentType paymentInstrumentType) {
         this.paymentInstrumentID = paymentInstrumentID;
         this.paymentInstrumentName = paymentInstrumentName;
         this.paymentInstrumentDescription = paymentInstrumentDescription;
         this.paymentInstrumentStatus = paymentInstrumentStatus;
-        this.psp = new ArrayList<>();
+        this.paymentInstrumentType = paymentInstrumentType;
     }
 
     public void enablePaymentInstrument(PaymentInstrumentStatus paymentInstrumentStatus) {

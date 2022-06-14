@@ -53,12 +53,12 @@ public class PspService {
                                     new PspDocument(
                                             new PspDocumentKey(p.getPspCode().value(),
                                                     p.getPspPaymentInstrumentType().value(),
-                                                    p.getPspChannelCode().value()),
+                                                    p.getPspChannelCode().value(),
+                                                    p.getPspLanguage().value().getLanguage()),
                                             p.getPspStatus().value().getCode(),
                                             p.getPspBusinessName().value(),
                                             p.getPspBrokerName().value(),
                                             p.getPspDescription().value(),
-                                            p.getPspLanguage().value().getLanguage(),
                                             p.getPspMinAmount().value(),
                                             p.getPspMaxAmount().value(),
                                             p.getPspFixedCost().value()
@@ -86,7 +86,7 @@ public class PspService {
                     pspDto.setBusinessName(doc.getPspBusinessName());
                     pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
                     pspDto.setBrokerName(doc.getPspBrokerName());
-                    pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspLanguage()));
+                    pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
                     pspDto.setMinAmount(doc.getPspMinAmount());
                     pspDto.setMaxAmount(doc.getPspMaxAmount());
                     pspDto.setFixedCost(doc.getPspFixedCost());

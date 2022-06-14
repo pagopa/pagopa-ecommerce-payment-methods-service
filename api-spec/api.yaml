@@ -97,6 +97,8 @@ components:
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
+        type:
+          type: string
       required:
         - name
         - description

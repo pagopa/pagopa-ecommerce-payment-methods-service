@@ -11,4 +11,5 @@ public class PspDocumentKey implements Serializable {
     private String pspCode;
     private String pspPaymentTypeCode;
     private String pspChannelCode;
+    private String pspLanguageCode;
 }

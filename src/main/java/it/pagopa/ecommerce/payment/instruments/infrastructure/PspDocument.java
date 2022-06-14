@@ -17,7 +17,6 @@ public class PspDocument {
     private String pspBusinessName;
     private String pspBrokerName;
     private String pspDescription;
-    private String pspLanguage;
     private Double pspMinAmount;
     private Double pspMaxAmount;
     private Double pspFixedCost;
