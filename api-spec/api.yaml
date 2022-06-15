@@ -34,7 +34,7 @@ paths:
       operationId: patchPaymentInstrument
       summary: Update payment instruments
       parameters:
-        - name: id  
+        - name: id
           in: path
           description: Payment Instrument ID
           required: true
@@ -53,7 +53,7 @@ paths:
       operationId: getPaymentInstrument
       summary: Retrive payment instrument by ID
       parameters:
-        - name: id  
+        - name: id
           in: path
           description: Payment Instrument ID
           required: true
@@ -65,7 +65,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentInstrumentResponse'            
+                $ref: '#/components/schemas/PaymentInstrumentResponse'
+  /payment-instruments/psps:
+    put:
+      operationId: scheduleUpdatePSPs
+      summary: Update psps list
+      responses:
+        '200':
+          description: Update successfully scheduled
+    get:
+      operationId: getPSPs
+      summary: Retrive payment instrument by ID
+      responses:
+        '200':
+          description: PSP list successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PSPsResponse'
+
 components:
   schemas:
     PaymentInstrumentRequest:
@@ -73,12 +91,14 @@ components:
       description: New Payment Instrument Request
       properties:
         name:
-          type: string  
+          type: string
         description:
-          type: string  
+          type: string
         status:
           type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]    
+          enum: ["ENABLED","DISABLED","INCOMING"]
+        type:
+          type: string
       required:
         - name
         - description
@@ -89,27 +109,83 @@ components:
       properties:
         status:
           type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]     
+          enum: ["ENABLED","DISABLED","INCOMING"]
       required:
-        - status    
+        - status
     PaymentInstrumentResponse:
       type: object
       description: New Payment Instrument Response
       properties:
         id:
-          type: string  
+          type: string
         name:
-          type: string  
+          type: string
         description:
-          type: string  
+          type: string
         status:
           type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]  
+          enum: ["ENABLED","DISABLED","INCOMING"]
       required:
         - id
         - name
         - description
-        - status    
+        - status
+    PSPsResponse:
+      type: object
+      description: Get available PSP list Response
+      properties:
+        psp:
+          type: array
+          items:
+            $ref: "#/components/schemas/Psp"
+    Psp:
+      type: object
+      description: PSP object
+      properties:
+        code:
+          type: string
+        paymentTypeCode:
+          type: string
+        channelCode:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: ["ENABLED","DISABLED","INCOMING"]
+        businessName:
+          type: string
+        brokerName:
+          type: string
+        language:
+          type: string
+          enum:
+            - IT
+            - EN
+            - FR
+            - DE
+            - SL
+        minAmount:
+          type: number
+          format: double
+        maxAmount:
+          type: number
+          format: double
+        fixedCost:
+          type: number
+          format: double
+      required:
+        - code
+        - paymentInstrumentID
+        - description
+        - status
+        - type
+        - name
+        - brokerName
+        - language
+        - minAmount
+        - maxAmount
+        - fixedCost
   requestBodies:
     PaymentInstrumentRequest:
       required: true
@@ -122,4 +198,4 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/PatchPaymentInstrumentRequest"        
+            $ref: "#/components/schemas/PatchPaymentInstrumentRequest"

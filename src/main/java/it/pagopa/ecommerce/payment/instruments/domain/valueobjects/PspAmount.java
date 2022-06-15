@@ -10,16 +10,16 @@ import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode
-public class PspFee implements Serializable {
+public class PspAmount implements Serializable {
 
-    private final Double fee;
+    private final Double amount;
 
-    public PspFee(@NonNull Double fee) {
+    public PspAmount(@NonNull Double amount) {
 
-        this.fee = Objects.requireNonNull(fee);
+        this.amount = Objects.requireNonNull(amount);
     }
 
     public @NonNull Double value() {
-        return fee;
+        return amount;
     }
 }
