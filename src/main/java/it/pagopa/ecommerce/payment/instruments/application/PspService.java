@@ -71,7 +71,7 @@ public class PspService {
         });
     }
 
-    public Flux<PspDto> retrivePsps(Integer amount, String language) {
+    public Flux<PspDto> retrievePsps(Integer amount, String language) {
 
         log.debug("[Payment instrument Aggregate] Retrive Aggregate");
 

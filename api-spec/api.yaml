@@ -75,7 +75,7 @@ paths:
           description: Update successfully scheduled
     get:
       operationId: getPSPs
-      summary: Retrive payment instrument by ID
+      summary: Retrieve payment instrument by ID
       parameters:
         - in: query
           name: amount
