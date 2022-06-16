@@ -71,28 +71,91 @@ public class PspService {
         });
     }
 
-    public Flux<PspDto> retrivePsps() {
+    public Flux<PspDto> retrivePsps(Integer amount, String language) {
 
         log.debug("[Payment instrument Aggregate] Retrive Aggregate");
-        return pspRepository
-                .findAll()
-                .map(doc -> {
-                    PspDto pspDto = new PspDto();
+        if(amount == null && language == null) {
+            return pspRepository
+                    .findAll()
+                    .map(doc -> {
+                        PspDto pspDto = new PspDto();
 
-                    pspDto.setCode(doc.getPspDocumentKey().getPspCode());
-                    pspDto.setPaymentTypeCode(doc.getPspDocumentKey().getPspPaymentTypeCode());
-                    pspDto.setChannelCode(doc.getPspDocumentKey().getPspChannelCode());
-                    pspDto.setDescription(doc.getPspDescription());
-                    pspDto.setBusinessName(doc.getPspBusinessName());
-                    pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
-                    pspDto.setBrokerName(doc.getPspBrokerName());
-                    pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
-                    pspDto.setMinAmount(doc.getPspMinAmount());
-                    pspDto.setMaxAmount(doc.getPspMaxAmount());
-                    pspDto.setFixedCost(doc.getPspFixedCost());
+                        pspDto.setCode(doc.getPspDocumentKey().getPspCode());
+                        pspDto.setPaymentTypeCode(doc.getPspDocumentKey().getPspPaymentTypeCode());
+                        pspDto.setChannelCode(doc.getPspDocumentKey().getPspChannelCode());
+                        pspDto.setDescription(doc.getPspDescription());
+                        pspDto.setBusinessName(doc.getPspBusinessName());
+                        pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
+                        pspDto.setBrokerName(doc.getPspBrokerName());
+                        pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
+                        pspDto.setMinAmount(doc.getPspMinAmount());
+                        pspDto.setMaxAmount(doc.getPspMaxAmount());
+                        pspDto.setFixedCost(doc.getPspFixedCost());
 
-                    return pspDto;
-                });
+                        return pspDto;
+                    });
+        } else if(amount == null) {
+            return pspRepository
+                    .findByPspDocumentKeyPspLanguageCode(language.toUpperCase())
+                    .map(doc -> {
+                        PspDto pspDto = new PspDto();
+
+                        pspDto.setCode(doc.getPspDocumentKey().getPspCode());
+                        pspDto.setPaymentTypeCode(doc.getPspDocumentKey().getPspPaymentTypeCode());
+                        pspDto.setChannelCode(doc.getPspDocumentKey().getPspChannelCode());
+                        pspDto.setDescription(doc.getPspDescription());
+                        pspDto.setBusinessName(doc.getPspBusinessName());
+                        pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
+                        pspDto.setBrokerName(doc.getPspBrokerName());
+                        pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
+                        pspDto.setMinAmount(doc.getPspMinAmount());
+                        pspDto.setMaxAmount(doc.getPspMaxAmount());
+                        pspDto.setFixedCost(doc.getPspFixedCost());
+
+                        return pspDto;
+                    });
+        } else if(language == null) {
+            return pspRepository
+                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqual((double) amount/100, (double) amount/100)
+                    .map(doc -> {
+                        PspDto pspDto = new PspDto();
+
+                        pspDto.setCode(doc.getPspDocumentKey().getPspCode());
+                        pspDto.setPaymentTypeCode(doc.getPspDocumentKey().getPspPaymentTypeCode());
+                        pspDto.setChannelCode(doc.getPspDocumentKey().getPspChannelCode());
+                        pspDto.setDescription(doc.getPspDescription());
+                        pspDto.setBusinessName(doc.getPspBusinessName());
+                        pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
+                        pspDto.setBrokerName(doc.getPspBrokerName());
+                        pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
+                        pspDto.setMinAmount(doc.getPspMinAmount());
+                        pspDto.setMaxAmount(doc.getPspMaxAmount());
+                        pspDto.setFixedCost(doc.getPspFixedCost());
+
+                        return pspDto;
+                    });
+        } else {
+            return pspRepository
+                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
+                            (double) amount/100, (double) amount/100, language.toUpperCase())
+                    .map(doc -> {
+                        PspDto pspDto = new PspDto();
+
+                        pspDto.setCode(doc.getPspDocumentKey().getPspCode());
+                        pspDto.setPaymentTypeCode(doc.getPspDocumentKey().getPspPaymentTypeCode());
+                        pspDto.setChannelCode(doc.getPspDocumentKey().getPspChannelCode());
+                        pspDto.setDescription(doc.getPspDescription());
+                        pspDto.setBusinessName(doc.getPspBusinessName());
+                        pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
+                        pspDto.setBrokerName(doc.getPspBrokerName());
+                        pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
+                        pspDto.setMinAmount(doc.getPspMinAmount());
+                        pspDto.setMaxAmount(doc.getPspMaxAmount());
+                        pspDto.setFixedCost(doc.getPspFixedCost());
+
+                        return pspDto;
+                    });
+        }
     }
 }
 

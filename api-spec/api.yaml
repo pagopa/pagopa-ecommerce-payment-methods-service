@@ -76,6 +76,20 @@ paths:
     get:
       operationId: getPSPs
       summary: Retrive payment instrument by ID
+      parameters:
+        - in: query
+          name: amount
+          schema:
+            type: integer
+          description: Amount in cents
+          required: false
+        - in: query
+          name: lang
+          schema:
+            type: string
+            enum: [IT, EN, FR, DE, SL]
+          description: Service language
+          required: false
       responses:
         '200':
           description: PSP list successfully retrieved
