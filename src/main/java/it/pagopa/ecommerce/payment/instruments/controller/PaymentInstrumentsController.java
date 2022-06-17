@@ -11,7 +11,6 @@ import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentRes
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentInstrumentResponseDto.StatusEnum;
 import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +68,16 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
     }
 
     @Override
+    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(Integer amount, String lang, ServerWebExchange exchange) {
+        return pspService.retrievePsps(amount, lang).collectList().flatMap(pspDtos -> {
+            PSPsResponseDto responseDto = new PSPsResponseDto();
+            responseDto.setPsp(pspDtos);
+
+            return Mono.just(ResponseEntity.ok(responseDto));
+        });
+    }
+
+    @Override
     public Mono<ResponseEntity<PaymentInstrumentResponseDto>> getPaymentInstrument(String id,
             ServerWebExchange exchange) {
         return paymentInstrumentService.retrivePaymentInstrumentById(id)
@@ -122,15 +131,5 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     return ResponseEntity.accepted().build();
                 }
         );
-    }
-
-    @Override
-    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(ServerWebExchange exchange) {
-        return pspService.retrivePsps().collectList().flatMap(pspDtos -> {
-            PSPsResponseDto responseDto = new PSPsResponseDto();
-            responseDto.setPsp(pspDtos);
-
-            return Mono.just(ResponseEntity.ok(responseDto));
-        });
     }
 }

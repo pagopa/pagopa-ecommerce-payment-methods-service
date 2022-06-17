@@ -5,4 +5,10 @@ import reactor.core.publisher.Flux;
 
 public interface PspRepository extends ReactiveCrudRepository<PspDocument, String> {
     Flux<PspDocument> findByPspDocumentKey(String pspCode, String pspPaymentTypeCode, String pspChannelCode);
+    Flux<PspDocument> findByPspDocumentKeyPspLanguageCode(String lang);
+    Flux<PspDocument> findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqual(double min, double max);
+
+    Flux<PspDocument> findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
+            double min, double max, String lang);
+
 }

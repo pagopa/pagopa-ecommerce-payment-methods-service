@@ -71,28 +71,42 @@ public class PspService {
         });
     }
 
-    public Flux<PspDto> retrivePsps() {
+    public Flux<PspDto> retrievePsps(Integer amount, String language) {
 
         log.debug("[Payment instrument Aggregate] Retrive Aggregate");
-        return pspRepository
-                .findAll()
-                .map(doc -> {
-                    PspDto pspDto = new PspDto();
 
-                    pspDto.setCode(doc.getPspDocumentKey().getPspCode());
-                    pspDto.setPaymentTypeCode(doc.getPspDocumentKey().getPspPaymentTypeCode());
-                    pspDto.setChannelCode(doc.getPspDocumentKey().getPspChannelCode());
-                    pspDto.setDescription(doc.getPspDescription());
-                    pspDto.setBusinessName(doc.getPspBusinessName());
-                    pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
-                    pspDto.setBrokerName(doc.getPspBrokerName());
-                    pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
-                    pspDto.setMinAmount(doc.getPspMinAmount());
-                    pspDto.setMaxAmount(doc.getPspMaxAmount());
-                    pspDto.setFixedCost(doc.getPspFixedCost());
+        return getPspByFilter(amount, language).map(doc -> {
+            PspDto pspDto = new PspDto();
 
-                    return pspDto;
-                });
+            pspDto.setCode(doc.getPspDocumentKey().getPspCode());
+            pspDto.setPaymentTypeCode(doc.getPspDocumentKey().getPspPaymentTypeCode());
+            pspDto.setChannelCode(doc.getPspDocumentKey().getPspChannelCode());
+            pspDto.setDescription(doc.getPspDescription());
+            pspDto.setBusinessName(doc.getPspBusinessName());
+            pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
+            pspDto.setBrokerName(doc.getPspBrokerName());
+            pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
+            pspDto.setMinAmount(doc.getPspMinAmount());
+            pspDto.setMaxAmount(doc.getPspMaxAmount());
+            pspDto.setFixedCost(doc.getPspFixedCost());
+
+            return pspDto;
+        });
+    }
+
+    public Flux<PspDocument> getPspByFilter(Integer amount, String language) {
+        if (amount == null && language == null) {
+            return pspRepository.findAll();
+        } else if (amount == null) {
+            return pspRepository.findByPspDocumentKeyPspLanguageCode(language.toUpperCase());
+        } else if (language == null) {
+            return pspRepository
+                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqual((double) amount / 100, (double) amount / 100);
+        } else {
+            return pspRepository
+                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
+                            (double) amount / 100, (double) amount / 100, language.toUpperCase());
+        }
     }
 }
 
