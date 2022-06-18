@@ -81,7 +81,7 @@ microservice-chart:
   envConfig:   
     MONGO_HOST: pagopa-d-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-d-weu-ecommerce-cosmos-account
-    MONGO_PORT: 10255
+    MONGO_PORT: "10255"
     API_CONFIG_URI: api.uat.platform.pagopa.it
     API_CONFIG_READ_TIMEOUT: "10000"
     API_CONFIG_CONNECTION_TIMEOUT: "10000"
