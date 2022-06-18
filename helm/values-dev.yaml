@@ -7,7 +7,6 @@ microservice-chart:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentinstrumentsservice
     tag: "latest" #improve
     pullPolicy: Always
-    port: 8080
 
   livenessProbe:
     httpGet:
@@ -29,12 +28,14 @@ microservice-chart:
     create: true
 
   service:
+    create: true
     type: ClusterIP
     port: 8080
 
   ingress:
-    create: false
+    create: true
     host: "weudev.ecommerce.internal.dev.platform.pagopa.it"
+    path: /pagopa-ecommerce-payment-instruments-service/(.*)
   
   serviceAccount:
     create: false
@@ -52,11 +53,11 @@ microservice-chart:
 
   resources:
     requests:
-      memory: "96Mi"
+      memory: "256Mi"
       cpu: "40m"
     limits:
-      memory: "300Mi" #TO REDUCE
-      cpu: "300m" #TO REDUCE
+      memory: "256Mi"
+      cpu: "150m"
 
   autoscaling:
     minReplica: 1
@@ -93,4 +94,3 @@ microservice-chart:
   tolerations: []
 
   affinity: {}
-
