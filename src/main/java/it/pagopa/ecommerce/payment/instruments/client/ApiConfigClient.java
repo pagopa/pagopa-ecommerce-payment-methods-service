@@ -17,15 +17,19 @@ public class ApiConfigClient {
     @Qualifier("apiConfigWebClient")
     private PaymentServiceProvidersApi apiConfigClient;
 
+    @Value("${apiConfig.client.key}")
+    private String apiConfigKey;
+
     public Mono<ServicesDto> getPSPs(Integer page, Integer limit, String paymentTypeCode) {
         return apiConfigClient
                 .getApiClient()
                 .getWebClient()
                 .get()
+                .header("ocp-apim-subscription-key", apiConfigKey)
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("page", page)
                         .queryParam("limit", limit)
-                        .build())
+                        .build()
                 .retrieve()
                 .bodyToMono(ServicesDto.class)
                 .doOnError(ResponseStatusException.class,
