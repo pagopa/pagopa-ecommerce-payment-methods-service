@@ -26,11 +26,11 @@ public class ApiConfigClient {
                 .getApiClient()
                 .getWebClient()
                 .get()
-                .header("ocp-apim-subscription-key", apiConfigKey)
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("page", page)
                         .queryParam("limit", limit)
                         .build())
+                .header("ocp-apim-subscription-key", apiConfigKey)
                 .retrieve()
                 .bodyToMono(ServicesDto.class)
                 .doOnError(ResponseStatusException.class,
