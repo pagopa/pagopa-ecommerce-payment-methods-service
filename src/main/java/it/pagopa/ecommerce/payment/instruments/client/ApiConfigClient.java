@@ -29,7 +29,7 @@ public class ApiConfigClient {
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("page", page)
                         .queryParam("limit", limit)
-                        .build()
+                        .build())
                 .retrieve()
                 .bodyToMono(ServicesDto.class)
                 .doOnError(ResponseStatusException.class,
