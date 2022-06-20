@@ -1,6 +1,8 @@
 FROM openjdk:17-slim as build
 WORKDIR /workspace/app
 
+ENV test=test
+
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
