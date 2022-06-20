@@ -14142,23 +14142,17 @@
                         "format": "date-time"
                     },
                     "logo_psp": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "format": "byte"
-                        }
+                        "type": "string",
+                        "format": "byte"
                     },
                     "tags": {
                         "maxLength": 135,
                         "minLength": 0,
                         "type": "string"
                     },
-                    "logo_service": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "format": "byte"
-                        }
+                    "logo_service":  {
+                        "type": "string",
+                        "format": "byte"
                     },
                     "channel_app": {
                         "type": "boolean"
