@@ -71,11 +71,11 @@ public class PspService {
         });
     }
 
-    public Flux<PspDto> retrievePsps(Integer amount, String language) {
+    public Flux<PspDto> retrievePsps(Integer amount, String language, String paymentTypeCode) {
 
         log.debug("[Payment instrument Aggregate] Retrive Aggregate");
 
-        return getPspByFilter(amount, language).map(doc -> {
+        return getPspByFilter(amount, language, paymentTypeCode).map(doc -> {
             PspDto pspDto = new PspDto();
 
             pspDto.setCode(doc.getPspDocumentKey().getPspCode());
@@ -94,7 +94,7 @@ public class PspService {
         });
     }
 
-    public Flux<PspDocument> getPspByFilter(Integer amount, String language) {
+    public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
         if (amount == null && language == null) {
             return pspRepository.findAll();
         } else if (amount == null) {
@@ -102,11 +102,15 @@ public class PspService {
         } else if (language == null) {
             return pspRepository
                     .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqual((double) amount / 100, (double) amount / 100);
-        } else {
+        } else if (paymentTypeCode == null) {
             return pspRepository
                     .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
                             (double) amount / 100, (double) amount / 100, language.toUpperCase());
-        }
+        } else {
+            return pspRepository
+                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCodeAndPspDocumentKeyPspPaymentTypeCode(
+                            (double) amount / 100, (double) amount / 100, language.toUpperCase(), paymentTypeCode);
+    }
     }
 }
 
