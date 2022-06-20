@@ -115,7 +115,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
     public Mono<ResponseEntity<Void>> scheduleUpdatePSPs(ServerWebExchange exchange) {
         AtomicReference<Integer> currentPage = new AtomicReference<>(0);
 
-        return apiConfigClient.getPSPs(0, 500, null).expand(
+        return apiConfigClient.getPSPs(0, 50, null).expand(
                 servicesDto -> {
                     if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get())) {
                         return Mono.empty();
