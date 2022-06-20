@@ -68,8 +68,8 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(Integer amount, String lang, ServerWebExchange exchange) {
-        return pspService.retrievePsps(amount, lang).collectList().flatMap(pspDtos -> {
+    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(Integer amount, String lang, String paymentTypeCode, ServerWebExchange exchange) {
+        return pspService.retrievePsps(amount, lang, paymentTypeCode).collectList().flatMap(pspDtos -> {
             PSPsResponseDto responseDto = new PSPsResponseDto();
             responseDto.setPsp(pspDtos);
 

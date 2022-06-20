@@ -10,5 +10,7 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
 
     Flux<PspDocument> findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
             double min, double max, String lang);
-
+    
+    Flux<PspDocument> findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCodeAndPspDocumentKeyPspPaymentTypeCode(
+                double min, double max, String lang, String paymentTypeCode);        
 }

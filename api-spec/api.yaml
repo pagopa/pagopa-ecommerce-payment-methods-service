@@ -90,6 +90,12 @@ paths:
             enum: [IT, EN, FR, DE, SL]
           description: Service language
           required: false
+        - in: query
+          name: paymentTypeCode
+          schema:
+            type: string
+          description: Payment Type Code
+          required: false  
       responses:
         '200':
           description: PSP list successfully retrieved
