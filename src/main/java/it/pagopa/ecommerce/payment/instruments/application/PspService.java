@@ -98,10 +98,10 @@ public class PspService {
         if (amount == null && language == null) {
             return pspRepository.findAll();
         } else if (amount == null) {
-            return pspRepository.findByPspDocumentKeyPspLanguageCode(language.toUpperCase());
+            return pspRepository.findByPspDocumentKeyPspLanguageCodeAndPspDocumentKeyPspPaymentTypeCode(language.toUpperCase(), paymentTypeCode);
         } else if (language == null) {
             return pspRepository
-                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqual((double) amount / 100, (double) amount / 100);
+                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspPaymentTypeCode((double) amount / 100, (double) amount / 100, paymentTypeCode);
         } else if (paymentTypeCode == null) {
             return pspRepository
                     .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
