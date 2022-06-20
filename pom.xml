@@ -122,7 +122,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-api-config/main/openapi/openapi.json</inputSpec>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-ecommerce-payment-instruments-service/test-helm-deploy/api-config-mock/openapi.json</inputSpec>
 							<generatorName>java</generatorName>
 							<library>webclient</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
