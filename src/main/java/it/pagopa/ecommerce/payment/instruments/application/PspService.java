@@ -64,7 +64,7 @@ public class PspService {
                                             p.getPspFixedCost().value()
                                     )
                             ).map(doc -> {
-                                log.info("[Psp Service] {} added to db", doc.getPspBusinessName());
+                                log.debug("[Psp Service] {} added to db", doc.getPspBusinessName());
                                 return doc;
                             })
             ).subscribe();
