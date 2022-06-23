@@ -95,22 +95,30 @@ public class PspService {
     }
 
     public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
-        if (amount == null && language == null) {
+        language = language == null ? null : language.toUpperCase();
+        paymentTypeCode = paymentTypeCode == null ? null : paymentTypeCode.toUpperCase();
+
+        if(!checkQueryParam(language) && !checkQueryParam(paymentTypeCode) && amount == null) {
             return pspRepository.findAll();
-        } else if (amount == null) {
-            return pspRepository.findByPspDocumentKeyPspLanguageCodeAndPspDocumentKeyPspPaymentTypeCode(language.toUpperCase(), paymentTypeCode);
-        } else if (language == null) {
-            return pspRepository
-                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspPaymentTypeCode((double) amount / 100, (double) amount / 100, paymentTypeCode);
-        } else if (paymentTypeCode == null) {
-            return pspRepository
-                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
-                            (double) amount / 100, (double) amount / 100, language.toUpperCase());
+        } else if(!checkQueryParam(language) && !checkQueryParam(paymentTypeCode) && amount != null){
+            return pspRepository.findPspMatchAmount(amount);
+        } else if(!checkQueryParam(language) && checkQueryParam(paymentTypeCode) && amount == null){
+            return pspRepository.findPspMatchType(paymentTypeCode);
+        } else if(!checkQueryParam(paymentTypeCode) && checkQueryParam(language) && amount == null){
+            return pspRepository.findPspMatchLang(language);
+        } else if(!checkQueryParam(language) && checkQueryParam(paymentTypeCode) && amount != null){
+            return pspRepository.findPspMatchAmountType(amount, paymentTypeCode);
+        } else if(!checkQueryParam(paymentTypeCode) && checkQueryParam(language) && amount != null){
+            return pspRepository.findPspMatchAmountLang(amount, language);
+        } else if(checkQueryParam(paymentTypeCode) && checkQueryParam(language) && amount == null){
+            return pspRepository.findPspMatchTypeLang(paymentTypeCode, language);
         } else {
-            return pspRepository
-                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCodeAndPspDocumentKeyPspPaymentTypeCode(
-                            (double) amount / 100, (double) amount / 100, language.toUpperCase(), paymentTypeCode);
+            return pspRepository.findPspMatchAmountTypeLang((double) amount / 100, paymentTypeCode, language);
+        }
     }
+
+    private boolean checkQueryParam(String param){
+        return !(param == null || param.isBlank() || param.isEmpty());
     }
 }
 
