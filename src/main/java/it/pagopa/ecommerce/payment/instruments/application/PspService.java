@@ -7,6 +7,8 @@ import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspRepository;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.FilterRuleEngine;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.IFilterRule;
 import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
 import it.pagopa.ecommerce.payment.instruments.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.instruments.utils.LanguageEnum;
@@ -17,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 @ApplicationService
@@ -31,6 +35,9 @@ public class PspService {
 
     @Autowired
     private ApiConfigClient apiConfigClient;
+
+    @Autowired
+    private List<IFilterRule> filterRules;
 
     public void updatePSPs(ServicesDto servicesDto) {
         servicesDto.getServices().forEach(service -> {
@@ -95,26 +102,11 @@ public class PspService {
     }
 
     public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
+        FilterRuleEngine filterRuleEngine = new FilterRuleEngine(filterRules, pspRepository);
         language = language == null ? null : language.toUpperCase();
         paymentTypeCode = paymentTypeCode == null ? null : paymentTypeCode.toUpperCase();
 
-        if(!checkQueryParam(language) && !checkQueryParam(paymentTypeCode) && amount == null) {
-            return pspRepository.findAll();
-        } else if(!checkQueryParam(language) && !checkQueryParam(paymentTypeCode) && amount != null){
-            return pspRepository.findPspMatchAmount(amount);
-        } else if(!checkQueryParam(language) && checkQueryParam(paymentTypeCode) && amount == null){
-            return pspRepository.findPspMatchType(paymentTypeCode);
-        } else if(!checkQueryParam(paymentTypeCode) && checkQueryParam(language) && amount == null){
-            return pspRepository.findPspMatchLang(language);
-        } else if(!checkQueryParam(language) && checkQueryParam(paymentTypeCode) && amount != null){
-            return pspRepository.findPspMatchAmountType(amount, paymentTypeCode);
-        } else if(!checkQueryParam(paymentTypeCode) && checkQueryParam(language) && amount != null){
-            return pspRepository.findPspMatchAmountLang(amount, language);
-        } else if(checkQueryParam(paymentTypeCode) && checkQueryParam(language) && amount == null){
-            return pspRepository.findPspMatchTypeLang(paymentTypeCode, language);
-        } else {
-            return pspRepository.findPspMatchAmountTypeLang((double) amount / 100, paymentTypeCode, language);
-        }
+        return filterRuleEngine.applyFilter(amount, language, paymentTypeCode);
     }
 
     private boolean checkQueryParam(String param){
