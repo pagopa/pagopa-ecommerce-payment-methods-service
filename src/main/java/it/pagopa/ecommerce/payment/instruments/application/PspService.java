@@ -8,7 +8,6 @@ import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspRepository;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.FilterRuleEngine;
-import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.IFilterRule;
 import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
 import it.pagopa.ecommerce.payment.instruments.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.instruments.utils.LanguageEnum;
@@ -37,7 +36,7 @@ public class PspService {
     private ApiConfigClient apiConfigClient;
 
     @Autowired
-    private List<IFilterRule> filterRules;
+    private FilterRuleEngine filterRuleEngine;
 
     public void updatePSPs(ServicesDto servicesDto) {
         servicesDto.getServices().forEach(service -> {
@@ -102,7 +101,6 @@ public class PspService {
     }
 
     public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
-        FilterRuleEngine filterRuleEngine = new FilterRuleEngine(filterRules, pspRepository);
         language = language == null ? null : language.toUpperCase();
         paymentTypeCode = paymentTypeCode == null ? null : paymentTypeCode.toUpperCase();
 
