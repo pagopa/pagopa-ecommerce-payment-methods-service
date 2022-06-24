@@ -14,6 +14,6 @@ public class AmountTypeLangFilterRule implements IFilterRule {
 
     @Override
     public Flux<PspDocument> execute(PspRepository pspRepository, Integer amount, String language, String paymentTypeCode) {
-        return pspRepository.findPspMatchAmountTypeLang((double) amount / 100, paymentTypeCode, language);
+        return pspRepository.findPspMatchAmountTypeLang(amount, paymentTypeCode, language);
     }
 }
