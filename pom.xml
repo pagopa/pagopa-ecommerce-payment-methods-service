@@ -14,6 +14,7 @@
 	<description>payment instruments micro service</description>
 	<properties>
 		<java.version>17</java.version>
+		<jacoco.version>0.8.8</jacoco.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -78,8 +79,13 @@
 			<artifactId>jsr305</artifactId>
 			<version>3.0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>${jacoco.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -137,6 +143,31 @@
 							<apiPackage>it.pagopa.generated.ecommerce.apiconfig.v1.api</apiPackage>
 							<modelNameSuffix>dto</modelNameSuffix>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>it/pagopa/generated/**</exclude>
+					</excludes>
+				</configuration>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>jacoco-initialize</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-site</id>
+						<phase>package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
