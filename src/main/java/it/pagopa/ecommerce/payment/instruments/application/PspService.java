@@ -7,6 +7,7 @@ import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspRepository;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.FilterRuleEngine;
 import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
 import it.pagopa.ecommerce.payment.instruments.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.instruments.utils.LanguageEnum;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 @ApplicationService
@@ -31,6 +34,9 @@ public class PspService {
 
     @Autowired
     private ApiConfigClient apiConfigClient;
+
+    @Autowired
+    private FilterRuleEngine filterRuleEngine;
 
     public void updatePSPs(ServicesDto servicesDto) {
         servicesDto.getServices().forEach(service -> {
@@ -95,22 +101,10 @@ public class PspService {
     }
 
     public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
-        if (amount == null && language == null) {
-            return pspRepository.findAll();
-        } else if (amount == null) {
-            return pspRepository.findByPspDocumentKeyPspLanguageCodeAndPspDocumentKeyPspPaymentTypeCode(language.toUpperCase(), paymentTypeCode);
-        } else if (language == null) {
-            return pspRepository
-                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspPaymentTypeCode((double) amount / 100, (double) amount / 100, paymentTypeCode);
-        } else if (paymentTypeCode == null) {
-            return pspRepository
-                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCode(
-                            (double) amount / 100, (double) amount / 100, language.toUpperCase());
-        } else {
-            return pspRepository
-                    .findByPspMinAmountLessThanEqualAndPspMaxAmountGreaterThanEqualAndPspDocumentKeyPspLanguageCodeAndPspDocumentKeyPspPaymentTypeCode(
-                            (double) amount / 100, (double) amount / 100, language.toUpperCase(), paymentTypeCode);
-    }
+        language = language == null ? null : language.toUpperCase();
+        paymentTypeCode = paymentTypeCode == null ? null : paymentTypeCode.toUpperCase();
+
+        return filterRuleEngine.applyFilter(amount, language, paymentTypeCode);
     }
 }
 
