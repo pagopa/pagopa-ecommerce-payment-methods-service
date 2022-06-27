@@ -32,13 +32,26 @@ class PspServiceTests {
     private PspService pspService;
 
     @Test
-    void shouldReturnEmptyResult() {
+    void shouldReturnEmptyResultWithNullFilter() {
 
         // Precondition
         Mockito.when(filterRuleEngine.applyFilter(null, null, null)).thenReturn(Flux.empty());
 
         // Test execution
         Flux<PspDocument> services = pspService.getPspByFilter(null, null, null);
+
+        // Asserts
+        assertEquals(services, Flux.empty());
+    }
+
+    @Test
+    void shouldReturnEmptyResultWithEmptyFilter() {
+
+        // Precondition
+        Mockito.when(filterRuleEngine.applyFilter(100, "", "")).thenReturn(Flux.empty());
+
+        // Test execution
+        Flux<PspDocument> services = pspService.getPspByFilter(100, "", "");
 
         // Asserts
         assertEquals(services, Flux.empty());
