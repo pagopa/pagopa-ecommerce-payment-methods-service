@@ -106,9 +106,5 @@ public class PspService {
 
         return filterRuleEngine.applyFilter(amount, language, paymentTypeCode);
     }
-
-    private boolean checkQueryParam(String param){
-        return !(param == null || param.isBlank() || param.isEmpty());
-    }
 }
 
