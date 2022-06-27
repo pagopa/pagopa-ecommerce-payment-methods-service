@@ -23,7 +23,7 @@ import reactor.test.StepVerifier;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
-public class PspServiceTests {
+class PspServiceTests {
 
     @Mock
     private FilterRuleEngine filterRuleEngine;
