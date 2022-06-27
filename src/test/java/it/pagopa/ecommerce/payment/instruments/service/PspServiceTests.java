@@ -2,6 +2,8 @@ package it.pagopa.ecommerce.payment.instruments.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import javax.validation.constraints.Null;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,6 +54,19 @@ class PspServiceTests {
 
         // Test execution
         Flux<PspDocument> services = pspService.getPspByFilter(100, "", "");
+
+        // Asserts
+        assertEquals(services, Flux.empty());
+    }
+
+    @Test
+    void shouldReturnEmptyResultWithAmountEmptyFilter() {
+
+        // Precondition
+        Mockito.when(filterRuleEngine.applyFilter(null, "", "")).thenReturn(Flux.empty());
+
+        // Test execution
+        Flux<PspDocument> services = pspService.getPspByFilter(null, "", "");
 
         // Asserts
         assertEquals(services, Flux.empty());
