@@ -95,7 +95,7 @@ paths:
           schema:
             type: string
           description: Payment Type Code
-          required: false  
+          required: false
       responses:
         '200':
           description: PSP list successfully retrieved
@@ -103,6 +103,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PSPsResponse'
+
+  /payment-instruments/categories:
+    post:
+      operationId: addCategory
+      summary: Update psps list
+      requestBody:
+        $ref: "#/components/requestBodies/CategoryRequest"
+      responses:
+        '200':
+          description: Category successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    get:
+      operationId: getCategories
+      summary: Retrieve categories
+      responses:
+        '200':
+          description: Category list successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriesResponse'
+
+  /payment-instruments/categories/{id}:
+    get:
+      operationId: getCategory
+      summary: Retrieve category by Id
+      parameters:
+        - name: id
+          in: path
+          description: Category ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    patch:
+      operationId: patchCategory
+      parameters:
+        - name: id
+          in: path
+          description: Category ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/PatchCategoryRequest"
+      summary: Update category
+      responses:
+        '200':
+          description: Category successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
 
 components:
   schemas:
@@ -158,6 +220,37 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Psp"
+
+    CategoriesResponse:
+      type: object
+      description: Get category
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+    Category:
+      type: object
+      description: Category object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
+    CategoryRequest:
+      type: object
+      description: Category object
+      properties:
+        name:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
     Psp:
       type: object
       description: PSP object
@@ -207,6 +300,18 @@ components:
         - maxAmount
         - fixedCost
   requestBodies:
+    PatchCategoryRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CategoryRequest"
+    CategoryRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CategoryRequest"
     PaymentInstrumentRequest:
       required: true
       content:
