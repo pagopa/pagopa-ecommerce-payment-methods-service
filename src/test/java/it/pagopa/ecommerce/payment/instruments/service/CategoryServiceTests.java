@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
-public class CategoryServiceTest {
+public class CategoryServiceTests {
 
     @Mock
     private PaymentInstrumentCategoryRepository paymentInstrumentCategoryRepository;
