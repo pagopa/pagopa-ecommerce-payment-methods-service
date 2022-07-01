@@ -20,6 +20,8 @@ import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.UUID;
 
@@ -241,4 +243,23 @@ class CategoryServiceTests {
                 category.getPaymentInstrumentTypes().get(0).value());
     }
 
+    
+    @Test
+    void shouldReturnDocToAggregate() throws IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException, NoSuchMethodException, SecurityException {
+
+        PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
+                UUID.randomUUID().toString(),
+                "test",
+                List.of("PO"));
+
+        Method method = CategoryService.class.getDeclaredMethod("convertDocToAggregate",
+                PaymentInstrumentCategoryDocument.class);
+        method.setAccessible(true);
+        PaymentInstrumentCategory response = (PaymentInstrumentCategory) method.invoke(categoryService,
+                categoryDocument);
+
+        assertEquals(categoryDocument.getPaymentInstrumentCategoryID(),
+                response.getPaymentInstrumentCategoryID().value().toString());
+    }
 }
