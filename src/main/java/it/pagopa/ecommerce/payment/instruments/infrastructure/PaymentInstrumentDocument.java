@@ -14,6 +14,6 @@ public class PaymentInstrumentDocument {
     private String paymentInstrumentID;
     private String paymentInstrumentName;
     private String paymentInstrumentDescription;
-    private String paymentInstrumentType;
+    private String paymentInstrumentCategory;
     private String paymentInstrumentStatus;
 }

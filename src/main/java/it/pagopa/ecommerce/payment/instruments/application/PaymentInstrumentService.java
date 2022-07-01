@@ -29,7 +29,7 @@ public class PaymentInstrumentService {
 
     public Mono<PaymentInstrument> createPaymentInstrument(String paymentInstrumentName,
                                                            String paymentInstrumentDescription,
-                                                           String paymentInstrumentType) {
+                                                           String paymentInstrumentCategoryId) {
 
         log.debug("[Payment instrument Aggregate] Create new Aggregate");
         Mono<PaymentInstrument> paymentInstrument = paymentInstrumentFactory.newPaymentInstrument(
@@ -37,7 +37,7 @@ public class PaymentInstrumentService {
                 new PaymentInstrumentName(paymentInstrumentName),
                 new PaymentInstrumentDescription(paymentInstrumentDescription),
                 new PaymentInstrumentStatus(PaymentInstrumentStatusEnum.ENABLED),
-                new PaymentInstrumentType(paymentInstrumentType));
+                new PaymentInstrumentCategoryID(UUID.fromString(paymentInstrumentCategoryId)));
 
         // TODO create converter aggregate - document
         log.debug("[Payment instrument Aggregate] Store Aggregate");
@@ -47,7 +47,7 @@ public class PaymentInstrumentService {
                                         p.getPaymentInstrumentID().value().toString(),
                                         p.getPaymentInstrumentName().value(),
                                         p.getPaymentInstrumentDescription().value(),
-                                        p.getPaymentInstrumentType().value(),
+                                        p.getPaymentInstrumentCategory().value().toString(),
                                         p.getPaymentInstrumentStatus().value().toString())))
                 .map(document -> new PaymentInstrument(
                         new PaymentInstrumentID(
@@ -57,7 +57,7 @@ public class PaymentInstrumentService {
                                 document.getPaymentInstrumentDescription()),
                         new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                 .valueOf(document.getPaymentInstrumentStatus())),
-                        new PaymentInstrumentType(document.getPaymentInstrumentType())));
+                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory()))));
     }
 
     public Flux<PaymentInstrument> retrivePaymentInstruments() {
@@ -74,7 +74,7 @@ public class PaymentInstrumentService {
                                 document.getPaymentInstrumentDescription()),
                         new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                 .valueOf(document.getPaymentInstrumentStatus())),
-                        new PaymentInstrumentType(document.getPaymentInstrumentType())));
+                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory()))));
     }
 
     public Mono<PaymentInstrument> patchPaymentInstrument(String id,
@@ -94,7 +94,7 @@ public class PaymentInstrumentService {
                                     document.getPaymentInstrumentDescription()),
                             new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                     .valueOf(document.getPaymentInstrumentStatus())),
-                            new PaymentInstrumentType(document.getPaymentInstrumentType()));
+                            new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory())));
                     paymentInstrument.enablePaymentInstrument(new PaymentInstrumentStatus(enable));
                     return paymentInstrument;
                 }).flatMap(
@@ -103,7 +103,7 @@ public class PaymentInstrumentService {
                                         p.getPaymentInstrumentID().value().toString(),
                                         p.getPaymentInstrumentName().value(),
                                         p.getPaymentInstrumentDescription().value(),
-                                        p.getPaymentInstrumentType().value(),
+                                        p.getPaymentInstrumentCategory().value().toString(),
                                         p.getPaymentInstrumentStatus().value().toString())))
                 .map(document -> {
                     PaymentInstrument paymentInstrument = new PaymentInstrument(
@@ -115,7 +115,7 @@ public class PaymentInstrumentService {
                                     document.getPaymentInstrumentDescription()),
                             new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                     .valueOf(document.getPaymentInstrumentStatus())),
-                            new PaymentInstrumentType(document.getPaymentInstrumentType()));
+                            new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory())));
 
                     paymentInstrument.enablePaymentInstrument(new PaymentInstrumentStatus(enable));
                     return paymentInstrument;
@@ -136,6 +136,6 @@ public class PaymentInstrumentService {
                                 document.getPaymentInstrumentDescription()),
                         new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                 .valueOf(document.getPaymentInstrumentStatus())),
-                        new PaymentInstrumentType(document.getPaymentInstrumentType())));
+                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory()))));
     }
 }
