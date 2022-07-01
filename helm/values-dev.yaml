@@ -86,7 +86,7 @@ microservice-chart:
     API_CONFIG_READ_TIMEOUT: "10000"
     API_CONFIG_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
-    API_CONFIG_PSP_UPDATE_CRON_STRING: "*/720 * * * * *"
+    API_CONFIG_PSP_UPDATE_CRON_STRING: "0 0 * * * *"
 
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
