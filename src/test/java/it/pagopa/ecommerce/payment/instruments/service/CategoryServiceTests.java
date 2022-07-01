@@ -7,6 +7,7 @@ import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstru
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentCategoryName;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentType;
 import it.pagopa.ecommerce.payment.instruments.exception.CategoryAlreadyInUseException;
+import it.pagopa.ecommerce.payment.instruments.exception.CategoryNotFoundException;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentInstrumentCategoryDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentInstrumentCategoryRepository;
 import org.junit.jupiter.api.Test;
@@ -243,7 +244,22 @@ class CategoryServiceTests {
                 category.getPaymentInstrumentTypes().get(0).value());
     }
 
+    @Test
+    void shouldCategoryNotFoundException() {
+        String TEST_ID = UUID.randomUUID().toString();
+        String TEST_NAME = "test_name";
+        List<String> TEST_NEW_TYPES = List.of("PO", "PP");
+
+        Mockito.when(paymentInstrumentCategoryRepository.findById(TEST_ID)).thenReturn(Mono.empty());
+
+        CategoryNotFoundException exception = 
+        assertThrows(CategoryNotFoundException.class, () -> {
+            categoryService.updateCategory(TEST_ID, TEST_NAME, TEST_NEW_TYPES).block();
+        });
     
+        assertTrue(exception.getMessage().contains(TEST_ID));
+    }
+
     @Test
     void shouldReturnDocToAggregate() throws IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException, SecurityException {
