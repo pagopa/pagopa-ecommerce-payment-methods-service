@@ -58,8 +58,7 @@ class CategoryServiceTests {
         PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
                 UUID.randomUUID().toString(),
                 "test",
-                List.of("PO")
-        );
+                List.of("PO"));
 
         Mockito.when(paymentInstrumentCategoryRepository.findAll()).thenReturn(Flux.just(categoryDocument));
 
@@ -77,13 +76,13 @@ class CategoryServiceTests {
         PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
                 UUID.randomUUID().toString(),
                 "test",
-                List.of("PO")
-        );
+                List.of("PO"));
 
         Mockito.when(paymentInstrumentCategoryRepository.findById(categoryDocument.getPaymentInstrumentCategoryID()))
                 .thenReturn(Mono.just(categoryDocument));
 
-        PaymentInstrumentCategory category = categoryService.getCategory(categoryDocument.getPaymentInstrumentCategoryID()).block();
+        PaymentInstrumentCategory category = categoryService
+                .getCategory(categoryDocument.getPaymentInstrumentCategoryID()).block();
 
         assertNotNull(category);
         assertEquals(categoryDocument.getPaymentInstrumentCategoryID(),
@@ -96,13 +95,14 @@ class CategoryServiceTests {
         PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
                 UUID.randomUUID().toString(),
                 "test",
-                List.of("PO")
-        );
+                List.of("PO"));
 
-        Mockito.when(paymentInstrumentCategoryRepository.findByPaymentInstrumentCategoryName(categoryDocument.getPaymentInstrumentCategoryName()))
+        Mockito.when(paymentInstrumentCategoryRepository
+                .findByPaymentInstrumentCategoryName(categoryDocument.getPaymentInstrumentCategoryName()))
                 .thenReturn(Mono.just(categoryDocument));
 
-        PaymentInstrumentCategory category = categoryService.getCategoryByName(categoryDocument.getPaymentInstrumentCategoryName()).block();
+        PaymentInstrumentCategory category = categoryService
+                .getCategoryByName(categoryDocument.getPaymentInstrumentCategoryName()).block();
 
         assertNotNull(category);
         assertEquals(categoryDocument.getPaymentInstrumentCategoryID(),
@@ -117,8 +117,7 @@ class CategoryServiceTests {
         PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
                 UUID.randomUUID().toString(),
                 TEST_NAME,
-                TEST_TYPES
-        );
+                TEST_TYPES);
         PaymentInstrumentCategory expectedPaymentInstrumentCategory = new PaymentInstrumentCategory(
                 new PaymentInstrumentCategoryID(UUID.fromString(categoryDocument.getPaymentInstrumentCategoryID())),
                 List.of(new PaymentInstrumentType(TEST_TYPES.get(0))),
@@ -128,8 +127,7 @@ class CategoryServiceTests {
         Mockito.when(categoryFactory.newCategory(
                 Mockito.any(),
                 Mockito.any(),
-                Mockito.any()
-        )).thenReturn(Mono.just(expectedPaymentInstrumentCategory));
+                Mockito.any())).thenReturn(Mono.just(expectedPaymentInstrumentCategory));
 
         PaymentInstrumentCategory paymentInstrumentCategory = categoryService.createCategory(TEST_NAME, TEST_TYPES)
                 .block();
@@ -156,8 +154,7 @@ class CategoryServiceTests {
         PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
                 TEST_ID,
                 TEST_NAME,
-                TEST_TYPES
-        );
+                TEST_TYPES);
         PaymentInstrumentCategory expectedPaymentInstrumentCategory = new PaymentInstrumentCategory(
                 new PaymentInstrumentCategoryID(UUID.fromString(categoryDocument.getPaymentInstrumentCategoryID())),
                 List.of(new PaymentInstrumentType(TEST_TYPES.get(0))),
@@ -168,7 +165,8 @@ class CategoryServiceTests {
                 .thenReturn(Mono.empty());
         Mockito.when(paymentInstrumentCategoryRepository.findById(TEST_ID)).thenReturn(Mono.just(categoryDocument));
 
-        PaymentInstrumentCategory paymentInstrumentCategory = categoryService.updateCategory(TEST_ID, TEST_NAME, TEST_TYPES)
+        PaymentInstrumentCategory paymentInstrumentCategory = categoryService
+                .updateCategory(TEST_ID, TEST_NAME, TEST_TYPES)
                 .block();
 
         assert paymentInstrumentCategory != null;
@@ -194,14 +192,12 @@ class CategoryServiceTests {
         PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
                 TEST_ID,
                 TEST_NAME,
-                TEST_TYPES
-        );
+                TEST_TYPES);
 
         PaymentInstrumentCategoryDocument duplicatedDocument = new PaymentInstrumentCategoryDocument(
                 TEST_ANOTHER_ID,
                 TEST_NAME,
-                TEST_TYPES
-        );
+                TEST_TYPES);
 
         PaymentInstrumentCategory expectedPaymentInstrumentCategory = new PaymentInstrumentCategory(
                 new PaymentInstrumentCategoryID(UUID.fromString(categoryDocument.getPaymentInstrumentCategoryID())),
@@ -213,10 +209,9 @@ class CategoryServiceTests {
                 .thenReturn(Mono.just(duplicatedDocument));
         Mockito.when(paymentInstrumentCategoryRepository.findById(TEST_ID)).thenReturn(Mono.just(categoryDocument));
 
-        assertThrows(CategoryAlreadyInUseException.class, () ->
-                categoryService.updateCategory(TEST_ID, TEST_NAME, TEST_TYPES)
-                        .block()
-        );
+        assertThrows(CategoryAlreadyInUseException.class,
+                () -> categoryService.updateCategory(TEST_ID, TEST_NAME, TEST_TYPES)
+                        .block());
     }
 
     @Test
@@ -229,9 +224,7 @@ class CategoryServiceTests {
         PaymentInstrumentCategoryDocument categoryDocument = new PaymentInstrumentCategoryDocument(
                 TEST_ID,
                 TEST_NAME,
-                TEST_TYPES
-        );
-
+                TEST_TYPES);
 
         Mockito.when(paymentInstrumentCategoryRepository.save(Mockito.any())).thenReturn(Mono.just(categoryDocument));
         Mockito.when(paymentInstrumentCategoryRepository.findByPaymentInstrumentCategoryName(TEST_NAME))
@@ -252,11 +245,10 @@ class CategoryServiceTests {
 
         Mockito.when(paymentInstrumentCategoryRepository.findById(TEST_ID)).thenReturn(Mono.empty());
 
-        CategoryNotFoundException exception = 
-        assertThrows(CategoryNotFoundException.class, () -> {
+        CategoryNotFoundException exception = assertThrows(CategoryNotFoundException.class, () -> {
             categoryService.updateCategory(TEST_ID, TEST_NAME, TEST_NEW_TYPES).block();
         });
-    
+
         assertTrue(exception.getMessage().contains(TEST_ID));
     }
 
