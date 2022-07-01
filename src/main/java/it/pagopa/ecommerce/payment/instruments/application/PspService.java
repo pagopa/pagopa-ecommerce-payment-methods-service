@@ -77,11 +77,11 @@ public class PspService {
         });
     }
 
-    public Flux<PspDto> retrievePsps(Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDto> retrievePsps(String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
 
         log.debug("[Payment instrument Aggregate] Retrive Aggregate");
 
-        return getPspByFilter(amount, language, paymentTypeCode).map(doc -> {
+        return getPspByFilter(paymentInstrumentId, amount, language, paymentTypeCode).map(doc -> {
             PspDto pspDto = new PspDto();
 
             pspDto.setCode(doc.getPspDocumentKey().getPspCode());
@@ -100,11 +100,11 @@ public class PspService {
         });
     }
 
-    public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDocument> getPspByFilter(String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
         language = language == null ? null : language.toUpperCase();
         paymentTypeCode = paymentTypeCode == null ? null : paymentTypeCode.toUpperCase();
 
-        return filterRuleEngine.applyFilter(amount, language, paymentTypeCode);
+        return filterRuleEngine.applyFilter(paymentInstrumentId, amount, language, paymentTypeCode);
     }
 }
 

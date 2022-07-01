@@ -15,10 +15,10 @@ public class FilterRuleEngine {
     private PspRepository pspRepository;
 
 
-    public Flux<PspDocument> applyFilter(Integer amount, String language, String paymentTypeCode){
+    public Flux<PspDocument> applyFilter(String paymentInstrumentId, Integer amount, String language, String paymentTypeCode){
         for(IFilterRule rule: filterRules){
-            if(rule.shouldExecute(amount, language, paymentTypeCode)){
-                return rule.execute(pspRepository, amount, language, paymentTypeCode);
+            if(rule.shouldExecute(paymentInstrumentId, amount, language, paymentTypeCode)){
+                return rule.execute(pspRepository, paymentInstrumentId, amount, language, paymentTypeCode);
             }
         }
 
