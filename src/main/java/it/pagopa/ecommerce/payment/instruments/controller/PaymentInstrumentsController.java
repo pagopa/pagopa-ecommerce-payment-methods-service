@@ -69,7 +69,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
     @Override
     public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(Integer amount, String lang, String paymentTypeCode, ServerWebExchange exchange) {
-        return pspService.retrievePsps(amount, lang, paymentTypeCode).collectList().flatMap(pspDtos -> {
+        return pspService.retrievePsps(null, amount, lang, paymentTypeCode).collectList().flatMap(pspDtos -> {
             PSPsResponseDto responseDto = new PSPsResponseDto();
             responseDto.setPsp(pspDtos);
 
@@ -90,6 +90,16 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                             StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
                     return ResponseEntity.ok(response);
                 });
+    }
+
+    @Override
+    public Mono<ResponseEntity<PSPsResponseDto>> getPiPSPs(String id, Integer amount, String lang, String paymentTypeCode, ServerWebExchange exchange) {
+        return pspService.retrievePsps(id, amount, lang, paymentTypeCode).collectList().flatMap(pspDtos -> {
+            PSPsResponseDto responseDto = new PSPsResponseDto();
+            responseDto.setPsp(pspDtos);
+
+            return Mono.just(ResponseEntity.ok(responseDto));
+        });
     }
 
     @Override

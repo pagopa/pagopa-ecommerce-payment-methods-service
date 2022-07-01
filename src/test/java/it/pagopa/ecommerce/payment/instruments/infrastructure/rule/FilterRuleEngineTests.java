@@ -24,7 +24,6 @@ class FilterRuleEngineTests {
     private final double NOT_NULL_AMOUNT = 100;
     private final String NOT_NULL_LANGUAGE = "IT";
     private final String NOT_NULL_TYPE = "PO";
-    private final String NULL_STRING = null;
 
     @Mock
     private PspRepository pspRepository;
@@ -62,7 +61,7 @@ class FilterRuleEngineTests {
      */
     void testEmptyFilter(){
         Mockito.when(pspRepository.findAll()).thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(null, NULL_STRING, NULL_STRING).collectList().block();
+        filterRuleEngine.applyFilter(null, null, null, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1)).findAll();
     }
@@ -74,7 +73,7 @@ class FilterRuleEngineTests {
          */
     void testAmountFilter(){
         Mockito.when(pspRepository.findPspMatchAmount(TEST_AMOUNT)).thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(TEST_AMOUNT, NULL_STRING, NULL_STRING).collectList().block();
+        filterRuleEngine.applyFilter(null, TEST_AMOUNT, null, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchAmount(TEST_AMOUNT);
     }
@@ -86,7 +85,7 @@ class FilterRuleEngineTests {
          */
     void testLangFilter(){
         Mockito.when(pspRepository.findPspMatchLang(TEST_LANG)).thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(null, TEST_LANG, NULL_STRING).collectList().block();
+        filterRuleEngine.applyFilter(null, null, TEST_LANG, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchLang(TEST_LANG);
     }
@@ -99,7 +98,7 @@ class FilterRuleEngineTests {
     void testPaymentTypeFilter(){
         String TEST_PAYMENT_TYPE = "PO";
         Mockito.when(pspRepository.findPspMatchType(TEST_PAYMENT_TYPE)).thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(null, NULL_STRING, TEST_PAYMENT_TYPE).collectList().block();
+        filterRuleEngine.applyFilter(null, null, null, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchType(TEST_PAYMENT_TYPE);
     }
@@ -111,7 +110,7 @@ class FilterRuleEngineTests {
          */
     void testAmountLangFilter(){
         Mockito.when(pspRepository.findPspMatchAmountLang(TEST_AMOUNT, TEST_LANG)).thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, NULL_STRING).collectList().block();
+        filterRuleEngine.applyFilter(null, TEST_AMOUNT, TEST_LANG, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
                 .findPspMatchAmountLang(TEST_AMOUNT, TEST_LANG);
@@ -125,7 +124,7 @@ class FilterRuleEngineTests {
     void testAmountTypeFilter(){
         Mockito.when(pspRepository.findPspMatchAmountType(TEST_AMOUNT, TEST_PAYMENT_TYPE))
                 .thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(TEST_AMOUNT, NULL_STRING, TEST_PAYMENT_TYPE).collectList().block();
+        filterRuleEngine.applyFilter(null, TEST_AMOUNT, null, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
                 .findPspMatchAmountType(TEST_AMOUNT, TEST_PAYMENT_TYPE);
@@ -139,7 +138,7 @@ class FilterRuleEngineTests {
     void testTypeLangFilter(){
         Mockito.when(pspRepository.findPspMatchTypeLang(TEST_PAYMENT_TYPE, TEST_LANG))
                 .thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(null, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
+        filterRuleEngine.applyFilter(null, null, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
                 .findPspMatchTypeLang(TEST_PAYMENT_TYPE, TEST_LANG);
@@ -153,7 +152,7 @@ class FilterRuleEngineTests {
     void testAmountTypeLangFilter(){
         Mockito.when(pspRepository.findPspMatchAmountTypeLang(TEST_AMOUNT, TEST_PAYMENT_TYPE, TEST_LANG))
                 .thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
+        filterRuleEngine.applyFilter(null, TEST_AMOUNT, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
                 .findPspMatchAmountTypeLang(TEST_AMOUNT, TEST_PAYMENT_TYPE, TEST_LANG);
