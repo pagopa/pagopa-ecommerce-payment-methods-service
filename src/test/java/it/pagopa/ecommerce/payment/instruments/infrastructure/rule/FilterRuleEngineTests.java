@@ -19,7 +19,11 @@ import reactor.core.publisher.Flux;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
+<<<<<<< HEAD
 class FilterRuleEngineTests {
+=======
+public class FilterRuleEngineTests {
+>>>>>>> 3be15b35752dad40117d3f647f4d91d6c6a5d31d
 
     private final double NOT_NULL_AMOUNT = 100;
     private final String NOT_NULL_LANGUAGE = "IT";
