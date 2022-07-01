@@ -44,13 +44,14 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
         return paymentInstrumentRequestDto.flatMap(request -> paymentInstrumentService.createPaymentInstrument(
                 request.getName(),
                 request.getDescription(),
-                request.getType())).map(paymentInstrument -> {
+                request.getCategory())).map(paymentInstrument -> {
             PaymentInstrumentResponseDto response = new PaymentInstrumentResponseDto();
             response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
             response.setName(paymentInstrument.getPaymentInstrumentName().value());
             response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
             response.setStatus(
                     StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
+            response.setCategory(paymentInstrument.getPaymentInstrumentCategory().value().toString());
             return ResponseEntity.ok(response);
         });
     }
@@ -67,6 +68,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
                     response.setStatus(
                             StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
+                    response.setCategory(paymentInstrument.getPaymentInstrumentCategory().value().toString());
                     return response;
                 })));
     }
@@ -92,6 +94,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
                     response.setStatus(
                             StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
+                    response.setCategory(paymentInstrument.getPaymentInstrumentCategory().value().toString());
                     return ResponseEntity.ok(response);
                 });
     }

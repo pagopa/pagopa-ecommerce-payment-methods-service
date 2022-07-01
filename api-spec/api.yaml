@@ -69,7 +69,7 @@ paths:
   /payment-instruments/psps:
     put:
       operationId: scheduleUpdatePSPs
-      summary: Update psps list
+      summary: Update psp list
       responses:
         '200':
           description: Update successfully scheduled
@@ -107,7 +107,7 @@ paths:
   /payment-instruments/categories:
     post:
       operationId: addCategory
-      summary: Update psps list
+      summary: Update category list
       requestBody:
         $ref: "#/components/requestBodies/CategoryRequest"
       responses:
@@ -179,7 +179,7 @@ components:
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
-        type:
+        category:
           type: string
       required:
         - name
@@ -207,6 +207,8 @@ components:
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
+        category:
+          type: string
       required:
         - id
         - name
