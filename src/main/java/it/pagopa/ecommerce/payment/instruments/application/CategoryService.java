@@ -54,7 +54,7 @@ public class CategoryService {
         Mono<PaymentInstrumentCategory>  paymentInstrumentCategoryMono = categoryFactory.newCategory(
                 new PaymentInstrumentCategoryID(UUID.randomUUID()),
                 new PaymentInstrumentCategoryName(name),
-                types.stream().map(PaymentInstrumentType::new).collect(Collectors.toList())
+                types.stream().map(PaymentInstrumentType::new).toList()
         );
 
         log.debug("[Payment instrument Aggregate] Store Aggregate");

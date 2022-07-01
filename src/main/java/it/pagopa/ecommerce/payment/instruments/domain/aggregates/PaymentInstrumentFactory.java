@@ -32,11 +32,11 @@ public class PaymentInstrumentFactory {
                 .flatMap(hasPaymentInstrument -> paymentInstrumentCategoryRepository
                         .findById(paymentInstrumentCategoryID.value().toString()).hasElement().map(
                                 hasCategory -> {
-                                    if(!hasPaymentInstrument && hasCategory){
+                                    if(Boolean.FALSE.equals(hasPaymentInstrument) && Boolean.TRUE.equals(hasCategory)){
                                         return new PaymentInstrument(paymentInstrumentID, paymentInstrumentName,
                                                 paymentInstrumentDescription,
                                                 paymentInstrumentEnabled, paymentInstrumentCategoryID);
-                                    } else if (hasPaymentInstrument) {
+                                    } else if (Boolean.TRUE.equals(hasPaymentInstrument)) {
                                         throw paymentInstrumentAlreadyInUse(paymentInstrumentName);
                                     } else {
                                         throw categoryNotFoundException(paymentInstrumentCategoryID);

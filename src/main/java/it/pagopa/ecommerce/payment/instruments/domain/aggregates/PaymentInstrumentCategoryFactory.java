@@ -26,7 +26,7 @@ public class PaymentInstrumentCategoryFactory {
 
         return paymentInstrumentCategoryRepository.findByPaymentInstrumentCategoryName(paymentInstrumentCategoryName.value()).hasElement()
                 .map(hasCategory -> {
-                    if (!hasCategory) {
+                    if (Boolean.FALSE.equals(hasCategory)) {
                         return new PaymentInstrumentCategory(
                                 paymentInstrumentCategoryID, paymentInstrumentTypes, paymentInstrumentCategoryName);
                     } else {

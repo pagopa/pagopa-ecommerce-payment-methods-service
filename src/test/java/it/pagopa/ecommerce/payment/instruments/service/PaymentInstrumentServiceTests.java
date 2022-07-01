@@ -17,7 +17,7 @@ import java.util.UUID;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
-public class PaymentInstrumentServiceTests {
+class PaymentInstrumentServiceTests {
 
     @Mock
     private PaymentInstrumentRepository paymentInstrumentRepository;
