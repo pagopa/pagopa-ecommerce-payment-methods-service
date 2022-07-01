@@ -75,7 +75,7 @@ public class CategoryService {
 
         return categoryRepository.findById(id).hasElement().flatMap(
                 exist -> {
-                    if(exist){
+                    if(Boolean.TRUE.equals(exist)){
                         return categoryRepository.findByPaymentInstrumentCategoryName(name).flatMap(
                                 duplicated -> {
                                     if(duplicated.getPaymentInstrumentCategoryID().equals(id)){
