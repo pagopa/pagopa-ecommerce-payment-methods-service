@@ -44,7 +44,7 @@ public class CategoryService {
     }
 
     public Mono<PaymentInstrumentCategory> getCategoryByName(String name){
-        return categoryRepository.findBypaymentInstrumentCategoryName(name).map(
+        return categoryRepository.findByPaymentInstrumentCategoryName(name).map(
                 this::convertDocToAggregate
         );
     }
@@ -71,15 +71,15 @@ public class CategoryService {
     }
 
     public Mono<PaymentInstrumentCategory> updateCategory(String id, String name, List<String> types) {
-        log.debug("[Payment instrument Category Aggregate] Update Aggregate");
-
+        log.info("[Payment instrument Category Aggregate] Update Aggregate");
 
         return categoryRepository.findById(id).hasElement().flatMap(
                 exist -> {
                     if(exist){
-                        return categoryRepository.findBypaymentInstrumentCategoryName(name).flatMap(
+                        return categoryRepository.findByPaymentInstrumentCategoryName(name).flatMap(
                                 duplicated -> {
                                     if(duplicated.getPaymentInstrumentCategoryID().equals(id)){
+
                                         return categoryRepository
                                                 .save(new PaymentInstrumentCategoryDocument(id, name, types))
                                                 .map(this::convertDocToAggregate);
@@ -87,6 +87,9 @@ public class CategoryService {
                                         throw categoryAlreadyInUseException(new PaymentInstrumentCategoryName(name));
                                     }
                                 }
+                        ).switchIfEmpty(categoryRepository
+                                .save(new PaymentInstrumentCategoryDocument(id, name, types))
+                                .map(this::convertDocToAggregate)
                         );
                     } else {
                         throw categoryNotFoundException(new PaymentInstrumentCategoryID(UUID.fromString(id)));
