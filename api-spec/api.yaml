@@ -103,6 +103,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PSPsResponse'
+  /payment-instruments/{id}/psps:
+    get:
+      operationId: getPiPSPs
+      summary: Retrive payment instrument by ID
+      parameters:
+        - name: id
+          in: path
+          description: Payment Instrument ID
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: amount
+          schema:
+            type: integer
+          description: Amount in cents
+          required: false
+        - in: query
+          name: lang
+          schema:
+            type: string
+            enum: [IT, EN, FR, DE, SL]
+          description: Service language
+          required: false
+        - in: query
+          name: paymentTypeCode
+          schema:
+            type: string
+          description: Payment Type Code
+          required: false
+      responses:
+        '200':
+          description: New payment instrument successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PSPsResponse'
 
   /payment-instruments/categories:
     post:

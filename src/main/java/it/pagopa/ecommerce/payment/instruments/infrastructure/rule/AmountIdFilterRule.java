@@ -6,15 +6,15 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 @Component
-public class LangFilterRule implements IFilterRule {
+public class AmountIdFilterRule implements IFilterRule{
     @Override
     public boolean shouldExecute(String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
-        return !checkQueryParam(paymentInstrumentId) && !checkQueryParam(paymentTypeCode) && checkQueryParam(language) && amount == null;
+        return checkQueryParam(paymentInstrumentId) && amount != null
+                && !checkQueryParam(language) && !checkQueryParam(paymentTypeCode);
     }
 
     @Override
     public Flux<PspDocument> execute(PspRepository pspRepository, String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
-        return pspRepository.findPspMatchLang(language);
+        return pspRepository.findPspMatchAmountId(amount, paymentInstrumentId);
     }
-
 }
