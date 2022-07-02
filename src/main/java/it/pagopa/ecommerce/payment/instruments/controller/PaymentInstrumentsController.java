@@ -158,7 +158,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                             c -> new CategoryDto()
                                     .id(c.getPaymentInstrumentCategoryID().value().toString())
                                     .name(c.getPaymentInstrumentCategoryName().value())
-                                    .types(c.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value).collect(Collectors.toList()))
+                                    .paymentTypeCodes(c.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value).collect(Collectors.toList()))
                     ).collect(Collectors.toList());
 
                     return ResponseEntity.ok(new CategoriesResponseDto().categories(categoryDtos));
@@ -170,12 +170,12 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
     public Mono<ResponseEntity<CategoryDto>> addCategory(Mono<CategoryRequestDto> categoryRequestDto, ServerWebExchange exchange) {
         return categoryRequestDto.flatMap(
                 request -> categoryService.createCategory(
-                                request.getName(), request.getTypes())
+                                request.getName(), request.getPaymentTypeCodes())
                         .map(category -> {
                             CategoryDto categoryDto = new CategoryDto()
                                     .id(category.getPaymentInstrumentCategoryID().value().toString())
                                     .name(category.getPaymentInstrumentCategoryName().value())
-                                    .types(category.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
+                                    .paymentTypeCodes(category.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
                                             .collect(Collectors.toList()));
 
                             return ResponseEntity.ok(categoryDto);
@@ -190,7 +190,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     CategoryDto categoryDto = new CategoryDto()
                             .id(category.getPaymentInstrumentCategoryID().value().toString())
                             .name(category.getPaymentInstrumentCategoryName().value())
-                            .types(category.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
+                            .paymentTypeCodes(category.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
                                     .collect(Collectors.toList()));
 
                     return ResponseEntity.ok(categoryDto);
@@ -201,12 +201,12 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
     @Override
     public Mono<ResponseEntity<CategoryDto>> patchCategory(String id, Mono<CategoryRequestDto> categoryRequestDto, ServerWebExchange exchange) {
         return categoryRequestDto.flatMap(
-                req -> categoryService.updateCategory(id, req.getName(), req.getTypes())
+                req -> categoryService.updateCategory(id, req.getName(), req.getPaymentTypeCodes())
                         .map(c -> {
                             CategoryDto categoryDto = new CategoryDto()
                                     .id(c.getPaymentInstrumentCategoryID().value().toString())
                                     .name(c.getPaymentInstrumentCategoryName().value())
-                                    .types(c.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
+                                    .paymentTypeCodes(c.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
                                             .collect(Collectors.toList()));
 
                             return ResponseEntity.ok(categoryDto);

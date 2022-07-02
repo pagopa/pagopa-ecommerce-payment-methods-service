@@ -276,7 +276,7 @@ components:
           type: string
         name:
           type: string
-        types:
+        paymentTypeCodes:
           type: array
           items:
             type: string
@@ -286,7 +286,7 @@ components:
       properties:
         name:
           type: string
-        types:
+        paymentTypeCodes:
           type: array
           items:
             type: string
