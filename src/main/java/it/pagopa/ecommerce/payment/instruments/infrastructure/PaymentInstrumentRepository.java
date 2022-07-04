@@ -6,4 +6,5 @@ import reactor.core.publisher.Flux;
 
 public interface PaymentInstrumentRepository extends ReactiveCrudRepository<PaymentInstrumentDocument, String> {
     Flux<PaymentInstrumentDocument> findByPaymentInstrumentName(String paymentInstrumentName);
+    Flux<PaymentInstrumentDocument> findByPaymentInstrumentCategoryID(String paymentInstrumentCategoryID);
 }

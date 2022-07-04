@@ -67,7 +67,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
     @Override
     public Mono<ResponseEntity<Flux<PaymentInstrumentResponseDto>>> getAllPaymentInstruments(String categoryId, ServerWebExchange exchange) {
-        return Mono.just(ResponseEntity.ok(paymentInstrumentService.retrivePaymentInstruments()
+        return Mono.just(ResponseEntity.ok(paymentInstrumentService.retrivePaymentInstruments(categoryId)
                 .map(paymentInstrument -> {
                     PaymentInstrumentResponseDto response = new PaymentInstrumentResponseDto();
                     response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());

@@ -139,7 +139,7 @@ class PaymentInstrumentServiceTests {
         Mockito.when(paymentInstrumentRepository.findAll())
                 .thenReturn(Flux.just(paymentInstrumentDocument));
 
-        PaymentInstrument paymentInstrumentCreated = paymentInstrumentService.retrivePaymentInstruments().blockFirst();
+        PaymentInstrument paymentInstrumentCreated = paymentInstrumentService.retrivePaymentInstruments(null).blockFirst();
 
         assertEquals(paymentInstrumentCreated.getPaymentInstrumentCategoryID().value(),
                 paymentInstrumentCategoryID.value());

@@ -69,24 +69,30 @@ public class PaymentInstrumentService {
                 ));
     }
 
-    public Flux<PaymentInstrument> retrivePaymentInstruments() {
+    public Flux<PaymentInstrument> retrivePaymentInstruments(String categoryId) {
 
-        // TODO create converter aggregate - document
         log.debug("[Payment instrument Aggregate] Retrive Aggregate");
-        return paymentInstrumentRepository
-                .findAll()
-                .map(document -> new PaymentInstrument(
-                        new PaymentInstrumentID(
-                                UUID.fromString(document.getPaymentInstrumentID())),
-                        new PaymentInstrumentName(document.getPaymentInstrumentName()),
-                        new PaymentInstrumentDescription(
-                                document.getPaymentInstrumentDescription()),
-                        new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
-                                .valueOf(document.getPaymentInstrumentStatus())),
-                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategoryID())),
-                        new PaymentInstrumentCategoryName(document.getPaymentInstrumentCategoryName()),
-                        document.getPaymentInstrumentCategoryTypes().stream()
-                                .map(PaymentInstrumentType::new).collect(Collectors.toList())));
+        Flux<PaymentInstrumentDocument> docs;
+
+        log.info("Category id: {}", categoryId);
+        if(categoryId == null || categoryId.isEmpty() || categoryId.isBlank()) {
+            docs = paymentInstrumentRepository.findAll();
+        } else {
+            docs = paymentInstrumentRepository.findByPaymentInstrumentCategoryID(categoryId);
+        }
+
+        return docs.map(document -> new PaymentInstrument(
+                new PaymentInstrumentID(
+                        UUID.fromString(document.getPaymentInstrumentID())),
+                new PaymentInstrumentName(document.getPaymentInstrumentName()),
+                new PaymentInstrumentDescription(
+                        document.getPaymentInstrumentDescription()),
+                new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
+                        .valueOf(document.getPaymentInstrumentStatus())),
+                new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategoryID())),
+                new PaymentInstrumentCategoryName(document.getPaymentInstrumentCategoryName()),
+                document.getPaymentInstrumentCategoryTypes().stream()
+                        .map(PaymentInstrumentType::new).collect(Collectors.toList())));
     }
 
     public Mono<PaymentInstrument> patchPaymentInstrument(String id,
