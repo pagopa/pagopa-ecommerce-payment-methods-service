@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.instruments.application;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +48,11 @@ public class PaymentInstrumentService {
                                         p.getPaymentInstrumentID().value().toString(),
                                         p.getPaymentInstrumentName().value(),
                                         p.getPaymentInstrumentDescription().value(),
-                                        p.getPaymentInstrumentCategory().value().toString(),
-                                        p.getPaymentInstrumentStatus().value().toString())))
+                                        p.getPaymentInstrumentStatus().value().toString(),
+                                        p.getPaymentInstrumentCategoryID().value().toString(),
+                                        p.getPaymentInstrumentCategoryName().value(),
+                                        p.getPaymentInstrumentCategoryTypes().stream().map(PaymentInstrumentType::value)
+                                                .collect(Collectors.toList())))
                 .map(document -> new PaymentInstrument(
                         new PaymentInstrumentID(
                                 UUID.fromString(document.getPaymentInstrumentID())),
@@ -57,7 +61,12 @@ public class PaymentInstrumentService {
                                 document.getPaymentInstrumentDescription()),
                         new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                 .valueOf(document.getPaymentInstrumentStatus())),
-                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory()))));
+                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategoryID())),
+                        new PaymentInstrumentCategoryName(document.getPaymentInstrumentCategoryName()),
+                        document.getPaymentInstrumentCategoryTypes().stream().map(
+                                PaymentInstrumentType::new
+                        ).collect(Collectors.toList()))
+                ));
     }
 
     public Flux<PaymentInstrument> retrivePaymentInstruments() {
@@ -74,7 +83,10 @@ public class PaymentInstrumentService {
                                 document.getPaymentInstrumentDescription()),
                         new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                 .valueOf(document.getPaymentInstrumentStatus())),
-                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory()))));
+                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategoryID())),
+                        new PaymentInstrumentCategoryName(document.getPaymentInstrumentCategoryName()),
+                        document.getPaymentInstrumentCategoryTypes().stream()
+                                .map(PaymentInstrumentType::new).collect(Collectors.toList())));
     }
 
     public Mono<PaymentInstrument> patchPaymentInstrument(String id,
@@ -94,7 +106,10 @@ public class PaymentInstrumentService {
                                     document.getPaymentInstrumentDescription()),
                             new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                     .valueOf(document.getPaymentInstrumentStatus())),
-                            new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory())));
+                            new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategoryID())),
+                            new PaymentInstrumentCategoryName(document.getPaymentInstrumentCategoryName()),
+                            document.getPaymentInstrumentCategoryTypes().stream()
+                                    .map(type -> new PaymentInstrumentType(type)).collect(Collectors.toList()));
                     paymentInstrument.enablePaymentInstrument(new PaymentInstrumentStatus(enable));
                     return paymentInstrument;
                 }).flatMap(
@@ -103,8 +118,12 @@ public class PaymentInstrumentService {
                                         p.getPaymentInstrumentID().value().toString(),
                                         p.getPaymentInstrumentName().value(),
                                         p.getPaymentInstrumentDescription().value(),
-                                        p.getPaymentInstrumentCategory().value().toString(),
-                                        p.getPaymentInstrumentStatus().value().toString())))
+                                        p.getPaymentInstrumentStatus().value().toString(),
+                                        p.getPaymentInstrumentCategoryID().value().toString(),
+                                        p.getPaymentInstrumentCategoryName().value(),
+                                        p.getPaymentInstrumentCategoryTypes().stream().map(PaymentInstrumentType::value)
+                                                .collect(Collectors.toList())))
+                )
                 .map(document -> {
                     PaymentInstrument paymentInstrument = new PaymentInstrument(
                             new PaymentInstrumentID(
@@ -115,7 +134,12 @@ public class PaymentInstrumentService {
                                     document.getPaymentInstrumentDescription()),
                             new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                     .valueOf(document.getPaymentInstrumentStatus())),
-                            new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory())));
+                            new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategoryID())),
+                            new PaymentInstrumentCategoryName(document.getPaymentInstrumentName()),
+                            document.getPaymentInstrumentCategoryTypes().stream().map(
+                                    PaymentInstrumentType::new
+                            ).collect(Collectors.toList())
+                    );
 
                     paymentInstrument.enablePaymentInstrument(new PaymentInstrumentStatus(enable));
                     return paymentInstrument;
@@ -136,6 +160,9 @@ public class PaymentInstrumentService {
                                 document.getPaymentInstrumentDescription()),
                         new PaymentInstrumentStatus(PaymentInstrumentStatusEnum
                                 .valueOf(document.getPaymentInstrumentStatus())),
-                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategory()))));
+                        new PaymentInstrumentCategoryID(UUID.fromString(document.getPaymentInstrumentCategoryID())),
+                        new PaymentInstrumentCategoryName(document.getPaymentInstrumentCategoryName()),
+                        document.getPaymentInstrumentCategoryTypes().stream()
+                                .map(PaymentInstrumentType::new).collect(Collectors.toList())));
     }
 }

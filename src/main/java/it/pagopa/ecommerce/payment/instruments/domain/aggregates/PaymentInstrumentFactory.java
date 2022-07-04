@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentInstrumentRepository;
 import reactor.core.publisher.Mono;
 
+import java.util.stream.Collectors;
+
 @Component
 @AggregateFactory(PaymentInstrument.class)
 public class PaymentInstrumentFactory {
@@ -30,12 +32,18 @@ public class PaymentInstrumentFactory {
 
         return paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()).hasElements()
                 .flatMap(hasPaymentInstrument -> paymentInstrumentCategoryRepository
-                        .findById(paymentInstrumentCategoryID.value().toString()).hasElement().map(
-                                hasCategory -> {
-                                    if(Boolean.FALSE.equals(hasPaymentInstrument) && Boolean.TRUE.equals(hasCategory)){
+                        .findById(paymentInstrumentCategoryID.value().toString()).switchIfEmpty(
+                                Mono.error(categoryNotFoundException(paymentInstrumentCategoryID))
+                        ).map(
+                                category -> {
+                                    if (Boolean.FALSE.equals(hasPaymentInstrument) && Boolean.TRUE.equals(category != null)) {
                                         return new PaymentInstrument(paymentInstrumentID, paymentInstrumentName,
                                                 paymentInstrumentDescription,
-                                                paymentInstrumentEnabled, paymentInstrumentCategoryID);
+                                                paymentInstrumentEnabled, paymentInstrumentCategoryID,
+                                                new PaymentInstrumentCategoryName(category.getPaymentInstrumentCategoryName()),
+                                                category.getPaymentInstrumentCategoryTypes().stream().map(
+                                                        PaymentInstrumentType::new
+                                                ).collect(Collectors.toList()));
                                     } else if (Boolean.TRUE.equals(hasPaymentInstrument)) {
                                         throw paymentInstrumentAlreadyInUse(paymentInstrumentName);
                                     } else {
