@@ -142,6 +142,15 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                             response.setStatus(
                                     StatusEnum.valueOf(
                                             paymentInstrument.getPaymentInstrumentStatus().value().toString()));
+                            response.setCategory(
+                                    new CategoryDto()
+                                            .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
+                                            .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
+                                            .paymentTypeCodes(
+                                                    paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
+                                                            .map(PaymentInstrumentType::value)
+                                                            .collect(Collectors.toList()))
+                            );
                             return ResponseEntity.ok(response);
                         }));
     }
@@ -153,7 +162,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
         return apiConfigClient.getPSPs(0, 50, null).expand(
                 servicesDto -> {
-                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get())) {
+                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get()+1)) {
                         return Mono.empty();
                     }
                     return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);
