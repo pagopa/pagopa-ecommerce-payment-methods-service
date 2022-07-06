@@ -21,6 +21,8 @@ public class PaymentInstrument {
 
     private final List<PaymentInstrumentType> paymentInstrumentCategoryTypes;
 
+    private final PaymentInstrumentType paymentInstrumentTypeCode;
+
     @AggregateID
     public PaymentInstrumentID paymentInstrumentID() {
         return this.paymentInstrumentID;
@@ -31,7 +33,8 @@ public class PaymentInstrument {
                              PaymentInstrumentStatus paymentInstrumentStatus,
                              PaymentInstrumentCategoryID paymentInstrumentCategory,
                              PaymentInstrumentCategoryName paymentInstrumentCategoryName,
-                             List<PaymentInstrumentType> paymentInstrumentCategoryTypes) {
+                             List<PaymentInstrumentType> paymentInstrumentCategoryTypes,
+                             PaymentInstrumentType paymentInstrumentTypeCode) {
         this.paymentInstrumentID = paymentInstrumentID;
         this.paymentInstrumentName = paymentInstrumentName;
         this.paymentInstrumentDescription = paymentInstrumentDescription;
@@ -39,6 +42,7 @@ public class PaymentInstrument {
         this.paymentInstrumentCategoryID = paymentInstrumentCategory;
         this.paymentInstrumentCategoryName = paymentInstrumentCategoryName;
         this.paymentInstrumentCategoryTypes  = paymentInstrumentCategoryTypes;
+        this.paymentInstrumentTypeCode = paymentInstrumentTypeCode;
     }
 
     public void enablePaymentInstrument(PaymentInstrumentStatus paymentInstrumentStatus) {

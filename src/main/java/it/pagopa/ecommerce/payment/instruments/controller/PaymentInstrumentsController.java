@@ -43,13 +43,15 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
         return paymentInstrumentRequestDto.flatMap(request -> paymentInstrumentService.createPaymentInstrument(
                 request.getName(),
                 request.getDescription(),
-                request.getCategoryId())).flatMap(paymentInstrument -> {
+                request.getCategoryId(),
+                request.getPaymentTypeCode())).flatMap(paymentInstrument -> {
             PaymentInstrumentResponseDto response = new PaymentInstrumentResponseDto();
             response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
             response.setName(paymentInstrument.getPaymentInstrumentName().value());
             response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
             response.setStatus(
                     StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
+            response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
 
             return categoryService.getCategory(paymentInstrument.getPaymentInstrumentCategoryID().value().toString()).map(
                     category -> {
@@ -82,6 +84,8 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                                     .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
                                             .stream().map(PaymentInstrumentType::value).collect(Collectors.toList()))
                     );
+                    response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
+
                     return response;
                 })));
     }
@@ -114,6 +118,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                                     .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
                                             .stream().map(PaymentInstrumentType::value).collect(Collectors.toList()))
                     );
+                    response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
                     return ResponseEntity.ok(response);
                 });
     }
@@ -151,6 +156,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                                                             .map(PaymentInstrumentType::value)
                                                             .collect(Collectors.toList()))
                             );
+                            response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
                             return ResponseEntity.ok(response);
                         }));
     }

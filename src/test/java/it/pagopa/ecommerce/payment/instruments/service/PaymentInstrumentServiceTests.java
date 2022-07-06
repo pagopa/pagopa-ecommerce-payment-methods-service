@@ -62,6 +62,7 @@ class PaymentInstrumentServiceTests {
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
         List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
+        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
 
         PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
                 paymentInstrumentName,
@@ -69,7 +70,8 @@ class PaymentInstrumentServiceTests {
                 paymentInstrumentStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType);
+                paymentInstrumentType,
+                paymentInstrumentTypeCode);
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
                 paymentInstrument.getPaymentInstrumentID().value().toString(),
@@ -79,14 +81,12 @@ class PaymentInstrumentServiceTests {
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()));
+                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
+                paymentInstrument.getPaymentInstrumentTypeCode().value());
 
         Mockito.when(paymentInstrumentFactory.newPaymentInstrument(
-                any(),
-                eq(paymentInstrumentName),
-                eq(paymentInstrumentDescription),
-                eq(paymentInstrumentStatus),
-                eq(paymentInstrumentCategoryID)))
+                        any(), any(), any(), any(), any(), any())
+                )
                 .thenReturn(Mono.just(paymentInstrument));
 
         Mockito.when(paymentInstrumentRepository.save(
@@ -96,7 +96,9 @@ class PaymentInstrumentServiceTests {
         PaymentInstrument paymentInstrumentCreated = paymentInstrumentService.createPaymentInstrument(
                 paymentInstrumentNameAsString,
                 paymentInstrumentDescriptionAsString,
-                paymentInstrumentCategoryID.value().toString()).block();
+                paymentInstrumentCategoryID.value().toString(),
+                paymentInstrumentTypeCode.value()).block();
+
         assertEquals(paymentInstrumentCreated.getPaymentInstrumentCategoryID().value(),
                 paymentInstrumentCategoryID.value());
     }
@@ -118,6 +120,7 @@ class PaymentInstrumentServiceTests {
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
         List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
+        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
 
         PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
                 paymentInstrumentName,
@@ -125,7 +128,8 @@ class PaymentInstrumentServiceTests {
                 paymentInstrumentStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType);
+                paymentInstrumentType,
+                paymentInstrumentTypeCode);
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
                 paymentInstrument.getPaymentInstrumentID().value().toString(),
@@ -135,7 +139,8 @@ class PaymentInstrumentServiceTests {
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()));
+                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
+                paymentInstrumentTypeCode.value());
         Mockito.when(paymentInstrumentRepository.findAll())
                 .thenReturn(Flux.just(paymentInstrumentDocument));
 
@@ -161,6 +166,7 @@ class PaymentInstrumentServiceTests {
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
         List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
+        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
 
         PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
                 paymentInstrumentName,
@@ -168,7 +174,9 @@ class PaymentInstrumentServiceTests {
                 paymentInstrumentStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType);
+                paymentInstrumentType,
+                paymentInstrumentTypeCode
+                );
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
                 paymentInstrument.getPaymentInstrumentID().value().toString(),
@@ -178,7 +186,8 @@ class PaymentInstrumentServiceTests {
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()));
+                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
+                paymentInstrumentTypeCode.value());
         Mockito.when(paymentInstrumentRepository.findById(paymentInstrumentID.value().toString()))
                 .thenReturn(Mono.just(paymentInstrumentDocument));
 
@@ -214,6 +223,7 @@ class PaymentInstrumentServiceTests {
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
         List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
+        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
 
         PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
                 paymentInstrumentName,
@@ -221,7 +231,8 @@ class PaymentInstrumentServiceTests {
                 paymentInstrumentStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType);
+                paymentInstrumentType,
+                paymentInstrumentTypeCode);
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
                 paymentInstrument.getPaymentInstrumentID().value().toString(),
@@ -231,7 +242,8 @@ class PaymentInstrumentServiceTests {
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()));
+                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
+                paymentInstrumentTypeCode.value());
 
         Mockito.when(paymentInstrumentRepository.findById(paymentInstrumentID.value().toString()))
                 .thenReturn(Mono.just(paymentInstrumentDocument));

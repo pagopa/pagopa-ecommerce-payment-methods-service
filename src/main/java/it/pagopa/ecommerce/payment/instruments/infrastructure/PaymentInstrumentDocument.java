@@ -20,4 +20,5 @@ public class PaymentInstrumentDocument {
     private String paymentInstrumentCategoryID;
     private String paymentInstrumentCategoryName;
     private List<String> paymentInstrumentCategoryTypes;
+    private String paymentInstrumentTypeCode;
 }

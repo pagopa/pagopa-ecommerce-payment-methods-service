@@ -54,12 +54,14 @@ public class PaymentInstrumentsControllerTests {
         String TEST_DESC = "test";
         PaymentInstrumentRequestDto.StatusEnum TEST_STATUS = PaymentInstrumentRequestDto.StatusEnum.ENABLED;
         UUID TEST_CAT = UUID.randomUUID();
+        String TEST_TYPE_CODE = "test";
 
         PaymentInstrumentRequestDto paymentInstrumentRequestDto = new PaymentInstrumentRequestDto()
                 .name(TEST_NAME)
                 .description(TEST_DESC)
                 .status(TEST_STATUS)
-                .categoryId(TEST_CAT.toString());
+                .categoryId(TEST_CAT.toString())
+                .paymentTypeCode(TEST_TYPE_CODE);
 
         PaymentInstrument paymentInstrument = new PaymentInstrument(
                 new PaymentInstrumentID(UUID.randomUUID()),
@@ -68,10 +70,11 @@ public class PaymentInstrumentsControllerTests {
                 new PaymentInstrumentStatus(PaymentInstrumentStatusEnum.ENABLED),
                 new PaymentInstrumentCategoryID(TEST_CAT),
                 new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentInstrumentType("PO"))
+                List.of(new PaymentInstrumentType("PO")),
+                new PaymentInstrumentType(TEST_TYPE_CODE)
         );
 
-        Mockito.when(paymentInstrumentService.createPaymentInstrument(TEST_NAME, TEST_DESC, TEST_CAT.toString()))
+        Mockito.when(paymentInstrumentService.createPaymentInstrument(TEST_NAME, TEST_DESC, TEST_CAT.toString(), TEST_TYPE_CODE))
                 .thenReturn(Mono.just(paymentInstrument));
 
         Mockito.when(categoryService.getCategory(TEST_CAT.toString())).thenReturn(Mono.just(
@@ -91,7 +94,8 @@ public class PaymentInstrumentsControllerTests {
                         .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
                         .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
                         .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())));
+                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())))
+                .paymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
 
         webClient
                 .post().uri("/payment-instruments")
@@ -106,8 +110,6 @@ public class PaymentInstrumentsControllerTests {
 
     @Test
     public void shouldGetAllInstruments(){
-        String TEST_NAME = "Test";
-        String TEST_DESC = "test";
         PaymentInstrumentRequestDto.StatusEnum TEST_STATUS = PaymentInstrumentRequestDto.StatusEnum.ENABLED;
         UUID TEST_CAT = UUID.randomUUID();
 
@@ -118,7 +120,8 @@ public class PaymentInstrumentsControllerTests {
                 new PaymentInstrumentStatus(PaymentInstrumentStatusEnum.ENABLED),
                 new PaymentInstrumentCategoryID(TEST_CAT),
                 new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentInstrumentType("PO"))
+                List.of(new PaymentInstrumentType("PO")),
+                new PaymentInstrumentType("test")
         );
 
         Mockito.when(paymentInstrumentService.retrivePaymentInstruments(TEST_CAT.toString())).thenReturn(
@@ -134,7 +137,8 @@ public class PaymentInstrumentsControllerTests {
                         .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
                         .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
                         .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())));
+                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())))
+                .paymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
 
         webClient
                 .get()
@@ -183,9 +187,6 @@ public class PaymentInstrumentsControllerTests {
 
     @Test
     public void shouldGetAnInstrument(){
-        String TEST_NAME = "Test";
-        String TEST_DESC = "test";
-        PaymentInstrumentRequestDto.StatusEnum TEST_STATUS = PaymentInstrumentRequestDto.StatusEnum.ENABLED;
         UUID TEST_CAT = UUID.randomUUID();
 
         PaymentInstrument paymentInstrument = new PaymentInstrument(
@@ -195,7 +196,8 @@ public class PaymentInstrumentsControllerTests {
                 new PaymentInstrumentStatus(PaymentInstrumentStatusEnum.ENABLED),
                 new PaymentInstrumentCategoryID(TEST_CAT),
                 new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentInstrumentType("PO"))
+                List.of(new PaymentInstrumentType("PO")),
+                new PaymentInstrumentType("test")
         );
 
         Mockito.when(paymentInstrumentService.retrivePaymentInstrumentById(
@@ -211,7 +213,8 @@ public class PaymentInstrumentsControllerTests {
                         .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
                         .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
                         .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())));
+                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())))
+                .paymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
 
         webClient
                 .get()
@@ -258,16 +261,7 @@ public class PaymentInstrumentsControllerTests {
 
     @Test
     void shouldPatchPaymentInstrument(){
-        String TEST_NAME = "Test";
-        String TEST_DESC = "test";
-        PaymentInstrumentRequestDto.StatusEnum TEST_STATUS = PaymentInstrumentRequestDto.StatusEnum.ENABLED;
         UUID TEST_CAT = UUID.randomUUID();
-
-        PaymentInstrumentRequestDto paymentInstrumentRequestDto = new PaymentInstrumentRequestDto()
-                .name(TEST_NAME)
-                .description(TEST_DESC)
-                .status(TEST_STATUS)
-                .categoryId(TEST_CAT.toString());
 
         PaymentInstrument paymentInstrument = new PaymentInstrument(
                 new PaymentInstrumentID(UUID.randomUUID()),
@@ -276,7 +270,8 @@ public class PaymentInstrumentsControllerTests {
                 new PaymentInstrumentStatus(PaymentInstrumentStatusEnum.ENABLED),
                 new PaymentInstrumentCategoryID(TEST_CAT),
                 new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentInstrumentType("PO"))
+                List.of(new PaymentInstrumentType("PO")),
+                new PaymentInstrumentType("test")
         );
 
         Mockito.when(paymentInstrumentService.patchPaymentInstrument(
@@ -292,7 +287,8 @@ public class PaymentInstrumentsControllerTests {
                         .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
                         .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
                         .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())));
+                                .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())))
+                .paymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
 
         PatchPaymentInstrumentRequestDto patchRequest = new PatchPaymentInstrumentRequestDto()
                 .status(PatchPaymentInstrumentRequestDto.StatusEnum.ENABLED);

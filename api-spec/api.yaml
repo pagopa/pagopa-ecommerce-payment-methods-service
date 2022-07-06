@@ -225,11 +225,14 @@ components:
           enum: ["ENABLED","DISABLED","INCOMING"]
         categoryId:
           type: string
+        paymentTypeCode:
+          type: string
       required:
         - name
         - description
         - status
         - categoryId
+        - required
     PatchPaymentInstrumentRequest:
       type: object
       description: Patch Payment Instrument Request
@@ -254,12 +257,15 @@ components:
           enum: ["ENABLED","DISABLED","INCOMING"]
         category:
           $ref: "#/components/schemas/Category"
+        paymentTypeCode:
+          type: string
       required:
         - id
         - name
         - description
         - status
         - category
+        - paymentTypeCode
     PSPsResponse:
       type: object
       description: Get available PSP list Response

@@ -28,7 +28,8 @@ public class PaymentInstrumentFactory {
                                                         PaymentInstrumentName paymentInstrumentName,
                                                         PaymentInstrumentDescription paymentInstrumentDescription,
                                                         PaymentInstrumentStatus paymentInstrumentEnabled,
-                                                        PaymentInstrumentCategoryID paymentInstrumentCategoryID) {
+                                                        PaymentInstrumentCategoryID paymentInstrumentCategoryID,
+                                                        PaymentInstrumentType paymentInstrumentTypeCode) {
 
         return paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()).hasElements()
                 .flatMap(hasPaymentInstrument -> paymentInstrumentCategoryRepository
@@ -43,7 +44,8 @@ public class PaymentInstrumentFactory {
                                                 new PaymentInstrumentCategoryName(category.getPaymentInstrumentCategoryName()),
                                                 category.getPaymentInstrumentCategoryTypes().stream().map(
                                                         PaymentInstrumentType::new
-                                                ).collect(Collectors.toList()));
+                                                ).collect(Collectors.toList()),
+                                                paymentInstrumentTypeCode);
                                     } else if (Boolean.TRUE.equals(hasPaymentInstrument)) {
                                         throw paymentInstrumentAlreadyInUse(paymentInstrumentName);
                                     } else {

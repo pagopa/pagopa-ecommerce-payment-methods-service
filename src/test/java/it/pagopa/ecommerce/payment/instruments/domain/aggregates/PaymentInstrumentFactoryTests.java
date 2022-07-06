@@ -47,6 +47,7 @@ public class PaymentInstrumentFactoryTests {
         PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(UUID.randomUUID());
+        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("testCode");
 
         Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()))
                 .thenReturn(Flux.empty());
@@ -65,7 +66,8 @@ public class PaymentInstrumentFactoryTests {
                 paymentInstrumentName,
                 paymentInstrumentDescription,
                 paymentInstrumentStatus,
-                paymentInstrumentCategoryID
+                paymentInstrumentCategoryID,
+                paymentInstrumentTypeCode
         ).block();
 
         assertNotNull(newPaymentInstrument);
@@ -79,6 +81,7 @@ public class PaymentInstrumentFactoryTests {
         PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(UUID.randomUUID());
+        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("testCode");
 
         Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()))
                 .thenReturn(Flux.empty());
@@ -92,7 +95,8 @@ public class PaymentInstrumentFactoryTests {
                         paymentInstrumentName,
                         paymentInstrumentDescription,
                         paymentInstrumentStatus,
-                        paymentInstrumentCategoryID
+                        paymentInstrumentCategoryID,
+                        paymentInstrumentTypeCode
                 ).block());
     }
 
@@ -104,6 +108,7 @@ public class PaymentInstrumentFactoryTests {
         PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(UUID.randomUUID());
+        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("testCode");
 
         Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()))
                 .thenReturn(Flux.just(
@@ -114,7 +119,8 @@ public class PaymentInstrumentFactoryTests {
                                 paymentInstrumentStatus.value().toString(),
                                 paymentInstrumentCategoryID.value().toString(),
                                 "test name",
-                                List.of("test")
+                                List.of("test"),
+                                paymentInstrumentTypeCode.value()
                                 )
                 ));
 
@@ -133,7 +139,8 @@ public class PaymentInstrumentFactoryTests {
                         paymentInstrumentName,
                         paymentInstrumentDescription,
                         paymentInstrumentStatus,
-                        paymentInstrumentCategoryID
+                        paymentInstrumentCategoryID,
+                        paymentInstrumentTypeCode
                 ).block());
     }
 
