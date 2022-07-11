@@ -18,7 +18,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -44,23 +43,33 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
         return paymentInstrumentRequestDto.flatMap(request -> paymentInstrumentService.createPaymentInstrument(
                 request.getName(),
                 request.getDescription(),
-                request.getCategory())).map(paymentInstrument -> {
+                request.getCategoryId(),
+                request.getPaymentTypeCode())).flatMap(paymentInstrument -> {
             PaymentInstrumentResponseDto response = new PaymentInstrumentResponseDto();
             response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
             response.setName(paymentInstrument.getPaymentInstrumentName().value());
             response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
             response.setStatus(
                     StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
-            response.setCategory(paymentInstrument.getPaymentInstrumentCategory().value().toString());
-            return ResponseEntity.ok(response);
+            response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
+
+            return categoryService.getCategory(paymentInstrument.getPaymentInstrumentCategoryID().value().toString()).map(
+                    category -> {
+                        response.setCategory(new CategoryDto()
+                                .id(category.getPaymentInstrumentCategoryID().value().toString())
+                                .name(category.getPaymentInstrumentCategoryName().value())
+                                .paymentTypeCodes(category.getPaymentInstrumentTypes()
+                                        .stream().map(PaymentInstrumentType::value).collect(Collectors.toList())));
+
+                        return ResponseEntity.ok(response);
+                    }
+            );
         });
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<PaymentInstrumentResponseDto>>> getAllPaymentInstruments(
-            ServerWebExchange exchange) {
-
-        return Mono.just(ResponseEntity.ok(paymentInstrumentService.retrivePaymentInstruments()
+    public Mono<ResponseEntity<Flux<PaymentInstrumentResponseDto>>> getAllPaymentInstruments(String categoryId, ServerWebExchange exchange) {
+        return Mono.just(ResponseEntity.ok(paymentInstrumentService.retrivePaymentInstruments(categoryId)
                 .map(paymentInstrument -> {
                     PaymentInstrumentResponseDto response = new PaymentInstrumentResponseDto();
                     response.setId(paymentInstrument.getPaymentInstrumentID().value().toString());
@@ -68,7 +77,15 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
                     response.setStatus(
                             StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
-                    response.setCategory(paymentInstrument.getPaymentInstrumentCategory().value().toString());
+                    response.setCategory(
+                            new CategoryDto()
+                                    .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
+                                    .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
+                                    .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
+                                            .stream().map(PaymentInstrumentType::value).collect(Collectors.toList()))
+                    );
+                    response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
+
                     return response;
                 })));
     }
@@ -94,7 +111,14 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                     response.setDescription(paymentInstrument.getPaymentInstrumentDescription().value());
                     response.setStatus(
                             StatusEnum.valueOf(paymentInstrument.getPaymentInstrumentStatus().value().toString()));
-                    response.setCategory(paymentInstrument.getPaymentInstrumentCategory().value().toString());
+                    response.setCategory(
+                            new CategoryDto()
+                                    .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
+                                    .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
+                                    .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
+                                            .stream().map(PaymentInstrumentType::value).collect(Collectors.toList()))
+                    );
+                    response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
                     return ResponseEntity.ok(response);
                 });
     }
@@ -123,6 +147,16 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                             response.setStatus(
                                     StatusEnum.valueOf(
                                             paymentInstrument.getPaymentInstrumentStatus().value().toString()));
+                            response.setCategory(
+                                    new CategoryDto()
+                                            .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
+                                            .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
+                                            .paymentTypeCodes(
+                                                    paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
+                                                            .map(PaymentInstrumentType::value)
+                                                            .collect(Collectors.toList()))
+                            );
+                            response.setPaymentTypeCode(paymentInstrument.getPaymentInstrumentTypeCode().value());
                             return ResponseEntity.ok(response);
                         }));
     }
@@ -134,7 +168,7 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
 
         return apiConfigClient.getPSPs(0, 50, null).expand(
                 servicesDto -> {
-                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get())) {
+                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get()+1)) {
                         return Mono.empty();
                     }
                     return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);
@@ -149,69 +183,4 @@ public class PaymentInstrumentsController implements PaymentInstrumentsApi {
                 }
         );
     }
-
-    @Override
-    public Mono<ResponseEntity<CategoriesResponseDto>> getCategories(ServerWebExchange exchange) {
-        return categoryService.getCategories().collectList().map(
-                categories -> {
-                    List<CategoryDto> categoryDtos = categories.stream().map(
-                            c -> new CategoryDto()
-                                    .id(c.getPaymentInstrumentCategoryID().value().toString())
-                                    .name(c.getPaymentInstrumentCategoryName().value())
-                                    .types(c.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value).collect(Collectors.toList()))
-                    ).collect(Collectors.toList());
-
-                    return ResponseEntity.ok(new CategoriesResponseDto().categories(categoryDtos));
-                }
-        );
-    }
-
-    @Override
-    public Mono<ResponseEntity<CategoryDto>> addCategory(Mono<CategoryRequestDto> categoryRequestDto, ServerWebExchange exchange) {
-        return categoryRequestDto.flatMap(
-                request -> categoryService.createCategory(
-                                request.getName(), request.getTypes())
-                        .map(category -> {
-                            CategoryDto categoryDto = new CategoryDto()
-                                    .id(category.getPaymentInstrumentCategoryID().value().toString())
-                                    .name(category.getPaymentInstrumentCategoryName().value())
-                                    .types(category.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
-                                            .collect(Collectors.toList()));
-
-                            return ResponseEntity.ok(categoryDto);
-                        })
-        );
-    }
-
-    @Override
-    public Mono<ResponseEntity<CategoryDto>> getCategory(String id, ServerWebExchange exchange) {
-        return categoryService.getCategory(id).map(
-                category -> {
-                    CategoryDto categoryDto = new CategoryDto()
-                            .id(category.getPaymentInstrumentCategoryID().value().toString())
-                            .name(category.getPaymentInstrumentCategoryName().value())
-                            .types(category.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
-                                    .collect(Collectors.toList()));
-
-                    return ResponseEntity.ok(categoryDto);
-                }
-        );
-    }
-
-    @Override
-    public Mono<ResponseEntity<CategoryDto>> patchCategory(String id, Mono<CategoryRequestDto> categoryRequestDto, ServerWebExchange exchange) {
-        return categoryRequestDto.flatMap(
-                req -> categoryService.updateCategory(id, req.getName(), req.getTypes())
-                        .map(c -> {
-                            CategoryDto categoryDto = new CategoryDto()
-                                    .id(c.getPaymentInstrumentCategoryID().value().toString())
-                                    .name(c.getPaymentInstrumentCategoryName().value())
-                                    .types(c.getPaymentInstrumentTypes().stream().map(PaymentInstrumentType::value)
-                                            .collect(Collectors.toList()));
-
-                            return ResponseEntity.ok(categoryDto);
-                        })
-        );
-    }
-
 }

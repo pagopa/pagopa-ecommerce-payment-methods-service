@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @Document(collection = "payment-instruments")
@@ -14,6 +16,9 @@ public class PaymentInstrumentDocument {
     private String paymentInstrumentID;
     private String paymentInstrumentName;
     private String paymentInstrumentDescription;
-    private String paymentInstrumentCategory;
     private String paymentInstrumentStatus;
+    private String paymentInstrumentCategoryID;
+    private String paymentInstrumentCategoryName;
+    private List<String> paymentInstrumentCategoryTypes;
+    private String paymentInstrumentTypeCode;
 }
