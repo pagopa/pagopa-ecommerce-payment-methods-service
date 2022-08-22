@@ -10,11 +10,11 @@ import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode
-public class PaymentInstrumentID implements Serializable {
+public class PaymentMethodID implements Serializable {
 
     private final UUID uuid;
 
-    public PaymentInstrumentID(@NonNull UUID uuid) {
+    public PaymentMethodID(@NonNull UUID uuid) {
 
         this.uuid = Objects.requireNonNull(uuid);
     }

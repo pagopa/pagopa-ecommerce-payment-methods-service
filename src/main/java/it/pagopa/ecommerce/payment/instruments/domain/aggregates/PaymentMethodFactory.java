@@ -14,8 +14,8 @@ import reactor.core.publisher.Mono;
 import java.util.stream.Collectors;
 
 @Component
-@AggregateFactory(PaymentInstrument.class)
-public class PaymentInstrumentFactory {
+@AggregateFactory(PaymentMethod.class)
+public class PaymentMethodFactory {
 
     @Autowired
     private PaymentInstrumentRepository paymentInstrumentRepository;
@@ -23,31 +23,31 @@ public class PaymentInstrumentFactory {
     @Autowired
     private PaymentInstrumentCategoryRepository paymentInstrumentCategoryRepository;
 
-    @AggregateFactory(PaymentInstrument.class)
-    public Mono<PaymentInstrument> newPaymentInstrument(PaymentInstrumentID paymentInstrumentID,
-                                                        PaymentInstrumentName paymentInstrumentName,
-                                                        PaymentInstrumentDescription paymentInstrumentDescription,
-                                                        PaymentInstrumentStatus paymentInstrumentEnabled,
-                                                        PaymentInstrumentCategoryID paymentInstrumentCategoryID,
-                                                        PaymentInstrumentType paymentInstrumentTypeCode) {
+    @AggregateFactory(PaymentMethod.class)
+    public Mono<PaymentMethod> newPaymentInstrument(PaymentMethodID paymentMethodID,
+                                                    PaymentMethodName paymentMethodName,
+                                                    PaymentMethodDescription paymentMethodDescription,
+                                                    PaymentMethodStatus paymentInstrumentEnabled,
+                                                    PaymentInstrumentCategoryID paymentInstrumentCategoryID,
+                                                    PaymentMethodType paymentMethodTypeCode) {
 
-        return paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()).hasElements()
+        return paymentInstrumentRepository.findByPaymentInstrumentName(paymentMethodName.value()).hasElements()
                 .flatMap(hasPaymentInstrument -> paymentInstrumentCategoryRepository
                         .findById(paymentInstrumentCategoryID.value().toString()).switchIfEmpty(
                                 Mono.error(categoryNotFoundException(paymentInstrumentCategoryID))
                         ).map(
                                 category -> {
                                     if (Boolean.FALSE.equals(hasPaymentInstrument) && Boolean.TRUE.equals(category != null)) {
-                                        return new PaymentInstrument(paymentInstrumentID, paymentInstrumentName,
-                                                paymentInstrumentDescription,
+                                        return new PaymentMethod(paymentMethodID, paymentMethodName,
+                                                paymentMethodDescription,
                                                 paymentInstrumentEnabled, paymentInstrumentCategoryID,
                                                 new PaymentInstrumentCategoryName(category.getPaymentInstrumentCategoryName()),
                                                 category.getPaymentInstrumentCategoryTypes().stream().map(
-                                                        PaymentInstrumentType::new
+                                                        PaymentMethodType::new
                                                 ).collect(Collectors.toList()),
-                                                paymentInstrumentTypeCode);
+                                                paymentMethodTypeCode);
                                     } else if (Boolean.TRUE.equals(hasPaymentInstrument)) {
-                                        throw paymentInstrumentAlreadyInUse(paymentInstrumentName);
+                                        throw paymentInstrumentAlreadyInUse(paymentMethodName);
                                     } else {
                                         throw categoryNotFoundException(paymentInstrumentCategoryID);
                                     }

@@ -1,8 +1,8 @@
 package it.pagopa.ecommerce.payment.instruments.service;
 
 import it.pagopa.ecommerce.payment.instruments.application.PaymentInstrumentService;
-import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentInstrument;
-import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentInstrumentFactory;
+import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentInstrumentCategoryRepository;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentInstrumentDocument;
@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
-class PaymentInstrumentServiceTests {
+class PaymentMethodServiceTests {
 
     @Mock
     private PaymentInstrumentRepository paymentInstrumentRepository;
 
     @Mock
-    private PaymentInstrumentFactory paymentInstrumentFactory;
+    private PaymentMethodFactory paymentInstrumentFactory;
 
     @InjectMocks
     private PaymentInstrumentService paymentInstrumentService;
@@ -51,38 +51,38 @@ class PaymentInstrumentServiceTests {
         String paymentInstrumentNameAsString = "paymentInstrumentName";
         String paymentInstrumentDescriptionAsString = "paymentInstrumentDescription";
 
-        PaymentInstrumentName paymentInstrumentName = new PaymentInstrumentName(paymentInstrumentNameAsString);
-        PaymentInstrumentDescription paymentInstrumentDescription = new PaymentInstrumentDescription(
+        PaymentMethodName paymentMethodName = new PaymentMethodName(paymentInstrumentNameAsString);
+        PaymentMethodDescription paymentMethodDescription = new PaymentMethodDescription(
                 paymentInstrumentDescriptionAsString);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(
                 UUID.fromString(UUID.randomUUID().toString()));
-        PaymentInstrumentID paymentInstrumentID = new PaymentInstrumentID(UUID.randomUUID());
-        PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
+        PaymentMethodID paymentMethodID = new PaymentMethodID(UUID.randomUUID());
+        PaymentMethodStatus paymentMethodStatus = new PaymentMethodStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
-        List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
-        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
+        List<PaymentMethodType> paymentMethodType = List.of(new PaymentMethodType("PO"));
+        PaymentMethodType paymentMethodTypeCode = new PaymentMethodType("test");
 
-        PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
-                paymentInstrumentName,
-                paymentInstrumentDescription,
-                paymentInstrumentStatus,
+        PaymentMethod paymentInstrument = new PaymentMethod(paymentMethodID,
+                paymentMethodName,
+                paymentMethodDescription,
+                paymentMethodStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType,
-                paymentInstrumentTypeCode);
+                paymentMethodType,
+                paymentMethodTypeCode);
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
-                paymentInstrument.getPaymentInstrumentID().value().toString(),
-                paymentInstrument.getPaymentInstrumentName().value(),
-                paymentInstrument.getPaymentInstrumentDescription().value(),
-                paymentInstrument.getPaymentInstrumentStatus().value().toString(),
+                paymentInstrument.getPaymentMethodID().value().toString(),
+                paymentInstrument.getPaymentMethodName().value(),
+                paymentInstrument.getPaymentMethodDescription().value(),
+                paymentInstrument.getPaymentMethodStatus().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
-                paymentInstrument.getPaymentInstrumentTypeCode().value());
+                        .map(PaymentMethodType::value).collect(Collectors.toList()),
+                paymentInstrument.getPaymentMethodTypeCode().value());
 
         Mockito.when(paymentInstrumentFactory.newPaymentInstrument(
                         any(), any(), any(), any(), any(), any())
@@ -93,11 +93,11 @@ class PaymentInstrumentServiceTests {
                         paymentInstrumentDocument))
                 .thenReturn(Mono.just(paymentInstrumentDocument));
 
-        PaymentInstrument paymentInstrumentCreated = paymentInstrumentService.createPaymentInstrument(
+        PaymentMethod paymentInstrumentCreated = paymentInstrumentService.createPaymentInstrument(
                 paymentInstrumentNameAsString,
                 paymentInstrumentDescriptionAsString,
                 paymentInstrumentCategoryID.value().toString(),
-                paymentInstrumentTypeCode.value()).block();
+                paymentMethodTypeCode.value()).block();
 
         assertEquals(paymentInstrumentCreated.getPaymentInstrumentCategoryID().value(),
                 paymentInstrumentCategoryID.value());
@@ -109,42 +109,42 @@ class PaymentInstrumentServiceTests {
         String paymentInstrumentNameAsString = "paymentInstrumentName";
         String paymentInstrumentDescriptionAsString = "paymentInstrumentDescription";
 
-        PaymentInstrumentName paymentInstrumentName = new PaymentInstrumentName(paymentInstrumentNameAsString);
-        PaymentInstrumentDescription paymentInstrumentDescription = new PaymentInstrumentDescription(
+        PaymentMethodName paymentMethodName = new PaymentMethodName(paymentInstrumentNameAsString);
+        PaymentMethodDescription paymentMethodDescription = new PaymentMethodDescription(
                 paymentInstrumentDescriptionAsString);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(
                 UUID.fromString(UUID.randomUUID().toString()));
-        PaymentInstrumentID paymentInstrumentID = new PaymentInstrumentID(UUID.randomUUID());
-        PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
+        PaymentMethodID paymentMethodID = new PaymentMethodID(UUID.randomUUID());
+        PaymentMethodStatus paymentMethodStatus = new PaymentMethodStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
-        List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
-        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
+        List<PaymentMethodType> paymentMethodType = List.of(new PaymentMethodType("PO"));
+        PaymentMethodType paymentMethodTypeCode = new PaymentMethodType("test");
 
-        PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
-                paymentInstrumentName,
-                paymentInstrumentDescription,
-                paymentInstrumentStatus,
+        PaymentMethod paymentInstrument = new PaymentMethod(paymentMethodID,
+                paymentMethodName,
+                paymentMethodDescription,
+                paymentMethodStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType,
-                paymentInstrumentTypeCode);
+                paymentMethodType,
+                paymentMethodTypeCode);
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
-                paymentInstrument.getPaymentInstrumentID().value().toString(),
-                paymentInstrument.getPaymentInstrumentName().value(),
-                paymentInstrument.getPaymentInstrumentDescription().value(),
-                paymentInstrument.getPaymentInstrumentStatus().value().toString(),
+                paymentInstrument.getPaymentMethodID().value().toString(),
+                paymentInstrument.getPaymentMethodName().value(),
+                paymentInstrument.getPaymentMethodDescription().value(),
+                paymentInstrument.getPaymentMethodStatus().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
-                paymentInstrumentTypeCode.value());
+                        .map(PaymentMethodType::value).collect(Collectors.toList()),
+                paymentMethodTypeCode.value());
         Mockito.when(paymentInstrumentRepository.findAll())
                 .thenReturn(Flux.just(paymentInstrumentDocument));
 
-        PaymentInstrument paymentInstrumentCreated = paymentInstrumentService.retrivePaymentInstruments(null).blockFirst();
+        PaymentMethod paymentInstrumentCreated = paymentInstrumentService.retrivePaymentInstruments(null).blockFirst();
 
         assertEquals(paymentInstrumentCreated.getPaymentInstrumentCategoryID().value(),
                 paymentInstrumentCategoryID.value());
@@ -155,40 +155,40 @@ class PaymentInstrumentServiceTests {
         String paymentInstrumentNameAsString = "paymentInstrumentName";
         String paymentInstrumentDescriptionAsString = "paymentInstrumentDescription";
 
-        PaymentInstrumentName paymentInstrumentName = new PaymentInstrumentName(paymentInstrumentNameAsString);
-        PaymentInstrumentDescription paymentInstrumentDescription = new PaymentInstrumentDescription(
+        PaymentMethodName paymentMethodName = new PaymentMethodName(paymentInstrumentNameAsString);
+        PaymentMethodDescription paymentMethodDescription = new PaymentMethodDescription(
                 paymentInstrumentDescriptionAsString);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(
                 UUID.fromString(UUID.randomUUID().toString()));
-        PaymentInstrumentID paymentInstrumentID = new PaymentInstrumentID(UUID.randomUUID());
-        PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
+        PaymentMethodID paymentMethodID = new PaymentMethodID(UUID.randomUUID());
+        PaymentMethodStatus paymentMethodStatus = new PaymentMethodStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
-        List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
-        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
+        List<PaymentMethodType> paymentMethodType = List.of(new PaymentMethodType("PO"));
+        PaymentMethodType paymentMethodTypeCode = new PaymentMethodType("test");
 
-        PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
-                paymentInstrumentName,
-                paymentInstrumentDescription,
-                paymentInstrumentStatus,
+        PaymentMethod paymentInstrument = new PaymentMethod(paymentMethodID,
+                paymentMethodName,
+                paymentMethodDescription,
+                paymentMethodStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType,
-                paymentInstrumentTypeCode
+                paymentMethodType,
+                paymentMethodTypeCode
                 );
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
-                paymentInstrument.getPaymentInstrumentID().value().toString(),
-                paymentInstrument.getPaymentInstrumentName().value(),
-                paymentInstrument.getPaymentInstrumentDescription().value(),
-                paymentInstrument.getPaymentInstrumentStatus().value().toString(),
+                paymentInstrument.getPaymentMethodID().value().toString(),
+                paymentInstrument.getPaymentMethodName().value(),
+                paymentInstrument.getPaymentMethodDescription().value(),
+                paymentInstrument.getPaymentMethodStatus().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
-                paymentInstrumentTypeCode.value());
-        Mockito.when(paymentInstrumentRepository.findById(paymentInstrumentID.value().toString()))
+                        .map(PaymentMethodType::value).collect(Collectors.toList()),
+                paymentMethodTypeCode.value());
+        Mockito.when(paymentInstrumentRepository.findById(paymentMethodID.value().toString()))
                 .thenReturn(Mono.just(paymentInstrumentDocument));
 
         paymentInstrumentDocument.setPaymentInstrumentStatus(PaymentInstrumentStatusEnum.DISABLED.getCode());
@@ -196,14 +196,14 @@ class PaymentInstrumentServiceTests {
                 paymentInstrumentDocument))
                 .thenReturn(Mono.just(paymentInstrumentDocument));
 
-        PaymentInstrument paymentInstrumentPatched = paymentInstrumentService
-                .patchPaymentInstrument(paymentInstrumentID.value().toString(), PaymentInstrumentStatusEnum.DISABLED)
+        PaymentMethod paymentInstrumentPatched = paymentInstrumentService
+                .patchPaymentInstrument(paymentMethodID.value().toString(), PaymentInstrumentStatusEnum.DISABLED)
                 .block();
 
         assertEquals(paymentInstrumentPatched.getPaymentInstrumentCategoryID().value(),
                 paymentInstrumentCategoryID.value());
 
-        assertEquals(paymentInstrumentPatched.getPaymentInstrumentStatus().value(),
+        assertEquals(paymentInstrumentPatched.getPaymentMethodStatus().value(),
                 PaymentInstrumentStatusEnum.DISABLED);
     }
 
@@ -212,44 +212,44 @@ class PaymentInstrumentServiceTests {
         String paymentInstrumentNameAsString = "paymentInstrumentName";
         String paymentInstrumentDescriptionAsString = "paymentInstrumentDescription";
 
-        PaymentInstrumentName paymentInstrumentName = new PaymentInstrumentName(paymentInstrumentNameAsString);
-        PaymentInstrumentDescription paymentInstrumentDescription = new PaymentInstrumentDescription(
+        PaymentMethodName paymentMethodName = new PaymentMethodName(paymentInstrumentNameAsString);
+        PaymentMethodDescription paymentMethodDescription = new PaymentMethodDescription(
                 paymentInstrumentDescriptionAsString);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(
                 UUID.fromString(UUID.randomUUID().toString()));
-        PaymentInstrumentID paymentInstrumentID = new PaymentInstrumentID(UUID.randomUUID());
-        PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
+        PaymentMethodID paymentMethodID = new PaymentMethodID(UUID.randomUUID());
+        PaymentMethodStatus paymentMethodStatus = new PaymentMethodStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryName paymentInstrumentCategoryName =
                 new PaymentInstrumentCategoryName("paymentInstrumentCategoryName");
-        List<PaymentInstrumentType> paymentInstrumentType = List.of(new PaymentInstrumentType("PO"));
-        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("test");
+        List<PaymentMethodType> paymentMethodType = List.of(new PaymentMethodType("PO"));
+        PaymentMethodType paymentMethodTypeCode = new PaymentMethodType("test");
 
-        PaymentInstrument paymentInstrument = new PaymentInstrument(paymentInstrumentID,
-                paymentInstrumentName,
-                paymentInstrumentDescription,
-                paymentInstrumentStatus,
+        PaymentMethod paymentInstrument = new PaymentMethod(paymentMethodID,
+                paymentMethodName,
+                paymentMethodDescription,
+                paymentMethodStatus,
                 paymentInstrumentCategoryID,
                 paymentInstrumentCategoryName,
-                paymentInstrumentType,
-                paymentInstrumentTypeCode);
+                paymentMethodType,
+                paymentMethodTypeCode);
 
         PaymentInstrumentDocument paymentInstrumentDocument = new PaymentInstrumentDocument(
-                paymentInstrument.getPaymentInstrumentID().value().toString(),
-                paymentInstrument.getPaymentInstrumentName().value(),
-                paymentInstrument.getPaymentInstrumentDescription().value(),
-                paymentInstrument.getPaymentInstrumentStatus().value().toString(),
+                paymentInstrument.getPaymentMethodID().value().toString(),
+                paymentInstrument.getPaymentMethodName().value(),
+                paymentInstrument.getPaymentMethodDescription().value(),
+                paymentInstrument.getPaymentMethodStatus().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryID().value().toString(),
                 paymentInstrument.getPaymentInstrumentCategoryName().value(),
                 paymentInstrument.getPaymentInstrumentCategoryTypes().stream()
-                        .map(PaymentInstrumentType::value).collect(Collectors.toList()),
-                paymentInstrumentTypeCode.value());
+                        .map(PaymentMethodType::value).collect(Collectors.toList()),
+                paymentMethodTypeCode.value());
 
-        Mockito.when(paymentInstrumentRepository.findById(paymentInstrumentID.value().toString()))
+        Mockito.when(paymentInstrumentRepository.findById(paymentMethodID.value().toString()))
                 .thenReturn(Mono.just(paymentInstrumentDocument));
 
-        PaymentInstrument paymentInstrumentCreated = paymentInstrumentService
-                .retrivePaymentInstrumentById(paymentInstrumentID.value().toString()).block();
+        PaymentMethod paymentInstrumentCreated = paymentInstrumentService
+                .retrivePaymentInstrumentById(paymentMethodID.value().toString()).block();
 
         assertEquals(paymentInstrumentCreated.getPaymentInstrumentCategoryID().value(),
                 paymentInstrumentCategoryID.value());

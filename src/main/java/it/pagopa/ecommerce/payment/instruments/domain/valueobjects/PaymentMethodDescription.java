@@ -9,11 +9,11 @@ import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode
-public class PaymentInstrumentDescription implements Serializable {
+public class PaymentMethodDescription implements Serializable {
 
     private final String description;
 
-    public PaymentInstrumentDescription(@NonNull String description) {
+    public PaymentMethodDescription(@NonNull String description) {
 
         this.description = Objects.requireNonNull(description);
     }

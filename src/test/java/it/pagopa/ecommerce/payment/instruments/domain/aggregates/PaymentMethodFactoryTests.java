@@ -22,13 +22,12 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.UUID;
 
-import static it.pagopa.ecommerce.payment.instruments.exception.CategoryNotFoundException.categoryNotFoundException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
-public class PaymentInstrumentFactoryTests {
+public class PaymentMethodFactoryTests {
 
     @Mock
     private PaymentInstrumentCategoryRepository paymentInstrumentCategoryRepository;
@@ -37,19 +36,19 @@ public class PaymentInstrumentFactoryTests {
     private PaymentInstrumentRepository paymentInstrumentRepository;
 
     @InjectMocks
-    private PaymentInstrumentFactory paymentInstrumentFactory;
+    private PaymentMethodFactory paymentInstrumentFactory;
 
     @Test
     void shouldCreateNewInstrument(){
-        PaymentInstrumentID paymentInstrumentID = new PaymentInstrumentID(UUID.randomUUID());
-        PaymentInstrumentName paymentInstrumentName = new PaymentInstrumentName("Test name");
-        PaymentInstrumentDescription paymentInstrumentDescription = new PaymentInstrumentDescription("Test desc");
-        PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
+        PaymentMethodID paymentMethodID = new PaymentMethodID(UUID.randomUUID());
+        PaymentMethodName paymentMethodName = new PaymentMethodName("Test name");
+        PaymentMethodDescription paymentMethodDescription = new PaymentMethodDescription("Test desc");
+        PaymentMethodStatus paymentMethodStatus = new PaymentMethodStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(UUID.randomUUID());
-        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("testCode");
+        PaymentMethodType paymentMethodTypeCode = new PaymentMethodType("testCode");
 
-        Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()))
+        Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentMethodName.value()))
                 .thenReturn(Flux.empty());
 
         Mockito.when(paymentInstrumentCategoryRepository.findById(paymentInstrumentCategoryID.value().toString()))
@@ -61,13 +60,13 @@ public class PaymentInstrumentFactoryTests {
                         )
                 ));
 
-        PaymentInstrument newPaymentInstrument = paymentInstrumentFactory.newPaymentInstrument(
-                paymentInstrumentID,
-                paymentInstrumentName,
-                paymentInstrumentDescription,
-                paymentInstrumentStatus,
+        PaymentMethod newPaymentInstrument = paymentInstrumentFactory.newPaymentInstrument(
+                paymentMethodID,
+                paymentMethodName,
+                paymentMethodDescription,
+                paymentMethodStatus,
                 paymentInstrumentCategoryID,
-                paymentInstrumentTypeCode
+                paymentMethodTypeCode
         ).block();
 
         assertNotNull(newPaymentInstrument);
@@ -75,15 +74,15 @@ public class PaymentInstrumentFactoryTests {
 
     @Test
     void shouldThrowInvalidCategory(){
-        PaymentInstrumentID paymentInstrumentID = new PaymentInstrumentID(UUID.randomUUID());
-        PaymentInstrumentName paymentInstrumentName = new PaymentInstrumentName("Test name");
-        PaymentInstrumentDescription paymentInstrumentDescription = new PaymentInstrumentDescription("Test desc");
-        PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
+        PaymentMethodID paymentMethodID = new PaymentMethodID(UUID.randomUUID());
+        PaymentMethodName paymentMethodName = new PaymentMethodName("Test name");
+        PaymentMethodDescription paymentMethodDescription = new PaymentMethodDescription("Test desc");
+        PaymentMethodStatus paymentMethodStatus = new PaymentMethodStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(UUID.randomUUID());
-        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("testCode");
+        PaymentMethodType paymentMethodTypeCode = new PaymentMethodType("testCode");
 
-        Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()))
+        Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentMethodName.value()))
                 .thenReturn(Flux.empty());
 
         Mockito.when(paymentInstrumentCategoryRepository.findById(paymentInstrumentCategoryID.value().toString()))
@@ -91,36 +90,36 @@ public class PaymentInstrumentFactoryTests {
 
         assertThrows(CategoryNotFoundException.class,
                 () -> paymentInstrumentFactory.newPaymentInstrument(
-                        paymentInstrumentID,
-                        paymentInstrumentName,
-                        paymentInstrumentDescription,
-                        paymentInstrumentStatus,
+                        paymentMethodID,
+                        paymentMethodName,
+                        paymentMethodDescription,
+                        paymentMethodStatus,
                         paymentInstrumentCategoryID,
-                        paymentInstrumentTypeCode
+                        paymentMethodTypeCode
                 ).block());
     }
 
     @Test
     void shouldThrowDuplicatedInstrumentException(){
-        PaymentInstrumentID paymentInstrumentID = new PaymentInstrumentID(UUID.randomUUID());
-        PaymentInstrumentName paymentInstrumentName = new PaymentInstrumentName("Test name");
-        PaymentInstrumentDescription paymentInstrumentDescription = new PaymentInstrumentDescription("Test desc");
-        PaymentInstrumentStatus paymentInstrumentStatus = new PaymentInstrumentStatus(
+        PaymentMethodID paymentMethodID = new PaymentMethodID(UUID.randomUUID());
+        PaymentMethodName paymentMethodName = new PaymentMethodName("Test name");
+        PaymentMethodDescription paymentMethodDescription = new PaymentMethodDescription("Test desc");
+        PaymentMethodStatus paymentMethodStatus = new PaymentMethodStatus(
                 PaymentInstrumentStatusEnum.ENABLED);
         PaymentInstrumentCategoryID paymentInstrumentCategoryID = new PaymentInstrumentCategoryID(UUID.randomUUID());
-        PaymentInstrumentType paymentInstrumentTypeCode = new PaymentInstrumentType("testCode");
+        PaymentMethodType paymentMethodTypeCode = new PaymentMethodType("testCode");
 
-        Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentInstrumentName.value()))
+        Mockito.when(paymentInstrumentRepository.findByPaymentInstrumentName(paymentMethodName.value()))
                 .thenReturn(Flux.just(
                         new PaymentInstrumentDocument(
-                                paymentInstrumentID.value().toString(),
-                                paymentInstrumentName.value(),
-                                paymentInstrumentDescription.value(),
-                                paymentInstrumentStatus.value().toString(),
+                                paymentMethodID.value().toString(),
+                                paymentMethodName.value(),
+                                paymentMethodDescription.value(),
+                                paymentMethodStatus.value().toString(),
                                 paymentInstrumentCategoryID.value().toString(),
                                 "test name",
                                 List.of("test"),
-                                paymentInstrumentTypeCode.value()
+                                paymentMethodTypeCode.value()
                                 )
                 ));
 
@@ -135,12 +134,12 @@ public class PaymentInstrumentFactoryTests {
 
         assertThrows(PaymentInstrumentAlreadyInUseException.class,
                 () -> paymentInstrumentFactory.newPaymentInstrument(
-                        paymentInstrumentID,
-                        paymentInstrumentName,
-                        paymentInstrumentDescription,
-                        paymentInstrumentStatus,
+                        paymentMethodID,
+                        paymentMethodName,
+                        paymentMethodDescription,
+                        paymentMethodStatus,
                         paymentInstrumentCategoryID,
-                        paymentInstrumentTypeCode
+                        paymentMethodTypeCode
                 ).block());
     }
 

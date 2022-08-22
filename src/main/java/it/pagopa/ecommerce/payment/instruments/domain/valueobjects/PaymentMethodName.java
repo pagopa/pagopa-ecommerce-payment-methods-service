@@ -1,22 +1,25 @@
 package it.pagopa.ecommerce.payment.instruments.domain.valueobjects;
 
-import lombok.EqualsAndHashCode;
-import org.springframework.lang.NonNull;
-
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.springframework.lang.NonNull;
+
+import lombok.EqualsAndHashCode;
+
 @ValueObjects
 @EqualsAndHashCode
-public class PaymentInstrumentCategoryName implements Serializable {
-    private String name;
+public class PaymentMethodName implements Serializable {
 
-    public PaymentInstrumentCategoryName(@NonNull String name) {
+    private final String name;
+
+    public PaymentMethodName(@NonNull String name) {
 
         this.name = Objects.requireNonNull(name);
     }
 
     public @NonNull String value() {
+
         return name;
     }
 }

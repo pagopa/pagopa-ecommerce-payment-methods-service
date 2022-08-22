@@ -5,11 +5,11 @@ import org.springframework.lang.NonNull;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class PspPaymentInstrumentType implements Serializable {
+public class PspPaymentMethodType implements Serializable {
 
     private final String paymentInstrumentType;
 
-    public PspPaymentInstrumentType(@NonNull String paymentInstrumentType) {
+    public PspPaymentMethodType(@NonNull String paymentInstrumentType) {
 
         this.paymentInstrumentType = Objects.requireNonNull(paymentInstrumentType);
     }

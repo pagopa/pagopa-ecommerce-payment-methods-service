@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode
-public class PspStatus extends PaymentInstrumentStatus{
+public class PspStatus extends PaymentMethodStatus {
     public PspStatus(PaymentInstrumentStatusEnum status) {
         super(status);
     }

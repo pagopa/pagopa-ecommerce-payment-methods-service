@@ -9,7 +9,7 @@ import lombok.Getter;
 @Aggregate
 public class Psp {
     private final PspCode pspCode;
-    private final PspPaymentInstrumentType pspPaymentInstrumentType;
+    private final PspPaymentMethodType pspPaymentMethodType;
     private PspStatus pspStatus;
     private final PspBusinessName pspBusinessName;
     private final PspBrokerName pspBrokerName;
@@ -30,7 +30,7 @@ public class Psp {
         return this.pspCode;
     }
 
-    public Psp(PspCode pspCode, PspPaymentInstrumentType pspPaymentInstrumentType, PspStatus pspStatus,
+    public Psp(PspCode pspCode, PspPaymentMethodType pspPaymentMethodType, PspStatus pspStatus,
                PspBusinessName pspBusinessName, PspBrokerName pspBrokerName,
                PspDescription pspDescription, PspLanguage pspLanguage,
                PspAmount pspMinAmount, PspAmount pspMaxAmount,
@@ -41,7 +41,7 @@ public class Psp {
         }
 
         this.pspCode = pspCode;
-        this.pspPaymentInstrumentType = pspPaymentInstrumentType;
+        this.pspPaymentMethodType = pspPaymentMethodType;
         this.pspStatus = pspStatus;
         this.pspBusinessName = pspBusinessName;
         this.pspBrokerName = pspBrokerName;

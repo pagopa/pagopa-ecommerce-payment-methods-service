@@ -10,11 +10,11 @@ import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode
-public class PaymentInstrumentStatus implements Serializable {
+public class PaymentMethodStatus implements Serializable {
 
     private final PaymentInstrumentStatusEnum status;
 
-    public PaymentInstrumentStatus(@NonNull PaymentInstrumentStatusEnum status) {
+    public PaymentMethodStatus(@NonNull PaymentInstrumentStatusEnum status) {
 
         this.status = Objects.requireNonNull(status);
     }
