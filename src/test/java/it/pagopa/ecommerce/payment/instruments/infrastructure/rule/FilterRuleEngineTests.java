@@ -4,7 +4,7 @@ import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspRepository;
-import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,7 +40,7 @@ class FilterRuleEngineTests {
                     "CHANNEL_0",
                     "IT"
             ),
-            new PspStatus(PaymentInstrumentStatusEnum.ENABLED).value().getCode(),
+            new PspStatus(PaymentMethodStatusEnum.ENABLED).value().getCode(),
             "Test",
             "Test broker",
             "Test description",

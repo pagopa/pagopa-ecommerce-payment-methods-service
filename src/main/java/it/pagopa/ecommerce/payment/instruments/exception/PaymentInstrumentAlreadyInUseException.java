@@ -1,16 +1,16 @@
 package it.pagopa.ecommerce.payment.instruments.exception;
 
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentInstrumentName;
+import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PaymentMethodName;
 
 public class PaymentInstrumentAlreadyInUseException extends RuntimeException {
 
-    private PaymentInstrumentAlreadyInUseException(PaymentInstrumentName paymentInstrumentName) {
-        super("PaymentInstrumentName '" + paymentInstrumentName.value() + "' is already in use");
+    private PaymentInstrumentAlreadyInUseException(PaymentMethodName paymentMethodName) {
+        super("PaymentInstrumentName '" + paymentMethodName.value() + "' is already in use");
     }
 
     public static PaymentInstrumentAlreadyInUseException paymentInstrumentAlreadyInUse(
-            PaymentInstrumentName paymentInstrumentName) {
-        return new PaymentInstrumentAlreadyInUseException(paymentInstrumentName);
+            PaymentMethodName paymentMethodName) {
+        return new PaymentInstrumentAlreadyInUseException(paymentMethodName);
     }
 
 }
