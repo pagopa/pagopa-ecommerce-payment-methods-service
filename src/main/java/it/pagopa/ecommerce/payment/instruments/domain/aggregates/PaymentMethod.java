@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.instruments.domain.aggregates;
 
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -37,8 +38,8 @@ public class PaymentMethod {
         this.paymentMethodRanges = paymentMethodRanges;
     }
 
-    public void enablePaymentInstrument(PaymentMethodStatus paymentMethodStatus) {
+    public void setPaymentMethodStatus(PaymentMethodStatusEnum paymentMethodStatus) {
 
-        this.paymentMethodStatus = paymentMethodStatus;
+        this.paymentMethodStatus = new PaymentMethodStatus(paymentMethodStatus);
     }
 }

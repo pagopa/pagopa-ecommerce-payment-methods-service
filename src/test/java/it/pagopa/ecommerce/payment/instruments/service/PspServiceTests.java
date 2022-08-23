@@ -2,8 +2,6 @@ package it.pagopa.ecommerce.payment.instruments.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.validation.constraints.Null;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +16,7 @@ import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.FilterRuleEngine;
-import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -86,7 +84,7 @@ class PspServiceTests {
                         paymentTypeCode,
                         "CHANNEL_0",
                         language),
-                new PspStatus(PaymentInstrumentStatusEnum.ENABLED).value().getCode(),
+                new PspStatus(PaymentMethodStatusEnum.ENABLED).value().getCode(),
                 "Test",
                 "Test broker",
                 "Test description",
@@ -100,7 +98,7 @@ class PspServiceTests {
                         paymentTypeCode,
                         "CHANNEL_0_2",
                         language),
-                new PspStatus(PaymentInstrumentStatusEnum.ENABLED).value().getCode(),
+                new PspStatus(PaymentMethodStatusEnum.ENABLED).value().getCode(),
                 "Test_2",
                 "Test broker",
                 "Test description",

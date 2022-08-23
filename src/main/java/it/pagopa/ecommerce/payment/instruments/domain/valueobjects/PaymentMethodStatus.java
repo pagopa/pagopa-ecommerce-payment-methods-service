@@ -5,21 +5,21 @@ import java.util.Objects;
 
 import org.springframework.lang.NonNull;
 
-import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode
 public class PaymentMethodStatus implements Serializable {
 
-    private final PaymentInstrumentStatusEnum status;
+    private final PaymentMethodStatusEnum status;
 
-    public PaymentMethodStatus(@NonNull PaymentInstrumentStatusEnum status) {
+    public PaymentMethodStatus(@NonNull PaymentMethodStatusEnum status) {
 
         this.status = Objects.requireNonNull(status);
     }
 
-    public @NonNull PaymentInstrumentStatusEnum value() {
+    public @NonNull PaymentMethodStatusEnum value() {
 
         return status;
     }
