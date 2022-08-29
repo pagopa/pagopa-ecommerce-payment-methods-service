@@ -19,10 +19,17 @@ paths:
                 $ref: '#/components/schemas/PaymentMethodResponse'
     get:
       operationId: getAllPaymentMethods
-      summary: Retrive all Payment Methods (by filter)
+      summary: Retrieve all Payment Methods (by filter)
+      parameters:
+        - name: amount
+          in: query
+          description: Payment Amount
+          required: false
+          schema:
+            type: number
       responses:
         '200':
-          description: Payment instrument successfully retrived
+          description: Payment instrument successfully retrieved
           content:
             application/json:
               schema:
@@ -104,9 +111,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PSPsResponse'
 
-
-
-
   /payment-methods/{id}/psps:
     get:
       operationId: getPaymentMethodsPSPs
@@ -170,9 +174,11 @@ components:
       properties:
         min:
           type: integer
+          format: int64
           minimum: 0
         max:
           type: integer
+          format: int64
           minimum: 0
     PatchPaymentMethodRequest:
       type: object

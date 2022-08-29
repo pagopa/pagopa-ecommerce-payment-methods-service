@@ -8,12 +8,12 @@ import reactor.core.publisher.Flux;
 @Component
 public class AmountFilterRule implements IFilterRule {
     @Override
-    public boolean shouldExecute(String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
-        return !checkQueryParam(paymentInstrumentId) && !checkQueryParam(language) && !checkQueryParam(paymentTypeCode) && amount != null;
+    public boolean shouldExecute(Integer amount, String language, String paymentTypeCode) {
+        return !checkQueryParam(language) && !checkQueryParam(paymentTypeCode) && amount != null;
     }
 
     @Override
-    public Flux<PspDocument> execute(PspRepository pspRepository, String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDocument> execute(PspRepository pspRepository, Integer amount, String language, String paymentTypeCode) {
         return pspRepository.findPspMatchAmount(amount);
     }
 }

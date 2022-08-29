@@ -4,6 +4,7 @@ import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.Psp;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PspFactory;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspRepository;
@@ -12,12 +13,18 @@ import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
 import it.pagopa.ecommerce.payment.instruments.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.instruments.utils.LanguageEnum;
 import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @ApplicationService
@@ -32,6 +39,9 @@ public class PspService {
 
     @Autowired
     private ApiConfigClient apiConfigClient;
+
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
 
     @Autowired
     private FilterRuleEngine filterRuleEngine;

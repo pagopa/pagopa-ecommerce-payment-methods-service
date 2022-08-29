@@ -29,7 +29,7 @@ public class ScheduledPSPUpdate {
 
         apiConfigClient.getPSPs(0, 50, null).expand(
                 servicesDto -> {
-                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get())) {
+                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get()+1)) {
                         return Mono.empty();
                     }
                     return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);

@@ -8,10 +8,10 @@ import java.io.Serializable;
 
 public class PaymentMethodRange implements Serializable {
 
-    private final int min;
-    private final int max;
+    private final long min;
+    private final long max;
 
-    public PaymentMethodRange(@NonNull @PositiveOrZero int min, @NonNull @PositiveOrZero int max) {
+    public PaymentMethodRange(@NonNull @PositiveOrZero Long min, @NonNull @PositiveOrZero Long max) {
         if (min > max){
             throw new ValidationException("Invalid range");
         }
@@ -20,10 +20,10 @@ public class PaymentMethodRange implements Serializable {
         this.max = max;
     }
 
-    public @NonNull int min() {
+    public @NonNull long min() {
         return min;
     }
-    public @NonNull int max() {
+    public @NonNull long max() {
         return max;
     }
 }

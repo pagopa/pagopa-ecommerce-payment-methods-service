@@ -1,6 +1,6 @@
 package it.pagopa.ecommerce.payment.instruments.domain.aggregates;
 
-import static it.pagopa.ecommerce.payment.instruments.exception.PaymentInstrumentAlreadyInUseException.paymentInstrumentAlreadyInUse;
+import static it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodAlreadyInUseException.paymentInstrumentAlreadyInUse;
 
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,8 @@ public class PaymentMethodFactory {
                                                 List<PaymentMethodRange> paymentMethodRanges,
                                                 PaymentMethodType paymentMethodTypeCode) {
 
-        return paymentMethodRepository.findByPaymentMethodName(paymentMethodName.value()).hasElements()
+        return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
+                    paymentMethodName.value(), paymentMethodTypeCode.value()).hasElement()
                 .map(hasPaymentInstrument -> {
                             if (Boolean.TRUE.equals(hasPaymentInstrument)) {
                                 throw paymentInstrumentAlreadyInUse(paymentMethodName);

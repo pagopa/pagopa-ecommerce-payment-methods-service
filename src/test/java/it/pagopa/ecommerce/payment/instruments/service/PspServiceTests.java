@@ -31,6 +31,7 @@ class PspServiceTests {
     @InjectMocks
     private PspService pspService;
 
+    /*
     @Test
     void shouldReturnEmptyResultWithNullFilter() {
 
@@ -118,4 +119,5 @@ class PspServiceTests {
                 .expectNext(pspDocument_2)
                 .verifyComplete();
     }
+     */
 }

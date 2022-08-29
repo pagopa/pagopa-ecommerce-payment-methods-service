@@ -12,9 +12,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @ExtendWith(SpringExtension.class)
-@WebFluxTest(PaymentInstrumentsController.class)
+@WebFluxTest(PaymentMethodsController.class)
 @TestPropertySource(locations = "classpath:application.test.properties")
-public class PaymentInstrumentsControllerTests {
+public class PaymentMethodsControllerTests {
     @Autowired
     private WebTestClient webClient;
 

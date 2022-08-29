@@ -4,22 +4,34 @@ import it.pagopa.ecommerce.payment.instruments.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.instruments.application.PspService;
 import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodAlreadyInUseException;
+import it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodStoreException;
+import it.pagopa.ecommerce.payment.instruments.exception.PspAlreadyInUseException;
 import it.pagopa.ecommerce.payment.instruments.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.instruments.server.model.*;
 import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ProblemJsonDto;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
-public class PaymentInstrumentsController implements PaymentMethodsApi {
+@Slf4j
+public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Autowired
     private PaymentMethodService paymentMethodService;
@@ -30,13 +42,34 @@ public class PaymentInstrumentsController implements PaymentMethodsApi {
     @Autowired
     private ApiConfigClient apiConfigClient;
 
+    @ExceptionHandler({
+            PaymentMethodAlreadyInUseException.class,
+            PaymentMethodStoreException.class,
+            PspAlreadyInUseException.class
+    })
+    private ResponseEntity<ProblemJsonDto> genericBadGatewayHandler(RuntimeException exception) {
+        if(exception instanceof PaymentMethodAlreadyInUseException){
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"), HttpStatus.BAD_REQUEST);
+        } else if(exception instanceof PaymentMethodStoreException){
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(502).title("Bad gateway"), HttpStatus.BAD_GATEWAY);
+        } else if (exception instanceof PspAlreadyInUseException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(404).title("Bad request").detail("PSP already in use"), HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(500).title("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @Override
-    public Mono<ResponseEntity<Flux<PaymentMethodResponseDto>>> getAllPaymentMethods(ServerWebExchange exchange) {
-        // TODO: add amount filter
-        return Mono.just(ResponseEntity.ok(paymentMethodService.retrievePaymentMethods(null)
+    public Mono<ResponseEntity<Flux<PaymentMethodResponseDto>>> getAllPaymentMethods(BigDecimal amount, ServerWebExchange exchange) {
+        return Mono.just(ResponseEntity.ok(paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
                 .map(paymentMethod -> {
                     PaymentMethodResponseDto responseDto = new PaymentMethodResponseDto();
                     responseDto.setId(paymentMethod.getPaymentMethodID().value().toString());
+                    responseDto.setName(paymentMethod.getPaymentMethodName().value());
                     responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
                     responseDto.setStatus(PaymentMethodResponseDto.StatusEnum.valueOf(paymentMethod.getPaymentMethodStatus().value().toString()));
                     responseDto.setRanges(paymentMethod.getPaymentMethodRanges().stream().map(
@@ -53,6 +86,7 @@ public class PaymentInstrumentsController implements PaymentMethodsApi {
                 })
         ));
     }
+
 
     @Override
     public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(Integer amount, String lang, String paymentTypeCode, ServerWebExchange exchange) {
@@ -74,7 +108,13 @@ public class PaymentInstrumentsController implements PaymentMethodsApi {
 
     @Override
     public Mono<ResponseEntity<PSPsResponseDto>> getPaymentMethodsPSPs(String id, Integer amount, String lang, ServerWebExchange exchange) {
-        return null;
+        return paymentMethodService.retrievePaymentMethodById(id)
+                .flatMap(pm -> pspService.retrievePsps(amount, lang, pm.getPaymentMethodTypeCode().value()).collectList().flatMap(pspDtos -> {
+            PSPsResponseDto responseDto = new PSPsResponseDto();
+            responseDto.setPsp(pspDtos);
+
+            return Mono.just(ResponseEntity.ok(responseDto));
+        }));
     }
 
     @Override
@@ -99,7 +139,30 @@ public class PaymentInstrumentsController implements PaymentMethodsApi {
 
     @Override
     public Mono<ResponseEntity<Void>> scheduleUpdatePSPs(ServerWebExchange exchange) {
-        return null;
+        AtomicReference<Integer> currentPage = new AtomicReference<>(0);
+
+        return apiConfigClient.getPSPs(0, 50, null).expand(
+                servicesDto -> {
+                    if (Integer.valueOf(servicesDto.getPageInfo().getTotalPages()).equals(currentPage.get()+1)) {
+                        return Mono.empty();
+                    }
+                    return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);
+                }
+        ).collectList().map(
+                services -> {
+                    ServicesDto servicesDto = new ServicesDto();
+
+                    for (ServicesDto service : services) {
+                        servicesDto.setServices(Stream.concat(servicesDto.getServices().stream(),
+                                service.getServices().stream()).collect(Collectors.toList()));
+                    }
+
+                    pspService.updatePSPs(servicesDto);
+                    paymentMethodService.updatePaymentMethodRanges(servicesDto);
+
+                    return ResponseEntity.accepted().build();
+                }
+        );
     }
 
     private ResponseEntity<PaymentMethodResponseDto> paymentMethodToResponse(PaymentMethod paymentMethod){
