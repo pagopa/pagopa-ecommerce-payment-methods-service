@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 public interface PaymentMethodRepository extends ReactiveCrudRepository<PaymentMethodDocument, String> {
     Flux<PaymentMethodDocument> findByPaymentMethodName(String paymentInstrumentName);
-    Mono<PaymentMethodDocument> findByPaymentMethodID(String paymentMethodID);
+
     Mono<PaymentMethodDocument> findByPaymentMethodNameOrPaymentMethodTypeCode(String paymentMethodID,
                                                                                String paymentMethodTypeCode);
     Mono<PaymentMethodDocument> findByPaymentMethodTypeCode(String paymentMethodTypeCode);

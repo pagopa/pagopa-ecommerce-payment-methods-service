@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.instruments.utils;
 
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PaymentMethodResponseDto;
 import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
@@ -9,9 +10,11 @@ import it.pagopa.ecommerce.payment.instruments.server.model.RangeDto;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.PageInfoDto;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
+import org.springframework.data.util.Pair;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class TestUtil {
 
@@ -97,5 +100,16 @@ public class TestUtil {
                                 .page(0)
                                 .itemsFound(1)
                 );
+    }
+
+    public static PaymentMethodDocument getTestPaymentDoc(PaymentMethod paymentMethod){
+        return new PaymentMethodDocument(
+                paymentMethod.getPaymentMethodID().value().toString(),
+                paymentMethod.getPaymentMethodName().value(),
+                paymentMethod.getPaymentMethodDescription().value(),
+                paymentMethod.getPaymentMethodStatus().value().toString(),
+                paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
+                        .collect(Collectors.toList()),
+                paymentMethod.getPaymentMethodTypeCode().value());
     }
 }

@@ -114,7 +114,7 @@ public class PaymentMethodService {
         log.debug("[Payment Method Aggregate] Retrieve Aggregate");
 
         return paymentMethodRepository
-                .findByPaymentMethodID(id)
+                .findById(id)
                 .map(this::docToAggregate);
     }
 
