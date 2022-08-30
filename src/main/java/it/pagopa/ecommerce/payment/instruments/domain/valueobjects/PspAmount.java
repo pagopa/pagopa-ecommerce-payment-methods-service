@@ -1,12 +1,10 @@
 package it.pagopa.ecommerce.payment.instruments.domain.valueobjects;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Objects;
-
+import lombok.EqualsAndHashCode;
 import org.springframework.lang.NonNull;
 
-import lombok.EqualsAndHashCode;
+import java.io.Serializable;
+import java.util.Objects;
 
 @ValueObjects
 @EqualsAndHashCode

@@ -124,7 +124,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         return paymentMethodRequestDto.flatMap(request -> paymentMethodService.createPaymentMethod(
                 request.getName(),
                 request.getDescription(),
-                request.getRanges().stream().map(r -> Pair.of(r.getMin(), r.getMax())).collect(Collectors.toList()),
+                request.getRanges().stream().map(r -> Pair.of(r.getMin(), r.getMax())).toList(),
                 request.getPaymentTypeCode())
                 .map(this::paymentMethodToResponse)
         );
@@ -155,7 +155,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
                     for (ServicesDto service : services) {
                         servicesDto.setServices(Stream.concat(servicesDto.getServices().stream(),
-                                service.getServices().stream()).collect(Collectors.toList()));
+                                service.getServices().stream()).toList());
                     }
 
                     pspService.updatePSPs(servicesDto);

@@ -100,8 +100,7 @@ class PaymentMethodServiceTests {
         assertEquals(paymentInstrumentPatched.getPaymentMethodID(),
                 paymentMethod.getPaymentMethodID());
 
-        assertEquals(paymentInstrumentPatched.getPaymentMethodStatus().value(),
-                PaymentMethodStatusEnum.DISABLED);
+        assertEquals(PaymentMethodStatusEnum.DISABLED, paymentInstrumentPatched.getPaymentMethodStatus().value());
     }
 
     @Test

@@ -28,7 +28,7 @@ public class PspFactory {
                         pspChannelCode.value()
                 ).hasElements()
                 .map(hasPsp -> {
-                    if (!hasPsp) {
+                    if (Boolean.FALSE.equals(hasPsp)) {
                         return new Psp(pspCode, pspPaymentMethodType, pspStatus, pspBusinessName,
                                 pspBrokerName, pspDescription, pspLanguage, pspMinAmount, pspMaxAmount,
                                 pspChannelCode, pspFixedCost);

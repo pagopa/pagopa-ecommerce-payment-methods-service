@@ -33,7 +33,7 @@ import java.util.UUID;
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
 @TestPropertySource(locations = "classpath:application.test.properties")
-public class PaymentMethodsControllerTests {
+class PaymentMethodsControllerTests {
     @Autowired
     private WebTestClient webClient;
 
@@ -48,7 +48,7 @@ public class PaymentMethodsControllerTests {
 
 
     @Test
-    public void shouldCreateNewInstrument(){
+    void shouldCreateNewInstrument(){
         String TEST_NAME = "Test";
         String TEST_DESC = "test";
         PaymentMethodRequestDto.StatusEnum TEST_STATUS = PaymentMethodRequestDto.StatusEnum.ENABLED;
@@ -77,7 +77,7 @@ public class PaymentMethodsControllerTests {
 
 
     @Test
-    public void shouldGetAllInstruments(){
+    void shouldGetAllInstruments(){
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
@@ -102,7 +102,7 @@ public class PaymentMethodsControllerTests {
     }
 
     @Test
-    public void shouldGetPSPs(){
+    void shouldGetPSPs(){
 
         PspDto pspDto = TestUtil.getTestPsp();
 
@@ -123,7 +123,7 @@ public class PaymentMethodsControllerTests {
     }
 
     @Test
-    public void shouldGetAnInstrument(){
+    void shouldGetAnInstrument(){
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         Mockito.when(paymentMethodService.retrievePaymentMethodById(
@@ -144,7 +144,7 @@ public class PaymentMethodsControllerTests {
     }
 
     @Test
-    public void shouldGetPaymentInstrumentPSPs(){
+    void shouldGetPaymentInstrumentPSPs(){
         String TEST_INSTRUMENT_ID = UUID.randomUUID().toString();
         PspDto pspDto = TestUtil.getTestPsp();
 
@@ -196,7 +196,7 @@ public class PaymentMethodsControllerTests {
     }
 
     @Test
-    public void shouldScheduleUpdate(){
+    void shouldScheduleUpdate(){
 
         Mockito.when(apiConfigClient.getPSPs(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(
                 Mono.just(TestUtil.getTestServices())

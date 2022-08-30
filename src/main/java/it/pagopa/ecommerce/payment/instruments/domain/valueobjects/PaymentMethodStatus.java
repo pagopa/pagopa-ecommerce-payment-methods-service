@@ -1,12 +1,11 @@
 package it.pagopa.ecommerce.payment.instruments.domain.valueobjects;
 
-import java.io.Serializable;
-import java.util.Objects;
-
-import org.springframework.lang.NonNull;
-
 import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import lombok.EqualsAndHashCode;
+import org.springframework.lang.NonNull;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 @ValueObjects
 @EqualsAndHashCode

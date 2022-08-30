@@ -3,7 +3,6 @@ package it.pagopa.ecommerce.payment.instruments.application;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
-import it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodStoreException;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.instruments.utils.ApplicationService;
@@ -12,7 +11,6 @@ import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -45,7 +43,7 @@ public class PaymentMethodService {
                 new PaymentMethodName(paymentMethodName),
                 new PaymentMethodDescription(paymentMethodDescription),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
-                ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).collect(Collectors.toList()),
+                ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode)
         );
 
@@ -88,8 +86,6 @@ public class PaymentMethodService {
 
         return paymentMethodRepository
                 .findById(id)
-                // TODO: add error on invalid ID
-                // .switchIfEmpty()
                 .map(this::docToAggregate)
                 .map(p -> {
                     p.setPaymentMethodStatus(status);

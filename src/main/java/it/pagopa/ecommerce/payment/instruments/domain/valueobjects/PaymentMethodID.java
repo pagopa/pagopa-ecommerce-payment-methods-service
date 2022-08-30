@@ -1,12 +1,11 @@
 package it.pagopa.ecommerce.payment.instruments.domain.valueobjects;
 
+import lombok.EqualsAndHashCode;
+import org.springframework.lang.NonNull;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
-
-import org.springframework.lang.NonNull;
-
-import lombok.EqualsAndHashCode;
 
 @ValueObjects
 @EqualsAndHashCode

@@ -1,15 +1,14 @@
 package it.pagopa.ecommerce.payment.instruments.domain.aggregates;
 
-import static it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodAlreadyInUseException.paymentInstrumentAlreadyInUse;
-
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodRepository;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+
+import static it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodAlreadyInUseException.paymentInstrumentAlreadyInUse;
 
 @Component
 @AggregateFactory(PaymentMethod.class)
