@@ -5,7 +5,6 @@ import it.pagopa.ecommerce.payment.instruments.application.PspService;
 import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.instruments.exception.PaymentMethodStoreException;
 import it.pagopa.ecommerce.payment.instruments.exception.PspAlreadyInUseException;
 import it.pagopa.ecommerce.payment.instruments.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.instruments.server.model.*;
@@ -44,16 +43,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @ExceptionHandler({
             PaymentMethodAlreadyInUseException.class,
-            PaymentMethodStoreException.class,
             PspAlreadyInUseException.class
     })
     private ResponseEntity<ProblemJsonDto> genericBadGatewayHandler(RuntimeException exception) {
         if(exception instanceof PaymentMethodAlreadyInUseException){
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"), HttpStatus.BAD_REQUEST);
-        } else if(exception instanceof PaymentMethodStoreException){
-            return new ResponseEntity<>(
-                    new ProblemJsonDto().status(502).title("Bad gateway"), HttpStatus.BAD_GATEWAY);
         } else if (exception instanceof PspAlreadyInUseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("PSP already in use"), HttpStatus.BAD_REQUEST);
