@@ -1,8 +1,12 @@
 package it.pagopa.ecommerce.payment.instruments.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import it.pagopa.ecommerce.payment.instruments.domain.aggregates.Psp;
+import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
+import it.pagopa.ecommerce.payment.instruments.utils.LanguageEnum;
 import it.pagopa.ecommerce.payment.instruments.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import it.pagopa.ecommerce.payment.instruments.application.PspService;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.FilterRuleEngine;
@@ -77,6 +80,24 @@ class PspServiceTests {
 
         // Asserts
         assertEquals(services, Flux.empty());
+    }
+
+    @Test
+    void shouldThrowInvalidRangeException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Psp(
+                        new PspCode("PSP_TEST_CODE"),
+                        new PspPaymentMethodType("PO"),
+                        new PspStatus(PaymentMethodStatusEnum.ENABLED),
+                        new PspBusinessName(""),
+                        new PspBrokerName(""),
+                        new PspDescription(""),
+                        new PspLanguage(LanguageEnum.IT),
+                        new PspAmount(10.0),
+                        new PspAmount(1.0),
+                        new PspChannelCode("AB0"),
+                        new PspFee(0.0)));
+
     }
 
     @Test

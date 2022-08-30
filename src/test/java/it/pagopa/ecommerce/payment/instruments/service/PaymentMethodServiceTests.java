@@ -19,6 +19,7 @@ import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,6 +78,36 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentInstrumentCreated = paymentMethodService.retrievePaymentMethods(null).blockFirst();
 
         assertEquals(paymentInstrumentCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
+    }
+
+    @Test
+    void shouldNotRetrievePaymentInstrumentsWithAmount() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+
+        Mockito.when(paymentMethodRepository.findAll())
+                .thenReturn(Flux.just(paymentMethodDocument));
+
+        List<PaymentMethod> paymentInstrumentCreated = paymentMethodService.retrievePaymentMethods(101)
+                .collectList().block();
+
+        assertEquals(0, paymentInstrumentCreated.size());
+    }
+
+    @Test
+    void shouldRetrievePaymentInstrumentsWithAmount() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+
+        Mockito.when(paymentMethodRepository.findAll())
+                .thenReturn(Flux.just(paymentMethodDocument));
+
+        List<PaymentMethod> paymentInstrumentCreated = paymentMethodService.retrievePaymentMethods(50)
+                .collectList().block();
+
+        assertEquals(1, paymentInstrumentCreated.size());
     }
 
     @Test
