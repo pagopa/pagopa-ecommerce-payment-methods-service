@@ -118,10 +118,7 @@ public class PaymentMethodService {
         Map<String, Set<Pair<Long, Long>>> rangeMap = servicesDto.getServices().stream()
                 .collect(Collectors.groupingBy(
                                 ServiceDto::getPaymentTypeCode,
-                                Collectors.mapping(it ->
-                                                Pair.of(
-                                                        it.getMinimumAmount() != null ? Double.valueOf(it.getMinimumAmount() * 100.0).longValue(): Long.MIN_VALUE, // Convert euros to cents
-                                                        it.getMaximumAmount() != null ? Double.valueOf(it.getMaximumAmount() * 100.0).longValue() : Long.MAX_VALUE),
+                                Collectors.mapping(this::convertRange,
                                         Collectors.toSet())
                         )
                 );
@@ -139,6 +136,26 @@ public class PaymentMethodService {
                             .subscribe();
                 }
         );
+    }
+
+    private Pair<Long, Long> convertRange(ServiceDto serviceDto){
+        long min;
+        long max;
+
+        if(serviceDto.getMinimumAmount() == null){
+            min = Long.MIN_VALUE;
+        } else {
+            double res = (serviceDto.getMinimumAmount()*100.0);
+            min = (long) res;
+        }
+
+        if(serviceDto.getMaximumAmount() == null){
+            max = Long.MAX_VALUE;
+        } else {
+            double res = (serviceDto.getMaximumAmount()*100.0);
+            max = (long) res;
+        }
+        return Pair.of(min, max);
     }
 
     private PaymentMethod docToAggregate(PaymentMethodDocument doc){
