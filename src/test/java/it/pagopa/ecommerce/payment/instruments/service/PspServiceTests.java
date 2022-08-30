@@ -2,6 +2,8 @@ package it.pagopa.ecommerce.payment.instruments.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
+import it.pagopa.ecommerce.payment.instruments.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +22,8 @@ import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +34,24 @@ class PspServiceTests {
 
     @InjectMocks
     private PspService pspService;
+
+    @Test
+    void shouldReturnPsp() {
+
+        PspDocument pspDocument = TestUtil.getTestPspDoc(TestUtil.getTestPsp());
+
+        // Precondition
+        Mockito.when(filterRuleEngine.applyFilter(null, null, null))
+                .thenReturn(Flux.just(pspDocument));
+
+        // Test execution
+        List<PspDto> services = pspService.retrievePsps(null, null, null)
+                .collectList().block();
+
+        // Asserts
+        assertEquals(1, services.size());
+        assertEquals(pspDocument.getPspDocumentKey().getPspCode(), services.get(0).getCode());
+    }
 
     @Test
     void shouldReturnEmptyResultWithNullFilter() {

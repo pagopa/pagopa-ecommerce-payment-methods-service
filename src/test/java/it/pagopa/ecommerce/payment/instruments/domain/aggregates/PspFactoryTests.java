@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
-public class PspFactoryTests {
+class PspFactoryTests {
 
     @Mock
     private PspRepository pspRepository;
