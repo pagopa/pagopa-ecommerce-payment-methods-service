@@ -31,15 +31,14 @@ class PspServiceTests {
     @InjectMocks
     private PspService pspService;
 
-    /*
     @Test
     void shouldReturnEmptyResultWithNullFilter() {
 
         // Precondition
-        Mockito.when(filterRuleEngine.applyFilter(null,null, null, null)).thenReturn(Flux.empty());
+        Mockito.when(filterRuleEngine.applyFilter(null, null, null)).thenReturn(Flux.empty());
 
         // Test execution
-        Flux<PspDocument> services = pspService.getPspByFilter(null, null, null, null);
+        Flux<PspDocument> services = pspService.getPspByFilter( null, null, null);
 
         // Asserts
         assertEquals(services, Flux.empty());
@@ -49,10 +48,10 @@ class PspServiceTests {
     void shouldReturnEmptyResultWithEmptyFilter() {
 
         // Precondition
-        Mockito.when(filterRuleEngine.applyFilter(null,100, "", "")).thenReturn(Flux.empty());
+        Mockito.when(filterRuleEngine.applyFilter(100, "", "")).thenReturn(Flux.empty());
 
         // Test execution
-        Flux<PspDocument> services = pspService.getPspByFilter(null,100, "", "");
+        Flux<PspDocument> services = pspService.getPspByFilter(100, "", "");
 
         // Asserts
         assertEquals(services, Flux.empty());
@@ -62,10 +61,10 @@ class PspServiceTests {
     void shouldReturnEmptyResultWithAmountEmptyFilter() {
 
         // Precondition
-        Mockito.when(filterRuleEngine.applyFilter(null,null, "", "")).thenReturn(Flux.empty());
+        Mockito.when(filterRuleEngine.applyFilter(null, "", "")).thenReturn(Flux.empty());
 
         // Test execution
-        Flux<PspDocument> services = pspService.getPspByFilter(null,null, "", "");
+        Flux<PspDocument> services = pspService.getPspByFilter(null, "", "");
 
         // Asserts
         assertEquals(services, Flux.empty());
@@ -107,11 +106,11 @@ class PspServiceTests {
                 100.0,
                 100.0);
 
-        Mockito.when(filterRuleEngine.applyFilter(null, amount, language, paymentTypeCode))
+        Mockito.when(filterRuleEngine.applyFilter( amount, language, paymentTypeCode))
                 .thenReturn(Flux.just(pspDocument_1, pspDocument_2));
         // Test execution
 
-        Flux<PspDocument> services = pspService.getPspByFilter(null, amount, language, paymentTypeCode);
+        Flux<PspDocument> services = pspService.getPspByFilter(amount, language, paymentTypeCode);
 
         // Asserts
         StepVerifier.create(services)
@@ -119,5 +118,4 @@ class PspServiceTests {
                 .expectNext(pspDocument_2)
                 .verifyComplete();
     }
-     */
 }
