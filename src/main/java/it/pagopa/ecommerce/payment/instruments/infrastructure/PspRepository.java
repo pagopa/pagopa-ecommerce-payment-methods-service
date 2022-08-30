@@ -27,28 +27,4 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
     @Query("{ 'pspMinAmount' : { $lt: ?0 }, 'pspMaxAmount' : { $gt: ?0 }, '_id.pspPaymentTypeCode' : ?1, '_id.pspLanguageCode' : ?2 }")
     Flux<PspDocument> findPspMatchAmountTypeLang(double amount, String pspPaymentTypeCode, String pspLanguageCode);
 
-    @Query("{ '_id.pspCode' : ?0 }")
-    Flux<PspDocument> findPspMatchId(String paymentInstrumentId);
-
-    @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0},  '_id.pspCode' : ?1 }")
-    Flux<PspDocument> findPspMatchAmountId(double amount, String paymentInstrumentId);
-
-    @Query("{ '_id.pspLanguageCode' : ?0,  '_id.pspCode' : ?1 }")
-    Flux<PspDocument> findPspMatchLangId(String pspLanguageCode, String paymentInstrumentId);
-
-    @Query("{ '_id.pspPaymentTypeCode' : ?0,  '_id.pspCode' : ?1 }")
-    Flux<PspDocument> findPspMatchTypeId(String pspPaymentTypeCode, String paymentInstrumentId);
-
-    @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0}, '_id.pspLanguageCode' : ?1,  '_id.pspCode' : ?2 }")
-    Flux<PspDocument> findPspMatchAmountLangId(double amount, String pspLanguageCode, String paymentInstrumentId);
-
-    @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0}, '_id.pspPaymentTypeCode' : ?1,  '_id.pspCode' : ?2 }")
-    Flux<PspDocument> findPspMatchAmountTypeId(double amount, String pspPaymentTypeCode, String paymentInstrumentId);
-
-    @Query("{ '_id.pspLanguageCode' : ?0, '_id.pspPaymentTypeCode' : ?1,  '_id.pspCode' : ?2 }")
-    Flux<PspDocument> findPspMatchLangTypeId(String pspLanguageCode, String pspPaymentTypeCode, String paymentInstrumentId);
-
-    @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0}, '_id.pspLanguageCode' : ?1, '_id.pspPaymentTypeCode' : ?2,  '_id.pspCode' : ?3 }")
-    Flux<PspDocument> findPspMatchAmountLangTypeId(double amount, String pspLanguageCode, String pspPaymentTypeCode, String paymentInstrumentId);
-
 }

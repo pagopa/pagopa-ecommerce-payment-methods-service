@@ -1,6 +1,6 @@
 package it.pagopa.ecommerce.payment.instruments.utils;
 
-public enum PaymentInstrumentStatusEnum {
+public enum PaymentMethodStatusEnum {
 
     ENABLED("ENABLED"),
     DISABLED("DISABLED"),
@@ -8,7 +8,7 @@ public enum PaymentInstrumentStatusEnum {
 
     private final String code;
 
-    PaymentInstrumentStatusEnum(final String code) {
+    PaymentMethodStatusEnum(final String code) {
         this.code = code;
     }
 

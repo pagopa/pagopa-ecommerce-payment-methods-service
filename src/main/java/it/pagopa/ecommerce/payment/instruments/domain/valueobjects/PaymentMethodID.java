@@ -9,15 +9,16 @@ import java.util.UUID;
 
 @ValueObjects
 @EqualsAndHashCode
-public class PaymentInstrumentCategoryID implements Serializable {
-    private UUID category;
+public class PaymentMethodID implements Serializable {
 
-    public PaymentInstrumentCategoryID(@NonNull UUID category) {
+    private final UUID uuid;
 
-        this.category = Objects.requireNonNull(category);
+    public PaymentMethodID(@NonNull UUID uuid) {
+
+        this.uuid = Objects.requireNonNull(uuid);
     }
 
     public @NonNull UUID value() {
-        return category;
+        return uuid;
     }
 }

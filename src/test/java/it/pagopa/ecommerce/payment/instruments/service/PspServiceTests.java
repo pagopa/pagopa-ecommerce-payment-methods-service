@@ -1,9 +1,13 @@
 package it.pagopa.ecommerce.payment.instruments.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import javax.validation.constraints.Null;
-
+import it.pagopa.ecommerce.payment.instruments.domain.aggregates.Psp;
+import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
+import it.pagopa.ecommerce.payment.instruments.utils.LanguageEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,13 +18,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import it.pagopa.ecommerce.payment.instruments.application.PspService;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.FilterRuleEngine;
-import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+
+import java.util.List;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -34,13 +39,31 @@ class PspServiceTests {
     private PspService pspService;
 
     @Test
+    void shouldReturnPsp() {
+
+        PspDocument pspDocument = TestUtil.getTestPspDoc(TestUtil.getTestPsp());
+
+        // Precondition
+        Mockito.when(filterRuleEngine.applyFilter(null, null, null))
+                .thenReturn(Flux.just(pspDocument));
+
+        // Test execution
+        List<PspDto> services = pspService.retrievePsps(null, null, null)
+                .collectList().block();
+
+        // Asserts
+        assertEquals(1, services.size());
+        assertEquals(pspDocument.getPspDocumentKey().getPspCode(), services.get(0).getCode());
+    }
+
+    @Test
     void shouldReturnEmptyResultWithNullFilter() {
 
         // Precondition
-        Mockito.when(filterRuleEngine.applyFilter(null,null, null, null)).thenReturn(Flux.empty());
+        Mockito.when(filterRuleEngine.applyFilter(null, null, null)).thenReturn(Flux.empty());
 
         // Test execution
-        Flux<PspDocument> services = pspService.getPspByFilter(null, null, null, null);
+        Flux<PspDocument> services = pspService.getPspByFilter( null, null, null);
 
         // Asserts
         assertEquals(services, Flux.empty());
@@ -50,23 +73,41 @@ class PspServiceTests {
     void shouldReturnEmptyResultWithEmptyFilter() {
 
         // Precondition
-        Mockito.when(filterRuleEngine.applyFilter(null,100, "", "")).thenReturn(Flux.empty());
+        Mockito.when(filterRuleEngine.applyFilter(100, "", "")).thenReturn(Flux.empty());
 
         // Test execution
-        Flux<PspDocument> services = pspService.getPspByFilter(null,100, "", "");
+        Flux<PspDocument> services = pspService.getPspByFilter(100, "", "");
 
         // Asserts
         assertEquals(services, Flux.empty());
     }
 
     @Test
+    void shouldThrowInvalidRangeException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Psp(
+                        new PspCode("PSP_TEST_CODE"),
+                        new PspPaymentMethodType("PO"),
+                        new PspStatus(PaymentMethodStatusEnum.ENABLED),
+                        new PspBusinessName(""),
+                        new PspBrokerName(""),
+                        new PspDescription(""),
+                        new PspLanguage(LanguageEnum.IT),
+                        new PspAmount(10.0),
+                        new PspAmount(1.0),
+                        new PspChannelCode("AB0"),
+                        new PspFee(0.0)));
+
+    }
+
+    @Test
     void shouldReturnEmptyResultWithAmountEmptyFilter() {
 
         // Precondition
-        Mockito.when(filterRuleEngine.applyFilter(null,null, "", "")).thenReturn(Flux.empty());
+        Mockito.when(filterRuleEngine.applyFilter(null, "", "")).thenReturn(Flux.empty());
 
         // Test execution
-        Flux<PspDocument> services = pspService.getPspByFilter(null,null, "", "");
+        Flux<PspDocument> services = pspService.getPspByFilter(null, "", "");
 
         // Asserts
         assertEquals(services, Flux.empty());
@@ -86,7 +127,7 @@ class PspServiceTests {
                         paymentTypeCode,
                         "CHANNEL_0",
                         language),
-                new PspStatus(PaymentInstrumentStatusEnum.ENABLED).value().getCode(),
+                new PspStatus(PaymentMethodStatusEnum.ENABLED).value().getCode(),
                 "Test",
                 "Test broker",
                 "Test description",
@@ -100,7 +141,7 @@ class PspServiceTests {
                         paymentTypeCode,
                         "CHANNEL_0_2",
                         language),
-                new PspStatus(PaymentInstrumentStatusEnum.ENABLED).value().getCode(),
+                new PspStatus(PaymentMethodStatusEnum.ENABLED).value().getCode(),
                 "Test_2",
                 "Test broker",
                 "Test description",
@@ -108,11 +149,11 @@ class PspServiceTests {
                 100.0,
                 100.0);
 
-        Mockito.when(filterRuleEngine.applyFilter(null, amount, language, paymentTypeCode))
+        Mockito.when(filterRuleEngine.applyFilter( amount, language, paymentTypeCode))
                 .thenReturn(Flux.just(pspDocument_1, pspDocument_2));
         // Test execution
 
-        Flux<PspDocument> services = pspService.getPspByFilter(null, amount, language, paymentTypeCode);
+        Flux<PspDocument> services = pspService.getPspByFilter(amount, language, paymentTypeCode);
 
         // Asserts
         StepVerifier.create(services)

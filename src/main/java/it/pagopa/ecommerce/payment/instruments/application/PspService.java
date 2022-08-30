@@ -4,6 +4,7 @@ import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.Psp;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PspFactory;
 import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PspRepository;
@@ -11,15 +12,13 @@ import it.pagopa.ecommerce.payment.instruments.infrastructure.rule.FilterRuleEng
 import it.pagopa.ecommerce.payment.instruments.server.model.PspDto;
 import it.pagopa.ecommerce.payment.instruments.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.instruments.utils.LanguageEnum;
-import it.pagopa.ecommerce.payment.instruments.utils.PaymentInstrumentStatusEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Service
 @ApplicationService
@@ -36,6 +35,9 @@ public class PspService {
     private ApiConfigClient apiConfigClient;
 
     @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
+
+    @Autowired
     private FilterRuleEngine filterRuleEngine;
 
 
@@ -43,8 +45,8 @@ public class PspService {
         servicesDto.getServices().forEach(service -> {
             Mono<Psp> pspMono = pspFactory.newPsp(
                     new PspCode(service.getPspCode()),
-                    new PspPaymentInstrumentType(service.getPaymentTypeCode()),
-                    new PspStatus(PaymentInstrumentStatusEnum.ENABLED),
+                    new PspPaymentMethodType(service.getPaymentTypeCode()),
+                    new PspStatus(PaymentMethodStatusEnum.ENABLED),
                     new PspBusinessName(service.getPspBusinessName()),
                     new PspBrokerName(service.getBrokerPspCode()),
                     new PspDescription(service.getServiceDescription()),
@@ -59,7 +61,7 @@ public class PspService {
                             pspRepository.save(
                                     new PspDocument(
                                             new PspDocumentKey(p.getPspCode().value(),
-                                                    p.getPspPaymentInstrumentType().value(),
+                                                    p.getPspPaymentMethodType().value(),
                                                     p.getPspChannelCode().value(),
                                                     p.getPspLanguage().value().getLanguage()),
                                             p.getPspStatus().value().getCode(),
@@ -78,11 +80,11 @@ public class PspService {
         });
     }
 
-    public Flux<PspDto> retrievePsps(String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDto> retrievePsps(Integer amount, String language, String paymentTypeCode) {
 
         log.debug("[Payment instrument Aggregate] Retrive Aggregate");
 
-        return getPspByFilter(paymentInstrumentId, amount, language, paymentTypeCode).map(doc -> {
+        return getPspByFilter(amount, language, paymentTypeCode).map(doc -> {
             PspDto pspDto = new PspDto();
 
             pspDto.setCode(doc.getPspDocumentKey().getPspCode());
@@ -101,11 +103,11 @@ public class PspService {
         });
     }
 
-    public Flux<PspDocument> getPspByFilter(String paymentInstrumentId, Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
         language = language == null ? null : language.toUpperCase();
         paymentTypeCode = paymentTypeCode == null ? null : paymentTypeCode.toUpperCase();
 
-        return filterRuleEngine.applyFilter(paymentInstrumentId, amount, language, paymentTypeCode);
+        return filterRuleEngine.applyFilter(amount, language, paymentTypeCode);
     }
 }
 

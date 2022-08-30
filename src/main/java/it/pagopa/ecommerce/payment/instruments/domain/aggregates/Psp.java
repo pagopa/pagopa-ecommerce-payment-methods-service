@@ -9,7 +9,7 @@ import lombok.Getter;
 @Aggregate
 public class Psp {
     private final PspCode pspCode;
-    private final PspPaymentInstrumentType pspPaymentInstrumentType;
+    private final PspPaymentMethodType pspPaymentMethodType;
     private PspStatus pspStatus;
     private final PspBusinessName pspBusinessName;
     private final PspBrokerName pspBrokerName;
@@ -30,18 +30,18 @@ public class Psp {
         return this.pspCode;
     }
 
-    public Psp(PspCode pspCode, PspPaymentInstrumentType pspPaymentInstrumentType, PspStatus pspStatus,
+    public Psp(PspCode pspCode, PspPaymentMethodType pspPaymentMethodType, PspStatus pspStatus,
                PspBusinessName pspBusinessName, PspBrokerName pspBrokerName,
                PspDescription pspDescription, PspLanguage pspLanguage,
                PspAmount pspMinAmount, PspAmount pspMaxAmount,
                PspChannelCode pspChannelCode, PspFee pspFixedCost) {
 
-        if (pspMinAmount.value().compareTo(pspMaxAmount.value()) == 1){
+        if (pspMinAmount.value().compareTo(pspMaxAmount.value()) > 0){
             throw new IllegalArgumentException("Invalid amount range");
         }
 
         this.pspCode = pspCode;
-        this.pspPaymentInstrumentType = pspPaymentInstrumentType;
+        this.pspPaymentMethodType = pspPaymentMethodType;
         this.pspStatus = pspStatus;
         this.pspBusinessName = pspBusinessName;
         this.pspBrokerName = pspBrokerName;

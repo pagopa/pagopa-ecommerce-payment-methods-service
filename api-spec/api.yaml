@@ -4,76 +4,76 @@ info:
   title: Pagopa eCommerce payment instruments service
   description: This microservice handles payment instruments.
 paths:
-  /payment-instruments:
+  /payment-methods:
     post:
-      operationId: newPaymentInstrument
-      summary: Make a new payment instruments
+      operationId: newPaymentMethod
+      summary: Make a new payment method
       requestBody:
-        $ref: "#/components/requestBodies/PaymentInstrumentRequest"
+        $ref: "#/components/requestBodies/PaymentMethodRequest"
       responses:
         '200':
-          description: New payment instrument successfully created
+          description: New payment method successfully created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentInstrumentResponse'
+                $ref: '#/components/schemas/PaymentMethodResponse'
     get:
-      operationId: getAllPaymentInstruments
-      summary: Retrive all Payment Instruments (by filter)
+      operationId: getAllPaymentMethods
+      summary: Retrieve all Payment Methods (by filter)
       parameters:
-        - in: query
-          name: categoryId
-          schema:
-            type: string
-          description: Payment Instrument Category ID
+        - name: amount
+          in: query
+          description: Payment Amount
           required: false
+          schema:
+            type: number
       responses:
         '200':
-          description: Payment instrument successfully retrived
+          description: Payment instrument successfully retrieved
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PaymentInstrumentResponse'
-  /payment-instruments/{id}:
+                  $ref: '#/components/schemas/PaymentMethodResponse'
+  /payment-methods/{id}:
     patch:
-      operationId: patchPaymentInstrument
-      summary: Update payment instruments
+      operationId: patchPaymentMethod
+      summary: Update payment method
       parameters:
         - name: id
           in: path
-          description: Payment Instrument ID
+          description: Payment Method ID
           required: true
           schema:
             type: string
       requestBody:
-        $ref: "#/components/requestBodies/PatchPaymentInstrumentRequest"
+        $ref: "#/components/requestBodies/PatchPaymentMethodRequest"
       responses:
         '200':
           description: Payment instrument successfully retrived
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentInstrumentResponse'
+                $ref: '#/components/schemas/PaymentMethodResponse'
     get:
-      operationId: getPaymentInstrument
-      summary: Retrive payment instrument by ID
+      operationId: getPaymentMethod
+      summary: Retrive payment method by ID
       parameters:
         - name: id
           in: path
-          description: Payment Instrument ID
+          description: Payment Method ID
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: New payment instrument successfully updated
+          description: New payment method successfully updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentInstrumentResponse'
-  /payment-instruments/psps:
+                $ref: '#/components/schemas/PaymentMethodResponse'
+  /payment-methods/psps:
     put:
       operationId: scheduleUpdatePSPs
       summary: Update psp list
@@ -82,7 +82,7 @@ paths:
           description: Update successfully scheduled
     get:
       operationId: getPSPs
-      summary: Retrieve payment instrument by ID
+      summary: Retrieve psps
       parameters:
         - in: query
           name: amount
@@ -110,14 +110,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PSPsResponse'
-  /payment-instruments/{id}/psps:
+
+  /payment-methods/{id}/psps:
     get:
-      operationId: getPiPSPs
-      summary: Retrive payment instrument by ID
+      operationId: getPaymentMethodsPSPs
+      summary: Retrive PSPs by payment method ID
       parameters:
         - name: id
           in: path
-          description: Payment Instrument ID
+          description: Payment Method ID
           required: true
           schema:
             type: string
@@ -134,12 +135,6 @@ paths:
             enum: [IT, EN, FR, DE, SL]
           description: Service language
           required: false
-        - in: query
-          name: paymentTypeCode
-          schema:
-            type: string
-          description: Payment Type Code
-          required: false
       responses:
         '200':
           description: New payment instrument successfully updated
@@ -147,72 +142,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PSPsResponse'
-
-  /payment-instrument-categories:
-    post:
-      operationId: addCategory
-      summary: Add new Payment Instrument Category
-      requestBody:
-        $ref: "#/components/requestBodies/CategoryRequest"
-      responses:
-        '200':
-          description: Category successfully created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
-    get:
-      operationId: getCategories
-      summary: Retrieve Payment Instrument Categors
-      responses:
-        '200':
-          description: Category list successfully retrieved
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CategoriesResponse'
-
-  /payment-instrument-categories/{id}:
-    get:
-      operationId: getCategoryByID
-      summary: Retrieve category by Id
-      parameters:
-        - name: id
-          in: path
-          description: Category ID
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Category successfully retrieved
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
-    patch:
-      operationId: patchCategory
-      parameters:
-        - name: id
-          in: path
-          description: Category ID
-          required: true
-          schema:
-            type: string
-      requestBody:
-        $ref: "#/components/requestBodies/PatchCategoryRequest"
-      summary: Update category
-      responses:
-        '200':
-          description: Category successfully created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
-
 components:
   schemas:
-    PaymentInstrumentRequest:
+    PaymentMethodRequest:
       type: object
       description: New Payment Instrument Request
       properties:
@@ -223,28 +155,43 @@ components:
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
-        categoryId:
-          type: string
         paymentTypeCode:
           type: string
+        ranges:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Range"
       required:
         - name
         - description
         - status
-        - categoryId
-        - required
-    PatchPaymentInstrumentRequest:
+        - paymentTypeCode
+        - ranges
+    Range:
       type: object
-      description: Patch Payment Instrument Request
+      description: Payment amount range in cents
+      properties:
+        min:
+          type: integer
+          format: int64
+          minimum: 0
+        max:
+          type: integer
+          format: int64
+          minimum: 0
+    PatchPaymentMethodRequest:
+      type: object
+      description: Patch Payment Method Request
       properties:
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
       required:
         - status
-    PaymentInstrumentResponse:
+    PaymentMethodResponse:
       type: object
-      description: New Payment Instrument Response
+      description: Payment Instrument Response
       properties:
         id:
           type: string
@@ -255,17 +202,20 @@ components:
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
-        category:
-          $ref: "#/components/schemas/Category"
         paymentTypeCode:
           type: string
+        ranges:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Range"
       required:
         - id
         - name
         - description
         - status
-        - category
         - paymentTypeCode
+        - ranges
     PSPsResponse:
       type: object
       description: Get available PSP list Response
@@ -274,37 +224,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Psp"
-
-    CategoriesResponse:
-      type: object
-      description: Get category
-      properties:
-        categories:
-          type: array
-          items:
-            $ref: "#/components/schemas/Category"
-    Category:
-      type: object
-      description: Category object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        paymentTypeCodes:
-          type: array
-          items:
-            type: string
-    CategoryRequest:
-      type: object
-      description: Category object
-      properties:
-        name:
-          type: string
-        paymentTypeCodes:
-          type: array
-          items:
-            type: string
     Psp:
       type: object
       description: PSP object
@@ -354,27 +273,15 @@ components:
         - maxAmount
         - fixedCost
   requestBodies:
-    PatchCategoryRequest:
+    PaymentMethodRequest:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/CategoryRequest"
-    CategoryRequest:
+            $ref: "#/components/schemas/PaymentMethodRequest"
+    PatchPaymentMethodRequest:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/CategoryRequest"
-    PaymentInstrumentRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/PaymentInstrumentRequest"
-    PatchPaymentInstrumentRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/PatchPaymentInstrumentRequest"
+            $ref: "#/components/schemas/PatchPaymentMethodRequest"
