@@ -1,29 +1,13 @@
 package it.pagopa.ecommerce.payment.instruments.service;
 
-import it.pagopa.ecommerce.payment.instruments.application.PaymentInstrumentServiceOld;
-import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethodFactory;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
-import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.instruments.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -36,8 +20,6 @@ class PaymentMethodServiceTests {
     @Mock
     private PaymentMethodFactory paymentInstrumentFactory;
 
-    @InjectMocks
-    private PaymentInstrumentServiceOld paymentInstrumentService;
 
     // TODO: fix tests
     /*

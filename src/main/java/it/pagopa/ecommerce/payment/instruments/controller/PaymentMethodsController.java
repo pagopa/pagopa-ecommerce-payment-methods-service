@@ -110,11 +110,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     public Mono<ResponseEntity<PSPsResponseDto>> getPaymentMethodsPSPs(String id, Integer amount, String lang, ServerWebExchange exchange) {
         return paymentMethodService.retrievePaymentMethodById(id)
                 .flatMap(pm -> pspService.retrievePsps(amount, lang, pm.getPaymentMethodTypeCode().value()).collectList().flatMap(pspDtos -> {
-            PSPsResponseDto responseDto = new PSPsResponseDto();
-            responseDto.setPsp(pspDtos);
+                        PSPsResponseDto responseDto = new PSPsResponseDto();
+                        responseDto.setPsp(pspDtos);
 
-            return Mono.just(ResponseEntity.ok(responseDto));
-        }));
+                        return Mono.just(ResponseEntity.ok(responseDto));
+                    })
+                );
     }
 
     @Override

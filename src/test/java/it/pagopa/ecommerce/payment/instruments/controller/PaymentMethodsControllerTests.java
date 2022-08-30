@@ -1,15 +1,34 @@
 package it.pagopa.ecommerce.payment.instruments.controller;
 
-import it.pagopa.ecommerce.payment.instruments.application.PaymentInstrumentServiceOld;
+import it.pagopa.ecommerce.payment.instruments.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.instruments.application.PspService;
 import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
+import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.instruments.server.model.*;
+import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
+import it.pagopa.ecommerce.payment.instruments.utils.TestUtil;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.PageInfoDto;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.util.Pair;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.UUID;
+
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
@@ -19,137 +38,75 @@ public class PaymentMethodsControllerTests {
     private WebTestClient webClient;
 
     @MockBean
-    private PaymentInstrumentServiceOld paymentInstrumentService;
-
-    @MockBean
     private PspService pspService;
 
     @MockBean
     private ApiConfigClient apiConfigClient;
 
-    /*
+    @MockBean
+    private PaymentMethodService paymentMethodService;
+
+
     @Test
     public void shouldCreateNewInstrument(){
         String TEST_NAME = "Test";
         String TEST_DESC = "test";
-        PaymentInstrumentRequestDto.StatusEnum TEST_STATUS = PaymentInstrumentRequestDto.StatusEnum.ENABLED;
+        PaymentMethodRequestDto.StatusEnum TEST_STATUS = PaymentMethodRequestDto.StatusEnum.ENABLED;
         UUID TEST_CAT = UUID.randomUUID();
         String TEST_TYPE_CODE = "test";
 
-        PaymentInstrumentRequestDto paymentInstrumentRequestDto = new PaymentInstrumentRequestDto()
-                .name(TEST_NAME)
-                .description(TEST_DESC)
-                .status(TEST_STATUS)
-                .categoryId(TEST_CAT.toString())
-                .paymentTypeCode(TEST_TYPE_CODE);
+        PaymentMethodRequestDto paymentInstrumentRequestDto = TestUtil.getPaymentMethodRequest();
 
-        PaymentMethod paymentInstrument = new PaymentMethod(
-                new PaymentMethodID(UUID.randomUUID()),
-                new PaymentMethodName("Test"),
-                new PaymentMethodDescription("Test"),
-                new PaymentMethodStatus(PaymentInstrumentStatusEnum.ENABLED),
-                new PaymentInstrumentCategoryID(TEST_CAT),
-                new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentMethodType("PO")),
-                new PaymentMethodType(TEST_TYPE_CODE)
-        );
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
-        Mockito.when(paymentInstrumentService.createPaymentInstrument(TEST_NAME, TEST_DESC, TEST_CAT.toString(), TEST_TYPE_CODE))
-                .thenReturn(Mono.just(paymentInstrument));
+        Mockito.when(paymentMethodService.createPaymentMethod(TEST_NAME, TEST_DESC, List.of(Pair.of(0L, 100L)), TEST_TYPE_CODE))
+                .thenReturn(Mono.just(paymentMethod));
 
-        Mockito.when(categoryService.getCategory(TEST_CAT.toString())).thenReturn(Mono.just(
-                new PaymentInstrumentCategory(
-                        new PaymentInstrumentCategoryID(TEST_CAT),
-                        List.of(new PaymentMethodType("PO")),
-                        new PaymentInstrumentCategoryName("Test")
-                )
-        ));
-
-        PaymentInstrumentResponseDto expectedResult = new PaymentInstrumentResponseDto()
-                .id(paymentInstrument.getPaymentMethodID().value().toString())
-                .name(paymentInstrument.getPaymentMethodName().value())
-                .description(paymentInstrument.getPaymentMethodDescription().value())
-                .status(PaymentInstrumentResponseDto.StatusEnum.fromValue(paymentInstrument.getPaymentMethodStatus().value().getCode()))
-                .category(new CategoryDto()
-                        .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
-                        .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
-                        .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentMethodType::value).collect(Collectors.toList())))
-                .paymentTypeCode(paymentInstrument.getPaymentMethodTypeCode().value());
+        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
 
         webClient
-                .post().uri("/payment-instruments")
+                .post().uri("/payment-methods")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentInstrumentRequestDto)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(PaymentInstrumentResponseDto.class)
+                .expectBody(PaymentMethodResponseDto.class)
                 .isEqualTo(expectedResult);
     }
 
+
     @Test
     public void shouldGetAllInstruments(){
-        PaymentInstrumentRequestDto.StatusEnum TEST_STATUS = PaymentInstrumentRequestDto.StatusEnum.ENABLED;
-        UUID TEST_CAT = UUID.randomUUID();
 
-        PaymentMethod paymentInstrument = new PaymentMethod(
-                new PaymentMethodID(UUID.randomUUID()),
-                new PaymentMethodName("Test"),
-                new PaymentMethodDescription("Test"),
-                new PaymentMethodStatus(PaymentInstrumentStatusEnum.ENABLED),
-                new PaymentInstrumentCategoryID(TEST_CAT),
-                new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentMethodType("PO")),
-                new PaymentMethodType("test")
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+
+        Mockito.when(paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount())).thenReturn(
+                Flux.just(paymentMethod)
         );
 
-        Mockito.when(paymentInstrumentService.retrivePaymentInstruments(TEST_CAT.toString())).thenReturn(
-                Flux.just(paymentInstrument)
-        );
-
-        PaymentInstrumentResponseDto expectedResult = new PaymentInstrumentResponseDto()
-                .id(paymentInstrument.getPaymentMethodID().value().toString())
-                .name(paymentInstrument.getPaymentMethodName().value())
-                .description(paymentInstrument.getPaymentMethodDescription().value())
-                .status(PaymentInstrumentResponseDto.StatusEnum.fromValue(paymentInstrument.getPaymentMethodStatus().value().getCode()))
-                .category(new CategoryDto()
-                        .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
-                        .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
-                        .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentMethodType::value).collect(Collectors.toList())))
-                .paymentTypeCode(paymentInstrument.getPaymentMethodTypeCode().value());
+        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
 
         webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                    .path("/payment-instruments")
-                    .queryParam("categoryId", TEST_CAT.toString())
+                    .path("/payment-methods")
+                    .queryParam("amount", TestUtil.getTestAmount())
                     .build())
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBodyList(PaymentInstrumentResponseDto.class)
+                .expectBodyList(PaymentMethodResponseDto.class)
                 .hasSize(1)
                 .contains(expectedResult);
     }
 
     @Test
     public void shouldGetPSPs(){
-        String TEST_CODE = "001";
-        String TEST_NAME = "test";
-        String TEST_DESC = "test";
-        String TEST_CHANNEL = "channel0";
 
-        PspDto pspDto = new PspDto()
-                .code(TEST_CODE)
-                .brokerName(TEST_NAME)
-                .description(TEST_DESC)
-                .businessName(TEST_NAME)
-                .status(PspDto.StatusEnum.ENABLED)
-                .channelCode(TEST_CHANNEL);
+        PspDto pspDto = TestUtil.getTestPsp();
 
-        Mockito.when(pspService.retrievePsps(null, null, null, null))
+        Mockito.when(pspService.retrievePsps(null, null, null))
                         .thenReturn(Flux.just(pspDto));
 
         PSPsResponseDto expectedResult = new PSPsResponseDto()
@@ -157,7 +114,7 @@ public class PaymentMethodsControllerTests {
 
         webClient
                 .get()
-                .uri("/payment-instruments/psps")
+                .uri("/payment-methods/psps")
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -167,63 +124,36 @@ public class PaymentMethodsControllerTests {
 
     @Test
     public void shouldGetAnInstrument(){
-        UUID TEST_CAT = UUID.randomUUID();
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
-        PaymentMethod paymentInstrument = new PaymentMethod(
-                new PaymentMethodID(UUID.randomUUID()),
-                new PaymentMethodName("Test"),
-                new PaymentMethodDescription("Test"),
-                new PaymentMethodStatus(PaymentInstrumentStatusEnum.ENABLED),
-                new PaymentInstrumentCategoryID(TEST_CAT),
-                new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentMethodType("PO")),
-                new PaymentMethodType("test")
-        );
+        Mockito.when(paymentMethodService.retrievePaymentMethodById(
+                paymentMethod.getPaymentMethodID().value().toString())
+        ).thenReturn(Mono.just(paymentMethod));
 
-        Mockito.when(paymentInstrumentService.retrivePaymentInstrumentById(
-                paymentInstrument.getPaymentMethodID().value().toString())
-        ).thenReturn(Mono.just(paymentInstrument));
-
-        PaymentInstrumentResponseDto expectedResult = new PaymentInstrumentResponseDto()
-                .id(paymentInstrument.getPaymentMethodID().value().toString())
-                .name(paymentInstrument.getPaymentMethodName().value())
-                .description(paymentInstrument.getPaymentMethodDescription().value())
-                .status(PaymentInstrumentResponseDto.StatusEnum.fromValue(paymentInstrument.getPaymentMethodStatus().value().getCode()))
-                .category(new CategoryDto()
-                        .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
-                        .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
-                        .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentMethodType::value).collect(Collectors.toList())))
-                .paymentTypeCode(paymentInstrument.getPaymentMethodTypeCode().value());
+        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
 
         webClient
                 .get()
-                .uri("/payment-instruments/"+paymentInstrument.getPaymentMethodID().value())
+                .uri("/payment-methods/"+paymentMethod.getPaymentMethodID().value())
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBodyList(PaymentInstrumentResponseDto.class)
+                .expectBodyList(PaymentMethodResponseDto.class)
                 .hasSize(1)
                 .contains(expectedResult);
     }
 
     @Test
     public void shouldGetPaymentInstrumentPSPs(){
-        String TEST_CODE = "001";
-        String TEST_NAME = "test";
-        String TEST_DESC = "test";
-        String TEST_CHANNEL = "channel0";
         String TEST_INSTRUMENT_ID = UUID.randomUUID().toString();
+        PspDto pspDto = TestUtil.getTestPsp();
 
-        PspDto pspDto = new PspDto()
-                .code(TEST_CODE)
-                .brokerName(TEST_NAME)
-                .description(TEST_DESC)
-                .businessName(TEST_NAME)
-                .status(PspDto.StatusEnum.ENABLED)
-                .channelCode(TEST_CHANNEL);
+        Mockito.when(paymentMethodService.retrievePaymentMethodById(
+                        Mockito.any()
+                )
+        ).thenReturn(Mono.just(TestUtil.getPaymentMethod()));
 
-        Mockito.when(pspService.retrievePsps(TEST_INSTRUMENT_ID, null, null, null))
+        Mockito.when(pspService.retrievePsps(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Flux.just(pspDto));
 
         PSPsResponseDto expectedResult = new PSPsResponseDto()
@@ -231,7 +161,7 @@ public class PaymentMethodsControllerTests {
 
         webClient
                 .get()
-                .uri("/payment-instruments/"+TEST_INSTRUMENT_ID+"/psps")
+                .uri("/payment-methods/"+TEST_INSTRUMENT_ID+"/psps")
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -243,44 +173,25 @@ public class PaymentMethodsControllerTests {
     void shouldPatchPaymentInstrument(){
         UUID TEST_CAT = UUID.randomUUID();
 
-        PaymentMethod paymentInstrument = new PaymentMethod(
-                new PaymentMethodID(UUID.randomUUID()),
-                new PaymentMethodName("Test"),
-                new PaymentMethodDescription("Test"),
-                new PaymentMethodStatus(PaymentInstrumentStatusEnum.ENABLED),
-                new PaymentInstrumentCategoryID(TEST_CAT),
-                new PaymentInstrumentCategoryName("Test"),
-                List.of(new PaymentMethodType("PO")),
-                new PaymentMethodType("test")
-        );
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
-        Mockito.when(paymentInstrumentService.patchPaymentInstrument(
-                paymentInstrument.getPaymentMethodID().value().toString(), PaymentInstrumentStatusEnum.ENABLED)
-        ).thenReturn(Mono.just(paymentInstrument));
+        Mockito.when(paymentMethodService.updatePaymentMethodStatus(
+                paymentMethod.getPaymentMethodID().value().toString(), PaymentMethodStatusEnum.ENABLED)
+        ).thenReturn(Mono.just(paymentMethod));
 
-        PaymentInstrumentResponseDto expectedResult = new PaymentInstrumentResponseDto()
-                .id(paymentInstrument.getPaymentMethodID().value().toString())
-                .name(paymentInstrument.getPaymentMethodName().value())
-                .description(paymentInstrument.getPaymentMethodDescription().value())
-                .status(PaymentInstrumentResponseDto.StatusEnum.fromValue(paymentInstrument.getPaymentMethodStatus().value().getCode()))
-                .category(new CategoryDto()
-                        .id(paymentInstrument.getPaymentInstrumentCategoryID().value().toString())
-                        .name(paymentInstrument.getPaymentInstrumentCategoryName().value())
-                        .paymentTypeCodes(paymentInstrument.getPaymentInstrumentCategoryTypes()
-                                .stream().map(PaymentMethodType::value).collect(Collectors.toList())))
-                .paymentTypeCode(paymentInstrument.getPaymentMethodTypeCode().value());
+        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        PatchPaymentInstrumentRequestDto patchRequest = new PatchPaymentInstrumentRequestDto()
-                .status(PatchPaymentInstrumentRequestDto.StatusEnum.ENABLED);
+        PaymentMethodRequestDto patchRequest = new PaymentMethodRequestDto()
+                .status(PaymentMethodRequestDto.StatusEnum.ENABLED);
 
         webClient
-                .patch().uri("/payment-instruments/"+paymentInstrument.getPaymentMethodID().value())
+                .patch().uri("/payment-methods/"+paymentMethod.getPaymentMethodID().value())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(patchRequest)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(PaymentInstrumentResponseDto.class)
+                .expectBody(PaymentMethodResponseDto.class)
                 .isEqualTo(expectedResult);
     }
 
@@ -288,31 +199,15 @@ public class PaymentMethodsControllerTests {
     public void shouldScheduleUpdate(){
 
         Mockito.when(apiConfigClient.getPSPs(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(
-                Mono.just(new ServicesDto()
-                        .services(List.of(new ServiceDto()
-                                .abiCode("TEST")
-                                .channelCode("CHANNEL=")
-                                .languageCode(ServiceDto.LanguageCodeEnum.IT)
-                                .conventionCode("TEST")
-                                .pspCode("TEST")
-                                .serviceName("TEST")))
-                        .pageInfo(
-                                new PageInfoDto()
-                                        .totalPages(1)
-                                        .limit(50)
-                                        .page(0)
-                                        .itemsFound(1)
-                        )
-                )
+                Mono.just(TestUtil.getTestServices())
         );
 
         webClient
-                .put().uri("/payment-instruments/psps")
+                .put().uri("/payment-methods/psps")
                 .exchange()
                 .expectStatus()
                 .isAccepted();
 
         Mockito.verify(pspService, Mockito.times(1)).updatePSPs(Mockito.any());
     }
-     */
 }
