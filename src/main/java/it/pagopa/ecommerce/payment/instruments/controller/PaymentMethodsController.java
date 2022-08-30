@@ -45,7 +45,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             PaymentMethodAlreadyInUseException.class,
             PspAlreadyInUseException.class
     })
-    private ResponseEntity<ProblemJsonDto> genericBadGatewayHandler(RuntimeException exception) {
+    private ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
         if(exception instanceof PaymentMethodAlreadyInUseException){
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"), HttpStatus.BAD_REQUEST);
@@ -139,7 +139,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
         return apiConfigClient.getPSPs(0, 50, null).expand(
                 servicesDto -> {
-                    if (Integer.valueOf(servicesDto.getPageInfo().getTotalPages()).equals(currentPage.get()+1)) {
+                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get()+1)) {
                         return Mono.empty();
                     }
                     return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);

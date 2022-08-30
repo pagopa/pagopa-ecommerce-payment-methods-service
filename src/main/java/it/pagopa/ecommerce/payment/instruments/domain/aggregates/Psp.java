@@ -36,7 +36,7 @@ public class Psp {
                PspAmount pspMinAmount, PspAmount pspMaxAmount,
                PspChannelCode pspChannelCode, PspFee pspFixedCost) {
 
-        if (pspMinAmount.value().compareTo(pspMaxAmount.value()) == 1){
+        if (pspMinAmount.value().compareTo(pspMaxAmount.value()) > 0){
             throw new IllegalArgumentException("Invalid amount range");
         }
 
