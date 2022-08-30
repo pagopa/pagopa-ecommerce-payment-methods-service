@@ -120,8 +120,8 @@ public class PaymentMethodService {
                                 ServiceDto::getPaymentTypeCode,
                                 Collectors.mapping(it ->
                                                 Pair.of(
-                                                        Double.valueOf(it.getMinimumAmount() != null ? it.getMinimumAmount() * 100.0 : Double.MIN_VALUE).longValue(), // Convert euros to cents
-                                                        Double.valueOf(it.getMaximumAmount() != null ? it.getMaximumAmount() * 100.0 : Double.MAX_VALUE).longValue()),
+                                                        it.getMinimumAmount() != null ? Double.valueOf(it.getMinimumAmount() * 100.0).longValue(): Long.MIN_VALUE, // Convert euros to cents
+                                                        it.getMaximumAmount() != null ? Double.valueOf(it.getMaximumAmount() * 100.0).longValue() : Long.MAX_VALUE),
                                         Collectors.toSet())
                         )
                 );

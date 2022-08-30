@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 @Slf4j
 public class ScheduledPSPUpdate {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
     @Autowired
     private ApiConfigClient apiConfigClient;
     @Autowired

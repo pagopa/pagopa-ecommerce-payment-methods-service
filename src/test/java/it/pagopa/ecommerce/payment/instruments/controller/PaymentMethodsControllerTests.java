@@ -4,16 +4,11 @@ import it.pagopa.ecommerce.payment.instruments.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.instruments.application.PspService;
 import it.pagopa.ecommerce.payment.instruments.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.instruments.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.instruments.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.instruments.server.model.*;
 import it.pagopa.ecommerce.payment.instruments.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.instruments.utils.TestUtil;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.PageInfoDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -104,7 +99,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldGetPSPs(){
 
-        PspDto pspDto = TestUtil.getTestPsp();
+        PspDto pspDto = TestUtil.getTestPspDto();
 
         Mockito.when(pspService.retrievePsps(null, null, null))
                         .thenReturn(Flux.just(pspDto));
@@ -146,7 +141,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldGetPaymentInstrumentPSPs(){
         String TEST_INSTRUMENT_ID = UUID.randomUUID().toString();
-        PspDto pspDto = TestUtil.getTestPsp();
+        PspDto pspDto = TestUtil.getTestPspDto();
 
         Mockito.when(paymentMethodService.retrievePaymentMethodById(
                         Mockito.any()
