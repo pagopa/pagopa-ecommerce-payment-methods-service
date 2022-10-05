@@ -262,7 +262,7 @@ components:
           format: double
       required:
         - code
-        - paymentmethodID
+        - paymentMethodID
         - description
         - status
         - type
