@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
 
   image:
-    repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentinstrumentsservice
+    repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "latest" #improve
     pullPolicy: Always
 
@@ -35,7 +35,7 @@ microservice-chart:
   ingress:
     create: true
     host: "weudev.ecommerce.internal.dev.platform.pagopa.it"
-    path: /pagopa-ecommerce-payment-instruments-service/(.*)
+    path: /pagopa-ecommerce-payment-methods-service/(.*)
   
   serviceAccount:
     create: false
