@@ -29,7 +29,7 @@ class PaymentMethodFactoryTests {
     private PaymentMethodRepository paymentMethodRepository;
 
     @InjectMocks
-    private PaymentMethodFactory paymentmethodFactory;
+    private PaymentMethodFactory paymentMethodFactory;
 
     @Test
     void shouldCreateNewmethod(){
@@ -40,7 +40,7 @@ class PaymentMethodFactoryTests {
                 .thenReturn(Mono.empty());
 
 
-        PaymentMethod paymentMethodProduct = paymentmethodFactory.newPaymentMethod(
+        PaymentMethod paymentMethodProduct = paymentMethodFactory.newPaymentMethod(
                 paymentMethod.getPaymentMethodID(),
                 paymentMethod.getPaymentMethodName(),
                 paymentMethod.getPaymentMethodDescription(),
@@ -53,7 +53,7 @@ class PaymentMethodFactoryTests {
     }
 
     @Test
-    void shouldThrowDuplicatedmethodException(){
+    void shouldThrowDuplicatedMethodException(){
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         Mockito.when(paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
@@ -71,7 +71,7 @@ class PaymentMethodFactoryTests {
                 ));
 
         assertThrows(PaymentMethodAlreadyInUseException.class,
-                () -> paymentmethodFactory.newPaymentMethod(
+                () -> paymentMethodFactory.newPaymentMethod(
                         paymentMethod.getPaymentMethodID(),
                         paymentMethod.getPaymentMethodName(),
                         paymentMethod.getPaymentMethodDescription(),

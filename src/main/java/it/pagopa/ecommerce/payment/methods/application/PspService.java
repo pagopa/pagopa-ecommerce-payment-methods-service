@@ -82,7 +82,7 @@ public class PspService {
 
     public Flux<PspDto> retrievePsps(Integer amount, String language, String paymentTypeCode) {
 
-        log.debug("[Payment method Aggregate] Retrive Aggregate");
+        log.debug("[Payment Method Aggregate] Retrive Aggregate");
 
         return getPspByFilter(amount, language, paymentTypeCode).map(doc -> {
             PspDto pspDto = new PspDto();

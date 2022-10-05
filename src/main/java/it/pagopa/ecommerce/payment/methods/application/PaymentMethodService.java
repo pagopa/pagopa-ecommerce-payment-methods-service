@@ -31,14 +31,14 @@ public class PaymentMethodService {
     private PaymentMethodRepository paymentMethodRepository;
 
     @Autowired
-    private PaymentMethodFactory paymentmethodFactory;
+    private PaymentMethodFactory paymentMethodFactory;
 
     public Mono<PaymentMethod> createPaymentMethod(String paymentMethodName,
                                                    String paymentMethodDescription,
                                                    List<Pair<Long, Long>> ranges,
                                                    String paymentMethodTypeCode){
         log.debug("[Payment Method Aggregate] Create new aggregate");
-        Mono<PaymentMethod> paymentMethod = paymentmethodFactory.newPaymentMethod(
+        Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
                 new PaymentMethodID(UUID.randomUUID()),
                 new PaymentMethodName(paymentMethodName),
                 new PaymentMethodDescription(paymentMethodDescription),

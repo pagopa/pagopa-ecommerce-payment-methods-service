@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException.paymentmethodAlreadyInUse;
+import static it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException.paymentMethodAlreadyInUse;
 
 @Component
 @AggregateFactory(PaymentMethod.class)
@@ -28,9 +28,9 @@ public class PaymentMethodFactory {
 
         return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
                     paymentMethodName.value(), paymentMethodTypeCode.value()).hasElement()
-                .map(hasPaymentmethod -> {
-                            if (Boolean.TRUE.equals(hasPaymentmethod)) {
-                                throw paymentmethodAlreadyInUse(paymentMethodName);
+                .map(hasPaymentMethod -> {
+                            if (Boolean.TRUE.equals(hasPaymentMethod)) {
+                                throw paymentMethodAlreadyInUse(paymentMethodName);
                             }
 
                             return new PaymentMethod(paymentMethodID, paymentMethodName,

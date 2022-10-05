@@ -34,19 +34,19 @@ class PaymentMethodServiceTests {
     private PaymentMethodRepository paymentMethodRepository;
 
     @Mock
-    private PaymentMethodFactory paymentmethodFactory;
+    private PaymentMethodFactory paymentMethodFactory;
 
     @InjectMocks
     private PaymentMethodService paymentMethodService;
 
 
     @Test
-    void shouldCreatePaymentmethod() {
+    void shouldCreatePaymentMethod() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(paymentmethodFactory.newPaymentMethod(
+        Mockito.when(paymentMethodFactory.newPaymentMethod(
                         any(), any(), any(), any(), any(), any())
                 )
                 .thenReturn(Mono.just(paymentMethod));
@@ -67,7 +67,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldRetrievePaymentmethods() {
+    void shouldRetrievePaymentMethods() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
@@ -75,13 +75,13 @@ class PaymentMethodServiceTests {
         Mockito.when(paymentMethodRepository.findAll())
                 .thenReturn(Flux.just(paymentMethodDocument));
 
-        PaymentMethod paymentmethodCreated = paymentMethodService.retrievePaymentMethods(null).blockFirst();
+        PaymentMethod paymentMethodCreated = paymentMethodService.retrievePaymentMethods(null).blockFirst();
 
-        assertEquals(paymentmethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
+        assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
     }
 
     @Test
-    void shouldNotRetrievePaymentmethodsWithAmount() {
+    void shouldNotRetrievePaymentMethodsWithAmount() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
@@ -89,14 +89,14 @@ class PaymentMethodServiceTests {
         Mockito.when(paymentMethodRepository.findAll())
                 .thenReturn(Flux.just(paymentMethodDocument));
 
-        List<PaymentMethod> paymentmethodCreated = paymentMethodService.retrievePaymentMethods(101)
+        List<PaymentMethod> paymentMethodCreated = paymentMethodService.retrievePaymentMethods(101)
                 .collectList().block();
 
-        assertEquals(0, paymentmethodCreated.size());
+        assertEquals(0, paymentMethodCreated.size());
     }
 
     @Test
-    void shouldRetrievePaymentmethodsWithAmount() {
+    void shouldRetrievePaymentMethodsWithAmount() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
@@ -111,7 +111,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldPatchPaymentmethod() {
+    void shouldPatchPaymentMethod() {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
@@ -124,18 +124,18 @@ class PaymentMethodServiceTests {
                         paymentMethodDocument))
                 .thenReturn(Mono.just(paymentMethodDocument));
 
-        PaymentMethod paymentmethodPatched = paymentMethodService
+        PaymentMethod paymentMethodPatched = paymentMethodService
                 .updatePaymentMethodStatus(paymentMethod.getPaymentMethodID().value().toString(), PaymentMethodStatusEnum.DISABLED)
                 .block();
 
-        assertEquals(paymentmethodPatched.getPaymentMethodID(),
+        assertEquals(paymentMethodPatched.getPaymentMethodID(),
                 paymentMethod.getPaymentMethodID());
 
-        assertEquals(PaymentMethodStatusEnum.DISABLED, paymentmethodPatched.getPaymentMethodStatus().value());
+        assertEquals(PaymentMethodStatusEnum.DISABLED, paymentMethodPatched.getPaymentMethodStatus().value());
     }
 
     @Test
-    void shouldRetrivePaymentmethodById() {
+    void shouldRetrivePaymentMethodById() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 

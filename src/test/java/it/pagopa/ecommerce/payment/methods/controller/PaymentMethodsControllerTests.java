@@ -50,7 +50,7 @@ class PaymentMethodsControllerTests {
         UUID TEST_CAT = UUID.randomUUID();
         String TEST_TYPE_CODE = "test";
 
-        PaymentMethodRequestDto paymentmethodRequestDto = TestUtil.getPaymentMethodRequest();
+        PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequest();
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
@@ -62,7 +62,7 @@ class PaymentMethodsControllerTests {
         webClient
                 .post().uri("/payment-methods")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(paymentmethodRequestDto)
+                .bodyValue(paymentMethodRequestDto)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -72,7 +72,7 @@ class PaymentMethodsControllerTests {
 
 
     @Test
-    void shouldGetAllmethods(){
+    void shouldGetAllMethods(){
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
@@ -118,7 +118,7 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldGetAnmethod(){
+    void shouldGetAMethod(){
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         Mockito.when(paymentMethodService.retrievePaymentMethodById(
@@ -139,8 +139,8 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldGetPaymentmethodPSPs(){
-        String TEST_method_ID = UUID.randomUUID().toString();
+    void shouldGetPaymentMethodPSPs(){
+        String TEST_METHOD_ID = UUID.randomUUID().toString();
         PspDto pspDto = TestUtil.getTestPspDto();
 
         Mockito.when(paymentMethodService.retrievePaymentMethodById(
@@ -156,7 +156,7 @@ class PaymentMethodsControllerTests {
 
         webClient
                 .get()
-                .uri("/payment-methods/"+TEST_method_ID+"/psps")
+                .uri("/payment-methods/"+TEST_METHOD_ID+"/psps")
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -165,7 +165,7 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldPatchPaymentmethod(){
+    void shouldPatchPaymentMethod(){
         UUID TEST_CAT = UUID.randomUUID();
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();

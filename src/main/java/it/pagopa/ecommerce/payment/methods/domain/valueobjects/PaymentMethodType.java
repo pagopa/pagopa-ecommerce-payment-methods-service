@@ -7,14 +7,14 @@ import java.util.Objects;
 
 public class PaymentMethodType implements Serializable {
 
-    private final String paymentmethodType;
+    private final String paymentMethodType;
 
-    public PaymentMethodType(@NonNull String paymentmethodType) {
+    public PaymentMethodType(@NonNull String paymentMethodType) {
 
-        this.paymentmethodType = Objects.requireNonNull(paymentmethodType);
+        this.paymentMethodType = Objects.requireNonNull(paymentMethodType);
     }
 
     public @NonNull String value() {
-        return paymentmethodType;
+        return paymentMethodType;
     }
 }
