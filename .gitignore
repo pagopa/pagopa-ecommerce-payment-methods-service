@@ -34,4 +34,4 @@ build/
 
 ### Env files ###
 .env
-helm/charts/microservice-chart-1.17.0.tgz
+helm/charts/
