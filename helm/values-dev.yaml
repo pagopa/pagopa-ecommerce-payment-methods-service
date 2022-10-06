@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.4.23"
+    tag: "0.0.2"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -65,7 +65,7 @@ microservice-chart:
           # metricAggregationInterval: "-1:1:0"
           metricAggregationType: Count
           targetValue: "30"
-  envConfig:   
+  envConfig:
     MONGO_HOST: pagopa-d-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-d-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"

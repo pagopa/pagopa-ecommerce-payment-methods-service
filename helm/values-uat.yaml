@@ -16,7 +16,7 @@ microservice-chart:
         repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
         tag: "latest"
         pullPolicy: Always
-  envConfig:   
+  envConfig:
     MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
@@ -31,7 +31,7 @@ microservice-chart:
     API_CONFIG_KEY: api-config-for-ecommerce-key
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.4.23"
+    tag: "0.0.2"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -90,7 +90,7 @@ microservice-chart:
           # metricAggregationInterval: "-1:1:0"
           metricAggregationType: Count
           targetValue: "30"
-  envConfig:   
+  envConfig:
     MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
