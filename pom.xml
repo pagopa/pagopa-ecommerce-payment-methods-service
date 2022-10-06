@@ -8,10 +8,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>it.pagopa.ecommerce</groupId>
-	<artifactId>pagopa-ecommerce-payment-instruments-service</artifactId>
+	<artifactId>pagopa-ecommerce-payment-methods-service</artifactId>
 	<version>0.0.2</version>
-	<name>pagopa-ecommerce-payment-instruments-service</name>
-	<description>payment instruments micro service</description>
+	<name>pagopa-ecommerce-payment-methods-service</name>
+	<description>payment methods micro service</description>
 	<properties>
 		<java.version>17</java.version>
 		<jacoco.version>0.8.8</jacoco.version>
@@ -98,7 +98,7 @@
 				<version>5.4.0</version>
 				<executions>
 					<execution>
-						<id>payment-instrument-api</id>
+						<id>payment-method-api</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -110,10 +110,10 @@
 							<generateApiTests>false</generateApiTests>
 							<generateModelTests>false</generateModelTests>
 							<configOptions>
-								<basePackage>it.pagopa.ecommerce.payment.instruments.server</basePackage>
-								<modelPackage>it.pagopa.ecommerce.payment.instruments.server.model</modelPackage>
-								<apiPackage>it.pagopa.ecommerce.payment.instruments.server.api</apiPackage>
-								<configPackage>it.pagopa.ecommerce.payment.instruments.server.config</configPackage>
+								<basePackage>it.pagopa.ecommerce.payment.methods.server</basePackage>
+								<modelPackage>it.pagopa.ecommerce.payment.methods.server.model</modelPackage>
+								<apiPackage>it.pagopa.ecommerce.payment.methods.server.api</apiPackage>
+								<configPackage>it.pagopa.ecommerce.payment.methods.server.config</configPackage>
 								<interfaceOnly>true</interfaceOnly>
 								<hideGenerationTimestamp>true</hideGenerationTimestamp>
 								<skipDefaultInterface>true</skipDefaultInterface>
