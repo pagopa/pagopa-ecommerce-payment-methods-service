@@ -2,8 +2,35 @@ microservice-chart:
   namespace: "ecommerce"
   nameOverride: ""
   fullnameOverride: ""
+  canaryDelivery:
+    create: false
+    ingress:
+      create: true
+      canary:
+        type: bluegreen
+    service:
+      create: true
+    deployment:
+      create: true
+      image:
+        repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
+        tag: "latest"
+        pullPolicy: Always
+  envConfig:
+    MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
+    MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
+    MONGO_PORT: "10255"
+    MONGO_SSL_ENABLED: "true"
+    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
+    API_CONFIG_READ_TIMEOUT: "10000"
+    API_CONFIG_CONNECTION_TIMEOUT: "10000"
+    SPRING_MAX_IN_MEM_SIZE: "16777216"
+    API_CONFIG_PSP_UPDATE_CRON_STRING: "0 0 * * * *"
+  envSecret:
+    MONGO_PASSWORD: mongo-ecommerce-password
+    API_CONFIG_KEY: api-config-for-ecommerce-key
   image:
-    repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
+    repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "0.0.2"
     pullPolicy: Always
   livenessProbe:
@@ -20,15 +47,13 @@ microservice-chart:
     initialDelaySeconds: 60
     failureThreshold: 6
     periodSeconds: 10
-  deployment:
-    create: true
   service:
     create: true
     type: ClusterIP
     port: 8080
   ingress:
     create: true
-    host: "weudev.ecommerce.internal.dev.platform.pagopa.it"
+    host: "weuuat.ecommerce.internal.uat.platform.pagopa.it"
     path: /pagopa-ecommerce-payment-methods-service/(.*)
   serviceAccount:
     create: false
@@ -42,10 +67,10 @@ microservice-chart:
     allowPrivilegeEscalation: false
   resources:
     requests:
-      memory: "256Mi"
+      memory: "384Mi"
       cpu: "200m"
     limits:
-      memory: "256Mi"
+      memory: "384Mi"
       cpu: "200m"
   autoscaling:
     minReplica: 1
@@ -57,8 +82,8 @@ microservice-chart:
         metadata:
           tenantId: 7788edaf-0346-4068-9d79-c868aed15b3d
           subscriptionId: bbe47ad4-08b3-4925-94c5-1278e5819b86
-          resourceGroupName: pagopa-d-ecommerce-sec-rg
-          resourceURI: Microsoft.KeyVault/vaults/pagopa-d-ecommerce-kv
+          resourceGroupName: pagopa-u-ecommerce-sec-rg
+          resourceURI: Microsoft.KeyVault/vaults/pagopa-u-ecommerce-kv
           metricName: ServiceApiHit
           # metricNamespace: Microsoft.KeyVault/vaults
           # metricFilter: namespace eq 'default'
@@ -66,11 +91,11 @@ microservice-chart:
           metricAggregationType: Count
           targetValue: "30"
   envConfig:
-    MONGO_HOST: pagopa-d-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
-    MONGO_USERNAME: pagopa-d-weu-ecommerce-cosmos-account
+    MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
+    MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    API_CONFIG_URI: "https://api.dev.platform.pagopa.it"
+    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
     API_CONFIG_READ_TIMEOUT: "10000"
     API_CONFIG_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
@@ -79,12 +104,8 @@ microservice-chart:
     MONGO_PASSWORD: mongo-ecommerce-password
     API_CONFIG_KEY: api-config-for-ecommerce-key
   keyvault:
-    name: "pagopa-d-ecommerce-kv"
+    name: "pagopa-u-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  canaryDelivery:
-    deployment:
-      image:
-        tag: ""
