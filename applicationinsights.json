@@ -1,0 +1,13 @@
+{
+  "selfDiagnostics": {
+    "destination": "console",
+    "level": "INFO"
+  },
+  "role": {
+    "name": "pagopa-ecommerce-payment-methods-service"
+  },
+  "sampling": {
+    "percentage": 100
+  }
+}
+
