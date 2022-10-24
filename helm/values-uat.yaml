@@ -21,7 +21,7 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
+    API_CONFIG_URI: "https://api.dev.platform.pagopa.it"
     API_CONFIG_READ_TIMEOUT: "10000"
     API_CONFIG_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
@@ -32,7 +32,7 @@ microservice-chart:
     APPLICATIONINSIGHTS_CONNECTION_STRING: applicationinsights-connection-string
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.0.3"
+    tag: "0.0.6"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -68,11 +68,11 @@ microservice-chart:
     allowPrivilegeEscalation: false
   resources:
     requests:
-      memory: "384Mi"
-      cpu: "200m"
+      memory: "512Mi"
+      cpu: "300m"
     limits:
-      memory: "384Mi"
-      cpu: "200m"
+      memory: "512Mi"
+      cpu: "300m"
   autoscaling:
     minReplica: 1
     maxReplica: 2
@@ -96,7 +96,7 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
+    API_CONFIG_URI: "https://api.dev.platform.pagopa.it"
     API_CONFIG_READ_TIMEOUT: "10000"
     API_CONFIG_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
