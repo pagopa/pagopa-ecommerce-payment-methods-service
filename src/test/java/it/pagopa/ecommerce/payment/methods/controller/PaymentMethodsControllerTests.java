@@ -4,11 +4,16 @@ import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.application.PspService;
 import it.pagopa.ecommerce.payment.methods.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
+import it.pagopa.ecommerce.payment.methods.exception.PspNotFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -18,7 +23,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -204,5 +211,52 @@ class PaymentMethodsControllerTests {
                 .isAccepted();
 
         Mockito.verify(pspService, Mockito.times(1)).updatePSPs(Mockito.any());
+    }
+
+    @Test
+    void shouldRetrieveExistingPsp() {
+        Psp psp = TestUtil.getTestPsp();
+        PspDto pspDto = TestUtil.getTestPspDto();
+        PspDocumentKey searchKey = TestUtil.getTestPspDoc(psp).getPspDocumentKey();
+
+        PspFindRequestDto pspFindRequest = new PspFindRequestDto()
+                .pspCode(psp.getPspCode().value())
+                .paymentTypeCode(psp.getPspPaymentMethodType().value())
+                .channel(psp.getPspChannelCode().value())
+                .language(LanguageDto.fromValue(psp.getPspLanguage().value().getLanguage()));
+
+        Mockito.when(pspService.findPsp(searchKey)).thenReturn(Mono.just(pspDto));
+
+        Hooks.onOperatorDebug();
+
+        webClient
+                .post()
+                .uri("/payment-methods/psp")
+                .body(BodyInserters.fromValue(pspFindRequest))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PspDto.class)
+                .isEqualTo(pspDto);
+    }
+
+    @Test
+    void shouldReturn404OnNoPspMatch() {
+        Psp psp = TestUtil.getTestPsp();
+        PspDocumentKey pspDocumentKey = TestUtil.getTestPspDoc(psp).getPspDocumentKey();
+
+        PspFindRequestDto pspFindRequest = new PspFindRequestDto()
+                .pspCode(psp.getPspCode().value())
+                .paymentTypeCode(psp.getPspPaymentMethodType().value())
+                .channel(psp.getPspChannelCode().value())
+                .language(LanguageDto.fromValue(psp.getPspLanguage().value().getLanguage()));
+
+        Mockito.when(pspService.findPsp(pspDocumentKey)).thenReturn(Mono.error(new PspNotFoundException(pspDocumentKey)));
+
+        webClient
+                .post()
+                .uri("/payment-methods/psp")
+                .body(BodyInserters.fromValue(pspFindRequest))
+                .exchange()
+                .expectStatus().isNotFound();
     }
 }

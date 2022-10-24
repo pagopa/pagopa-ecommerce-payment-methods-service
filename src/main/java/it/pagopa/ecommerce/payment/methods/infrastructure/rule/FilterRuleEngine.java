@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.infrastructure.rule;
 
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspCode;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,18 @@
 package it.pagopa.ecommerce.payment.methods.infrastructure;
 
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspCode;
+import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-public interface PspRepository extends ReactiveCrudRepository<PspDocument, String> {
+import static org.springframework.data.domain.ExampleMatcher.matching;
+
+public interface PspRepository extends ReactiveCrudRepository<PspDocument, String>, ReactiveQueryByExampleExecutor<PspDocument> {
     Flux<PspDocument> findByPspDocumentKey(String pspCode, String pspPaymentTypeCode, String pspChannelCode);
     @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0} }")
     Flux<PspDocument> findPspMatchAmount(double amount);
@@ -27,4 +35,26 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
     @Query("{ 'pspMinAmount' : { $lt: ?0 }, 'pspMaxAmount' : { $gt: ?0 }, '_id.pspPaymentTypeCode' : ?1, '_id.pspLanguageCode' : ?2 }")
     Flux<PspDocument> findPspMatchAmountTypeLang(double amount, String pspPaymentTypeCode, String pspLanguageCode);
 
+    default Mono<PspDocument> findPspByKey(PspDocumentKey pspDocumentKey) {
+        PspDocument pspDocument = new PspDocument(
+                new PspDocumentKey(
+                        pspDocumentKey.getPspCode(),
+                        pspDocumentKey.getPspPaymentTypeCode(),
+                        pspDocumentKey.getPspChannelCode(),
+                        pspDocumentKey.getPspLanguageCode()
+                ),
+                PspDto.StatusEnum.ENABLED.getValue(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        ExampleMatcher matcher = matching().withIgnoreNullValues();
+        Example<PspDocument> example = Example.of(pspDocument, matcher);
+
+        return this.findAll(example).single();
+    }
 }

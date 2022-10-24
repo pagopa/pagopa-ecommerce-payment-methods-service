@@ -4,12 +4,15 @@ import it.pagopa.ecommerce.payment.methods.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PspFactory;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.exception.PspNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspRepository;
 import it.pagopa.ecommerce.payment.methods.infrastructure.rule.FilterRuleEngine;
+import it.pagopa.ecommerce.payment.methods.server.model.LanguageDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PspFindRequestDto;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.LanguageEnum;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
@@ -94,7 +97,7 @@ public class PspService {
             pspDto.setBusinessName(doc.getPspBusinessName());
             pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
             pspDto.setBrokerName(doc.getPspBrokerName());
-            pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
+            pspDto.setLanguage(LanguageDto.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
             pspDto.setMinAmount(doc.getPspMinAmount());
             pspDto.setMaxAmount(doc.getPspMaxAmount());
             pspDto.setFixedCost(doc.getPspFixedCost());
@@ -109,5 +112,20 @@ public class PspService {
 
         return filterRuleEngine.applyFilter(amount, language, paymentTypeCode);
     }
-}
 
+    public Mono<PspDto> findPsp(PspDocumentKey searchKey) {
+        return pspRepository.findPspByKey(searchKey)
+                .map(pspDocument -> new PspDto()
+                        .code(pspDocument.getPspDocumentKey().getPspCode())
+                        .paymentTypeCode(pspDocument.getPspDocumentKey().getPspPaymentTypeCode())
+                        .description(pspDocument.getPspDescription())
+                        .businessName(pspDocument.getPspBusinessName())
+                        .status(PspDto.StatusEnum.fromValue(pspDocument.getPspStatus()))
+                        .brokerName(pspDocument.getPspBrokerName())
+                        .language(LanguageDto.fromValue(pspDocument.getPspDocumentKey().getPspLanguageCode()))
+                        .minAmount(pspDocument.getPspMinAmount())
+                        .maxAmount(pspDocument.getPspMaxAmount())
+                        .fixedCost(pspDocument.getPspFixedCost())
+                );
+    }
+}

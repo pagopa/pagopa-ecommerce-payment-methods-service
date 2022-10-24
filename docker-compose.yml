@@ -6,7 +6,7 @@ services:
       context: .
     container_name: pagopa-ecommerce-payment-methods-service
     ports:
-      - "8080:8080"
+      - "8083:8080"
     networks:
       - pagopa-ecommerce
     env_file: .env.example
@@ -54,7 +54,7 @@ services:
 
 networks:
   pagopa-ecommerce:
-    name: pagopa-ecommerce
+    name: pagopa-ecommerce-net
     driver: bridge
     driver_opts:
       com.docker.network.driver.mtu: 1450

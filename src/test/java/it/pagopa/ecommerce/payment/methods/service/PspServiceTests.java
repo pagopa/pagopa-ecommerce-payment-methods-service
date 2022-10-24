@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.LanguageDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
 import it.pagopa.ecommerce.payment.methods.utils.LanguageEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
@@ -23,6 +25,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.methods.infrastructure.rule.FilterRuleEngine;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -37,6 +40,9 @@ class PspServiceTests {
 
     @InjectMocks
     private PspService pspService;
+
+    @Mock
+    private PspRepository pspRepository;
 
     @Test
     void shouldReturnPsp() {
@@ -160,5 +166,45 @@ class PspServiceTests {
                 .expectNext(pspDocument_1)
                 .expectNext(pspDocument_2)
                 .verifyComplete();
+    }
+
+    @Test
+    void shouldRetrievePspByKey() {
+        Psp psp = TestUtil.getTestPsp();
+        PspDocument pspDocument = TestUtil.getTestPspDoc(psp);
+
+        PspDto expected = new PspDto()
+                .code(pspDocument.getPspDocumentKey().getPspCode())
+                .paymentTypeCode(pspDocument.getPspDocumentKey().getPspPaymentTypeCode())
+                .description(pspDocument.getPspDescription())
+                .businessName(pspDocument.getPspBusinessName())
+                .status(PspDto.StatusEnum.fromValue(pspDocument.getPspStatus()))
+                .brokerName(pspDocument.getPspBrokerName())
+                .language(LanguageDto.fromValue(pspDocument.getPspDocumentKey().getPspLanguageCode()))
+                .minAmount(pspDocument.getPspMinAmount())
+                .maxAmount(pspDocument.getPspMaxAmount())
+                .fixedCost(pspDocument.getPspFixedCost());
+
+        PspDocumentKey searchKey = pspDocument.getPspDocumentKey();
+
+        Mockito.when(pspRepository.findPspByKey(searchKey)).thenReturn(Mono.just(pspDocument));
+
+        StepVerifier.create(pspService.findPsp(searchKey))
+                .expectNext(expected)
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnEmptyMonoIfNotMatch() {
+        Psp psp = TestUtil.getTestPsp();
+        PspDocument pspDocument = TestUtil.getTestPspDoc(psp);
+
+        PspDocumentKey searchKey = pspDocument.getPspDocumentKey();
+
+        Mockito.when(pspRepository.findPspByKey(searchKey)).thenReturn(Mono.empty());
+
+        StepVerifier.create(pspService.findPsp(searchKey))
+                .verifyComplete();
+
     }
 }

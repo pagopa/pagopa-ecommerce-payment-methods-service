@@ -142,6 +142,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PSPsResponse'
+  /payment-methods/psp:
+    post:
+      operationId: getPSP
+      summary: Retrieve PSP by key
+      requestBody:
+        $ref: "#/components/requestBodies/PspFindRequest"
+      responses:
+        '200':
+          description: New payment method successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Psp'
+        '400':
+          description: Bad request
+        '404':
+          description: PSP not found
 components:
   schemas:
     PaymentMethodRequest:
@@ -180,6 +197,34 @@ components:
           type: integer
           format: int64
           minimum: 0
+    Language:
+      type: string
+      enum:
+        - IT
+        - EN
+        - FR
+        - DE
+        - SL
+    PspFindRequest:
+      type: object
+      description: Psp find object
+      properties:
+        language:
+          $ref: '#/components/schemas/Language'
+        pspCode:
+          type: string
+          description: PSP Code
+        channel:
+          type: string
+          description: PSP channel
+        paymentTypeCode:
+          type: string
+          description: Payment type code
+      required:
+        - language
+        - pspCode
+        - channel
+        - paymentTypeCode
     PatchPaymentMethodRequest:
       type: object
       description: Patch Payment Method Request
@@ -244,13 +289,7 @@ components:
         brokerName:
           type: string
         language:
-          type: string
-          enum:
-            - IT
-            - EN
-            - FR
-            - DE
-            - SL
+          $ref: '#/components/schemas/Language'
         minAmount:
           type: number
           format: double
@@ -285,3 +324,9 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/PatchPaymentMethodRequest"
+    PspFindRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PspFindRequest"

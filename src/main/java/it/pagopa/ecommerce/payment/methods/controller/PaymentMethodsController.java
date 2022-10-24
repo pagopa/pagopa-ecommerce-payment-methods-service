@@ -4,8 +4,11 @@ import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.application.PspService;
 import it.pagopa.ecommerce.payment.methods.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspCode;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PspAlreadyInUseException;
+import it.pagopa.ecommerce.payment.methods.exception.PspNotFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
@@ -82,6 +85,20 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         ));
     }
 
+    @Override
+    public Mono<ResponseEntity<PspDto>> getPSP(Mono<PspFindRequestDto> pspFindRequestDto, ServerWebExchange exchange) {
+        return pspFindRequestDto
+                .map(request -> new PspDocumentKey(
+                        request.getPspCode(),
+                        request.getPaymentTypeCode(),
+                        request.getChannel(),
+                        request.getLanguage().getValue()
+                ))
+                .flatMap(searchKey ->
+                        pspService.findPsp(searchKey)
+                                .switchIfEmpty(Mono.error(new PspNotFoundException(searchKey))))
+                .map(ResponseEntity::ok);
+    }
 
     @Override
     public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(Integer amount, String lang, String paymentTypeCode, ServerWebExchange exchange) {
@@ -178,5 +195,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         ).collect(Collectors.toList()));
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         return ResponseEntity.ok(response);
+    }
+
+    @ExceptionHandler(PspNotFoundException.class)
+    ResponseEntity<Void> pspNotFoundExceptionHandler(PspNotFoundException _exception) {
+        return ResponseEntity.notFound().build();
     }
 }
