@@ -1,6 +1,11 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,8 +31,7 @@ public class PaymentMethodFactory {
                                                 List<PaymentMethodRange> paymentMethodRanges,
                                                 PaymentMethodType paymentMethodTypeCode) {
 
-        return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
-                    paymentMethodName.value(), paymentMethodTypeCode.value()).hasElement()
+        return paymentMethodRepository.findByPaymentMethodName(paymentMethodName.value()).hasElements()
                 .map(hasPaymentMethod -> {
                             if (Boolean.TRUE.equals(hasPaymentMethod)) {
                                 throw paymentMethodAlreadyInUse(paymentMethodName);
