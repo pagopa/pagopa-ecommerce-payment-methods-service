@@ -21,7 +21,7 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    API_CONFIG_URI: "https://api.dev.platform.pagopa.it"
+    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
     API_CONFIG_READ_TIMEOUT: "10000"
     API_CONFIG_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
@@ -96,7 +96,7 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    API_CONFIG_URI: "https://api.dev.platform.pagopa.it"
+    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
     API_CONFIG_READ_TIMEOUT: "10000"
     API_CONFIG_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
