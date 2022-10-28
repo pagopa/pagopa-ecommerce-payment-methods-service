@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
 
+import java.math.BigInteger;
+
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
@@ -44,9 +46,9 @@ class FilterRuleEngineTests {
             "Test",
             "Test broker",
             "Test description",
-            0.0,
-            100.0,
-            100.0
+            BigInteger.valueOf(0),
+            BigInteger.valueOf(100),
+            BigInteger.valueOf(100)
     );
 
     String TEST_PAYMENT_TYPE = "PO";

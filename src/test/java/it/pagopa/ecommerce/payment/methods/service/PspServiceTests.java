@@ -1,12 +1,23 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import it.pagopa.ecommerce.payment.methods.application.PspService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspAmount;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBrokerName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBusinessName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspChannelCode;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspCode;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspDescription;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspFee;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspLanguage;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspPaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspStatus;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
+import it.pagopa.ecommerce.payment.methods.infrastructure.rule.FilterRuleEngine;
 import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
 import it.pagopa.ecommerce.payment.methods.utils.LanguageEnum;
+import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,16 +27,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-
-import it.pagopa.ecommerce.payment.methods.application.PspService;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
-import it.pagopa.ecommerce.payment.methods.infrastructure.rule.FilterRuleEngine;
-import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.math.BigInteger;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -93,10 +102,10 @@ class PspServiceTests {
                         new PspBrokerName(""),
                         new PspDescription(""),
                         new PspLanguage(LanguageEnum.IT),
-                        new PspAmount(10.0),
-                        new PspAmount(1.0),
+                        new PspAmount(BigInteger.valueOf(10)),
+                        new PspAmount(BigInteger.valueOf(1)),
                         new PspChannelCode("AB0"),
-                        new PspFee(0.0)));
+                        new PspFee(BigInteger.valueOf(0))));
 
     }
 
@@ -131,9 +140,9 @@ class PspServiceTests {
                 "Test",
                 "Test broker",
                 "Test description",
-                0.0,
-                100.0,
-                100.0);
+                BigInteger.valueOf(0),
+                        BigInteger.valueOf(100),
+                BigInteger.valueOf(100));
 
         PspDocument pspDocument_2 = new PspDocument(
                 new PspDocumentKey(
@@ -145,9 +154,9 @@ class PspServiceTests {
                 "Test_2",
                 "Test broker",
                 "Test description",
-                0.0,
-                100.0,
-                100.0);
+                BigInteger.valueOf(0),
+                BigInteger.valueOf(100),
+                BigInteger.valueOf(100));
 
         Mockito.when(filterRuleEngine.applyFilter( amount, language, paymentTypeCode))
                 .thenReturn(Flux.just(pspDocument_1, pspDocument_2));

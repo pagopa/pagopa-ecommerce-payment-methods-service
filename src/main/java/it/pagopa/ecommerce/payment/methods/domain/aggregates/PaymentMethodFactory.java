@@ -1,6 +1,11 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

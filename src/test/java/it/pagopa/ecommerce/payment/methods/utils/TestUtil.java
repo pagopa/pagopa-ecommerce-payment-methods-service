@@ -2,7 +2,22 @@ package it.pagopa.ecommerce.payment.methods.utils;
 
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspAmount;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBrokerName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBusinessName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspChannelCode;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspCode;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspDescription;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspFee;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspLanguage;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspPaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
@@ -15,6 +30,7 @@ import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import org.springframework.data.util.Pair;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -88,10 +104,10 @@ public class TestUtil {
                 new PspBrokerName(""),
                 new PspDescription(""),
                 new PspLanguage(LanguageEnum.IT),
-                new PspAmount(0.0),
-                new PspAmount(100.0),
+                new PspAmount(BigInteger.valueOf(0)),
+                new PspAmount(BigInteger.valueOf(100)),
                 new PspChannelCode("AB0"),
-                new PspFee(0.0)
+                new PspFee(BigInteger.valueOf(100))
         );
     }
 

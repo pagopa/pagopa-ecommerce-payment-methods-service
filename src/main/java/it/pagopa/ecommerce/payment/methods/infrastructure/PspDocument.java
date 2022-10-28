@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigInteger;
+
 
 @Data
 @AllArgsConstructor
@@ -17,7 +19,7 @@ public class PspDocument {
     private String pspBusinessName;
     private String pspBrokerName;
     private String pspDescription;
-    private Double pspMinAmount;
-    private Double pspMaxAmount;
-    private Double pspFixedCost;
+    private BigInteger pspMinAmount;
+    private BigInteger pspMaxAmount;
+    private BigInteger pspFixedCost;
 }
