@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @ApplicationService
 @Slf4j
-public class PaymentMethodService {
+public class  PaymentMethodService {
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
