@@ -30,6 +30,7 @@ import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
 import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import org.springframework.data.util.Pair;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -103,10 +104,10 @@ public class TestUtil {
                 new PspBrokerName(""),
                 new PspDescription(""),
                 new PspLanguage(LanguageEnum.IT),
-                new PspAmount(0.0),
-                new PspAmount(100.0),
+                new PspAmount(BigInteger.valueOf(0)),
+                new PspAmount(BigInteger.valueOf(100)),
                 new PspChannelCode("AB0"),
-                new PspFee(0.0)
+                new PspFee(BigInteger.valueOf(100))
         );
     }
 
@@ -126,7 +127,14 @@ public class TestUtil {
                         .languageCode(ServiceDto.LanguageCodeEnum.IT)
                         .conventionCode("TEST")
                         .pspCode("TEST")
-                        .serviceName("TEST")))
+                        .paymentTypeCode("PO")
+                        .pspBusinessName("TEST")
+                        .brokerPspCode("TEST")
+                        .serviceName("TEST")
+                        .serviceDescription("TEST")
+                        .minimumAmount(0.0)
+                        .maximumAmount(100.0)
+                        .fixedCost(100.0)))
                 .pageInfo(
                         new PageInfoDto()
                                 .totalPages(1)

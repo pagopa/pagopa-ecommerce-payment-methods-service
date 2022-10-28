@@ -4,20 +4,21 @@ import lombok.EqualsAndHashCode;
 import org.springframework.lang.NonNull;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Objects;
 
 @ValueObjects
 @EqualsAndHashCode
 public class PspFee implements Serializable {
 
-    private final Double fee;
+    private final BigInteger fee;
 
-    public PspFee(@NonNull Double fee) {
+    public PspFee(@NonNull BigInteger fee) {
 
         this.fee = Objects.requireNonNull(fee);
     }
 
-    public @NonNull Double value() {
+    public @NonNull BigInteger value() {
         return fee;
     }
 }

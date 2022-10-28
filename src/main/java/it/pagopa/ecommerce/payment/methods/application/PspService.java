@@ -29,6 +29,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 @Service
 @ApplicationService
 @Slf4j
@@ -52,6 +55,11 @@ public class PspService {
 
     public void updatePSPs(ServicesDto servicesDto) {
         servicesDto.getServices().forEach(service -> {
+
+            BigInteger min = BigDecimal.valueOf(service.getMinimumAmount()).multiply(BigDecimal.valueOf(100)).toBigInteger();
+            BigInteger max = BigDecimal.valueOf(service.getMaximumAmount()).multiply(BigDecimal.valueOf(100)).toBigInteger();
+            BigInteger fee = BigDecimal.valueOf(service.getFixedCost()).multiply(BigDecimal.valueOf(100)).toBigInteger();
+
             Mono<Psp> pspMono = pspFactory.newPsp(
                     new PspCode(service.getPspCode()),
                     new PspPaymentMethodType(service.getPaymentTypeCode()),
@@ -60,10 +68,10 @@ public class PspService {
                     new PspBrokerName(service.getBrokerPspCode()),
                     new PspDescription(service.getServiceDescription()),
                     new PspLanguage(LanguageEnum.valueOf(service.getLanguageCode().getValue())),
-                    new PspAmount(service.getMinimumAmount()),
-                    new PspAmount(service.getMaximumAmount()),
+                    new PspAmount(min),
+                    new PspAmount(max),
                     new PspChannelCode(service.getChannelCode()),
-                    new PspFee(service.getFixedCost()));
+                    new PspFee(fee));
 
             pspMono.flatMap(
                     p ->
@@ -104,9 +112,9 @@ public class PspService {
             pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
             pspDto.setBrokerName(doc.getPspBrokerName());
             pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
-            pspDto.setMinAmount(doc.getPspMinAmount());
-            pspDto.setMaxAmount(doc.getPspMaxAmount());
-            pspDto.setFixedCost(doc.getPspFixedCost());
+            pspDto.setMinAmount(doc.getPspMinAmount().longValue());
+            pspDto.setMaxAmount(doc.getPspMaxAmount().longValue());
+            pspDto.setFixedCost(doc.getPspFixedCost().longValue());
 
             return pspDto;
         });

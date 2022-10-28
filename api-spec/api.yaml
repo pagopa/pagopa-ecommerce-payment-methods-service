@@ -252,14 +252,14 @@ components:
             - DE
             - SL
         minAmount:
-          type: number
-          format: double
+          type: integer
+          format: int64
         maxAmount:
-          type: number
-          format: double
+          type: integer
+          format: int64
         fixedCost:
-          type: number
-          format: double
+          type: integer
+          format: int64
       required:
         - code
         - paymentMethodID
