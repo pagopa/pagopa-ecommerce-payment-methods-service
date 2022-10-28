@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
@@ -56,9 +57,9 @@ class PaymentMethodFactoryTests {
     void shouldThrowDuplicatedMethodException(){
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
-        Mockito.when(paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
-                paymentMethod.getPaymentMethodName().value(), paymentMethod.getPaymentMethodTypeCode().value()))
-                .thenReturn(Mono.just(
+        Mockito.when(paymentMethodRepository.findByPaymentMethodName(
+                        paymentMethod.getPaymentMethodName().value()))
+                .thenReturn(Flux.just(
                         new PaymentMethodDocument(
                                 paymentMethod.getPaymentMethodID().value().toString(),
                                 paymentMethod.getPaymentMethodName().value(),
@@ -67,7 +68,7 @@ class PaymentMethodFactoryTests {
                                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                                         .collect(Collectors.toList()),
                                 paymentMethod.getPaymentMethodTypeCode().value()
-                                )
+                        )
                 ));
 
         assertThrows(PaymentMethodAlreadyInUseException.class,
