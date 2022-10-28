@@ -36,10 +36,9 @@ class PaymentMethodFactoryTests {
     void shouldCreateNewmethod(){
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
-        Mockito.when(paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
-                paymentMethod.getPaymentMethodName().value(), paymentMethod.getPaymentMethodTypeCode().value()))
-                .thenReturn(Mono.empty());
-
+        Mockito.when(paymentMethodRepository.findByPaymentMethodName(
+                paymentMethod.getPaymentMethodName().value()))
+                .thenReturn(Flux.empty());
 
         PaymentMethod paymentMethodProduct = paymentMethodFactory.newPaymentMethod(
                 paymentMethod.getPaymentMethodID(),
