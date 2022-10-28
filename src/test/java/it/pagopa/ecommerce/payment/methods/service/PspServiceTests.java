@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.service;
 
 import it.pagopa.ecommerce.payment.methods.application.PspService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
+import it.pagopa.ecommerce.payment.methods.domain.aggregates.PspFactory;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspAmount;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBrokerName;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBusinessName;
@@ -14,11 +15,13 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspPaymentMethodT
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspRepository;
 import it.pagopa.ecommerce.payment.methods.infrastructure.rule.FilterRuleEngine;
 import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
 import it.pagopa.ecommerce.payment.methods.utils.LanguageEnum;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigInteger;
@@ -35,6 +39,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -43,6 +48,12 @@ class PspServiceTests {
 
     @Mock
     private FilterRuleEngine filterRuleEngine;
+
+    @Mock
+    private PspRepository pspRepository;
+
+    @Mock
+    private PspFactory pspFactory;
 
     @InjectMocks
     private PspService pspService;
@@ -64,6 +75,8 @@ class PspServiceTests {
         assertEquals(1, services.size());
         assertEquals(pspDocument.getPspDocumentKey().getPspCode(), services.get(0).getCode());
     }
+
+
 
     @Test
     void shouldReturnEmptyResultWithNullFilter() {
@@ -169,5 +182,20 @@ class PspServiceTests {
                 .expectNext(pspDocument_1)
                 .expectNext(pspDocument_2)
                 .verifyComplete();
+    }
+
+    @Test
+    void shouldUpdatePsps() {
+
+        ServicesDto servicesDto = TestUtil.getTestServices();
+
+        // Precondition
+        Mockito.when(pspFactory.newPsp(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                        .thenReturn(Mono.just(TestUtil.getTestPsp()));
+        Mockito.when(pspRepository.save(any())).thenReturn(Mono.just(
+                TestUtil.getTestPspDoc(TestUtil.getTestPsp())));
+
+        // Test execution
+        pspService.updatePSPs(servicesDto);
     }
 }
