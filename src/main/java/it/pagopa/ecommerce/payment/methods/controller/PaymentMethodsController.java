@@ -124,7 +124,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 request.getName(),
                 request.getDescription(),
                 request.getRanges().stream().map(r -> Pair.of(r.getMin(), r.getMax())).toList(),
-                request.getPaymentTypeCode())
+                request.getPaymentTypeCode(), request.getAsset())
                 .map(this::paymentMethodToResponse)
         );
     }

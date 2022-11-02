@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -25,6 +26,8 @@ public class PaymentMethod {
     private final List<PaymentMethodRange> paymentMethodRanges;
     private final PaymentMethodType paymentMethodTypeCode;
 
+    private final PaymentMethodAsset paymentMethodAsset;
+
     @AggregateID
     public PaymentMethodID paymentMethodID() {
         return this.paymentMethodID;
@@ -34,13 +37,14 @@ public class PaymentMethod {
                          PaymentMethodDescription paymentMethodDescription,
                          PaymentMethodStatus paymentMethodStatus,
                          PaymentMethodType paymentMethodTypeCode,
-                         List<PaymentMethodRange> paymentMethodRanges) {
+                         List<PaymentMethodRange> paymentMethodRanges, PaymentMethodAsset paymentMethodAsset) {
         this.paymentMethodID = paymentMethodID;
         this.paymentMethodName = paymentMethodName;
         this.paymentMethodDescription = paymentMethodDescription;
         this.paymentMethodStatus = paymentMethodStatus;
         this.paymentMethodTypeCode = paymentMethodTypeCode;
         this.paymentMethodRanges = paymentMethodRanges;
+        this.paymentMethodAsset = paymentMethodAsset;
     }
 
     public void setPaymentMethodStatus(PaymentMethodStatusEnum paymentMethodStatus) {

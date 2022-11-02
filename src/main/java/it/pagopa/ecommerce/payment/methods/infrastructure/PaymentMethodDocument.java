@@ -20,6 +20,7 @@ public class PaymentMethodDocument {
     private String paymentMethodName;
     private String paymentMethodDescription;
     private String paymentMethodStatus;
+    private String paymentMethodAsset;
     private List<Pair<Long, Long>> paymentMethodRanges;
     @Indexed(unique = true)
     private String paymentMethodTypeCode;

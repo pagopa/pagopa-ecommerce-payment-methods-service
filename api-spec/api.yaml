@@ -152,6 +152,8 @@ components:
           type: string
         description:
           type: string
+        asset:
+          type: string
         status:
           type: string
           enum: ["ENABLED","DISABLED","INCOMING"]
@@ -198,6 +200,8 @@ components:
         name:
           type: string
         description:
+          type: string
+        asset:
           type: string
         status:
           type: string

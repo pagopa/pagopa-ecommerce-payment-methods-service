@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
 
@@ -46,7 +45,8 @@ class PaymentMethodFactoryTests {
                 paymentMethod.getPaymentMethodDescription(),
                 paymentMethod.getPaymentMethodStatus(),
                 paymentMethod.getPaymentMethodRanges(),
-                paymentMethod.getPaymentMethodTypeCode()
+                paymentMethod.getPaymentMethodTypeCode(),
+                paymentMethod.getPaymentMethodAsset()
         ).block();
 
         assertNotNull(paymentMethodProduct);
@@ -64,6 +64,7 @@ class PaymentMethodFactoryTests {
                                 paymentMethod.getPaymentMethodName().value(),
                                 paymentMethod.getPaymentMethodDescription().value(),
                                 paymentMethod.getPaymentMethodStatus().value().toString(),
+                                paymentMethod.getPaymentMethodAsset().value(),
                                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                                         .collect(Collectors.toList()),
                                 paymentMethod.getPaymentMethodTypeCode().value()
@@ -77,7 +78,8 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getPaymentMethodDescription(),
                         paymentMethod.getPaymentMethodStatus(),
                         paymentMethod.getPaymentMethodRanges(),
-                        paymentMethod.getPaymentMethodTypeCode()
+                        paymentMethod.getPaymentMethodTypeCode(),
+                        paymentMethod.getPaymentMethodAsset()
                 ).block());
     }
 }

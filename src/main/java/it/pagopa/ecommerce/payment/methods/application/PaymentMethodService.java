@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -41,7 +42,8 @@ public class  PaymentMethodService {
     public Mono<PaymentMethod> createPaymentMethod(String paymentMethodName,
                                                    String paymentMethodDescription,
                                                    List<Pair<Long, Long>> ranges,
-                                                   String paymentMethodTypeCode){
+                                                   String paymentMethodTypeCode,
+                                                   String paymentMethodAsset){
         log.debug("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
                 new PaymentMethodID(UUID.randomUUID()),
@@ -49,7 +51,8 @@ public class  PaymentMethodService {
                 new PaymentMethodDescription(paymentMethodDescription),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
-                new PaymentMethodType(paymentMethodTypeCode)
+                new PaymentMethodType(paymentMethodTypeCode),
+                new PaymentMethodAsset(paymentMethodAsset)
         );
 
         log.debug("[Payment Method Aggregate] Store new aggregate");
@@ -59,6 +62,7 @@ public class  PaymentMethodService {
                         p.getPaymentMethodName().value(),
                         p.getPaymentMethodDescription().value(),
                         p.getPaymentMethodStatus().value().toString(),
+                        p.getPaymentMethodAsset().value(),
                         p.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max())).collect(Collectors.toList()),
                         p.getPaymentMethodTypeCode().value())
         ).map(doc -> new PaymentMethod(
@@ -67,7 +71,8 @@ public class  PaymentMethodService {
                 new PaymentMethodDescription(doc.getPaymentMethodDescription()),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())),
                 doc.getPaymentMethodRanges().stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).collect(Collectors.toList()),
-                new PaymentMethodType(doc.getPaymentMethodTypeCode())
+                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
+                new PaymentMethodAsset(doc.getPaymentMethodAsset())
         )));
     }
 
@@ -103,6 +108,7 @@ public class  PaymentMethodService {
                                         p.getPaymentMethodName().value(),
                                         p.getPaymentMethodDescription().value(),
                                         p.getPaymentMethodStatus().value().toString(),
+                                        p.getPaymentMethodAsset().value(),
                                         p.getPaymentMethodRanges().stream().map(
                                                 r -> Pair.of(r.min(), r.max())
                                         ).collect(Collectors.toList()),
@@ -174,6 +180,7 @@ public class  PaymentMethodService {
                 new PaymentMethodDescription(doc.getPaymentMethodDescription()),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())),
                 doc.getPaymentMethodRanges().stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).collect(Collectors.toList()),
-                new PaymentMethodType(doc.getPaymentMethodTypeCode()));
+                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
+                new PaymentMethodAsset(doc.getPaymentMethodAsset()));
     }
 }
