@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.util.Pair;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @Data
@@ -21,7 +22,7 @@ public class PaymentMethodDocument {
     private String paymentMethodDescription;
     private String paymentMethodStatus;
     private String paymentMethodAsset;
-    private List<Pair<Long, Long>> paymentMethodRanges;
+    private List<Pair<BigInteger, BigInteger>> paymentMethodRanges;
     @Indexed(unique = true)
     private String paymentMethodTypeCode;
 }

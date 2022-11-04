@@ -5,14 +5,15 @@ import org.springframework.lang.NonNull;
 import javax.validation.ValidationException;
 import javax.validation.constraints.PositiveOrZero;
 import java.io.Serializable;
+import java.math.BigInteger;
 
 public class PaymentMethodRange implements Serializable {
 
-    private final long min;
-    private final long max;
+    private final BigInteger min;
+    private final BigInteger max;
 
-    public PaymentMethodRange(@NonNull @PositiveOrZero Long min, @NonNull @PositiveOrZero Long max) {
-        if (min > max){
+    public PaymentMethodRange(@NonNull @PositiveOrZero BigInteger min, @NonNull @PositiveOrZero BigInteger max) {
+        if (min.compareTo(max) > 0){
             throw new ValidationException("Invalid range");
         }
 
@@ -20,10 +21,10 @@ public class PaymentMethodRange implements Serializable {
         this.max = max;
     }
 
-    public @NonNull long min() {
+    public @NonNull BigInteger min() {
         return min;
     }
-    public @NonNull long max() {
+    public @NonNull BigInteger max() {
         return max;
     }
 }

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class  PaymentMethodService {
 
     public Mono<PaymentMethod> createPaymentMethod(String paymentMethodName,
                                                    String paymentMethodDescription,
-                                                   List<Pair<Long, Long>> ranges,
+                                                   List<Pair<BigInteger, BigInteger>> ranges,
                                                    String paymentMethodTypeCode,
                                                    String paymentMethodAsset){
         log.debug("[Payment Method Aggregate] Create new aggregate");
@@ -85,7 +86,7 @@ public class  PaymentMethodService {
             return paymentMethodRepository
                     .findAll()
                     .filter(doc -> doc.getPaymentMethodRanges().stream()
-                            .anyMatch(range -> range.getFirst() <= amount && range.getSecond() >= amount)
+                            .anyMatch(range -> range.getFirst().longValue() <= amount && range.getSecond().longValue() >= amount)
                     ).map(this::docToAggregate);
         }
     }
@@ -140,7 +141,8 @@ public class  PaymentMethodService {
                     paymentMethodRepository.findByPaymentMethodTypeCode(paymentTypeCode)
                             .flatMap(p -> {
                                 log.info("Updating paymentMethod: {}", p.getPaymentMethodID());
-                                p.setPaymentMethodRanges(rangeMap.get(paymentTypeCode).stream().toList());
+                                p.setPaymentMethodRanges(rangeMap.get(paymentTypeCode).stream().map(
+                                        pair -> Pair.of(BigInteger.valueOf(pair.getFirst()), BigInteger.valueOf(pair.getSecond()))).toList());
                                 return Mono.just(p);
                             })
                             .flatMap(updatedDoc -> paymentMethodRepository.save(updatedDoc))

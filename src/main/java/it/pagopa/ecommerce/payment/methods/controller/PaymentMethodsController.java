@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -74,8 +75,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     responseDto.setRanges(paymentMethod.getPaymentMethodRanges().stream().map(
                             r -> {
                                 RangeDto rangeDto = new RangeDto();
-                                rangeDto.setMin(r.min());
-                                rangeDto.setMax(r.max());
+                                rangeDto.setMin(r.min().longValue());
+                                rangeDto.setMax(r.max().longValue());
                                 return rangeDto;
                             }
                     ).collect(Collectors.toList()));
@@ -123,7 +124,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         return paymentMethodRequestDto.flatMap(request -> paymentMethodService.createPaymentMethod(
                 request.getName(),
                 request.getDescription(),
-                request.getRanges().stream().map(r -> Pair.of(r.getMin(), r.getMax())).toList(),
+                request.getRanges().stream().map(r -> Pair.of(BigInteger.valueOf(r.getMin()), BigInteger.valueOf(r.getMax()))).toList(),
                 request.getPaymentTypeCode(), request.getAsset())
                 .map(this::paymentMethodToResponse)
         );
@@ -175,8 +176,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         response.setRanges(paymentMethod.getPaymentMethodRanges().stream().map(
                 r -> {
                     RangeDto rangeDto = new RangeDto();
-                    rangeDto.setMin(r.min());
-                    rangeDto.setMax(r.max());
+                    rangeDto.setMin(r.min().longValue());
+                    rangeDto.setMax(r.max().longValue());
                     return rangeDto;
                 }
         ).collect(Collectors.toList()));

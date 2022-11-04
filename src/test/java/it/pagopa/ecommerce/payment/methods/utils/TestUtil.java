@@ -61,7 +61,7 @@ public class TestUtil {
                 new PaymentMethodDescription("Test"),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 new PaymentMethodType(TEST_TYPE_CODE),
-                List.of(new PaymentMethodRange(0L, 100L)),
+                List.of(new PaymentMethodRange(BigInteger.ZERO, BigInteger.valueOf(100))),
                 new PaymentMethodAsset(TEST_ASSET)
         );
     }
