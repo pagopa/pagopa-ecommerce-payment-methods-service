@@ -76,10 +76,10 @@ class FilterRuleEngineTests {
          * Expected behavior: Should call pspRepository findPspMatchAmount()
          */
     void testAmountFilter(){
-        Mockito.when(pspRepository.findPspMatchAmount(TEST_AMOUNT)).thenReturn(Flux.just(pspDocument));
+        Mockito.when(pspRepository.findPspMatchAmount(BigInteger.valueOf(TEST_AMOUNT))).thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, null, null).collectList().block();
 
-        Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchAmount(TEST_AMOUNT);
+        Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchAmount(BigInteger.valueOf(TEST_AMOUNT));
     }
 
     @Test
@@ -113,11 +113,11 @@ class FilterRuleEngineTests {
          * Expected behavior: Should call pspRepository findPspMatchAmountLang()
          */
     void testAmountLangFilter(){
-        Mockito.when(pspRepository.findPspMatchAmountLang(TEST_AMOUNT, TEST_LANG)).thenReturn(Flux.just(pspDocument));
+        Mockito.when(pspRepository.findPspMatchAmountLang(BigInteger.valueOf(TEST_AMOUNT), TEST_LANG)).thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
-                .findPspMatchAmountLang(TEST_AMOUNT, TEST_LANG);
+                .findPspMatchAmountLang(BigInteger.valueOf(TEST_AMOUNT), TEST_LANG);
     }
 
     @Test
@@ -126,12 +126,12 @@ class FilterRuleEngineTests {
          * Expected behavior: Should call pspRepository findPspMatchType()
          */
     void testAmountTypeFilter(){
-        Mockito.when(pspRepository.findPspMatchAmountType(TEST_AMOUNT, TEST_PAYMENT_TYPE))
+        Mockito.when(pspRepository.findPspMatchAmountType(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE))
                 .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, null, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
-                .findPspMatchAmountType(TEST_AMOUNT, TEST_PAYMENT_TYPE);
+                .findPspMatchAmountType(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE);
     }
 
     @Test
