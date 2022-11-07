@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -29,7 +30,8 @@ public class PaymentMethodFactory {
                                                 PaymentMethodDescription paymentMethodDescription,
                                                 PaymentMethodStatus paymentMethodStatus,
                                                 List<PaymentMethodRange> paymentMethodRanges,
-                                                PaymentMethodType paymentMethodTypeCode) {
+                                                PaymentMethodType paymentMethodTypeCode,
+                                                PaymentMethodAsset paymentMethodAsset) {
 
         return paymentMethodRepository.findByPaymentMethodName(paymentMethodName.value()).hasElements()
                 .map(hasPaymentMethod -> {
@@ -38,8 +40,8 @@ public class PaymentMethodFactory {
                             }
 
                             return new PaymentMethod(paymentMethodID, paymentMethodName,
-                                    paymentMethodDescription,
-                                    paymentMethodStatus, paymentMethodRanges, paymentMethodTypeCode);
+                                    paymentMethodDescription, paymentMethodStatus,
+                                    paymentMethodRanges, paymentMethodTypeCode, paymentMethodAsset);
                         }
                 );
     }

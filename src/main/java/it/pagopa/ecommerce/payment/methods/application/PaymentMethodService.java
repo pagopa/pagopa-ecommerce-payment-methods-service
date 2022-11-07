@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,8 +42,9 @@ public class  PaymentMethodService {
 
     public Mono<PaymentMethod> createPaymentMethod(String paymentMethodName,
                                                    String paymentMethodDescription,
-                                                   List<Pair<Long, Long>> ranges,
-                                                   String paymentMethodTypeCode){
+                                                   List<Pair<BigInteger, BigInteger>> ranges,
+                                                   String paymentMethodTypeCode,
+                                                   String paymentMethodAsset){
         log.debug("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
                 new PaymentMethodID(UUID.randomUUID()),
@@ -49,7 +52,8 @@ public class  PaymentMethodService {
                 new PaymentMethodDescription(paymentMethodDescription),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
-                new PaymentMethodType(paymentMethodTypeCode)
+                new PaymentMethodType(paymentMethodTypeCode),
+                new PaymentMethodAsset(paymentMethodAsset)
         );
 
         log.debug("[Payment Method Aggregate] Store new aggregate");
@@ -59,6 +63,7 @@ public class  PaymentMethodService {
                         p.getPaymentMethodName().value(),
                         p.getPaymentMethodDescription().value(),
                         p.getPaymentMethodStatus().value().toString(),
+                        p.getPaymentMethodAsset().value(),
                         p.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max())).collect(Collectors.toList()),
                         p.getPaymentMethodTypeCode().value())
         ).map(doc -> new PaymentMethod(
@@ -67,7 +72,8 @@ public class  PaymentMethodService {
                 new PaymentMethodDescription(doc.getPaymentMethodDescription()),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())),
                 doc.getPaymentMethodRanges().stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).collect(Collectors.toList()),
-                new PaymentMethodType(doc.getPaymentMethodTypeCode())
+                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
+                new PaymentMethodAsset(doc.getPaymentMethodAsset())
         )));
     }
 
@@ -80,7 +86,7 @@ public class  PaymentMethodService {
             return paymentMethodRepository
                     .findAll()
                     .filter(doc -> doc.getPaymentMethodRanges().stream()
-                            .anyMatch(range -> range.getFirst() <= amount && range.getSecond() >= amount)
+                            .anyMatch(range -> range.getFirst().longValue() <= amount && range.getSecond().longValue() >= amount)
                     ).map(this::docToAggregate);
         }
     }
@@ -103,6 +109,7 @@ public class  PaymentMethodService {
                                         p.getPaymentMethodName().value(),
                                         p.getPaymentMethodDescription().value(),
                                         p.getPaymentMethodStatus().value().toString(),
+                                        p.getPaymentMethodAsset().value(),
                                         p.getPaymentMethodRanges().stream().map(
                                                 r -> Pair.of(r.min(), r.max())
                                         ).collect(Collectors.toList()),
@@ -134,7 +141,8 @@ public class  PaymentMethodService {
                     paymentMethodRepository.findByPaymentMethodTypeCode(paymentTypeCode)
                             .flatMap(p -> {
                                 log.info("Updating paymentMethod: {}", p.getPaymentMethodID());
-                                p.setPaymentMethodRanges(rangeMap.get(paymentTypeCode).stream().toList());
+                                p.setPaymentMethodRanges(rangeMap.get(paymentTypeCode).stream().map(
+                                        pair -> Pair.of(BigInteger.valueOf(pair.getFirst()), BigInteger.valueOf(pair.getSecond()))).toList());
                                 return Mono.just(p);
                             })
                             .flatMap(updatedDoc -> paymentMethodRepository.save(updatedDoc))
@@ -174,6 +182,7 @@ public class  PaymentMethodService {
                 new PaymentMethodDescription(doc.getPaymentMethodDescription()),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())),
                 doc.getPaymentMethodRanges().stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).collect(Collectors.toList()),
-                new PaymentMethodType(doc.getPaymentMethodTypeCode()));
+                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
+                new PaymentMethodAsset(doc.getPaymentMethodAsset()));
     }
 }

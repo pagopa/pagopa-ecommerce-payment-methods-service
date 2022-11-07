@@ -47,7 +47,7 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(paymentMethodFactory.newPaymentMethod(
-                        any(), any(), any(), any(), any(), any())
+                        any(), any(), any(), any(), any(), any(), any())
                 )
                 .thenReturn(Mono.just(paymentMethod));
 
@@ -60,7 +60,8 @@ class PaymentMethodServiceTests {
                 paymentMethod.getPaymentMethodDescription().value(),
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
-                paymentMethod.getPaymentMethodTypeCode().value()
+                paymentMethod.getPaymentMethodTypeCode().value(),
+                paymentMethod.getPaymentMethodAsset().value()
         ).block();
 
         assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
@@ -135,7 +136,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldRetrivePaymentMethodById() {
+    void shouldRetrievePaymentMethodById() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 

@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.utils;
 
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -45,6 +46,8 @@ public class TestUtil {
     static final String TEST_LANG = "IT";
     static final Long TEST_AMOUNT = 1L;
 
+    static final String TEST_ASSET = "test";
+
     static final UUID TEST_ID = UUID.randomUUID();
     static final String PSP_TEST_CODE = "001";
     static final String PSP_TEST_NAME = "test";
@@ -58,7 +61,8 @@ public class TestUtil {
                 new PaymentMethodDescription("Test"),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 new PaymentMethodType(TEST_TYPE_CODE),
-                List.of(new PaymentMethodRange(0L, 100L))
+                List.of(new PaymentMethodRange(BigInteger.ZERO, BigInteger.valueOf(100))),
+                new PaymentMethodAsset(TEST_ASSET)
         );
     }
 
@@ -68,7 +72,8 @@ public class TestUtil {
                 .description(TEST_DESC)
                 .status(TEST_STATUS)
                 .paymentTypeCode(TEST_TYPE_CODE)
-                .ranges(List.of(new RangeDto().max(100L).min(0L)));
+                .ranges(List.of(new RangeDto().max(100L).min(0L)))
+                .asset(TEST_ASSET);
     }
 
     public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod){
@@ -150,6 +155,7 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodName().value(),
                 paymentMethod.getPaymentMethodDescription().value(),
                 paymentMethod.getPaymentMethodStatus().value().toString(),
+                paymentMethod.getPaymentMethodAsset().value(),
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value());

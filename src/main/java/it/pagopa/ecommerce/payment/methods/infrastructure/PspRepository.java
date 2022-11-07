@@ -4,10 +4,12 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
+import java.math.BigInteger;
+
 public interface PspRepository extends ReactiveCrudRepository<PspDocument, String> {
     Flux<PspDocument> findByPspDocumentKey(String pspCode, String pspPaymentTypeCode, String pspChannelCode);
     @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0} }")
-    Flux<PspDocument> findPspMatchAmount(double amount);
+    Flux<PspDocument> findPspMatchAmount(BigInteger amount);
 
     @Query("{ '_id.pspPaymentTypeCode' : ?0 }")
     Flux<PspDocument> findPspMatchType(String type);
@@ -16,10 +18,10 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
     Flux<PspDocument> findPspMatchLang(String language);
 
     @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0}, '_id.pspLanguageCode' : ?1 }")
-    Flux<PspDocument> findPspMatchAmountLang(double amount, String languageCode);
+    Flux<PspDocument> findPspMatchAmountLang(BigInteger amount, String languageCode);
 
     @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0}, '_id.pspPaymentTypeCode' : ?1 }")
-    Flux<PspDocument> findPspMatchAmountType(double amount, String paymentTypeCode);
+    Flux<PspDocument> findPspMatchAmountType(BigInteger amount, String paymentTypeCode);
 
     @Query("{ '_id.pspPaymentTypeCode' : ?0 , '_id.pspLanguageCode' : ?1 }")
     Flux<PspDocument> findPspMatchTypeLang(String paymentTypeCode, String lang);

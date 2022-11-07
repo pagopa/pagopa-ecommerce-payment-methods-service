@@ -16,7 +16,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -26,6 +25,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
 
 
 @ExtendWith(SpringExtension.class)
@@ -47,20 +48,14 @@ class PaymentMethodsControllerTests {
 
     @Test
     void shouldCreateNewmethod(){
-        String TEST_NAME = "Test";
-        String TEST_DESC = "test";
-        PaymentMethodRequestDto.StatusEnum TEST_STATUS = PaymentMethodRequestDto.StatusEnum.ENABLED;
-        UUID TEST_CAT = UUID.randomUUID();
-        String TEST_TYPE_CODE = "test";
-
         PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequest();
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
-        Mockito.when(paymentMethodService.createPaymentMethod(TEST_NAME, TEST_DESC, List.of(Pair.of(0L, 100L)), TEST_TYPE_CODE))
-                .thenReturn(Mono.just(paymentMethod));
+        PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
+        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any()))
+                .thenReturn(Mono.just(paymentMethod));
 
         webClient
                 .post().uri("/payment-methods")
@@ -70,7 +65,7 @@ class PaymentMethodsControllerTests {
                 .expectStatus()
                 .isOk()
                 .expectBody(PaymentMethodResponseDto.class)
-                .isEqualTo(expectedResult);
+                .isEqualTo(methodResponse);
     }
 
 
@@ -147,11 +142,11 @@ class PaymentMethodsControllerTests {
         PspDto pspDto = TestUtil.getTestPspDto();
 
         Mockito.when(paymentMethodService.retrievePaymentMethodById(
-                        Mockito.any()
+                        any()
                 )
         ).thenReturn(Mono.just(TestUtil.getPaymentMethod()));
 
-        Mockito.when(pspService.retrievePsps(Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.when(pspService.retrievePsps(any(), any(), any()))
                 .thenReturn(Flux.just(pspDto));
 
         PSPsResponseDto expectedResult = new PSPsResponseDto()
@@ -196,7 +191,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldScheduleUpdate(){
 
-        Mockito.when(apiConfigClient.getPSPs(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(
+        Mockito.when(apiConfigClient.getPSPs(any(), any(), any())).thenReturn(
                 Mono.just(TestUtil.getTestServices())
         );
 
@@ -206,6 +201,6 @@ class PaymentMethodsControllerTests {
                 .expectStatus()
                 .isAccepted();
 
-        Mockito.verify(pspService, Mockito.times(1)).updatePSPs(Mockito.any());
+        Mockito.verify(pspService, Mockito.times(1)).updatePSPs(any());
     }
 }
