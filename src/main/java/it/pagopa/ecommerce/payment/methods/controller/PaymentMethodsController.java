@@ -81,6 +81,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                             }
                     ).collect(Collectors.toList()));
                     responseDto.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
+                    responseDto.setAsset(paymentMethod.getPaymentMethodAsset().value());
 
                     return responseDto;
                 })
@@ -182,6 +183,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 }
         ).collect(Collectors.toList()));
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
+        response.setAsset(paymentMethod.getPaymentMethodAsset().value());
         return ResponseEntity.ok(response);
     }
 }
