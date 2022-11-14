@@ -80,6 +80,7 @@ public class TestUtil {
         return new PaymentMethodResponseDto()
                 .id(paymentMethod.getPaymentMethodID().value().toString())
                 .name(paymentMethod.getPaymentMethodName().value())
+                .asset(paymentMethod.getPaymentMethodAsset().value())
                 .description(paymentMethod.getPaymentMethodDescription().value())
                 .status(PaymentMethodResponseDto.StatusEnum.fromValue(paymentMethod.getPaymentMethodStatus().value().getCode()))
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
