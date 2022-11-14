@@ -27,6 +27,6 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
     Flux<PspDocument> findPspMatchTypeLang(String paymentTypeCode, String lang);
 
     @Query("{ 'pspMinAmount' : { $lt: ?0 }, 'pspMaxAmount' : { $gt: ?0 }, '_id.pspPaymentTypeCode' : ?1, '_id.pspLanguageCode' : ?2 }")
-    Flux<PspDocument> findPspMatchAmountTypeLang(double amount, String pspPaymentTypeCode, String pspLanguageCode);
+    Flux<PspDocument> findPspMatchAmountTypeLang(BigInteger amount, String pspPaymentTypeCode, String pspLanguageCode);
 
 }

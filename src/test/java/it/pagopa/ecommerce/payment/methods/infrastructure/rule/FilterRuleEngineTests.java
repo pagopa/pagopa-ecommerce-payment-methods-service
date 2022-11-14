@@ -154,11 +154,11 @@ class FilterRuleEngineTests {
          * Expected behavior: Should call pspRepository findPspMatchAmountTypeLang()
          */
     void testAmountTypeLangFilter(){
-        Mockito.when(pspRepository.findPspMatchAmountTypeLang(TEST_AMOUNT, TEST_PAYMENT_TYPE, TEST_LANG))
+        Mockito.when(pspRepository.findPspMatchAmountTypeLang(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE, TEST_LANG))
                 .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
-                .findPspMatchAmountTypeLang(TEST_AMOUNT, TEST_PAYMENT_TYPE, TEST_LANG);
+                .findPspMatchAmountTypeLang(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE, TEST_LANG);
     }
 }
