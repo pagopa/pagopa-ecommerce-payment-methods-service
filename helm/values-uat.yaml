@@ -69,28 +69,21 @@ microservice-chart:
   resources:
     requests:
       memory: "512Mi"
-      cpu: "300m"
+      cpu: "200m"
     limits:
       memory: "512Mi"
-      cpu: "300m"
+      cpu: "200m"
   autoscaling:
     minReplica: 1
     maxReplica: 2
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
     triggers:
-      - type: azure-monitor
-        metadata:
-          tenantId: 7788edaf-0346-4068-9d79-c868aed15b3d
-          subscriptionId: bbe47ad4-08b3-4925-94c5-1278e5819b86
-          resourceGroupName: pagopa-u-ecommerce-sec-rg
-          resourceURI: Microsoft.KeyVault/vaults/pagopa-u-ecommerce-kv
-          metricName: ServiceApiHit
-          # metricNamespace: Microsoft.KeyVault/vaults
-          # metricFilter: namespace eq 'default'
-          # metricAggregationInterval: "-1:1:0"
-          metricAggregationType: Count
-          targetValue: "30"
+    - type: cpu
+      metadata:
+        # Required
+        type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+        value: "80"
   envConfig:
     MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
