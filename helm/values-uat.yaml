@@ -79,11 +79,11 @@ microservice-chart:
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
     triggers:
-    - type: cpu
-      metadata:
+     - type: cpu
+       metadata:
         # Required
-        type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-        value: "80"
+         type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+         value: "70"
   envConfig:
     MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
