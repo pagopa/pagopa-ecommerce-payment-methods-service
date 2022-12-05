@@ -32,7 +32,7 @@ microservice-chart:
     APPLICATIONINSIGHTS_CONNECTION_STRING: applicationinsights-connection-string
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.0.8"
+    tag: "0.1.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -79,11 +79,11 @@ microservice-chart:
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
     triggers:
-     - type: cpu
-       metadata:
-        # Required
-         type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-         value: "70"
+      - type: cpu
+        metadata:
+          # Required
+          type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+          value: "70"
   envConfig:
     MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
