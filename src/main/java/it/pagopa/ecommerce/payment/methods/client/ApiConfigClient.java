@@ -21,7 +21,10 @@ public class ApiConfigClient {
     @Value("${apiConfig.client.key}")
     private String apiConfigKey;
 
-    public Mono<ServicesDto> getPSPs(Integer page, Integer limit, String paymentTypeCode) {
+    @Value("${apiConfig.psp.get.flagIo.enabled}")
+    private Boolean flagIo;
+
+    public Mono<ServicesDto> getPSPs(Integer page, Integer limit) {
         return apiConfigClient
                 .getApiClient()
                 .getWebClient()
@@ -29,6 +32,7 @@ public class ApiConfigClient {
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("page", page)
                         .queryParam("limit", limit)
+                        .queryParam("flagio", flagIo)
                         .build())
                 .header("ocp-apim-subscription-key", apiConfigKey)
                 .retrieve()
