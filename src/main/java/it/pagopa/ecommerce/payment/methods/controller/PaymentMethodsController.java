@@ -143,12 +143,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     public Mono<ResponseEntity<Void>> scheduleUpdatePSPs(ServerWebExchange exchange) {
         AtomicReference<Integer> currentPage = new AtomicReference<>(0);
 
-        return apiConfigClient.getPSPs(0, 50, null).expand(
+        return apiConfigClient.getPSPs(0, 50).expand(
                 servicesDto -> {
                     if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get()+1)) {
                         return Mono.empty();
                     }
-                    return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);
+                    return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50);
                 }
         ).collectList().map(
                 services -> {

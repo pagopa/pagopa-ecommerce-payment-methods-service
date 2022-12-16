@@ -24,7 +24,7 @@ public class ApiConfigClient {
     @Value("${apiConfig.psp.get.flagIo.enabled}")
     private Boolean flagIo;
 
-    public Mono<ServicesDto> getPSPs(Integer page, Integer limit, String paymentTypeCode) {
+    public Mono<ServicesDto> getPSPs(Integer page, Integer limit) {
         return apiConfigClient
                 .getApiClient()
                 .getWebClient()

@@ -191,7 +191,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldScheduleUpdate(){
 
-        Mockito.when(apiConfigClient.getPSPs(any(), any(), any())).thenReturn(
+        Mockito.when(apiConfigClient.getPSPs(any(), any())).thenReturn(
                 Mono.just(TestUtil.getTestServices())
         );
 

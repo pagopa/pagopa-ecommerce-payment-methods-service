@@ -26,12 +26,12 @@ public class ScheduledPSPUpdate {
         AtomicReference<Integer> currentPage = new AtomicReference<>(0);
         log.info("Starting PSPs scheduled update. Time: {}", dateFormat.format(new Date()));
 
-        apiConfigClient.getPSPs(0, 50, null).expand(
+        apiConfigClient.getPSPs(0, 50).expand(
                 servicesDto -> {
                     if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get()+1)) {
                         return Mono.empty();
                     }
-                    return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50, null);
+                    return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50);
                 }
         ).collectList().subscribe(
                 methods -> {
