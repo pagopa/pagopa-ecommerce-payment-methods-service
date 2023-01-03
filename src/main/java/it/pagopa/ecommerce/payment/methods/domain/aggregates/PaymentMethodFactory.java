@@ -33,7 +33,8 @@ public class PaymentMethodFactory {
                                                 PaymentMethodType paymentMethodTypeCode,
                                                 PaymentMethodAsset paymentMethodAsset) {
 
-        return paymentMethodRepository.findByPaymentMethodName(paymentMethodName.value()).hasElements()
+        return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(paymentMethodName.value(),
+                        paymentMethodTypeCode.value()).hasElement()
                 .map(hasPaymentMethod -> {
                             if (Boolean.TRUE.equals(hasPaymentMethod)) {
                                 throw paymentMethodAlreadyInUse(paymentMethodName);
