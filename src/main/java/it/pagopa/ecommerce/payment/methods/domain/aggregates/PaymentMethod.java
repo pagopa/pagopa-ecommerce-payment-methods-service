@@ -33,11 +33,15 @@ public class PaymentMethod {
         return this.paymentMethodID;
     }
 
-    public PaymentMethod(PaymentMethodID paymentMethodID, PaymentMethodName paymentMethodName,
-                         PaymentMethodDescription paymentMethodDescription,
-                         PaymentMethodStatus paymentMethodStatus,
-                         PaymentMethodType paymentMethodTypeCode,
-                         List<PaymentMethodRange> paymentMethodRanges, PaymentMethodAsset paymentMethodAsset) {
+    public PaymentMethod(
+            PaymentMethodID paymentMethodID,
+            PaymentMethodName paymentMethodName,
+            PaymentMethodDescription paymentMethodDescription,
+            PaymentMethodStatus paymentMethodStatus,
+            PaymentMethodType paymentMethodTypeCode,
+            List<PaymentMethodRange> paymentMethodRanges,
+            PaymentMethodAsset paymentMethodAsset
+    ) {
         this.paymentMethodID = paymentMethodID;
         this.paymentMethodName = paymentMethodName;
         this.paymentMethodDescription = paymentMethodDescription;

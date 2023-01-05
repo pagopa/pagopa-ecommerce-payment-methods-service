@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigInteger;
 
-
 @Data
 @AllArgsConstructor
 @Document(collection = "psps")

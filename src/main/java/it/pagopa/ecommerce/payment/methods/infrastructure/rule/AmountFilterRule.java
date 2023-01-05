@@ -10,12 +10,21 @@ import java.math.BigInteger;
 @Component
 public class AmountFilterRule implements IFilterRule {
     @Override
-    public boolean shouldExecute(Integer amount, String language, String paymentTypeCode) {
+    public boolean shouldExecute(
+                                 Integer amount,
+                                 String language,
+                                 String paymentTypeCode
+    ) {
         return !checkQueryParam(language) && !checkQueryParam(paymentTypeCode) && amount != null;
     }
 
     @Override
-    public Flux<PspDocument> execute(PspRepository pspRepository, Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDocument> execute(
+                                     PspRepository pspRepository,
+                                     Integer amount,
+                                     String language,
+                                     String paymentTypeCode
+    ) {
         return pspRepository.findPspMatchAmount(BigInteger.valueOf(amount));
     }
 }

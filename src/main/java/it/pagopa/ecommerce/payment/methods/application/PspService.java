@@ -52,13 +52,15 @@ public class PspService {
     @Autowired
     private FilterRuleEngine filterRuleEngine;
 
-
     public void updatePSPs(ServicesDto servicesDto) {
         servicesDto.getServices().forEach(service -> {
 
-            BigInteger min = BigDecimal.valueOf(service.getMinimumAmount()).multiply(BigDecimal.valueOf(100)).toBigInteger();
-            BigInteger max = BigDecimal.valueOf(service.getMaximumAmount()).multiply(BigDecimal.valueOf(100)).toBigInteger();
-            BigInteger fee = BigDecimal.valueOf(service.getFixedCost()).multiply(BigDecimal.valueOf(100)).toBigInteger();
+            BigInteger min = BigDecimal.valueOf(service.getMinimumAmount()).multiply(BigDecimal.valueOf(100))
+                    .toBigInteger();
+            BigInteger max = BigDecimal.valueOf(service.getMaximumAmount()).multiply(BigDecimal.valueOf(100))
+                    .toBigInteger();
+            BigInteger fee = BigDecimal.valueOf(service.getFixedCost()).multiply(BigDecimal.valueOf(100))
+                    .toBigInteger();
 
             Mono<Psp> pspMono = pspFactory.newPsp(
                     new PspCode(service.getPspCode()),
@@ -71,33 +73,39 @@ public class PspService {
                     new PspAmount(min),
                     new PspAmount(max),
                     new PspChannelCode(service.getChannelCode()),
-                    new PspFee(fee));
+                    new PspFee(fee)
+            );
 
             pspMono.flatMap(
-                    p ->
-                            pspRepository.save(
-                                    new PspDocument(
-                                            new PspDocumentKey(p.getPspCode().value(),
-                                                    p.getPspPaymentMethodType().value(),
-                                                    p.getPspChannelCode().value(),
-                                                    p.getPspLanguage().value().getLanguage()),
-                                            p.getPspStatus().value().getCode(),
-                                            p.getPspBusinessName().value(),
-                                            p.getPspBrokerName().value(),
-                                            p.getPspDescription().value(),
-                                            p.getPspMinAmount().value(),
-                                            p.getPspMaxAmount().value(),
-                                            p.getPspFixedCost().value()
-                                    )
-                            ).map(doc -> {
-                                log.debug("[Psp Service] {} added to db", doc.getPspBusinessName());
-                                return doc;
-                            })
+                    p -> pspRepository.save(
+                            new PspDocument(
+                                    new PspDocumentKey(
+                                            p.getPspCode().value(),
+                                            p.getPspPaymentMethodType().value(),
+                                            p.getPspChannelCode().value(),
+                                            p.getPspLanguage().value().getLanguage()
+                                    ),
+                                    p.getPspStatus().value().getCode(),
+                                    p.getPspBusinessName().value(),
+                                    p.getPspBrokerName().value(),
+                                    p.getPspDescription().value(),
+                                    p.getPspMinAmount().value(),
+                                    p.getPspMaxAmount().value(),
+                                    p.getPspFixedCost().value()
+                            )
+                    ).map(doc -> {
+                        log.debug("[Psp Service] {} added to db", doc.getPspBusinessName());
+                        return doc;
+                    })
             ).subscribe();
         });
     }
 
-    public Flux<PspDto> retrievePsps(Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDto> retrievePsps(
+                                     Integer amount,
+                                     String language,
+                                     String paymentTypeCode
+    ) {
 
         log.debug("[Payment Method Aggregate] Retrive Aggregate");
 
@@ -120,11 +128,14 @@ public class PspService {
         });
     }
 
-    public Flux<PspDocument> getPspByFilter(Integer amount, String language, String paymentTypeCode) {
+    public Flux<PspDocument> getPspByFilter(
+                                            Integer amount,
+                                            String language,
+                                            String paymentTypeCode
+    ) {
         language = language == null ? null : language.toUpperCase();
         paymentTypeCode = paymentTypeCode == null ? null : paymentTypeCode.toUpperCase();
 
         return filterRuleEngine.applyFilter(amount, language, paymentTypeCode);
     }
 }
-
