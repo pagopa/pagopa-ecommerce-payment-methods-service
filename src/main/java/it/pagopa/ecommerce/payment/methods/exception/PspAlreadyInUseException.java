@@ -9,7 +9,8 @@ public class PspAlreadyInUseException extends RuntimeException {
     }
 
     public static PspAlreadyInUseException pspAlreadyInUseException(
-            PspCode pspCode) {
+                                                                    PspCode pspCode
+    ) {
         return new PspAlreadyInUseException(pspCode);
     }
 

@@ -46,51 +46,74 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Autowired
     private ApiConfigClient apiConfigClient;
 
-    @ExceptionHandler({
-            PaymentMethodAlreadyInUseException.class,
-            PspAlreadyInUseException.class
-    })
+    @ExceptionHandler(
+        {
+                PaymentMethodAlreadyInUseException.class,
+                PspAlreadyInUseException.class
+        }
+    )
     private ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
-        if(exception instanceof PaymentMethodAlreadyInUseException){
+        if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"), HttpStatus.BAD_REQUEST);
+                    new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),
+                    HttpStatus.BAD_REQUEST
+            );
         } else if (exception instanceof PspAlreadyInUseException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Bad request").detail("PSP already in use"), HttpStatus.BAD_REQUEST);
+                    new ProblemJsonDto().status(404).title("Bad request").detail("PSP already in use"),
+                    HttpStatus.BAD_REQUEST
+            );
         } else {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(500).title("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+                    new ProblemJsonDto().status(500).title("Internal server error"),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<PaymentMethodResponseDto>>> getAllPaymentMethods(BigDecimal amount, ServerWebExchange exchange) {
-        return Mono.just(ResponseEntity.ok(paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
-                .map(paymentMethod -> {
-                    PaymentMethodResponseDto responseDto = new PaymentMethodResponseDto();
-                    responseDto.setId(paymentMethod.getPaymentMethodID().value().toString());
-                    responseDto.setName(paymentMethod.getPaymentMethodName().value());
-                    responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
-                    responseDto.setStatus(PaymentMethodResponseDto.StatusEnum.valueOf(paymentMethod.getPaymentMethodStatus().value().toString()));
-                    responseDto.setRanges(paymentMethod.getPaymentMethodRanges().stream().map(
-                            r -> {
-                                RangeDto rangeDto = new RangeDto();
-                                rangeDto.setMin(r.min().longValue());
-                                rangeDto.setMax(r.max().longValue());
-                                return rangeDto;
-                            }
-                    ).collect(Collectors.toList()));
-                    responseDto.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
-                    responseDto.setAsset(paymentMethod.getPaymentMethodAsset().value());
+    public Mono<ResponseEntity<Flux<PaymentMethodResponseDto>>> getAllPaymentMethods(
+                                                                                     BigDecimal amount,
+                                                                                     ServerWebExchange exchange
+    ) {
+        return Mono.just(
+                ResponseEntity.ok(
+                        paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
+                                .map(paymentMethod -> {
+                                    PaymentMethodResponseDto responseDto = new PaymentMethodResponseDto();
+                                    responseDto.setId(paymentMethod.getPaymentMethodID().value().toString());
+                                    responseDto.setName(paymentMethod.getPaymentMethodName().value());
+                                    responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
+                                    responseDto.setStatus(
+                                            PaymentMethodResponseDto.StatusEnum
+                                                    .valueOf(paymentMethod.getPaymentMethodStatus().value().toString())
+                                    );
+                                    responseDto.setRanges(
+                                            paymentMethod.getPaymentMethodRanges().stream().map(
+                                                    r -> {
+                                                        RangeDto rangeDto = new RangeDto();
+                                                        rangeDto.setMin(r.min().longValue());
+                                                        rangeDto.setMax(r.max().longValue());
+                                                        return rangeDto;
+                                                    }
+                                            ).collect(Collectors.toList())
+                                    );
+                                    responseDto.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
+                                    responseDto.setAsset(paymentMethod.getPaymentMethodAsset().value());
 
-                    return responseDto;
-                })
-        ));
+                                    return responseDto;
+                                })
+                )
+        );
     }
 
-
     @Override
-    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(Integer amount, String lang, String paymentTypeCode, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(
+                                                         Integer amount,
+                                                         String lang,
+                                                         String paymentTypeCode,
+                                                         ServerWebExchange exchange
+    ) {
         return pspService.retrievePsps(amount, lang, paymentTypeCode).collectList().flatMap(
                 pspDtos -> {
                     PSPsResponseDto responseDto = new PSPsResponseDto();
@@ -102,41 +125,67 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PaymentMethodResponseDto>> getPaymentMethod(String id, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<PaymentMethodResponseDto>> getPaymentMethod(
+                                                                           String id,
+                                                                           ServerWebExchange exchange
+    ) {
         return paymentMethodService.retrievePaymentMethodById(id)
                 .map(this::paymentMethodToResponse);
     }
 
     @Override
-    public Mono<ResponseEntity<PSPsResponseDto>> getPaymentMethodsPSPs(String id, Integer amount, String lang, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<PSPsResponseDto>> getPaymentMethodsPSPs(
+                                                                       String id,
+                                                                       Integer amount,
+                                                                       String lang,
+                                                                       ServerWebExchange exchange
+    ) {
         return paymentMethodService.retrievePaymentMethodById(id)
-                .flatMap(pm -> pspService.retrievePsps(amount, lang, pm.getPaymentMethodTypeCode().value()).collectList().flatMap(pspDtos -> {
-                        PSPsResponseDto responseDto = new PSPsResponseDto();
-                        responseDto.setPsp(pspDtos);
+                .flatMap(
+                        pm -> pspService.retrievePsps(amount, lang, pm.getPaymentMethodTypeCode().value()).collectList()
+                                .flatMap(pspDtos -> {
+                                    PSPsResponseDto responseDto = new PSPsResponseDto();
+                                    responseDto.setPsp(pspDtos);
 
-                        return Mono.just(ResponseEntity.ok(responseDto));
-                    })
+                                    return Mono.just(ResponseEntity.ok(responseDto));
+                                })
                 );
     }
 
     @Override
-    public Mono<ResponseEntity<PaymentMethodResponseDto>> newPaymentMethod(@Valid Mono<PaymentMethodRequestDto> paymentMethodRequestDto,
-                                                                           ServerWebExchange exchange) {
-        return paymentMethodRequestDto.flatMap(request -> paymentMethodService.createPaymentMethod(
-                request.getName(),
-                request.getDescription(),
-                request.getRanges().stream().map(r -> Pair.of(BigInteger.valueOf(r.getMin()), BigInteger.valueOf(r.getMax()))).toList(),
-                request.getPaymentTypeCode(), request.getAsset())
-                .map(this::paymentMethodToResponse)
+    public Mono<ResponseEntity<PaymentMethodResponseDto>> newPaymentMethod(
+                                                                           @Valid Mono<PaymentMethodRequestDto> paymentMethodRequestDto,
+                                                                           ServerWebExchange exchange
+    ) {
+        return paymentMethodRequestDto.flatMap(
+                request -> paymentMethodService.createPaymentMethod(
+                        request.getName(),
+                        request.getDescription(),
+                        request.getRanges().stream()
+                                .map(r -> Pair.of(BigInteger.valueOf(r.getMin()), BigInteger.valueOf(r.getMax())))
+                                .toList(),
+                        request.getPaymentTypeCode(),
+                        request.getAsset()
+                )
+                        .map(this::paymentMethodToResponse)
         );
     }
 
     @Override
-    public Mono<ResponseEntity<PaymentMethodResponseDto>> patchPaymentMethod(String id, Mono<PatchPaymentMethodRequestDto> patchPaymentMethodRequestDto, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<PaymentMethodResponseDto>> patchPaymentMethod(
+                                                                             String id,
+                                                                             Mono<PatchPaymentMethodRequestDto> patchPaymentMethodRequestDto,
+                                                                             ServerWebExchange exchange
+    ) {
         return patchPaymentMethodRequestDto
-                .flatMap(request -> paymentMethodService
-                        .updatePaymentMethodStatus(id, PaymentMethodStatusEnum.valueOf(request.getStatus().toString()))
-                        .map(this::paymentMethodToResponse));
+                .flatMap(
+                        request -> paymentMethodService
+                                .updatePaymentMethodStatus(
+                                        id,
+                                        PaymentMethodStatusEnum.valueOf(request.getStatus().toString())
+                                )
+                                .map(this::paymentMethodToResponse)
+                );
     }
 
     @Override
@@ -145,7 +194,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
         return apiConfigClient.getPSPs(0, 50).expand(
                 servicesDto -> {
-                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get()+1)) {
+                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get() + 1)) {
                         return Mono.empty();
                     }
                     return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50);
@@ -155,8 +204,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     ServicesDto servicesDto = new ServicesDto();
 
                     for (ServicesDto service : services) {
-                        servicesDto.setServices(Stream.concat(servicesDto.getServices().stream(),
-                                service.getServices().stream()).toList());
+                        servicesDto.setServices(
+                                Stream.concat(
+                                        servicesDto.getServices().stream(),
+                                        service.getServices().stream()
+                                ).toList()
+                        );
                     }
 
                     pspService.updatePSPs(servicesDto);
@@ -167,21 +220,26 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         );
     }
 
-    private ResponseEntity<PaymentMethodResponseDto> paymentMethodToResponse(PaymentMethod paymentMethod){
+    private ResponseEntity<PaymentMethodResponseDto> paymentMethodToResponse(PaymentMethod paymentMethod) {
         PaymentMethodResponseDto response = new PaymentMethodResponseDto();
         response.setId(paymentMethod.getPaymentMethodID().value().toString());
         response.setName(paymentMethod.getPaymentMethodName().value());
         response.setDescription(paymentMethod.getPaymentMethodDescription().value());
-        response.setStatus(PaymentMethodResponseDto.StatusEnum.valueOf(
-                paymentMethod.getPaymentMethodStatus().value().toString()));
-        response.setRanges(paymentMethod.getPaymentMethodRanges().stream().map(
-                r -> {
-                    RangeDto rangeDto = new RangeDto();
-                    rangeDto.setMin(r.min().longValue());
-                    rangeDto.setMax(r.max().longValue());
-                    return rangeDto;
-                }
-        ).collect(Collectors.toList()));
+        response.setStatus(
+                PaymentMethodResponseDto.StatusEnum.valueOf(
+                        paymentMethod.getPaymentMethodStatus().value().toString()
+                )
+        );
+        response.setRanges(
+                paymentMethod.getPaymentMethodRanges().stream().map(
+                        r -> {
+                            RangeDto rangeDto = new RangeDto();
+                            rangeDto.setMin(r.min().longValue());
+                            rangeDto.setMax(r.max().longValue());
+                            return rangeDto;
+                        }
+                ).collect(Collectors.toList())
+        );
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
         return ResponseEntity.ok(response);

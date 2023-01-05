@@ -39,20 +39,30 @@ class PaymentMethodServiceTests {
     @InjectMocks
     private PaymentMethodService paymentMethodService;
 
-
     @Test
     void shouldCreatePaymentMethod() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(paymentMethodFactory.newPaymentMethod(
-                        any(), any(), any(), any(), any(), any(), any())
+        Mockito.when(
+                paymentMethodFactory.newPaymentMethod(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()
                 )
+        )
                 .thenReturn(Mono.just(paymentMethod));
 
-        Mockito.when(paymentMethodRepository.save(
-                        paymentMethodDocument))
+        Mockito.when(
+                paymentMethodRepository.save(
+                        paymentMethodDocument
+                )
+        )
                 .thenReturn(Mono.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodResponse = paymentMethodService.createPaymentMethod(
@@ -118,19 +128,29 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         paymentMethodDocument.setPaymentMethodStatus(PaymentMethodStatusEnum.DISABLED.getCode());
-        Mockito.when(paymentMethodRepository.findById(paymentMethod.getPaymentMethodID().value().toString())).thenReturn(
-                Mono.just(TestUtil.getTestPaymentDoc(paymentMethod)));
+        Mockito.when(paymentMethodRepository.findById(paymentMethod.getPaymentMethodID().value().toString()))
+                .thenReturn(
+                        Mono.just(TestUtil.getTestPaymentDoc(paymentMethod))
+                );
 
-        Mockito.when(paymentMethodRepository.save(
-                        paymentMethodDocument))
+        Mockito.when(
+                paymentMethodRepository.save(
+                        paymentMethodDocument
+                )
+        )
                 .thenReturn(Mono.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodPatched = paymentMethodService
-                .updatePaymentMethodStatus(paymentMethod.getPaymentMethodID().value().toString(), PaymentMethodStatusEnum.DISABLED)
+                .updatePaymentMethodStatus(
+                        paymentMethod.getPaymentMethodID().value().toString(),
+                        PaymentMethodStatusEnum.DISABLED
+                )
                 .block();
 
-        assertEquals(paymentMethodPatched.getPaymentMethodID(),
-                paymentMethod.getPaymentMethodID());
+        assertEquals(
+                paymentMethodPatched.getPaymentMethodID(),
+                paymentMethod.getPaymentMethodID()
+        );
 
         assertEquals(PaymentMethodStatusEnum.DISABLED, paymentMethodPatched.getPaymentMethodStatus().value());
     }

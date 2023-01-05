@@ -12,8 +12,11 @@ public class PaymentMethodRange implements Serializable {
     private final BigInteger min;
     private final BigInteger max;
 
-    public PaymentMethodRange(@NonNull @PositiveOrZero BigInteger min, @NonNull @PositiveOrZero BigInteger max) {
-        if (min.compareTo(max) > 0){
+    public PaymentMethodRange(
+            @NonNull @PositiveOrZero BigInteger min,
+            @NonNull @PositiveOrZero BigInteger max
+    ) {
+        if (min.compareTo(max) > 0) {
             throw new ValidationException("Invalid range");
         }
 
@@ -24,6 +27,7 @@ public class PaymentMethodRange implements Serializable {
     public @NonNull BigInteger min() {
         return min;
     }
+
     public @NonNull BigInteger max() {
         return max;
     }

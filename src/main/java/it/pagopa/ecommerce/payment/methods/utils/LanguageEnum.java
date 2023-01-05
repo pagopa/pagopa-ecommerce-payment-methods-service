@@ -7,9 +7,14 @@ public enum LanguageEnum {
     FR("FR"),
     DE("DE"),
     SL("SL");
+
     private final String language;
 
-    LanguageEnum(final String language) { this.language = language; }
+    LanguageEnum(final String language) {
+        this.language = language;
+    }
 
-    public String getLanguage() { return language; }
+    public String getLanguage() {
+        return language;
+    }
 }

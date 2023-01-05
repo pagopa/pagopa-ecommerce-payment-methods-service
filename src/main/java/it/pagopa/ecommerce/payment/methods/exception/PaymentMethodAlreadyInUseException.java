@@ -9,7 +9,8 @@ public class PaymentMethodAlreadyInUseException extends RuntimeException {
     }
 
     public static PaymentMethodAlreadyInUseException paymentMethodAlreadyInUse(
-            PaymentMethodName paymentMethodName) {
+                                                                               PaymentMethodName paymentMethodName
+    ) {
         return new PaymentMethodAlreadyInUseException(paymentMethodName);
     }
 

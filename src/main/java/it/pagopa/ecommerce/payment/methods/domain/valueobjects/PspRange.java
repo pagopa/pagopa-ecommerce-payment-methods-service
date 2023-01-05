@@ -14,12 +14,15 @@ public class PspRange implements Serializable {
     private final BigDecimal min;
     private final BigDecimal max;
 
-    public PspRange(@NonNull BigDecimal min, @NonNull BigDecimal max) {
+    public PspRange(
+            @NonNull BigDecimal min,
+            @NonNull BigDecimal max
+    ) {
 
-        if (min.compareTo(max) != -1){
+        if (min.compareTo(max) != -1) {
             throw new IllegalArgumentException("Invalid range.");
         }
-        
+
         this.min = Objects.requireNonNull(min);
         this.max = Objects.requireNonNull(max);
     }
@@ -27,6 +30,7 @@ public class PspRange implements Serializable {
     public @NonNull BigDecimal min() {
         return min;
     }
+
     public @NonNull BigDecimal max() {
         return max;
     }

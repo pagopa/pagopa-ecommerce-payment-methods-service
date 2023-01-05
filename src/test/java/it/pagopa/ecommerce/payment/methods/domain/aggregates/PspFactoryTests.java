@@ -29,18 +29,21 @@ class PspFactoryTests {
     private PspFactory pspFactory;
 
     @Test
-    void shouldThrowPspAlreadyInUse(){
+    void shouldThrowPspAlreadyInUse() {
         Psp psp = TestUtil.getTestPsp();
 
-        Mockito.when(pspRepository.findByPspDocumentKey(
-                any(),
-                any(),
-                any()
-        )).thenReturn(
+        Mockito.when(
+                pspRepository.findByPspDocumentKey(
+                        any(),
+                        any(),
+                        any()
+                )
+        ).thenReturn(
                 Flux.just(TestUtil.getTestPspDoc(psp))
         );
 
-        assertThrows(PspAlreadyInUseException.class,
+        assertThrows(
+                PspAlreadyInUseException.class,
                 () -> pspFactory.newPsp(
                         psp.getPspCode(),
                         psp.getPspPaymentMethodType(),
@@ -53,23 +56,26 @@ class PspFactoryTests {
                         psp.getPspMaxAmount(),
                         psp.getPspChannelCode(),
                         psp.getPspFixedCost()
-                ).block());
+                ).block()
+        );
     }
+
     @Test
-    void shouldCreatePsp(){
+    void shouldCreatePsp() {
         Psp psp = TestUtil.getTestPsp();
 
-        Mockito.when(pspRepository.findByPspDocumentKey(
-                any(),
-                any(),
-                any()
-        )).thenReturn(
+        Mockito.when(
+                pspRepository.findByPspDocumentKey(
+                        any(),
+                        any(),
+                        any()
+                )
+        ).thenReturn(
                 Flux.empty()
         );
 
-
-       Psp res = pspFactory.newPsp(
-               psp.getPspCode(),
+        Psp res = pspFactory.newPsp(
+                psp.getPspCode(),
                 psp.getPspPaymentMethodType(),
                 psp.getPspStatus(),
                 psp.getPspBusinessName(),
@@ -79,8 +85,9 @@ class PspFactoryTests {
                 psp.getPspMinAmount(),
                 psp.getPspMaxAmount(),
                 psp.getPspChannelCode(),
-                psp.getPspFixedCost()).block();
+                psp.getPspFixedCost()
+        ).block();
 
-       assertEquals(psp.getPspCode(), res.getPspCode());
+        assertEquals(psp.getPspCode(), res.getPspCode());
     }
 }

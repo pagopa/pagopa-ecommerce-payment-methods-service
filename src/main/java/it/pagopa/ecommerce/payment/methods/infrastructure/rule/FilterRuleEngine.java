@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+
 @Component
 public class FilterRuleEngine {
     @Autowired
@@ -14,10 +15,13 @@ public class FilterRuleEngine {
     @Autowired
     private PspRepository pspRepository;
 
-
-    public Flux<PspDocument> applyFilter(Integer amount, String language, String paymentTypeCode){
-        for(IFilterRule rule: filterRules){
-            if(rule.shouldExecute(amount, language, paymentTypeCode)){
+    public Flux<PspDocument> applyFilter(
+                                         Integer amount,
+                                         String language,
+                                         String paymentTypeCode
+    ) {
+        for (IFilterRule rule : filterRules) {
+            if (rule.shouldExecute(amount, language, paymentTypeCode)) {
                 return rule.execute(pspRepository, amount, language, paymentTypeCode);
             }
         }

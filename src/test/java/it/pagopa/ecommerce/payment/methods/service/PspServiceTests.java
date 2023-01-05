@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
-
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
@@ -77,8 +76,6 @@ class PspServiceTests {
         assertEquals(pspDocument.getPspDocumentKey().getPspCode(), services.get(0).getCode());
     }
 
-
-
     @Test
     void shouldReturnEmptyResultWithNullFilter() {
 
@@ -86,7 +83,7 @@ class PspServiceTests {
         Mockito.when(filterRuleEngine.applyFilter(null, null, null)).thenReturn(Flux.empty());
 
         // Test execution
-        Flux<PspDocument> services = pspService.getPspByFilter( null, null, null);
+        Flux<PspDocument> services = pspService.getPspByFilter(null, null, null);
 
         // Asserts
         assertEquals(services, Flux.empty());
@@ -107,7 +104,8 @@ class PspServiceTests {
 
     @Test
     void shouldThrowInvalidRangeException() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(
+                IllegalArgumentException.class,
                 () -> new Psp(
                         new PspCode("PSP_TEST_CODE"),
                         new PspPaymentMethodType("PO"),
@@ -119,7 +117,9 @@ class PspServiceTests {
                         new PspAmount(BigInteger.valueOf(10)),
                         new PspAmount(BigInteger.valueOf(1)),
                         new PspChannelCode("AB0"),
-                        new PspFee(BigInteger.valueOf(0))));
+                        new PspFee(BigInteger.valueOf(0))
+                )
+        );
 
     }
 
@@ -149,30 +149,34 @@ class PspServiceTests {
                         "PSP_CODE",
                         paymentTypeCode,
                         "CHANNEL_0",
-                        language),
+                        language
+                ),
                 new PspStatus(PaymentMethodStatusEnum.ENABLED).value().getCode(),
                 "Test",
                 "Test broker",
                 "Test description",
                 BigInteger.valueOf(0),
-                        BigInteger.valueOf(100),
-                BigInteger.valueOf(100));
+                BigInteger.valueOf(100),
+                BigInteger.valueOf(100)
+        );
 
         PspDocument pspDocument_2 = new PspDocument(
                 new PspDocumentKey(
                         "PSP_CODE_2",
                         paymentTypeCode,
                         "CHANNEL_0_2",
-                        language),
+                        language
+                ),
                 new PspStatus(PaymentMethodStatusEnum.ENABLED).value().getCode(),
                 "Test_2",
                 "Test broker",
                 "Test description",
                 BigInteger.valueOf(0),
                 BigInteger.valueOf(100),
-                BigInteger.valueOf(100));
+                BigInteger.valueOf(100)
+        );
 
-        Mockito.when(filterRuleEngine.applyFilter( amount, language, paymentTypeCode))
+        Mockito.when(filterRuleEngine.applyFilter(amount, language, paymentTypeCode))
                 .thenReturn(Flux.just(pspDocument_1, pspDocument_2));
         // Test execution
 
@@ -192,9 +196,12 @@ class PspServiceTests {
 
         // Precondition
         Mockito.when(pspFactory.newPsp(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                        .thenReturn(Mono.just(TestUtil.getTestPsp()));
-        Mockito.when(pspRepository.save(any())).thenReturn(Mono.just(
-                TestUtil.getTestPspDoc(TestUtil.getTestPsp())));
+                .thenReturn(Mono.just(TestUtil.getTestPsp()));
+        Mockito.when(pspRepository.save(any())).thenReturn(
+                Mono.just(
+                        TestUtil.getTestPspDoc(TestUtil.getTestPsp())
+                )
+        );
 
         // Test execution
         pspService.updatePSPs(servicesDto);

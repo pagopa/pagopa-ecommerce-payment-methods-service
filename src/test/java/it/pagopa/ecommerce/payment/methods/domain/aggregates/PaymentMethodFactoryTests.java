@@ -32,11 +32,14 @@ class PaymentMethodFactoryTests {
     private PaymentMethodFactory paymentMethodFactory;
 
     @Test
-    void shouldCreateNewmethod(){
+    void shouldCreateNewmethod() {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
-        Mockito.when(paymentMethodRepository.findByPaymentMethodName(
-                paymentMethod.getPaymentMethodName().value()))
+        Mockito.when(
+                paymentMethodRepository.findByPaymentMethodName(
+                        paymentMethod.getPaymentMethodName().value()
+                )
+        )
                 .thenReturn(Flux.empty());
 
         PaymentMethod paymentMethodProduct = paymentMethodFactory.newPaymentMethod(
@@ -53,25 +56,32 @@ class PaymentMethodFactoryTests {
     }
 
     @Test
-    void shouldThrowDuplicatedMethodException(){
+    void shouldThrowDuplicatedMethodException() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
-        Mockito.when(paymentMethodRepository.findByPaymentMethodName(
-                        paymentMethod.getPaymentMethodName().value()))
-                .thenReturn(Flux.just(
-                        new PaymentMethodDocument(
-                                paymentMethod.getPaymentMethodID().value().toString(),
-                                paymentMethod.getPaymentMethodName().value(),
-                                paymentMethod.getPaymentMethodDescription().value(),
-                                paymentMethod.getPaymentMethodStatus().value().toString(),
-                                paymentMethod.getPaymentMethodAsset().value(),
-                                paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
-                                        .collect(Collectors.toList()),
-                                paymentMethod.getPaymentMethodTypeCode().value()
+        Mockito.when(
+                paymentMethodRepository.findByPaymentMethodName(
+                        paymentMethod.getPaymentMethodName().value()
+                )
+        )
+                .thenReturn(
+                        Flux.just(
+                                new PaymentMethodDocument(
+                                        paymentMethod.getPaymentMethodID().value().toString(),
+                                        paymentMethod.getPaymentMethodName().value(),
+                                        paymentMethod.getPaymentMethodDescription().value(),
+                                        paymentMethod.getPaymentMethodStatus().value().toString(),
+                                        paymentMethod.getPaymentMethodAsset().value(),
+                                        paymentMethod.getPaymentMethodRanges().stream()
+                                                .map(r -> Pair.of(r.min(), r.max()))
+                                                .collect(Collectors.toList()),
+                                        paymentMethod.getPaymentMethodTypeCode().value()
+                                )
                         )
-                ));
+                );
 
-        assertThrows(PaymentMethodAlreadyInUseException.class,
+        assertThrows(
+                PaymentMethodAlreadyInUseException.class,
                 () -> paymentMethodFactory.newPaymentMethod(
                         paymentMethod.getPaymentMethodID(),
                         paymentMethod.getPaymentMethodName(),
@@ -80,6 +90,7 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getPaymentMethodRanges(),
                         paymentMethod.getPaymentMethodTypeCode(),
                         paymentMethod.getPaymentMethodAsset()
-                ).block());
+                ).block()
+        );
     }
 }

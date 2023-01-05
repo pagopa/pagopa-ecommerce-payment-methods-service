@@ -7,7 +7,6 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Objects;
 
-
 @ValueObjects
 @EqualsAndHashCode
 public class PaymentMethodAsset implements Serializable {
@@ -23,4 +22,3 @@ public class PaymentMethodAsset implements Serializable {
         return asset;
     }
 }
-

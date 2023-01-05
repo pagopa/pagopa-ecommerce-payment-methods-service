@@ -33,19 +33,26 @@ public class Psp {
 
     private final PspChannelCode pspChannelCode;
 
-
     @AggregateID
     public PspCode pspCode() {
         return this.pspCode;
     }
 
-    public Psp(PspCode pspCode, PspPaymentMethodType pspPaymentMethodType, PspStatus pspStatus,
-               PspBusinessName pspBusinessName, PspBrokerName pspBrokerName,
-               PspDescription pspDescription, PspLanguage pspLanguage,
-               PspAmount pspMinAmount, PspAmount pspMaxAmount,
-               PspChannelCode pspChannelCode, PspFee pspFixedCost) {
+    public Psp(
+            PspCode pspCode,
+            PspPaymentMethodType pspPaymentMethodType,
+            PspStatus pspStatus,
+            PspBusinessName pspBusinessName,
+            PspBrokerName pspBrokerName,
+            PspDescription pspDescription,
+            PspLanguage pspLanguage,
+            PspAmount pspMinAmount,
+            PspAmount pspMaxAmount,
+            PspChannelCode pspChannelCode,
+            PspFee pspFixedCost
+    ) {
 
-        if (pspMinAmount.value().compareTo(pspMaxAmount.value()) > 0){
+        if (pspMinAmount.value().compareTo(pspMaxAmount.value()) > 0) {
             throw new IllegalArgumentException("Invalid amount range");
         }
 

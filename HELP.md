@@ -16,4 +16,3 @@ The following guides illustrate how to use some features concretely:
 
 * [Accessing Data with MongoDB](https://spring.io/guides/gs/accessing-data-mongodb/)
 * [Building a Reactive RESTful Web Service](https://spring.io/guides/gs/reactive-rest-service/)
-

@@ -24,23 +24,41 @@ public class ApiConfigClient {
     @Value("${apiConfig.psp.get.flagIo.enabled}")
     private Boolean flagIo;
 
-    public Mono<ServicesDto> getPSPs(Integer page, Integer limit) {
+    public Mono<ServicesDto> getPSPs(
+                                     Integer page,
+                                     Integer limit
+    ) {
         return apiConfigClient
                 .getApiClient()
                 .getWebClient()
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .queryParam("page", page)
-                        .queryParam("limit", limit)
-                        .queryParam("flagio", flagIo)
-                        .build())
+                .uri(
+                        uriBuilder -> uriBuilder
+                                .queryParam("page", page)
+                                .queryParam("limit", limit)
+                                .queryParam("flagio", flagIo)
+                                .build()
+                )
                 .header("ocp-apim-subscription-key", apiConfigKey)
                 .retrieve()
                 .bodyToMono(ServicesDto.class)
-                .doOnError(ResponseStatusException.class,
-                        error -> log.error("ResponseStatus Error : {}", new Object[] { error }))
-                .doOnError(Exception.class,
-                        (Exception error) -> log.error("Generic Error : {}", new Object[] { error }));
+                .doOnError(
+                        ResponseStatusException.class,
+                        error -> log.error(
+                                "ResponseStatus Error : {}",
+                                new Object[] {
+                                        error
+                                }
+                        )
+                )
+                .doOnError(
+                        Exception.class,
+                        (Exception error) -> log.error(
+                                "Generic Error : {}",
+                                new Object[] {
+                                        error
+                                }
+                        )
+                );
     }
 }
-
