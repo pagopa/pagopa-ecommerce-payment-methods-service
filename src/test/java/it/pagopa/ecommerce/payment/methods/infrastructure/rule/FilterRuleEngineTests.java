@@ -34,7 +34,6 @@ class FilterRuleEngineTests {
     @InjectMocks
     private FilterRuleEngine filterRuleEngine;
 
-
     private PspDocument pspDocument = new PspDocument(
             new PspDocumentKey(
                     "PSP_CODE",
@@ -57,13 +56,12 @@ class FilterRuleEngineTests {
 
     String TEST_ID = "ID";
 
-
     @Test
     /*
-    * Precondition filter for: no filter
-    * Expected behavior: Should call pspRepository findAll()
+     * Precondition filter for: no filter Expected behavior: Should call
+     * pspRepository findAll()
      */
-    void testEmptyFilter(){
+    void testEmptyFilter() {
         Mockito.when(pspRepository.findAll()).thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(null, null, null).collectList().block();
 
@@ -71,23 +69,24 @@ class FilterRuleEngineTests {
     }
 
     @Test
-        /*
-         * Precondition filter for: amount
-         * Expected behavior: Should call pspRepository findPspMatchAmount()
-         */
-    void testAmountFilter(){
-        Mockito.when(pspRepository.findPspMatchAmount(BigInteger.valueOf(TEST_AMOUNT))).thenReturn(Flux.just(pspDocument));
+    /*
+     * Precondition filter for: amount Expected behavior: Should call pspRepository
+     * findPspMatchAmount()
+     */
+    void testAmountFilter() {
+        Mockito.when(pspRepository.findPspMatchAmount(BigInteger.valueOf(TEST_AMOUNT)))
+                .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, null, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchAmount(BigInteger.valueOf(TEST_AMOUNT));
     }
 
     @Test
-        /*
-         * Precondition filter for: language
-         * Expected behavior: Should call pspRepository findPspMatchLang()
-         */
-    void testLangFilter(){
+    /*
+     * Precondition filter for: language Expected behavior: Should call
+     * pspRepository findPspMatchLang()
+     */
+    void testLangFilter() {
         Mockito.when(pspRepository.findPspMatchLang(TEST_LANG)).thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(null, TEST_LANG, null).collectList().block();
 
@@ -95,11 +94,11 @@ class FilterRuleEngineTests {
     }
 
     @Test
-        /*
-         * Precondition filter for: paymentType
-         * Expected behavior: Should call pspRepository findPspMatchType()
-         */
-    void testPaymentTypeFilter(){
+    /*
+     * Precondition filter for: paymentType Expected behavior: Should call
+     * pspRepository findPspMatchType()
+     */
+    void testPaymentTypeFilter() {
         String TEST_PAYMENT_TYPE = "PO";
         Mockito.when(pspRepository.findPspMatchType(TEST_PAYMENT_TYPE)).thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(null, null, TEST_PAYMENT_TYPE).collectList().block();
@@ -108,12 +107,13 @@ class FilterRuleEngineTests {
     }
 
     @Test
-        /*
-         * Precondition filter for: amount & lang
-         * Expected behavior: Should call pspRepository findPspMatchAmountLang()
-         */
-    void testAmountLangFilter(){
-        Mockito.when(pspRepository.findPspMatchAmountLang(BigInteger.valueOf(TEST_AMOUNT), TEST_LANG)).thenReturn(Flux.just(pspDocument));
+    /*
+     * Precondition filter for: amount & lang Expected behavior: Should call
+     * pspRepository findPspMatchAmountLang()
+     */
+    void testAmountLangFilter() {
+        Mockito.when(pspRepository.findPspMatchAmountLang(BigInteger.valueOf(TEST_AMOUNT), TEST_LANG))
+                .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
@@ -121,11 +121,11 @@ class FilterRuleEngineTests {
     }
 
     @Test
-        /*
-         * Precondition filter for: amount & paymentType
-         * Expected behavior: Should call pspRepository findPspMatchType()
-         */
-    void testAmountTypeFilter(){
+    /*
+     * Precondition filter for: amount & paymentType Expected behavior: Should call
+     * pspRepository findPspMatchType()
+     */
+    void testAmountTypeFilter() {
         Mockito.when(pspRepository.findPspMatchAmountType(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE))
                 .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, null, TEST_PAYMENT_TYPE).collectList().block();
@@ -135,26 +135,28 @@ class FilterRuleEngineTests {
     }
 
     @Test
-        /*
-         * Precondition filter for: lang & paymentType
-         * Expected behavior: Should call pspRepository findPspMatchTypeLang()
-         */
-    void testTypeLangFilter(){
+    /*
+     * Precondition filter for: lang & paymentType Expected behavior: Should call
+     * pspRepository findPspMatchTypeLang()
+     */
+    void testTypeLangFilter() {
         Mockito.when(pspRepository.findPspMatchTypeLang(TEST_PAYMENT_TYPE, TEST_LANG))
                 .thenReturn(Flux.just(pspDocument));
-        filterRuleEngine.applyFilter( null, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
+        filterRuleEngine.applyFilter(null, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
                 .findPspMatchTypeLang(TEST_PAYMENT_TYPE, TEST_LANG);
     }
 
     @Test
-        /*
-         * Precondition filter for: amount & lang & paymentType
-         * Expected behavior: Should call pspRepository findPspMatchAmountTypeLang()
-         */
-    void testAmountTypeLangFilter(){
-        Mockito.when(pspRepository.findPspMatchAmountTypeLang(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE, TEST_LANG))
+    /*
+     * Precondition filter for: amount & lang & paymentType Expected behavior:
+     * Should call pspRepository findPspMatchAmountTypeLang()
+     */
+    void testAmountTypeLangFilter() {
+        Mockito.when(
+                pspRepository.findPspMatchAmountTypeLang(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE, TEST_LANG)
+        )
                 .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
 

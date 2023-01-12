@@ -23,27 +23,34 @@ public class PaymentMethodFactory {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
-
     @AggregateFactory(PaymentMethod.class)
-    public Mono<PaymentMethod> newPaymentMethod(PaymentMethodID paymentMethodID,
+    public Mono<PaymentMethod> newPaymentMethod(
+                                                PaymentMethodID paymentMethodID,
                                                 PaymentMethodName paymentMethodName,
                                                 PaymentMethodDescription paymentMethodDescription,
                                                 PaymentMethodStatus paymentMethodStatus,
                                                 List<PaymentMethodRange> paymentMethodRanges,
                                                 PaymentMethodType paymentMethodTypeCode,
-                                                PaymentMethodAsset paymentMethodAsset) {
+                                                PaymentMethodAsset paymentMethodAsset
+    ) {
 
         return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(paymentMethodName.value(),
                         paymentMethodTypeCode.value()).hasElement()
                 .map(hasPaymentMethod -> {
-                            if (Boolean.TRUE.equals(hasPaymentMethod)) {
-                                throw paymentMethodAlreadyInUse(paymentMethodName);
-                            }
+                    if (Boolean.TRUE.equals(hasPaymentMethod)) {
+                        throw paymentMethodAlreadyInUse(paymentMethodName);
+                    }
 
-                            return new PaymentMethod(paymentMethodID, paymentMethodName,
-                                    paymentMethodDescription, paymentMethodStatus,
-                                    paymentMethodRanges, paymentMethodTypeCode, paymentMethodAsset);
-                        }
+                    return new PaymentMethod(
+                            paymentMethodID,
+                            paymentMethodName,
+                            paymentMethodDescription,
+                            paymentMethodStatus,
+                            paymentMethodRanges,
+                            paymentMethodTypeCode,
+                            paymentMethodAsset
+                    );
+                }
                 );
     }
 }

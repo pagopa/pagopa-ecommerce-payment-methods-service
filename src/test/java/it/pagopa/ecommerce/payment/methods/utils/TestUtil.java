@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 public class TestUtil {
 
     static final String TEST_NAME = "Test";
-    static final  String TEST_DESC = "test";
-    static final  PaymentMethodRequestDto.StatusEnum TEST_STATUS = PaymentMethodRequestDto.StatusEnum.ENABLED;
+    static final String TEST_DESC = "test";
+    static final PaymentMethodRequestDto.StatusEnum TEST_STATUS = PaymentMethodRequestDto.StatusEnum.ENABLED;
     static final String TEST_TYPE_CODE = "test";
 
     static final String TEST_LANG = "IT";
@@ -66,7 +66,7 @@ public class TestUtil {
         );
     }
 
-    public static PaymentMethodRequestDto getPaymentMethodRequest(){
+    public static PaymentMethodRequestDto getPaymentMethodRequest() {
         return new PaymentMethodRequestDto()
                 .name(TEST_NAME)
                 .description(TEST_DESC)
@@ -76,22 +76,25 @@ public class TestUtil {
                 .asset(TEST_ASSET);
     }
 
-    public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod){
+    public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod) {
         return new PaymentMethodResponseDto()
                 .id(paymentMethod.getPaymentMethodID().value().toString())
                 .name(paymentMethod.getPaymentMethodName().value())
                 .asset(paymentMethod.getPaymentMethodAsset().value())
                 .description(paymentMethod.getPaymentMethodDescription().value())
-                .status(PaymentMethodResponseDto.StatusEnum.fromValue(paymentMethod.getPaymentMethodStatus().value().getCode()))
+                .status(
+                        PaymentMethodResponseDto.StatusEnum
+                                .fromValue(paymentMethod.getPaymentMethodStatus().value().getCode())
+                )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
                 .ranges(List.of(new RangeDto().min(0L).max(100L)));
     }
 
-    public static long getTestAmount(){
+    public static long getTestAmount() {
         return TEST_AMOUNT;
     }
 
-    public static PspDto getTestPspDto(){
+    public static PspDto getTestPspDto() {
         return new PspDto()
                 .code(PSP_TEST_CODE)
                 .brokerName(PSP_TEST_NAME)
@@ -101,7 +104,7 @@ public class TestUtil {
                 .channelCode(PSP_TEST_CHANNEL);
     }
 
-    public static Psp getTestPsp(){
+    public static Psp getTestPsp() {
         return new Psp(
                 new PspCode(PSP_TEST_CODE),
                 new PspPaymentMethodType("PO"),
@@ -117,30 +120,34 @@ public class TestUtil {
         );
     }
 
-    public static String getTestLang(){
+    public static String getTestLang() {
         return TEST_LANG;
     }
 
-    public static String getTestPaymentType(){
+    public static String getTestPaymentType() {
         return TEST_TYPE_CODE;
     }
 
-    public static ServicesDto getTestServices(){
+    public static ServicesDto getTestServices() {
         return new ServicesDto()
-                .services(List.of(new ServiceDto()
-                        .abiCode("TEST")
-                        .channelCode("CHANNEL=")
-                        .languageCode(ServiceDto.LanguageCodeEnum.IT)
-                        .conventionCode("TEST")
-                        .pspCode("TEST")
-                        .paymentTypeCode("PO")
-                        .pspBusinessName("TEST")
-                        .brokerPspCode("TEST")
-                        .serviceName("TEST")
-                        .serviceDescription("TEST")
-                        .minimumAmount(0.0)
-                        .maximumAmount(100.0)
-                        .fixedCost(100.0)))
+                .services(
+                        List.of(
+                                new ServiceDto()
+                                        .abiCode("TEST")
+                                        .channelCode("CHANNEL=")
+                                        .languageCode(ServiceDto.LanguageCodeEnum.IT)
+                                        .conventionCode("TEST")
+                                        .pspCode("TEST")
+                                        .paymentTypeCode("PO")
+                                        .pspBusinessName("TEST")
+                                        .brokerPspCode("TEST")
+                                        .serviceName("TEST")
+                                        .serviceDescription("TEST")
+                                        .minimumAmount(0.0)
+                                        .maximumAmount(100.0)
+                                        .fixedCost(100.0)
+                        )
+                )
                 .pageInfo(
                         new PageInfoDto()
                                 .totalPages(1)
@@ -150,7 +157,7 @@ public class TestUtil {
                 );
     }
 
-    public static PaymentMethodDocument getTestPaymentDoc(PaymentMethod paymentMethod){
+    public static PaymentMethodDocument getTestPaymentDoc(PaymentMethod paymentMethod) {
         return new PaymentMethodDocument(
                 paymentMethod.getPaymentMethodID().value().toString(),
                 paymentMethod.getPaymentMethodName().value(),
@@ -159,21 +166,25 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodAsset().value(),
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
-                paymentMethod.getPaymentMethodTypeCode().value());
+                paymentMethod.getPaymentMethodTypeCode().value()
+        );
     }
 
-    public static PspDocument getTestPspDoc(Psp psp){
-        return new PspDocument(new PspDocumentKey(
-                psp.getPspCode().value(),
-                psp.getPspPaymentMethodType().value(),
-                psp.getPspChannelCode().value(),
-                psp.getPspLanguage().value().getLanguage()),
+    public static PspDocument getTestPspDoc(Psp psp) {
+        return new PspDocument(
+                new PspDocumentKey(
+                        psp.getPspCode().value(),
+                        psp.getPspPaymentMethodType().value(),
+                        psp.getPspChannelCode().value(),
+                        psp.getPspLanguage().value().getLanguage()
+                ),
                 psp.getPspStatus().value().getCode(),
                 psp.getPspBusinessName().value(),
                 psp.getPspBrokerName().value(),
                 psp.getPspDescription().value(),
                 psp.getPspMinAmount().value(),
                 psp.getPspMaxAmount().value(),
-                psp.getPspFixedCost().value());
+                psp.getPspFixedCost().value()
+        );
     }
 }

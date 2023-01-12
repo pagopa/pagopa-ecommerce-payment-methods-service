@@ -9,7 +9,8 @@ RUN ./mvnw dependency:go-offline
 
 COPY src src
 COPY api-spec api-spec
-RUN ./mvnw install -DskipTests --offline
+COPY eclipse-style.xml eclipse-style.xml
+RUN ./mvnw install -DskipTests # --offline (remove the comment when ecommerce-commons will be integrated as he will download the dependencies of the spotless plugin)
 RUN mkdir target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
 
 FROM openjdk:17-slim

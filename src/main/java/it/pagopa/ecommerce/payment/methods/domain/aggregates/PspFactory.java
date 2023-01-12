@@ -25,22 +25,40 @@ public class PspFactory {
     private PspRepository pspRepository;
 
     @AggregateFactory(Psp.class)
-    public Mono<Psp> newPsp(PspCode pspCode, PspPaymentMethodType pspPaymentMethodType, PspStatus pspStatus,
-                            PspBusinessName pspBusinessName, PspBrokerName pspBrokerName,
-                            PspDescription pspDescription, PspLanguage pspLanguage,
-                            PspAmount pspMinAmount, PspAmount pspMaxAmount,
-                            PspChannelCode pspChannelCode, PspFee pspFixedCost) {
+    public Mono<Psp> newPsp(
+                            PspCode pspCode,
+                            PspPaymentMethodType pspPaymentMethodType,
+                            PspStatus pspStatus,
+                            PspBusinessName pspBusinessName,
+                            PspBrokerName pspBrokerName,
+                            PspDescription pspDescription,
+                            PspLanguage pspLanguage,
+                            PspAmount pspMinAmount,
+                            PspAmount pspMaxAmount,
+                            PspChannelCode pspChannelCode,
+                            PspFee pspFixedCost
+    ) {
 
         return pspRepository.findByPspDocumentKey(
-                        pspCode.value(),
-                        pspPaymentMethodType.value(),
-                        pspChannelCode.value()
-                ).hasElements()
+                pspCode.value(),
+                pspPaymentMethodType.value(),
+                pspChannelCode.value()
+        ).hasElements()
                 .map(hasPsp -> {
                     if (Boolean.FALSE.equals(hasPsp)) {
-                        return new Psp(pspCode, pspPaymentMethodType, pspStatus, pspBusinessName,
-                                pspBrokerName, pspDescription, pspLanguage, pspMinAmount, pspMaxAmount,
-                                pspChannelCode, pspFixedCost);
+                        return new Psp(
+                                pspCode,
+                                pspPaymentMethodType,
+                                pspStatus,
+                                pspBusinessName,
+                                pspBrokerName,
+                                pspDescription,
+                                pspLanguage,
+                                pspMinAmount,
+                                pspMaxAmount,
+                                pspChannelCode,
+                                pspFixedCost
+                        );
                     } else {
                         throw pspAlreadyInUseException(pspCode);
                     }
