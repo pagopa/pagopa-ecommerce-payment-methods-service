@@ -5,8 +5,6 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PspRepository;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
-import java.math.BigInteger;
-
 @Component
 public class AmountLangFilterRule implements IFilterRule {
     @Override
@@ -25,7 +23,7 @@ public class AmountLangFilterRule implements IFilterRule {
                                      String language,
                                      String paymentTypeCode
     ) {
-        return pspRepository.findPspMatchAmountLang(BigInteger.valueOf(amount), language);
+        return pspRepository.findPspMatchAmountLang(amount, language);
     }
 
 }

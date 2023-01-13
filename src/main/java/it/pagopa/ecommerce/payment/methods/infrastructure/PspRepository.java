@@ -4,7 +4,6 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
-import java.math.BigInteger;
 
 public interface PspRepository extends ReactiveCrudRepository<PspDocument, String> {
     Flux<PspDocument> findByPspDocumentKey(
@@ -14,7 +13,7 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
     );
 
     @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0} }")
-    Flux<PspDocument> findPspMatchAmount(BigInteger amount);
+    Flux<PspDocument> findPspMatchAmount(long amount);
 
     @Query("{ '_id.pspPaymentTypeCode' : ?0 }")
     Flux<PspDocument> findPspMatchType(String type);
@@ -24,13 +23,13 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
 
     @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0}, '_id.pspLanguageCode' : ?1 }")
     Flux<PspDocument> findPspMatchAmountLang(
-                                             BigInteger amount,
+                                             long amount,
                                              String languageCode
     );
 
     @Query("{ 'pspMinAmount' : { $lt: ?0}, 'pspMaxAmount' : { $gt: ?0}, '_id.pspPaymentTypeCode' : ?1 }")
     Flux<PspDocument> findPspMatchAmountType(
-                                             BigInteger amount,
+                                             long amount,
                                              String paymentTypeCode
     );
 
@@ -44,7 +43,7 @@ public interface PspRepository extends ReactiveCrudRepository<PspDocument, Strin
         "{ 'pspMinAmount' : { $lt: ?0 }, 'pspMaxAmount' : { $gt: ?0 }, '_id.pspPaymentTypeCode' : ?1, '_id.pspLanguageCode' : ?2 }"
     )
     Flux<PspDocument> findPspMatchAmountTypeLang(
-                                                 BigInteger amount,
+                                                 long amount,
                                                  String pspPaymentTypeCode,
                                                  String pspLanguageCode
     );

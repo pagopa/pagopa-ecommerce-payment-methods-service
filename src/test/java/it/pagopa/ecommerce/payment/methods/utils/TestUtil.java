@@ -61,7 +61,7 @@ public class TestUtil {
                 new PaymentMethodDescription("Test"),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 new PaymentMethodType(TEST_TYPE_CODE),
-                List.of(new PaymentMethodRange(BigInteger.ZERO, BigInteger.valueOf(100))),
+                List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET)
         );
     }
@@ -182,9 +182,9 @@ public class TestUtil {
                 psp.getPspBusinessName().value(),
                 psp.getPspBrokerName().value(),
                 psp.getPspDescription().value(),
-                psp.getPspMinAmount().value(),
-                psp.getPspMaxAmount().value(),
-                psp.getPspFixedCost().value()
+                psp.getPspMinAmount().value().longValue(),
+                psp.getPspMaxAmount().value().longValue(),
+                psp.getPspFixedCost().value().longValue()
         );
     }
 }

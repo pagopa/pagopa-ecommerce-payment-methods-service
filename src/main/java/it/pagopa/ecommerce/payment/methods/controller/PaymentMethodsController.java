@@ -92,8 +92,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                             paymentMethod.getPaymentMethodRanges().stream().map(
                                                     r -> {
                                                         RangeDto rangeDto = new RangeDto();
-                                                        rangeDto.setMin(r.min().longValue());
-                                                        rangeDto.setMax(r.max().longValue());
+                                                        rangeDto.setMin(r.min());
+                                                        rangeDto.setMax(r.max());
                                                         return rangeDto;
                                                     }
                                             ).collect(Collectors.toList())
@@ -162,7 +162,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         request.getName(),
                         request.getDescription(),
                         request.getRanges().stream()
-                                .map(r -> Pair.of(BigInteger.valueOf(r.getMin()), BigInteger.valueOf(r.getMax())))
+                                .map(r -> Pair.of(r.getMin(), r.getMax()))
                                 .toList(),
                         request.getPaymentTypeCode(),
                         request.getAsset()
@@ -234,8 +234,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 paymentMethod.getPaymentMethodRanges().stream().map(
                         r -> {
                             RangeDto rangeDto = new RangeDto();
-                            rangeDto.setMin(r.min().longValue());
-                            rangeDto.setMax(r.max().longValue());
+                            rangeDto.setMin(r.min());
+                            rangeDto.setMax(r.max());
                             return rangeDto;
                         }
                 ).collect(Collectors.toList())
