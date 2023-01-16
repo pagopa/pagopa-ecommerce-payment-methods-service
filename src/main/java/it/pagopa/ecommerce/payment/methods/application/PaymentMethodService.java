@@ -43,7 +43,7 @@ public class PaymentMethodService {
     public Mono<PaymentMethod> createPaymentMethod(
                                                    String paymentMethodName,
                                                    String paymentMethodDescription,
-                                                   List<Pair<BigInteger, BigInteger>> ranges,
+                                                   List<Pair<Long, Long>> ranges,
                                                    String paymentMethodTypeCode,
                                                    String paymentMethodAsset
     ) {
@@ -167,8 +167,8 @@ public class PaymentMethodService {
                         p.setPaymentMethodRanges(
                                 rangeMap.get(paymentTypeCode).stream().map(
                                         pair -> Pair.of(
-                                                BigInteger.valueOf(pair.getFirst()),
-                                                BigInteger.valueOf(pair.getSecond())
+                                                pair.getFirst(),
+                                                pair.getSecond()
                                         )
                                 ).toList()
                         );

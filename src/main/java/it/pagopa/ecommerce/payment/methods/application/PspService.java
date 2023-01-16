@@ -89,9 +89,9 @@ public class PspService {
                                     p.getPspBusinessName().value(),
                                     p.getPspBrokerName().value(),
                                     p.getPspDescription().value(),
-                                    p.getPspMinAmount().value(),
-                                    p.getPspMaxAmount().value(),
-                                    p.getPspFixedCost().value()
+                                    p.getPspMinAmount().value().longValue(),
+                                    p.getPspMaxAmount().value().longValue(),
+                                    p.getPspFixedCost().value().longValue()
                             )
                     ).map(doc -> {
                         log.debug("[Psp Service] {} added to db", doc.getPspBusinessName());
@@ -120,9 +120,9 @@ public class PspService {
             pspDto.setStatus(PspDto.StatusEnum.fromValue(doc.getPspStatus()));
             pspDto.setBrokerName(doc.getPspBrokerName());
             pspDto.setLanguage(PspDto.LanguageEnum.fromValue(doc.getPspDocumentKey().getPspLanguageCode()));
-            pspDto.setMinAmount(doc.getPspMinAmount().longValue());
-            pspDto.setMaxAmount(doc.getPspMaxAmount().longValue());
-            pspDto.setFixedCost(doc.getPspFixedCost().longValue());
+            pspDto.setMinAmount(doc.getPspMinAmount());
+            pspDto.setMaxAmount(doc.getPspMaxAmount());
+            pspDto.setFixedCost(doc.getPspFixedCost());
 
             return pspDto;
         });

@@ -45,9 +45,9 @@ class FilterRuleEngineTests {
             "Test",
             "Test broker",
             "Test description",
-            BigInteger.valueOf(0),
-            BigInteger.valueOf(100),
-            BigInteger.valueOf(100)
+            BigInteger.valueOf(0).longValue(),
+            BigInteger.valueOf(100).longValue(),
+            BigInteger.valueOf(100).longValue()
     );
 
     String TEST_PAYMENT_TYPE = "PO";
@@ -74,11 +74,10 @@ class FilterRuleEngineTests {
      * findPspMatchAmount()
      */
     void testAmountFilter() {
-        Mockito.when(pspRepository.findPspMatchAmount(BigInteger.valueOf(TEST_AMOUNT)))
-                .thenReturn(Flux.just(pspDocument));
+        Mockito.when(pspRepository.findPspMatchAmount(TEST_AMOUNT)).thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, null, null).collectList().block();
 
-        Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchAmount(BigInteger.valueOf(TEST_AMOUNT));
+        Mockito.verify(pspRepository, Mockito.times(1)).findPspMatchAmount(TEST_AMOUNT);
     }
 
     @Test
@@ -112,12 +111,11 @@ class FilterRuleEngineTests {
      * pspRepository findPspMatchAmountLang()
      */
     void testAmountLangFilter() {
-        Mockito.when(pspRepository.findPspMatchAmountLang(BigInteger.valueOf(TEST_AMOUNT), TEST_LANG))
-                .thenReturn(Flux.just(pspDocument));
+        Mockito.when(pspRepository.findPspMatchAmountLang(TEST_AMOUNT, TEST_LANG)).thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, null).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
-                .findPspMatchAmountLang(BigInteger.valueOf(TEST_AMOUNT), TEST_LANG);
+                .findPspMatchAmountLang(TEST_AMOUNT, TEST_LANG);
     }
 
     @Test
@@ -126,12 +124,12 @@ class FilterRuleEngineTests {
      * pspRepository findPspMatchType()
      */
     void testAmountTypeFilter() {
-        Mockito.when(pspRepository.findPspMatchAmountType(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE))
+        Mockito.when(pspRepository.findPspMatchAmountType(TEST_AMOUNT, TEST_PAYMENT_TYPE))
                 .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, null, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
-                .findPspMatchAmountType(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE);
+                .findPspMatchAmountType(TEST_AMOUNT, TEST_PAYMENT_TYPE);
     }
 
     @Test
@@ -154,13 +152,11 @@ class FilterRuleEngineTests {
      * Should call pspRepository findPspMatchAmountTypeLang()
      */
     void testAmountTypeLangFilter() {
-        Mockito.when(
-                pspRepository.findPspMatchAmountTypeLang(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE, TEST_LANG)
-        )
+        Mockito.when(pspRepository.findPspMatchAmountTypeLang(TEST_AMOUNT, TEST_PAYMENT_TYPE, TEST_LANG))
                 .thenReturn(Flux.just(pspDocument));
         filterRuleEngine.applyFilter(TEST_AMOUNT, TEST_LANG, TEST_PAYMENT_TYPE).collectList().block();
 
         Mockito.verify(pspRepository, Mockito.times(1))
-                .findPspMatchAmountTypeLang(BigInteger.valueOf(TEST_AMOUNT), TEST_PAYMENT_TYPE, TEST_LANG);
+                .findPspMatchAmountTypeLang(TEST_AMOUNT, TEST_PAYMENT_TYPE, TEST_LANG);
     }
 }

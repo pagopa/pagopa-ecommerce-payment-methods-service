@@ -155,9 +155,9 @@ class PspServiceTests {
                 "Test",
                 "Test broker",
                 "Test description",
-                BigInteger.valueOf(0),
-                BigInteger.valueOf(100),
-                BigInteger.valueOf(100)
+                BigInteger.valueOf(0).longValue(),
+                BigInteger.valueOf(100).longValue(),
+                BigInteger.valueOf(100).longValue()
         );
 
         PspDocument pspDocument_2 = new PspDocument(
@@ -171,9 +171,9 @@ class PspServiceTests {
                 "Test_2",
                 "Test broker",
                 "Test description",
-                BigInteger.valueOf(0),
-                BigInteger.valueOf(100),
-                BigInteger.valueOf(100)
+                BigInteger.valueOf(0).longValue(),
+                BigInteger.valueOf(100).longValue(),
+                BigInteger.valueOf(100).longValue()
         );
 
         Mockito.when(filterRuleEngine.applyFilter(amount, language, paymentTypeCode))
