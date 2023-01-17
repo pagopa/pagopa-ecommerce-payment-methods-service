@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
 
@@ -36,11 +37,11 @@ class PaymentMethodFactoryTests {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         Mockito.when(
-                paymentMethodRepository.findByPaymentMethodName(
-                        paymentMethod.getPaymentMethodName().value()
+                paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
+                        paymentMethod.getPaymentMethodName().value(),
+                        paymentMethod.getPaymentMethodTypeCode().value()
                 )
-        )
-                .thenReturn(Flux.empty());
+        ).thenReturn(Mono.empty());
 
         PaymentMethod paymentMethodProduct = paymentMethodFactory.newPaymentMethod(
                 paymentMethod.getPaymentMethodID(),
@@ -60,25 +61,25 @@ class PaymentMethodFactoryTests {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         Mockito.when(
-                paymentMethodRepository.findByPaymentMethodName(
-                        paymentMethod.getPaymentMethodName().value()
+                paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
+                        paymentMethod.getPaymentMethodName().value(),
+                        paymentMethod.getPaymentMethodTypeCode().value()
                 )
-        )
-                .thenReturn(
-                        Flux.just(
-                                new PaymentMethodDocument(
-                                        paymentMethod.getPaymentMethodID().value().toString(),
-                                        paymentMethod.getPaymentMethodName().value(),
-                                        paymentMethod.getPaymentMethodDescription().value(),
-                                        paymentMethod.getPaymentMethodStatus().value().toString(),
-                                        paymentMethod.getPaymentMethodAsset().value(),
-                                        paymentMethod.getPaymentMethodRanges().stream()
-                                                .map(r -> Pair.of(r.min(), r.max()))
-                                                .collect(Collectors.toList()),
-                                        paymentMethod.getPaymentMethodTypeCode().value()
-                                )
+        ).thenReturn(
+                Mono.just(
+                        new PaymentMethodDocument(
+                                paymentMethod.getPaymentMethodID().value().toString(),
+                                paymentMethod.getPaymentMethodName().value(),
+                                paymentMethod.getPaymentMethodDescription().value(),
+                                paymentMethod.getPaymentMethodStatus().value().toString(),
+                                paymentMethod.getPaymentMethodAsset().value(),
+                                paymentMethod.getPaymentMethodRanges().stream()
+                                        .map(r -> Pair.of(r.min(), r.max()))
+                                        .collect(Collectors.toList()),
+                                paymentMethod.getPaymentMethodTypeCode().value()
                         )
-                );
+                )
+        );
 
         assertThrows(
                 PaymentMethodAlreadyInUseException.class,
