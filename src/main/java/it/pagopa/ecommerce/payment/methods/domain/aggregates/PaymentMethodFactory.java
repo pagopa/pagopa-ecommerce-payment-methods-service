@@ -19,7 +19,6 @@ import static it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlready
 @Component
 @AggregateFactory(PaymentMethod.class)
 public class PaymentMethodFactory {
-
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
@@ -34,12 +33,14 @@ public class PaymentMethodFactory {
                                                 PaymentMethodAsset paymentMethodAsset
     ) {
 
-        return paymentMethodRepository.findByPaymentMethodName(paymentMethodName.value()).hasElements()
+        return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
+                paymentMethodName.value(),
+                paymentMethodTypeCode.value()
+        ).hasElement()
                 .map(hasPaymentMethod -> {
                     if (Boolean.TRUE.equals(hasPaymentMethod)) {
                         throw paymentMethodAlreadyInUse(paymentMethodName);
                     }
-
                     return new PaymentMethod(
                             paymentMethodID,
                             paymentMethodName,
