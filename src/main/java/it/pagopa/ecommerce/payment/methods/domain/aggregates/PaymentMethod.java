@@ -21,17 +21,10 @@ public class PaymentMethod {
     private final PaymentMethodID paymentMethodID;
     private final PaymentMethodName paymentMethodName;
     private final PaymentMethodDescription paymentMethodDescription;
-    private PaymentMethodStatus paymentMethodStatus;
-
     private final List<PaymentMethodRange> paymentMethodRanges;
     private final PaymentMethodType paymentMethodTypeCode;
-
     private final PaymentMethodAsset paymentMethodAsset;
-
-    @AggregateID
-    public PaymentMethodID paymentMethodID() {
-        return this.paymentMethodID;
-    }
+    private PaymentMethodStatus paymentMethodStatus;
 
     public PaymentMethod(
             PaymentMethodID paymentMethodID,
@@ -49,6 +42,11 @@ public class PaymentMethod {
         this.paymentMethodTypeCode = paymentMethodTypeCode;
         this.paymentMethodRanges = paymentMethodRanges;
         this.paymentMethodAsset = paymentMethodAsset;
+    }
+
+    @AggregateID
+    public PaymentMethodID paymentMethodID() {
+        return this.paymentMethodID;
     }
 
     public void setPaymentMethodStatus(PaymentMethodStatusEnum paymentMethodStatus) {

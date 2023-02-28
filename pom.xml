@@ -124,12 +124,12 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>api-config-api</id>
+						<id>gec-api</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-api-config/main/openapi/openapi.json</inputSpec>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-afm-calculator/main/openapi/openapi-node.json</inputSpec>
 							<generatorName>java</generatorName>
 							<library>webclient</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
@@ -140,8 +140,8 @@
 								<swaggerAnnotations>false</swaggerAnnotations>
 								<openApiNullable>false</openApiNullable>
 							</configOptions>
-							<modelPackage>it.pagopa.generated.ecommerce.apiconfig.v1.dto</modelPackage>
-							<apiPackage>it.pagopa.generated.ecommerce.apiconfig.v1.api</apiPackage>
+							<modelPackage>it.pagopa.generated.ecommerce.gec.v1.dto</modelPackage>
+							<apiPackage>it.pagopa.generated.ecommerce.gec.v1.api</apiPackage>
 							<modelNameSuffix>dto</modelNameSuffix>
 						</configuration>
 					</execution>

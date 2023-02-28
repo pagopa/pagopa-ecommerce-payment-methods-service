@@ -13,8 +13,6 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -22,10 +20,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -78,10 +73,10 @@ public class PaymentMethodService {
                                 new PaymentMethodName(doc.getPaymentMethodName()),
                                 new PaymentMethodDescription(doc.getPaymentMethodDescription()),
                                 new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())),
+                                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
                                 doc.getPaymentMethodRanges().stream()
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                                         .collect(Collectors.toList()),
-                                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset())
                         )
                 )
@@ -146,59 +141,33 @@ public class PaymentMethodService {
                 .map(this::docToAggregate);
     }
 
-    public void updatePaymentMethodRanges(ServicesDto servicesDto) {
-        Map<String, Set<Pair<Long, Long>>> rangeMap = servicesDto.getServices().stream()
-                .collect(
-                        Collectors.groupingBy(
-                                ServiceDto::getPaymentTypeCode,
-                                Collectors.mapping(
-                                        this::convertRange,
-                                        Collectors.toSet()
-                                )
-                        )
-                );
-
-        rangeMap.keySet().forEach(paymentTypeCode -> {
-            log.info("PaymentTypeCode: {}", paymentTypeCode);
-
-            paymentMethodRepository.findByPaymentMethodTypeCode(paymentTypeCode)
-                    .flatMap(p -> {
-                        log.info("Updating paymentMethod: {}", p.getPaymentMethodID());
-                        p.setPaymentMethodRanges(
-                                rangeMap.get(paymentTypeCode).stream().map(
-                                        pair -> Pair.of(
-                                                pair.getFirst(),
-                                                pair.getSecond()
-                                        )
-                                ).toList()
-                        );
-                        return Mono.just(p);
-                    })
-                    .flatMap(updatedDoc -> paymentMethodRepository.save(updatedDoc))
-                    .subscribe();
-        }
-        );
-    }
-
-    private Pair<Long, Long> convertRange(ServiceDto serviceDto) {
-        long min;
-        long max;
-
-        if (serviceDto.getMinimumAmount() == null) {
-            min = Long.MIN_VALUE;
-        } else {
-            double res = (serviceDto.getMinimumAmount() * 100.0);
-            min = (long) res;
-        }
-
-        if (serviceDto.getMaximumAmount() == null) {
-            max = Long.MAX_VALUE;
-        } else {
-            double res = (serviceDto.getMaximumAmount() * 100.0);
-            max = (long) res;
-        }
-        return Pair.of(min, max);
-    }
+    /*
+     * public void updatePaymentMethodRanges(ServicesDto servicesDto) { Map<String,
+     * Set<Pair<Long, Long>>> rangeMap = servicesDto.getServices().stream()
+     * .collect( Collectors.groupingBy( ServiceDto::getPaymentTypeCode,
+     * Collectors.mapping( this::convertRange, Collectors.toSet() ) ) );
+     *
+     * rangeMap.keySet().forEach(paymentTypeCode -> {
+     * log.info("PaymentTypeCode: {}", paymentTypeCode);
+     *
+     * paymentMethodRepository.findByPaymentMethodTypeCode(paymentTypeCode)
+     * .flatMap(p -> { log.info("Updating paymentMethod: {}",
+     * p.getPaymentMethodID()); p.setPaymentMethodRanges(
+     * rangeMap.get(paymentTypeCode).stream().map( pair -> Pair.of( pair.getFirst(),
+     * pair.getSecond() ) ).toList() ); return Mono.just(p); }) .flatMap(updatedDoc
+     * -> paymentMethodRepository.save(updatedDoc)) .subscribe(); } ); }
+     *
+     * private Pair<Long, Long> convertRange(ServiceDto serviceDto) { long min; long
+     * max;
+     *
+     * if (serviceDto.getMinimumAmount() == null) { min = Long.MIN_VALUE; } else {
+     * double res = (serviceDto.getMinimumAmount() * 100.0); min = (long) res; }
+     *
+     * if (serviceDto.getMaximumAmount() == null) { max = Long.MAX_VALUE; } else {
+     * double res = (serviceDto.getMaximumAmount() * 100.0); max = (long) res; }
+     * return Pair.of(min, max); }
+     *
+     */
 
     private PaymentMethod docToAggregate(PaymentMethodDocument doc) {
         if (doc == null) {
@@ -210,10 +179,10 @@ public class PaymentMethodService {
                 new PaymentMethodName(doc.getPaymentMethodName()),
                 new PaymentMethodDescription(doc.getPaymentMethodDescription()),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())),
+                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
                 doc.getPaymentMethodRanges().stream()
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                         .collect(Collectors.toList()),
-                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
                 new PaymentMethodAsset(doc.getPaymentMethodAsset())
         );
     }

@@ -24,11 +24,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
 import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.PageInfoDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServiceDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
@@ -94,15 +90,12 @@ public class TestUtil {
         return TEST_AMOUNT;
     }
 
-    public static PspDto getTestPspDto() {
-        return new PspDto()
-                .code(PSP_TEST_CODE)
-                .brokerName(PSP_TEST_NAME)
-                .description(PSP_TEST_DESC)
-                .businessName(PSP_TEST_NAME)
-                .status(PspDto.StatusEnum.ENABLED)
-                .channelCode(PSP_TEST_CHANNEL);
-    }
+    /*
+     * public static PspDto getTestPspDto() { return new PspDto()
+     * .code(PSP_TEST_CODE) .brokerName(PSP_TEST_NAME) .description(PSP_TEST_DESC)
+     * .businessName(PSP_TEST_NAME) .status(PspDto.StatusEnum.ENABLED)
+     * .channelCode(PSP_TEST_CHANNEL); }
+     */
 
     public static Psp getTestPsp() {
         return new Psp(
@@ -128,35 +121,17 @@ public class TestUtil {
         return TEST_TYPE_CODE;
     }
 
-    public static ServicesDto getTestServices() {
-        return new ServicesDto()
-                .services(
-                        List.of(
-                                new ServiceDto()
-                                        .abiCode("TEST")
-                                        .channelCode("CHANNEL=")
-                                        .languageCode(ServiceDto.LanguageCodeEnum.IT)
-                                        .conventionCode("TEST")
-                                        .pspCode("TEST")
-                                        .paymentTypeCode("PO")
-                                        .pspBusinessName("TEST")
-                                        .brokerPspCode("TEST")
-                                        .serviceName("TEST")
-                                        .serviceDescription("TEST")
-                                        .minimumAmount(0.0)
-                                        .maximumAmount(100.0)
-                                        .fixedCost(100.0)
-                        )
-                )
-                .pageInfo(
-                        new PageInfoDto()
-                                .totalPages(1)
-                                .limit(50)
-                                .page(0)
-                                .itemsFound(1)
-                );
-    }
-
+    /*
+     * public static ServicesDto getTestServices() { return new ServicesDto()
+     * .services( List.of( new ServiceDto() .abiCode("TEST")
+     * .channelCode("CHANNEL=") .languageCode(ServiceDto.LanguageCodeEnum.IT)
+     * .conventionCode("TEST") .pspCode("TEST") .paymentTypeCode("PO")
+     * .pspBusinessName("TEST") .brokerPspCode("TEST") .serviceName("TEST")
+     * .serviceDescription("TEST") .minimumAmount(0.0) .maximumAmount(100.0)
+     * .fixedCost(100.0) ) ) .pageInfo( new PageInfoDto() .totalPages(1) .limit(50)
+     * .page(0) .itemsFound(1) ); }
+     *
+     */
     public static PaymentMethodDocument getTestPaymentDoc(PaymentMethod paymentMethod) {
         return new PaymentMethodDocument(
                 paymentMethod.getPaymentMethodID().value().toString(),

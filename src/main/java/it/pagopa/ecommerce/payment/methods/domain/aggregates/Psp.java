@@ -19,24 +19,15 @@ import lombok.Getter;
 public class Psp {
     private final PspCode pspCode;
     private final PspPaymentMethodType pspPaymentMethodType;
-    private PspStatus pspStatus;
     private final PspBusinessName pspBusinessName;
     private final PspBrokerName pspBrokerName;
     private final PspDescription pspDescription;
     private final PspLanguage pspLanguage;
-
     private final PspAmount pspMinAmount;
-
     private final PspAmount pspMaxAmount;
-
     private final PspFee pspFixedCost;
-
     private final PspChannelCode pspChannelCode;
-
-    @AggregateID
-    public PspCode pspCode() {
-        return this.pspCode;
-    }
+    private PspStatus pspStatus;
 
     public Psp(
             PspCode pspCode,
@@ -67,6 +58,11 @@ public class Psp {
         this.pspMaxAmount = pspMaxAmount;
         this.pspChannelCode = pspChannelCode;
         this.pspFixedCost = pspFixedCost;
+    }
+
+    @AggregateID
+    public PspCode pspCode() {
+        return this.pspCode;
     }
 
     public void enablePsp(PspStatus pspStatus) {
