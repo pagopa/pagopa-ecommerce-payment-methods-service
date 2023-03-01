@@ -115,33 +115,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<BundleOptionDto>> getPaymentMethodsPSPs(
-                                                                       String id,
-                                                                       Mono<PaymentOptionDto> paymentOptionDto,
-                                                                       ServerWebExchange exchange
-    ) {
-        paymentOptionDto.map(
-                option -> {
-
-                    it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto dto =
-                            new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto();
-                    dto.setBin(option.getBin());
-                    dto.setPaymentMethod(option.getPaymentMethod());
-                    dto.setTouchpoint("CHECKOUT");
-                    dto.setPrimaryCreditorInstitution(option.getPrimaryCreditorInstitution());
-                    dto.setTransferList(option.getTransferList().stream().map(
-                            transfer -> {
-                                new TransferListItemDto();
-                            }
-                    ));
-                    pspService.getPsp(id);
-                }
-        )
-        pspService.getPsp(id, new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto());
-        return null;
-    }
-
-    @Override
     public Mono<ResponseEntity<PaymentMethodResponseDto>> newPaymentMethod(
                                                                            @Valid Mono<PaymentMethodRequestDto> paymentMethodRequestDto,
                                                                            ServerWebExchange exchange
