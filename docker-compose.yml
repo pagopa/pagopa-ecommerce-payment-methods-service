@@ -9,7 +9,7 @@ services:
       - "8080:8080"
     networks:
       - pagopa-ecommerce
-    env_file: .env.example
+    env_file: .env
 
   mongo:
     container_name: pagopa-ecommerce-mongo

@@ -16,14 +16,11 @@ import reactor.core.publisher.Mono;
 public class AfmClient {
 
     @Autowired
-    @Qualifier("AfmWebClient")
+    @Qualifier("afmWebClient")
     private CalculatorApi afmClient;
 
     @Value("${afm.client.key}")
     private String afmKey;
-
-    @Value("${afm.psp.get.flagIo.enabled}")
-    private Boolean flagIo;
 
     public Mono<BundleOptionDto> getFees(PaymentOptionDto paymentOptionDto) {
         return afmClient
@@ -38,13 +35,15 @@ public class AfmClient {
                         ResponseStatusException.class,
                         error -> log.error(
                                 "ResponseStatus Error : {}",
-                                error)
+                                error
+                        )
                 )
                 .doOnError(
                         Exception.class,
                         (Exception error) -> log.error(
                                 "Generic Error : {}",
-                                error)
+                                error
+                        )
                 );
     }
 

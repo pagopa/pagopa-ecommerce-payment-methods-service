@@ -30,20 +30,28 @@ public class PspService {
     @Autowired
     private FilterRuleEngine filterRuleEngine;
 
-    /*
-    public void getPsp(String paymentMethodId, PaymentOptionDto paymentOptionDto){
-       afmClient
-                .getFees(paymentOptionDto)
-                .map(bundleOptionDto ->
-                    bundleOptionDto
-                            .getBundleOptions()
-                            .stream()
-                            .map(transferDto ->
-                                    Pair.of(transferDto.getIdPsp(), transferDto)
-                            )
-                ).map(
-                        it -> it.collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())))
-               );
+    public void getPsp(
+                       String paymentMethodId,
+                       PaymentOptionDto paymentOptionDto
+    ) {
+        System.out.println(
+                afmClient
+                        .getFees(paymentOptionDto)
+                        .map(
+                                bundleOptionDto -> bundleOptionDto
+                                        .getBundleOptions()
+                                        .stream()
+                                        .map(
+                                                transferDto -> Pair.of(transferDto.getIdPsp(), transferDto)
+                                        )
+                        ).map(
+                                it -> it.collect(
+                                        Collectors.groupingBy(
+                                                Pair::getFirst,
+                                                Collectors.mapping(Pair::getSecond, Collectors.toList())
+                                        )
+                                )
+                        )
+        );
     }
-     */
 }
