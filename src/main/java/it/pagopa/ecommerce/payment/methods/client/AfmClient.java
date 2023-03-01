@@ -25,7 +25,7 @@ public class AfmClient {
     @Value("${afm.psp.get.flagIo.enabled}")
     private Boolean flagIo;
 
-    public Mono<BundleOptionDto> getFees(PaymentOptionDto paymentOptionDto) {
+    public Mono<BundleOptionDto> getFees(PaymentOptionDto paymentOptionDto, Integer maxOccurrences) {
         return afmClient
                 .getApiClient()
                 .getWebClient()

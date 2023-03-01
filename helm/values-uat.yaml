@@ -21,12 +21,11 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
-    API_CONFIG_READ_TIMEOUT: "10000"
-    API_CONFIG_CONNECTION_TIMEOUT: "10000"
+    GEC_URI: "https://api.uat.platform.pagopa.it/afm/node/calculator-service/v1/"
+    AFM_READ_TIMEOUT: "10000"
+    AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
-    API_CONFIG_PSP_UPDATE_CRON_STRING: "0 0 * * * *"
-    API_CONFIG_PSP_GET_FLAG_IO_ENABLED: "true"
+    AFM_PSP_GET_FLAG_IO_ENABLED: "true"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     API_CONFIG_KEY: api-config-for-ecommerce-key
@@ -92,12 +91,11 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    API_CONFIG_URI: "https://api.uat.platform.pagopa.it"
-    API_CONFIG_READ_TIMEOUT: "10000"
-    API_CONFIG_CONNECTION_TIMEOUT: "10000"
+    GEC_URI: "https://api.uat.platform.pagopa.it/afm/node/calculator-service/v1/"
+    AFM_READ_TIMEOUT: "10000"
+    AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
-    API_CONFIG_PSP_UPDATE_CRON_STRING: "0 0 * * * *"
-    API_CONFIG_PSP_GET_FLAG_IO_ENABLED: "true"
+    AFM_PSP_GET_FLAG_IO_ENABLED: "true"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     API_CONFIG_KEY: api-config-for-ecommerce-key
