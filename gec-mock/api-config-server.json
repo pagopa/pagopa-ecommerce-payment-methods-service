@@ -1,0 +1,37 @@
+{ 
+  "fees": {
+      "belowThreshold": true,
+      "bundleOptions": [
+        {
+          "abi": "string",
+          "bundleDescription": "string",
+          "bundleName": "string",
+          "idBrokerPsp": "string",
+          "idBundle": "string",
+          "idChannel": "string",
+          "idCiBundle": "string",
+          "idPsp": "string",
+          "onUs": true,
+          "paymentMethod": "string",
+          "primaryCiIncurredFee": 0,
+          "taxPayerFee": 0,
+          "touchpoint": "string"
+        },
+        {
+          "abi": "string",
+          "bundleDescription": "string",
+          "bundleName": "string",
+          "idBrokerPsp": "string",
+          "idBundle": "string",
+          "idChannel": "string",
+          "idCiBundle": "string",
+          "idPsp": "string",
+          "onUs": true,
+          "paymentMethod": "string",
+          "primaryCiIncurredFee": 0,
+          "taxPayerFee": 0,
+          "touchpoint": "string"
+        }
+      ]
+  }
+}
