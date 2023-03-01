@@ -241,6 +241,8 @@ components:
     PaymentOption:
       type: object
       properties:
+        touchpoint:
+          type: string
         paymentMethodId:
           type: string
         bin:
@@ -261,10 +263,10 @@ components:
           items:
             $ref: "#/components/schemas/TransferListItem"
       required:
-        - bin
         - paymentAmount
         - primaryCreditorInstitution
         - transferList
+        - touchpoint
     BundleOption:
       type: object
       properties:

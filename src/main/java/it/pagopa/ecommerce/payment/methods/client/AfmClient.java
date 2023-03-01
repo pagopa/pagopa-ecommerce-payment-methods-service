@@ -16,17 +16,25 @@ import reactor.core.publisher.Mono;
 public class AfmClient {
 
     @Autowired
-    @Qualifier("AfmWebClient")
+    @Qualifier("afmWebClient")
     private CalculatorApi afmClient;
 
     @Value("${afm.client.key}")
     private String afmKey;
 
-    public Mono<BundleOptionDto> getFees(PaymentOptionDto paymentOptionDto, Integer maxOccurrences) {
+    public Mono<BundleOptionDto> getFees(
+                                         PaymentOptionDto paymentOptionDto,
+                                         Integer maxOccurrences
+    ) {
         return afmClient
                 .getApiClient()
                 .getWebClient()
                 .post()
+                .uri(
+                        uriBuilder -> uriBuilder
+                                .queryParam("maxOccurrences", maxOccurrences)
+                                .build()
+                )
                 .body(paymentOptionDto, PaymentOptionDto.class)
                 .header("ocp-apim-subscription-key", afmKey)
                 .retrieve()
@@ -35,13 +43,15 @@ public class AfmClient {
                         ResponseStatusException.class,
                         error -> log.error(
                                 "ResponseStatus Error : {}",
-                                error)
+                                error
+                        )
                 )
                 .doOnError(
                         Exception.class,
                         (Exception error) -> log.error(
                                 "Generic Error : {}",
-                                error)
+                                error
+                        )
                 );
     }
 

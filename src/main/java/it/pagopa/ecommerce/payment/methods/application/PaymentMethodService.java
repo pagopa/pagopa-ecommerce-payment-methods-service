@@ -141,34 +141,6 @@ public class PaymentMethodService {
                 .map(this::docToAggregate);
     }
 
-    /*
-     * public void updatePaymentMethodRanges(ServicesDto servicesDto) { Map<String,
-     * Set<Pair<Long, Long>>> rangeMap = servicesDto.getServices().stream()
-     * .collect( Collectors.groupingBy( ServiceDto::getPaymentTypeCode,
-     * Collectors.mapping( this::convertRange, Collectors.toSet() ) ) );
-     *
-     * rangeMap.keySet().forEach(paymentTypeCode -> {
-     * log.info("PaymentTypeCode: {}", paymentTypeCode);
-     *
-     * paymentMethodRepository.findByPaymentMethodTypeCode(paymentTypeCode)
-     * .flatMap(p -> { log.info("Updating paymentMethod: {}",
-     * p.getPaymentMethodID()); p.setPaymentMethodRanges(
-     * rangeMap.get(paymentTypeCode).stream().map( pair -> Pair.of( pair.getFirst(),
-     * pair.getSecond() ) ).toList() ); return Mono.just(p); }) .flatMap(updatedDoc
-     * -> paymentMethodRepository.save(updatedDoc)) .subscribe(); } ); }
-     *
-     * private Pair<Long, Long> convertRange(ServiceDto serviceDto) { long min; long
-     * max;
-     *
-     * if (serviceDto.getMinimumAmount() == null) { min = Long.MIN_VALUE; } else {
-     * double res = (serviceDto.getMinimumAmount() * 100.0); min = (long) res; }
-     *
-     * if (serviceDto.getMaximumAmount() == null) { max = Long.MAX_VALUE; } else {
-     * double res = (serviceDto.getMaximumAmount() * 100.0); max = (long) res; }
-     * return Pair.of(min, max); }
-     *
-     */
-
     private PaymentMethod docToAggregate(PaymentMethodDocument doc) {
         if (doc == null) {
             return null;

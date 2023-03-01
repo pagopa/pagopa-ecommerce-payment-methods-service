@@ -1,21 +1,17 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
-import it.pagopa.ecommerce.payment.methods.application.PspService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PspAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
-import it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PatchPaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
-import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -37,9 +33,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Autowired
     private PaymentMethodService paymentMethodService;
-
-    @Autowired
-    private PspService pspService;
 
     @Autowired
     private AfmClient afmClient;
