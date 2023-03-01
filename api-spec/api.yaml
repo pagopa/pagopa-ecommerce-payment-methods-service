@@ -122,22 +122,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /payment-methods/{id}/psps:
+  /fee/calculate:
     post:
-      operationId: getPaymentMethodsPSPs
-      summary: Retrive PSPs by payment method ID
+      operationId: calculateFees
+      summary: Invoke GEC for calculate fees
       parameters:
-        - name: id
-          in: path
-          description: Payment Method ID
-          required: true
+        - name: maxOccurrences
+          in: query
+          description: max occurrences
+          required: false
           schema:
-            type: string
+            type: integer
       requestBody:
         $ref: "#/components/requestBodies/PostPaymentMethodPSP"
       responses:
         '200':
-          description: New payment method successfully updated
+          description: Return list of boundle returned by GEC
           content:
             application/json:
               schema:
@@ -149,7 +149,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
         '404':
-          description: Payment method not found
+          description: Resource not found
           content:
             application/json:
               schema:
@@ -241,6 +241,8 @@ components:
     PaymentOption:
       type: object
       properties:
+        paymentMethodId:
+          type: string
         bin:
           type: string
         idPspList:

@@ -15,6 +15,7 @@ import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
+import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -111,15 +112,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     ) {
         return paymentMethodService.retrievePaymentMethodById(id)
                 .map(this::paymentMethodToResponse);
-    }
-
-    @Override
-    public Mono<ResponseEntity<BundleOptionDto>> getPaymentMethodsPSPs(
-                                                                       String id,
-                                                                       Mono<PaymentOptionDto> paymentOptionDto,
-                                                                       ServerWebExchange exchange
-    ) {
-        return null;
     }
 
     @Override

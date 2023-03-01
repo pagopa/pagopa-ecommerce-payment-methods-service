@@ -22,13 +22,13 @@ public class WebClientsConfig implements WebFluxConfigurer {
 
     @Bean(name = "afmWebClient")
     public CalculatorApi afmWebClient(
-            @Value("${afm.uri}") String afmWebClientUri,
-            @Value(
-                    "${afm.readTimeout}"
-            ) int afmWebClientReadTimeout,
-            @Value(
-                    "${afm.connectionTimeout}"
-            ) int afmWebClientConnectionTimeout
+                                      @Value("${afm.uri}") String afmWebClientUri,
+                                      @Value(
+                                          "${afm.readTimeout}"
+                                      ) int afmWebClientReadTimeout,
+                                      @Value(
+                                          "${afm.connectionTimeout}"
+                                      ) int afmWebClientConnectionTimeout
     ) {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, afmWebClientConnectionTimeout)
