@@ -29,7 +29,7 @@ public class FeeService {
 
     public Mono<BundleOptionDto> computeFee(
                                             Mono<PaymentOptionDto> paymentOptionDto,
-                                            int maxOccurrences
+                                            Integer maxOccurrences
     ) {
         return paymentOptionDto.map(
                 po -> new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto()
