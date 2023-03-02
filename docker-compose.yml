@@ -51,6 +51,21 @@ services:
       - "8084:3000"
     networks:
       - pagopa-ecommerce
+  
+  pagopa-gec-mock:
+    build:
+      context: .
+      dockerfile: gec-mock/Dockerfile.gec-mock
+    container_name: pagopa-GEC-mock
+    volumes:
+      - type: bind
+        source: ./gec-mock
+        target: /config
+        read_only: true
+    ports:
+      - "8085:3000"
+    networks:
+      - pagopa-ecommerce
 
 networks:
   pagopa-ecommerce:
