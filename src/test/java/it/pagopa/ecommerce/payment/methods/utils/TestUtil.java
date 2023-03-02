@@ -164,26 +164,31 @@ public class TestUtil {
 
     public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionDto() {
         List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transferList = new ArrayList<>();
-        transferList.add(new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTest")
-                .bundleDescription("descriptionTest")
-                .bundleName("bundleNameTest")
-                .idBrokerPsp("idBrokerPspTest")
-                .idBundle("idBundleTest")
-                .idChannel("idChannelTest")
-                .idCiBundle("idCiBundleTest")
-                .idPsp("idPspTest")
-                .onUs(true)
-                .paymentMethod("idPaymentMethodTest")
-                .primaryCiIncurredFee(BigInteger.ZERO.longValue())
-                .taxPayerFee(BigInteger.ZERO.longValue())
-                .touchpoint("CHECKOUT"));
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTest")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idCiBundle("idCiBundleTest")
+                        .idPsp("idPspTest")
+                        .onUs(true)
+                        .paymentMethod("idPaymentMethodTest")
+                        .primaryCiIncurredFee(BigInteger.ZERO.longValue())
+                        .taxPayerFee(BigInteger.ZERO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
         return new it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto()
                 .belowThreshold(true)
-                .bundleOptions(transferList
+                .bundleOptions(
+                        transferList
                 );
     }
 
-    public static BundleOptionDto getBundleOptionDtoResponse(it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse) {
+    public static BundleOptionDto getBundleOptionDtoResponse(
+                                                             it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse
+    ) {
         return new BundleOptionDto()
                 .belowThreshold(gecResponse.getBelowThreshold())
                 .bundleOptions(
@@ -217,9 +222,15 @@ public class TestUtil {
                 .touchpoint("CHECKOUT")
                 .addIdPspListItem("string")
                 .idPspList(new ArrayList<>(List.of("first", "second")))
-                .transferList(new ArrayList<>(List.of(new TransferListItemDto()
-                        .transferCategory("category")
-                        .creditorInstitution("creditorInstitution")
-                        .digitalStamp(true))));
+                .transferList(
+                        new ArrayList<>(
+                                List.of(
+                                        new TransferListItemDto()
+                                                .transferCategory("category")
+                                                .creditorInstitution("creditorInstitution")
+                                                .digitalStamp(true)
+                                )
+                        )
+                );
     }
 }
