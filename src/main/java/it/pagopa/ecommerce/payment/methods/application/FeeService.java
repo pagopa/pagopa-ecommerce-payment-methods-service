@@ -50,10 +50,9 @@ public class FeeService {
                                         )
                                         .collect(Collectors.toList())
                         )
-        ).flatMap(reqBody -> {
-            var ret = afmClient.getFees(reqBody, maxOccurrences);
-            log.debug("Retval: " + ret);
-            return ret;
-        });
+
+        ).flatMap(reqBody -> afmClient.getFees(reqBody, maxOccurrences));
+
     }
+
 }

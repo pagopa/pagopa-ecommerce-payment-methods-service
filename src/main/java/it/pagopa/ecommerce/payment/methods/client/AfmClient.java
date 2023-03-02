@@ -35,7 +35,7 @@ public class AfmClient {
                                 .queryParam("maxOccurrences", maxOccurrences)
                                 .build()
                 )
-                .body(paymentOptionDto, PaymentOptionDto.class)
+                .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
                 .header("ocp-apim-subscription-key", afmKey)
                 .retrieve()
                 .bodyToMono(BundleOptionDto.class)
