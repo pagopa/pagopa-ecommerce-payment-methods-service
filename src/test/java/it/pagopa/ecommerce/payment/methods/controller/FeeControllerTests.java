@@ -35,11 +35,12 @@ public class FeeControllerTests {
     @Test
     void shouldGetFees() {
         PaymentOptionDto requestBody = TestUtil.getPaymentOptionRequest();
-        it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse = TestUtil.getBundleOptionDto();
+        it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse = TestUtil
+                .getBundleOptionDtoClientResponse();
         Mockito.when(feeService.computeFee(any(), any()))
                 .thenReturn(Mono.just(gecResponse));
 
-        BundleOptionDto expectedResult = TestUtil.getBundleOptionDtoResponse(gecResponse);
+        BundleOptionDto expectedResult = TestUtil.getBundleOptionDtoResponseFromClientResponse(gecResponse);
 
         webClient
                 .post()

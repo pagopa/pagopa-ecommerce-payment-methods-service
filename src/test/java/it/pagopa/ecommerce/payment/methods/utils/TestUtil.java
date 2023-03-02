@@ -162,7 +162,7 @@ public class TestUtil {
         );
     }
 
-    public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionDto() {
+    public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionDtoClientResponse() {
         List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transferList = new ArrayList<>();
         transferList.add(
                 new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTest")
@@ -186,8 +186,8 @@ public class TestUtil {
                 );
     }
 
-    public static BundleOptionDto getBundleOptionDtoResponse(
-                                                             it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse
+    public static BundleOptionDto getBundleOptionDtoResponseFromClientResponse(
+                                                                               it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse
     ) {
         return new BundleOptionDto()
                 .belowThreshold(gecResponse.getBelowThreshold())
@@ -210,6 +210,27 @@ public class TestUtil {
                                                 .taxPayerFee(t.getTaxPayerFee())
                                                 .touchpoint(t.getTouchpoint())
                                 ).collect(Collectors.toList()) : new ArrayList<>()
+                );
+    }
+
+    public static it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto getPaymentOptionRequestClient() {
+        return new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto()
+                .paymentAmount(BigInteger.TEN.longValue())
+                .paymentMethod("paymentMethodID")
+                .primaryCreditorInstitution("CF")
+                .bin("BIN_TEST")
+                .touchpoint("CHECKOUT")
+                .addIdPspListItem("string")
+                .idPspList(new ArrayList<>(List.of("first", "second")))
+                .transferList(
+                        new ArrayList<>(
+                                List.of(
+                                        new it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto()
+                                                .transferCategory("category")
+                                                .creditorInstitution("creditorInstitution")
+                                                .digitalStamp(true)
+                                )
+                        )
                 );
     }
 
