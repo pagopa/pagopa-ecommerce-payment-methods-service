@@ -3,10 +3,7 @@ package it.pagopa.ecommerce.payment.methods.controller;
 import it.pagopa.ecommerce.payment.methods.application.FeeService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.server.api.FeeApi;
-import it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
-import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,7 +35,29 @@ public class FeeController implements FeeApi {
     private ResponseEntity<BundleOptionDto> bundleOptionToResponse(
                                                                    it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle
     ) {
-
-        return ResponseEntity.ok(new BundleOptionDto());
+        return ResponseEntity.ok(
+                new BundleOptionDto()
+                        .belowThreshold(bundle.getBelowThreshold())
+                        .bundleOptions(
+                                bundle.getBundleOptions() != null ? bundle.getBundleOptions()
+                                        .stream()
+                                        .map(
+                                                t -> new TransferDto()
+                                                        .abi(t.getAbi())
+                                                        .bundleDescription(t.getBundleDescription())
+                                                        .bundleName(t.getBundleName())
+                                                        .idBrokerPsp(t.getIdBrokerPsp())
+                                                        .idBundle(t.getIdBundle())
+                                                        .idChannel(t.getIdChannel())
+                                                        .idCiBundle(t.getIdCiBundle())
+                                                        .idPsp(t.getIdPsp())
+                                                        .onUs(t.getOnUs())
+                                                        .paymentMethod(t.getPaymentMethod())
+                                                        .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
+                                                        .taxPayerFee(t.getTaxPayerFee())
+                                                        .touchpoint(t.getTouchpoint())
+                                        ).collect(Collectors.toList()) : new ArrayList<>()
+                        )
+        );
     }
 }
