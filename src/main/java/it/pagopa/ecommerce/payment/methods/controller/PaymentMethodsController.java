@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
-import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PspAlreadyInUseException;
@@ -33,9 +32,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Autowired
     private PaymentMethodService paymentMethodService;
-
-    @Autowired
-    private AfmClient afmClient;
 
     @ExceptionHandler(
         {
