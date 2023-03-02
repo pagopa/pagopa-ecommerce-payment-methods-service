@@ -32,7 +32,7 @@ public class FeeServiceTests {
     private FeeService feeService;
 
     @Test
-    void shouldRetrieveFeeByGEC() {
+    void shouldRetrieveFee() {
         PaymentOptionDto paymentOptionDtoRequest = TestUtil.getPaymentOptionRequest();
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
 

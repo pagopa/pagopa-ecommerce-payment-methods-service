@@ -55,7 +55,7 @@ public class FeeController implements FeeApi {
                                                         .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
                                                         .taxPayerFee(t.getTaxPayerFee())
                                                         .touchpoint(t.getTouchpoint())
-                                        ).collect(Collectors.toList()) : new ArrayList<>()
+                                        ).toList() : new ArrayList<>()
                         )
         );
     }

@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
-import it.pagopa.ecommerce.payment.methods.domain.aggregates.PspFactory;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
@@ -18,8 +17,6 @@ import java.util.stream.Collectors;
 @ApplicationService
 @Slf4j
 public class FeeService {
-    @Autowired
-    private PspFactory pspFactory;
 
     @Autowired
     private AfmClient afmClient;

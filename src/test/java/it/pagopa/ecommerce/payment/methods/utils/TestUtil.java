@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.utils;
 
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.methods.domain.aggregates.Psp;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
@@ -89,29 +88,6 @@ public class TestUtil {
         return TEST_AMOUNT;
     }
 
-    /*
-     * public static PspDto getTestPspDto() { return new PspDto()
-     * .code(PSP_TEST_CODE) .brokerName(PSP_TEST_NAME) .description(PSP_TEST_DESC)
-     * .businessName(PSP_TEST_NAME) .status(PspDto.StatusEnum.ENABLED)
-     * .channelCode(PSP_TEST_CHANNEL); }
-     */
-
-    public static Psp getTestPsp() {
-        return new Psp(
-                new PspCode(PSP_TEST_CODE),
-                new PspPaymentMethodType("PO"),
-                new PspStatus(PaymentMethodStatusEnum.ENABLED),
-                new PspBusinessName(""),
-                new PspBrokerName(""),
-                new PspDescription(""),
-                new PspLanguage(LanguageEnum.IT),
-                new PspAmount(BigInteger.valueOf(0)),
-                new PspAmount(BigInteger.valueOf(100)),
-                new PspChannelCode("AB0"),
-                new PspFee(BigInteger.valueOf(100))
-        );
-    }
-
     public static String getTestLang() {
         return TEST_LANG;
     }
@@ -141,24 +117,6 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value()
-        );
-    }
-
-    public static PspDocument getTestPspDoc(Psp psp) {
-        return new PspDocument(
-                new PspDocumentKey(
-                        psp.getPspCode().value(),
-                        psp.getPspPaymentMethodType().value(),
-                        psp.getPspChannelCode().value(),
-                        psp.getPspLanguage().value().getLanguage()
-                ),
-                psp.getPspStatus().value().getCode(),
-                psp.getPspBusinessName().value(),
-                psp.getPspBrokerName().value(),
-                psp.getPspDescription().value(),
-                psp.getPspMinAmount().value().longValue(),
-                psp.getPspMaxAmount().value().longValue(),
-                psp.getPspFixedCost().value().longValue()
         );
     }
 
