@@ -3,34 +3,34 @@
       "belowThreshold": true,
       "bundleOptions": [
         {
-          "abi": "string",
-          "bundleDescription": "string",
-          "bundleName": "string",
-          "idBrokerPsp": "string",
-          "idBundle": "string",
-          "idChannel": "string",
-          "idCiBundle": "string",
-          "idPsp": "string",
+          "abi": "abi1",
+          "bundleDescription": "bundleDescription1",
+          "bundleName": "bundleName1",
+          "idBrokerPsp": "idBrokerPsp1",
+          "idBundle": "idBundle1",
+          "idChannel": "idChannel1",
+          "idCiBundle": "idCiBundle1",
+          "idPsp": "idPsp1",
           "onUs": true,
-          "paymentMethod": "string",
+          "paymentMethod": "paymentMethod1",
           "primaryCiIncurredFee": 0,
           "taxPayerFee": 0,
-          "touchpoint": "string"
+          "touchpoint": "touchpoint1"
         },
         {
-          "abi": "string",
-          "bundleDescription": "string",
-          "bundleName": "string",
-          "idBrokerPsp": "string",
-          "idBundle": "string",
-          "idChannel": "string",
-          "idCiBundle": "string",
-          "idPsp": "string",
-          "onUs": true,
-          "paymentMethod": "string",
+          "abi": "abi2",
+          "bundleDescription": "bundleDescription2",
+          "bundleName": "bundleName2",
+          "idBrokerPsp": "idBrokerPsp2",
+          "idBundle": "idBundle2",
+          "idChannel": "idChannel2",
+          "idCiBundle": "idCiBundle2",
+          "idPsp": "idPsp2",
+          "onUs": false,
+          "paymentMethod": "paymentMethod2",
           "primaryCiIncurredFee": 0,
           "taxPayerFee": 0,
-          "touchpoint": "string"
+          "touchpoint": "touchpoint2"
         }
       ]
   }
