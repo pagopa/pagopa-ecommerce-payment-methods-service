@@ -36,7 +36,7 @@ public class FeeService {
                         .bin(po.getBin())
                         .paymentAmount(po.getPaymentAmount())
                         .idPspList(po.getIdPspList())
-                        .paymentMethod(po.getPaymentMethod())
+                        .paymentMethod(po.getPaymentMethodId())
                         .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
                         .touchpoint(po.getTouchpoint())
                         .transferList(

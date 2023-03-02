@@ -32,9 +32,6 @@ class PaymentMethodsControllerTests {
     private WebTestClient webClient;
 
     @MockBean
-    private AfmClient afmClient;
-
-    @MockBean
     private PaymentMethodService paymentMethodService;
 
     @Test

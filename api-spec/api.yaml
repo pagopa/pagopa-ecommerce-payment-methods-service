@@ -254,8 +254,6 @@ components:
         paymentAmount:
           type: integer
           format: int64
-        paymentMethod:
-          type: string
         primaryCreditorInstitution:
           type: string
         transferList:

@@ -22,12 +22,11 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -161,5 +160,66 @@ public class TestUtil {
                 psp.getPspMaxAmount().value().longValue(),
                 psp.getPspFixedCost().value().longValue()
         );
+    }
+
+    public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionDto() {
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transferList = new ArrayList<>();
+        transferList.add(new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTest")
+                .bundleDescription("descriptionTest")
+                .bundleName("bundleNameTest")
+                .idBrokerPsp("idBrokerPspTest")
+                .idBundle("idBundleTest")
+                .idChannel("idChannelTest")
+                .idCiBundle("idCiBundleTest")
+                .idPsp("idPspTest")
+                .onUs(true)
+                .paymentMethod("idPaymentMethodTest")
+                .primaryCiIncurredFee(BigInteger.ZERO.longValue())
+                .taxPayerFee(BigInteger.ZERO.longValue())
+                .touchpoint("CHECKOUT"));
+        return new it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto()
+                .belowThreshold(true)
+                .bundleOptions(transferList
+                );
+    }
+
+    public static BundleOptionDto getBundleOptionDtoResponse(it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse) {
+        return new BundleOptionDto()
+                .belowThreshold(gecResponse.getBelowThreshold())
+                .bundleOptions(
+                        gecResponse.getBundleOptions() != null ? gecResponse.getBundleOptions()
+                                .stream()
+                                .map(
+                                        t -> new TransferDto()
+                                                .abi(t.getAbi())
+                                                .bundleDescription(t.getBundleDescription())
+                                                .bundleName(t.getBundleName())
+                                                .idBrokerPsp(t.getIdBrokerPsp())
+                                                .idBundle(t.getIdBundle())
+                                                .idChannel(t.getIdChannel())
+                                                .idCiBundle(t.getIdCiBundle())
+                                                .idPsp(t.getIdPsp())
+                                                .onUs(t.getOnUs())
+                                                .paymentMethod(t.getPaymentMethod())
+                                                .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
+                                                .taxPayerFee(t.getTaxPayerFee())
+                                                .touchpoint(t.getTouchpoint())
+                                ).collect(Collectors.toList()) : new ArrayList<>()
+                );
+    }
+
+    public static PaymentOptionDto getPaymentOptionRequest() {
+        return new PaymentOptionDto()
+                .paymentAmount(BigInteger.TEN.longValue())
+                .paymentMethodId("paymentMethodID")
+                .primaryCreditorInstitution("CF")
+                .bin("BIN_TEST")
+                .touchpoint("CHECKOUT")
+                .addIdPspListItem("string")
+                .idPspList(new ArrayList<>(List.of("first", "second")))
+                .transferList(new ArrayList<>(List.of(new TransferListItemDto()
+                        .transferCategory("category")
+                        .creditorInstitution("creditorInstitution")
+                        .digitalStamp(true))));
     }
 }

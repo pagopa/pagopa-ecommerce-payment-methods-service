@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.FeeService;
-import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.server.api.FeeApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import lombok.extern.slf4j.Slf4j;
