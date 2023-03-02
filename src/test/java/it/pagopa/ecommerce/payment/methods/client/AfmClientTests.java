@@ -1,4 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.client;
+
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.ApiClient;
 import it.pagopa.generated.ecommerce.gec.v1.api.CalculatorApi;
