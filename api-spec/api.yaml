@@ -262,6 +262,7 @@ components:
             $ref: "#/components/schemas/TransferListItem"
       required:
         - paymentAmount
+        - paymentMethodId
         - primaryCreditorInstitution
         - transferList
         - touchpoint
