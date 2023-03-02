@@ -8,28 +8,28 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 public class FeeServiceTests {
 
     @Mock
     private AfmClient afmClient;
 
-    @InjectMocks
     private FeeService feeService;
+
+    @BeforeEach
+    public void init() {
+        feeService = new FeeService(afmClient);
+    }
 
     @Test
     void shouldRetrieveFee() {

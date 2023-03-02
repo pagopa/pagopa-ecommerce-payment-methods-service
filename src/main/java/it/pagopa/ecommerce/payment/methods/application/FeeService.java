@@ -18,11 +18,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FeeService {
 
-    @Autowired
-    private AfmClient afmClient;
+    private final AfmClient afmClient;
 
     @Autowired
-    private PaymentMethodRepository paymentMethodRepository;
+    public FeeService(AfmClient afmClient) {
+        this.afmClient = afmClient;
+    }
 
     public Mono<BundleOptionDto> computeFee(
                                             Mono<PaymentOptionDto> paymentOptionDto,

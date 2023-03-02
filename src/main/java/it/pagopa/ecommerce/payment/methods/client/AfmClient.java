@@ -15,18 +15,24 @@ import reactor.core.publisher.Mono;
 @Component
 public class AfmClient {
 
-    @Autowired
-    @Qualifier("afmWebClient")
-    private CalculatorApi afmClient;
+    private final CalculatorApi calculatorApi;
 
-    @Value("${afm.client.key}")
-    private String afmKey;
+    private final String afmKey;
+
+    @Autowired
+    public AfmClient(
+            @Qualifier("afmWebClient") CalculatorApi afmClient,
+            @Value("${afm.client.key}") String afmKey
+    ) {
+        this.calculatorApi = afmClient;
+        this.afmKey = afmKey;
+    }
 
     public Mono<BundleOptionDto> getFees(
                                          PaymentOptionDto paymentOptionDto,
                                          Integer maxOccurrences
     ) {
-        return afmClient
+        return calculatorApi
                 .getApiClient()
                 .getWebClient()
                 .post()
@@ -35,8 +41,8 @@ public class AfmClient {
                                 .queryParam("maxOccurrences", maxOccurrences)
                                 .build()
                 )
-                .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
                 .header("ocp-apim-subscription-key", afmKey)
+                .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
                 .retrieve()
                 .bodyToMono(BundleOptionDto.class)
                 .doOnError(
