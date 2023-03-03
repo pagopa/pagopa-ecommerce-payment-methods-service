@@ -33,5 +33,27 @@
           "touchpoint": "touchpoint2"
         }
       ]
+  },
+  "bundles": {
+      "name": "nameBundle",
+      "description": "description",
+      "paymentAmount": 0,
+      "minPaymentAmount": 0,
+      "maxPaymentAmount": 0,
+      "paymentType": "paymentTypeBundle",
+      "touchpoint": "touchpoint",
+      "type": "bundleType",
+      "transferCategoryList": [
+        "string"
+      ],
+      "validityDateFrom": "2023-03-03",
+      "validityDateTo": "2023-03-03",
+      "insertedDate": "2023-03-03T08:59:00.515Z",
+      "lastUpdatedDate": "2023-03-03T08:59:00.515Z",
+      "idChannel": "idChannelBundle",
+      "idBrokerPsp": "idBrokerPsp",
+      "digitalStamp": true,
+      "digitalStampRestriction": true,
+      "idBundle": "idBundle"
   }
 }
