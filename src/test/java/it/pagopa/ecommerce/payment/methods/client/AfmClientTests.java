@@ -70,7 +70,6 @@ public class AfmClientTests {
 
     @Test
     void shouldReturnResponseStatusException() {
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
         Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
         Mockito.when(webClient.post()).thenReturn(requestBodyUriSpec);
@@ -88,7 +87,6 @@ public class AfmClientTests {
 
     @Test
     void shouldReturnException() {
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
         Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
         Mockito.when(webClient.post()).thenReturn(requestBodyUriSpec);
