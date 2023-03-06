@@ -39,7 +39,8 @@ public class FeeServiceTests {
         Mockito.when(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), null))
                 .thenReturn(Mono.just(gecResponse));
 
-        BundleOptionDto serviceResponse = feeService.computeFee(Mono.just(paymentOptionDtoRequest), null).block();
-        assertEquals(gecResponse, serviceResponse);
+        it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto serviceResponse = feeService
+                .computeFee(Mono.just(paymentOptionDtoRequest), null).block();
+        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundleOptions().size());
     }
 }

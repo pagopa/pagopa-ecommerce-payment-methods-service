@@ -26,37 +26,8 @@ public class FeeController implements FeeApi {
                                                                Integer maxOccurrences,
                                                                ServerWebExchange exchange
     ) {
-        return feeService.computeFee(paymentOptionDto, maxOccurrences)
-                .map(this::bundleOptionToResponse);
-
-    }
-
-    private ResponseEntity<BundleOptionDto> bundleOptionToResponse(
-                                                                   it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle
-    ) {
-        return ResponseEntity.ok(
-                new BundleOptionDto()
-                        .belowThreshold(bundle.getBelowThreshold())
-                        .bundleOptions(
-                                bundle.getBundleOptions() != null ? bundle.getBundleOptions()
-                                        .stream()
-                                        .map(
-                                                t -> new TransferDto()
-                                                        .abi(t.getAbi())
-                                                        .bundleDescription(t.getBundleDescription())
-                                                        .bundleName(t.getBundleName())
-                                                        .idBrokerPsp(t.getIdBrokerPsp())
-                                                        .idBundle(t.getIdBundle())
-                                                        .idChannel(t.getIdChannel())
-                                                        .idCiBundle(t.getIdCiBundle())
-                                                        .idPsp(t.getIdPsp())
-                                                        .onUs(t.getOnUs())
-                                                        .paymentMethod(t.getPaymentMethod())
-                                                        .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
-                                                        .taxPayerFee(t.getTaxPayerFee())
-                                                        .touchpoint(t.getTouchpoint())
-                                        ).toList() : new ArrayList<>()
-                        )
+        return feeService.computeFee(paymentOptionDto, maxOccurrences).map(
+                resp -> ResponseEntity.ok(resp)
         );
     }
 }
