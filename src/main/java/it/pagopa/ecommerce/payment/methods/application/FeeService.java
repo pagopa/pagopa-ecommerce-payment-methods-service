@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,16 +59,35 @@ public class FeeService {
 
         ).flatMap(reqBody -> afmClient.getFees(reqBody, maxOccurrences))
                 .map(bo -> {
+                    /*
+                     * bo.setBundleOptions( groupBundleByPsp(bo) .values() .stream()
+                     * .map(transfersAgg -> transfersAgg.get(0)) // Get top-1 .collect(toList()) );
+                     */
                     bo.setBundleOptions(
-                            groupBundleByPsp(bo)
-                                    .values()
-                                    .stream()
-                                    .map(transfersAgg -> transfersAgg.get(0)) // Get top-1
-                                    .collect(toList())
+                            removeDuplicatePsp(bo.getBundleOptions())
                     );
                     return bo;
                 })
                 .map(this::bundleOptionToResponse);
+    }
+
+    public List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
+                                                                                         List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
+    ) {
+        return transfers
+                .stream()
+                .collect(
+                        Collectors.collectingAndThen(
+                                Collectors.toCollection(
+                                        () -> new TreeSet<>(
+                                                Comparator.comparing(
+                                                        it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getIdPsp
+                                                )
+                                        )
+                                ),
+                                ArrayList::new
+                        )
+                );
     }
 
     public Map<String, List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto>> groupBundleByPsp(
