@@ -172,7 +172,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldFilterDisabledPSP(){
+    void shouldFilterDisabledPSP() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         // Only CP method is enabled
