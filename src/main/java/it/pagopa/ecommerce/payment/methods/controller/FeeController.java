@@ -25,7 +25,7 @@ public class FeeController implements FeeApi {
                                                                ServerWebExchange exchange
     ) {
         return feeService.computeFee(paymentOptionDto, maxOccurrences).map(
-                resp -> ResponseEntity.ok(resp)
+                ResponseEntity::ok
         );
     }
 }

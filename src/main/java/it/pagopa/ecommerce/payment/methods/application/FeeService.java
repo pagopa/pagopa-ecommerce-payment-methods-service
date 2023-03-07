@@ -63,10 +63,6 @@ public class FeeService {
 
         ).flatMap(reqBody -> afmClient.getFees(reqBody, maxOccurrences))
                 .map(bo -> {
-                    /*
-                     * bo.setBundleOptions( groupBundleByPsp(bo) .values() .stream()
-                     * .map(transfersAgg -> transfersAgg.get(0)) // Get top-1 .collect(toList()) );
-                     */
                     bo.setBundleOptions(
                             removeDuplicatePsp(bo.getBundleOptions())
                     );
