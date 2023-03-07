@@ -8,20 +8,14 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspAmount;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBrokerName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspBusinessName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspChannelCode;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspCode;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspDescription;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspFee;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspLanguage;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspPaymentMethodType;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
-import it.pagopa.ecommerce.payment.methods.server.model.*;
+import it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
+import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.TransferDto;
+import it.pagopa.ecommerce.payment.methods.server.model.TransferListItemDto;
 import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
@@ -195,7 +189,7 @@ public class TestUtil {
     public static PaymentOptionDto getPaymentOptionRequest() {
         return new PaymentOptionDto()
                 .paymentAmount(BigInteger.TEN.longValue())
-                .paymentMethodId("paymentMethodID")
+                .paymentMethod("paymentMethodID")
                 .primaryCreditorInstitution("CF")
                 .bin("BIN_TEST")
                 .touchpoint("CHECKOUT")

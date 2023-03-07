@@ -158,4 +158,20 @@ public class PaymentMethodService {
                 new PaymentMethodAsset(doc.getPaymentMethodAsset())
         );
     }
+
+    public Mono<List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto>> removeDisabledPsp(
+                                                                                              List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
+    ) {
+        log.debug("[Payment Method Aggregate] Filtering psp by status");
+
+        return paymentMethodRepository
+                .findByPaymentMethodStatus(PaymentMethodStatusEnum.ENABLED.getCode())
+                .map(PaymentMethodDocument::getPaymentMethodTypeCode)
+                .collectList()
+                .map(
+                        enabledTypes -> transfers.stream().filter(
+                                t -> enabledTypes.contains(t.getPaymentMethod())
+                        ).collect(Collectors.toList())
+                );
+    }
 }

@@ -29,8 +29,12 @@ public class FeeService {
     private final AfmClient afmClient;
 
     @Autowired
-    public FeeService(AfmClient afmClient) {
+    private PaymentMethodService paymentMethodService;
+
+    @Autowired
+    public FeeService(AfmClient afmClient, PaymentMethodService paymentMethodService) {
         this.afmClient = afmClient;
+        this.paymentMethodService = paymentMethodService;
     }
 
     public Mono<it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto> computeFee(
@@ -42,7 +46,7 @@ public class FeeService {
                         .bin(po.getBin())
                         .paymentAmount(po.getPaymentAmount())
                         .idPspList(po.getIdPspList())
-                        .paymentMethod(po.getPaymentMethodId())
+                        .paymentMethod(po.getPaymentMethod())
                         .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
                         .touchpoint(po.getTouchpoint())
                         .transferList(
@@ -68,6 +72,13 @@ public class FeeService {
                     );
                     return bo;
                 })
+                .flatMap(
+                        bo -> paymentMethodService.removeDisabledPsp(bo.getBundleOptions())
+                                .map(filtered -> {
+                                    bo.setBundleOptions(filtered);
+                                    return bo;
+                                })
+                )
                 .map(this::bundleOptionToResponse);
     }
 
