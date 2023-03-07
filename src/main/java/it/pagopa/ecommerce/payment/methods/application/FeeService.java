@@ -32,7 +32,10 @@ public class FeeService {
     private PaymentMethodService paymentMethodService;
 
     @Autowired
-    public FeeService(AfmClient afmClient, PaymentMethodService paymentMethodService) {
+    public FeeService(
+            AfmClient afmClient,
+            PaymentMethodService paymentMethodService
+    ) {
         this.afmClient = afmClient;
         this.paymentMethodService = paymentMethodService;
     }
