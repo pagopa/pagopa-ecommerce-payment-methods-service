@@ -7,6 +7,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
@@ -167,5 +169,26 @@ class PaymentMethodServiceTests {
                 .retrievePaymentMethodById(paymentMethod.getPaymentMethodID().value().toString()).block();
 
         assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
+    }
+
+    @Test
+    void shouldFilterDisabledPSP(){
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        // Only CP method is enabled
+        paymentMethodDocument.setPaymentMethodTypeCode("CP");
+
+        List<TransferDto> transferDtos = TestUtil.getBundleOptionDtoClientResponse().getBundleOptions();
+
+        // This should be filtered out -> PPAY is not enabled
+        transferDtos.get(0).setPaymentMethod("PPAY");
+
+        Mockito.when(paymentMethodRepository.findByPaymentMethodStatus(PaymentMethodStatusEnum.ENABLED.getCode()))
+                .thenReturn(Flux.just(paymentMethodDocument));
+
+        List<TransferDto> filteredTransfers = paymentMethodService.removeDisabledPsp(transferDtos).block();
+
+        assertEquals(0, filteredTransfers.size());
+
     }
 }
