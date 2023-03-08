@@ -54,7 +54,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 PyamentMethodNotFoundException.class
         }
     )
-    private ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
+    public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
         if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),

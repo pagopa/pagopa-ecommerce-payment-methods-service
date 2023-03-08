@@ -4,19 +4,26 @@ import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.application.PspService;
 import it.pagopa.ecommerce.payment.methods.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
+import it.pagopa.ecommerce.payment.methods.exception.PyamentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.server.model.PSPsResponseDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ProblemJsonDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -26,12 +33,18 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.UUID;
 
+import static it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException.paymentMethodAlreadyInUse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
 @TestPropertySource(locations = "classpath:application.test.properties")
 class PaymentMethodsControllerTests {
+
+    @InjectMocks
+    private PaymentMethodsController paymentMethodsController = new PaymentMethodsController();
+
     @Autowired
     private WebTestClient webClient;
 
@@ -135,6 +148,22 @@ class PaymentMethodsControllerTests {
                 .expectBodyList(PaymentMethodResponseDto.class)
                 .hasSize(1)
                 .contains(expectedResult);
+    }
+
+    @Test
+    void shouldReturnResponseEntityWithNotFound() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new PyamentMethodNotFoundException("paymentMethodId"));
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("Payment method not found", responseEntity.getBody().getDetail());
+    }
+
+    @Test
+    void shouldReturnResponseEntityWithAlreadyInUse() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new PaymentMethodAlreadyInUseException(new PaymentMethodName("PaymentMethodName")));
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("Payment method already in use", responseEntity.getBody().getDetail());
     }
 
     @Test
