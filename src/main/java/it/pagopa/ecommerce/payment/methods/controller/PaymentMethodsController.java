@@ -6,6 +6,7 @@ import it.pagopa.ecommerce.payment.methods.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PspAlreadyInUseException;
+import it.pagopa.ecommerce.payment.methods.exception.PyamentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.PSPsResponseDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PatchPaymentMethodRequestDto;
@@ -49,10 +50,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @ExceptionHandler(
         {
                 PaymentMethodAlreadyInUseException.class,
-                PspAlreadyInUseException.class
+                PspAlreadyInUseException.class,
+                PyamentMethodNotFoundException.class
         }
     )
-    private ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
+    public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
         if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),
@@ -62,6 +64,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("PSP already in use"),
                     HttpStatus.BAD_REQUEST
+            );
+        } else if (exception instanceof PyamentMethodNotFoundException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(404).title("Not found").detail("Payment method not found"),
+                    HttpStatus.NOT_FOUND
             );
         } else {
             return new ResponseEntity<>(

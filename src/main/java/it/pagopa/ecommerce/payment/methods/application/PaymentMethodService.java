@@ -9,6 +9,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.exception.PyamentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,6 +115,9 @@ public class PaymentMethodService {
         return paymentMethodRepository
                 .findById(id)
                 .map(this::docToAggregate)
+                .switchIfEmpty(
+                        Mono.error(new PyamentMethodNotFoundException(id))
+                )
                 .map(p -> {
                     p.setPaymentMethodStatus(status);
                     return p;
@@ -143,6 +146,7 @@ public class PaymentMethodService {
 
         return paymentMethodRepository
                 .findById(id)
+                .switchIfEmpty(Mono.error(new PyamentMethodNotFoundException(id)))
                 .map(this::docToAggregate);
     }
 
