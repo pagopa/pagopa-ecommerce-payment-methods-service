@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -60,6 +61,7 @@ public class AfmClientTests {
         Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
         Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
         Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
         Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.just(gecResponse));
 
         StepVerifier
@@ -77,6 +79,7 @@ public class AfmClientTests {
         Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
         Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
         Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
         Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class))
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)));
 
@@ -94,6 +97,7 @@ public class AfmClientTests {
         Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
         Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
         Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
         Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.error(new Exception()));
 
         StepVerifier
