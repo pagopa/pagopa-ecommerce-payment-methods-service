@@ -9,6 +9,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
@@ -110,6 +111,9 @@ public class PaymentMethodService {
         return paymentMethodRepository
                 .findById(id)
                 .map(this::docToAggregate)
+                .switchIfEmpty(
+                        Mono.error(new PaymentMethodNotFoundException(id))
+                )
                 .map(p -> {
                     p.setPaymentMethodStatus(status);
                     return p;
@@ -138,6 +142,7 @@ public class PaymentMethodService {
 
         return paymentMethodRepository
                 .findById(id)
+                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
                 .map(this::docToAggregate);
     }
 
