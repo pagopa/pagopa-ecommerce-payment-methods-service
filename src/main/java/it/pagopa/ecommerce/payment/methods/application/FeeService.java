@@ -100,30 +100,6 @@ public class FeeService {
                 );
     }
 
-    public Map<String, List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto>> groupBundleByPsp(
-                                                                                                    it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundleOptionDto
-    ) {
-        return bundleOptionDto.getBundleOptions()
-                .stream()
-                .collect(
-                        Collectors.groupingBy(
-                                it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getIdPsp,
-                                Collectors.mapping(
-                                        Function.identity(),
-                                        Collectors.collectingAndThen(
-                                                toList(),
-                                                e -> e.stream().sorted(
-                                                        Comparator.comparingLong(
-                                                                it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getTaxPayerFee
-                                                        )
-                                                )
-                                                        .collect(toList())
-                                        )
-                                )
-                        )
-                );
-    }
-
     private BundleOptionDto bundleOptionToResponse(
                                                    it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle
     ) {
@@ -150,5 +126,29 @@ public class FeeService {
                                 ).toList() : new ArrayList<>()
                 );
     }
+
+   /* public Map<String, List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto>> groupBundleByPsp(
+            it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundleOptionDto
+    ) {
+        return bundleOptionDto.getBundleOptions()
+                .stream()
+                .collect(
+                        Collectors.groupingBy(
+                                it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getIdPsp,
+                                Collectors.mapping(
+                                        Function.identity(),
+                                        Collectors.collectingAndThen(
+                                                toList(),
+                                                e -> e.stream().sorted(
+                                                                Comparator.comparingLong(
+                                                                        it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getTaxPayerFee
+                                                                )
+                                                        )
+                                                        .collect(toList())
+                                        )
+                                )
+                        )
+                );
+    }*/
 
 }
