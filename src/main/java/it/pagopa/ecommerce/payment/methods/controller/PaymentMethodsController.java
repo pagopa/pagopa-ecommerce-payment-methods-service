@@ -3,7 +3,6 @@ package it.pagopa.ecommerce.payment.methods.controller;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PspAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.PatchPaymentMethodRequestDto;
@@ -19,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,19 +37,13 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @ExceptionHandler(
         {
                 PaymentMethodAlreadyInUseException.class,
-                PspAlreadyInUseException.class,
-                PaymentMethodNotFoundException.class
+                PaymentMethodNotFoundException.class,
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
         if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),
-                    HttpStatus.BAD_REQUEST
-            );
-        } else if (exception instanceof PspAlreadyInUseException) {
-            return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Bad request").detail("PSP already in use"),
                     HttpStatus.BAD_REQUEST
             );
         } else if (exception instanceof PaymentMethodNotFoundException) {

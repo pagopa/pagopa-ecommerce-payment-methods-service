@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.client;
 
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.generated.ecommerce.gec.v1.api.CalculatorApi;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto;
@@ -7,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
@@ -44,6 +46,18 @@ public class AfmClient {
                 .header("ocp-apim-subscription-key", afmKey)
                 .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
                 .retrieve()
+                .onStatus(
+                        HttpStatus::isError,
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(
+                                        errorResponseBody -> Mono.error(
+                                                new AfmResponseException(
+                                                        clientResponse.statusCode(),
+                                                        errorResponseBody
+                                                )
+                                        )
+                                )
+                )
                 .bodyToMono(BundleOptionDto.class)
                 .doOnError(
                         ResponseStatusException.class,
