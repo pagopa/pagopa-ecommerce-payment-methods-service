@@ -199,7 +199,7 @@ public class PaymentMethodService {
                                     );
                                     return bo;
                                 })
-                                .map(bo -> bundleOptionToResponse(bo, pm.getPaymentMethodStatus()))
+                                .map(bo -> bundleOptionToResponse(bo, pm))
 
                 );
 
@@ -226,11 +226,12 @@ public class PaymentMethodService {
 
     private BundleOptionDto bundleOptionToResponse(
                                                    it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle,
-                                                   String paymentMethodStatus
+                                                   PaymentMethodDocument paymentMethodDocument
     ) {
         return new it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto()
                 .belowThreshold(bundle.getBelowThreshold())
-                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodStatus))
+                .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
+                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
                 .bundleOptions(
                         bundle.getBundleOptions() != null ? bundle.getBundleOptions()
                                 .stream()

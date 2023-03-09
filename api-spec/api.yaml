@@ -270,6 +270,8 @@ components:
     BundleOption:
       type: object
       properties:
+        paymentMethodName:
+          type: string
         paymentMethodStatus:
           $ref: "#/components/schemas/PaymentMethodStatus"
         belowThreshold:
@@ -278,6 +280,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Transfer"
+      required:
+        - paymentMethodName
+        - paymentMethodStatus
     Transfer:
       type: object
       properties:
