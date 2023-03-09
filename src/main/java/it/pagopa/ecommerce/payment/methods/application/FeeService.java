@@ -1,10 +1,13 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
 import it.pagopa.ecommerce.payment.methods.server.model.TransferDto;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
+import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +32,15 @@ public class FeeService {
     private final AfmClient afmClient;
 
     @Autowired
-    private PaymentMethodService paymentMethodService;
+    private PaymentMethodRepository paymentMethodRepository;
 
     @Autowired
     public FeeService(
             AfmClient afmClient,
-            PaymentMethodService paymentMethodService
+            PaymentMethodRepository paymentMethodRepository
     ) {
         this.afmClient = afmClient;
-        this.paymentMethodService = paymentMethodService;
+        this.paymentMethodRepository = paymentMethodRepository;
     }
 
     public Mono<it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto> computeFee(
@@ -72,7 +75,7 @@ public class FeeService {
                     return bo;
                 })
                 .flatMap(
-                        bo -> paymentMethodService.removeDisabledPsp(bo.getBundleOptions())
+                        bo -> removeDisabledPsp(bo.getBundleOptions())
                                 .map(filtered -> {
                                     bo.setBundleOptions(filtered);
                                     return bo;
@@ -127,17 +130,20 @@ public class FeeService {
                 );
     }
 
-    /*
-     * public Map<String,
-     * List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto>> groupBundleByPsp(
-     * it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundleOptionDto ) {
-     * return bundleOptionDto.getBundleOptions() .stream() .collect(
-     * Collectors.groupingBy(
-     * it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getIdPsp,
-     * Collectors.mapping( Function.identity(), Collectors.collectingAndThen(
-     * toList(), e -> e.stream().sorted( Comparator.comparingLong(
-     * it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getTaxPayerFee ) )
-     * .collect(toList()) ) ) ) ); }
-     */
+    public Mono<List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto>> removeDisabledPsp(
+                                                                                              List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
+    ) {
+        log.debug("[Payment Method Aggregate] Filtering psp by status");
+
+        return paymentMethodRepository
+                .findByPaymentMethodStatus(PaymentMethodStatusEnum.ENABLED.getCode())
+                .map(PaymentMethodDocument::getPaymentMethodTypeCode)
+                .collectList()
+                .map(
+                        enabledTypes -> transfers.stream().filter(
+                                t -> enabledTypes.contains(t.getPaymentMethod())
+                        ).collect(Collectors.toList())
+                );
+    }
 
 }
