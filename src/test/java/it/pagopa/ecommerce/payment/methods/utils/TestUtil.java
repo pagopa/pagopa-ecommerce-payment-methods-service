@@ -65,7 +65,7 @@ public class TestUtil {
                 .asset(paymentMethod.getPaymentMethodAsset().value())
                 .description(paymentMethod.getPaymentMethodDescription().value())
                 .status(
-                        PaymentMethodResponseDto.StatusEnum
+                        PaymentMethodStatusDto
                                 .fromValue(paymentMethod.getPaymentMethodStatus().value().getCode())
                 )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())

@@ -77,7 +77,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                     responseDto.setName(paymentMethod.getPaymentMethodName().value());
                                     responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
                                     responseDto.setStatus(
-                                            PaymentMethodResponseDto.StatusEnum
+                                            PaymentMethodStatusDto
                                                     .valueOf(paymentMethod.getPaymentMethodStatus().value().toString())
                                     );
                                     responseDto.setRanges(
@@ -150,7 +150,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         response.setName(paymentMethod.getPaymentMethodName().value());
         response.setDescription(paymentMethod.getPaymentMethodDescription().value());
         response.setStatus(
-                PaymentMethodResponseDto.StatusEnum.valueOf(
+                PaymentMethodStatusDto.valueOf(
                         paymentMethod.getPaymentMethodStatus().value().toString()
                 )
         );

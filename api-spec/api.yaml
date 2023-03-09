@@ -211,8 +211,7 @@ components:
       description: Patch Payment Method Request
       properties:
         status:
-          type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]
+          $ref: "#/components/schemas/PaymentMethodStatus"
       required:
         - status
     PaymentMethodResponse:
@@ -228,8 +227,7 @@ components:
         asset:
           type: string
         status:
-          type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]
+          $ref: "#/components/schemas/PaymentMethodStatus"
         paymentTypeCode:
           type: string
         ranges:
