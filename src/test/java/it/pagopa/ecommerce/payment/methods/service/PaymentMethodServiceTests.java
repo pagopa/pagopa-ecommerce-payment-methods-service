@@ -170,25 +170,4 @@ class PaymentMethodServiceTests {
 
         assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
     }
-
-    @Test
-    void shouldFilterDisabledPSP() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        // Only CP method is enabled
-        paymentMethodDocument.setPaymentMethodTypeCode("CP");
-
-        List<TransferDto> transferDtos = TestUtil.getBundleOptionDtoClientResponse().getBundleOptions();
-
-        // This should be filtered out -> PPAY is not enabled
-        transferDtos.get(0).setPaymentMethod("PPAY");
-
-        Mockito.when(paymentMethodRepository.findByPaymentMethodStatus(PaymentMethodStatusEnum.ENABLED.getCode()))
-                .thenReturn(Flux.just(paymentMethodDocument));
-
-        List<TransferDto> filteredTransfers = paymentMethodService.removeDisabledPsp(transferDtos).block();
-
-        assertEquals(0, filteredTransfers.size());
-
-    }
 }

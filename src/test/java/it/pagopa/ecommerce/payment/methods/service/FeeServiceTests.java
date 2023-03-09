@@ -3,11 +3,14 @@ package it.pagopa.ecommerce.payment.methods.service;
 import it.pagopa.ecommerce.payment.methods.application.FeeService;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
+import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
+import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,14 +49,14 @@ public class FeeServiceTests {
         paymentOptionDtoRequest.setPaymentMethod("CP");
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
 
-        Mockito.when(paymentMethodRepository.findByPaymentMethodStatus(paymentOptionDtoRequest.getPaymentMethod()))
+        Mockito.when(paymentMethodRepository.findByPaymentMethodStatus(PaymentMethodStatusEnum.ENABLED.getCode()))
                 .thenReturn(
                         Flux.just(
                                 new PaymentMethodDocument(
                                         UUID.randomUUID().toString(),
                                         "Carte",
                                         "",
-                                        "ENABLED",
+                                        PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
                                         "CP"
@@ -68,5 +71,26 @@ public class FeeServiceTests {
         it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto serviceResponse = feeService
                 .computeFee(Mono.just(paymentOptionDtoRequest), null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundleOptions().size());
+    }
+
+    @Test
+    void shouldFilterDisabledPSP() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        // Only CP method is enabled
+        paymentMethodDocument.setPaymentMethodTypeCode("CP");
+
+        List<TransferDto> transferDtos = TestUtil.getBundleOptionDtoClientResponse().getBundleOptions();
+
+        // This should be filtered out -> PPAY is not enabled
+        transferDtos.get(0).setPaymentMethod("PPAY");
+
+        Mockito.when(paymentMethodRepository.findByPaymentMethodStatus(PaymentMethodStatusEnum.ENABLED.getCode()))
+                .thenReturn(Flux.just(paymentMethodDocument));
+
+        List<TransferDto> filteredTransfers = feeService.removeDisabledPsp(transferDtos).block();
+
+        assertEquals(0, filteredTransfers.size());
+
     }
 }
