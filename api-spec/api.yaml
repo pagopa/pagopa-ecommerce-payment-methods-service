@@ -122,11 +122,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /fee/calculate:
+
+  /payment-methods/{id}/fee/calculate:
     post:
       operationId: calculateFees
-      summary: Invoke GEC for calculate fees
+      summary: Retrieve payment method psps
       parameters:
+        - name: id
+          in: path
+          description: Payment Method ID
+          required: true
+          schema:
+            type: string
         - name: maxOccurrences
           in: query
           description: max occurrences
@@ -173,8 +180,7 @@ components:
         asset:
           type: string
         status:
-          type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]
+          $ref: "#/components/schemas/PaymentMethodStatus"
         paymentTypeCode:
           type: string
         ranges:
@@ -243,8 +249,6 @@ components:
       properties:
         touchpoint:
           type: string
-        paymentMethod:
-          type: string
         bin:
           type: string
         idPspList:
@@ -262,13 +266,14 @@ components:
             $ref: "#/components/schemas/TransferListItem"
       required:
         - paymentAmount
-        - paymentMethodId
         - primaryCreditorInstitution
         - transferList
         - touchpoint
     BundleOption:
       type: object
       properties:
+        paymentMethodStatus:
+          $ref: "#/components/schemas/PaymentMethodStatus"
         belowThreshold:
           type: boolean
         bundleOptions:
@@ -328,6 +333,13 @@ components:
           example: 200
         title:
           type: string
+    PaymentMethodStatus:
+      type: string
+      description: the payment method status
+      enum:
+        - ENABLED
+        - DISABLED
+        - INCOMING
   requestBodies:
     PaymentMethodRequest:
       required: true

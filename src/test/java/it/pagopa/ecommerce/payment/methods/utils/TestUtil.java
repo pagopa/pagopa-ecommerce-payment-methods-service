@@ -9,13 +9,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRang
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
-import it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
-import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
-import it.pagopa.ecommerce.payment.methods.server.model.TransferDto;
-import it.pagopa.ecommerce.payment.methods.server.model.TransferListItemDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
@@ -28,7 +22,7 @@ public class TestUtil {
 
     static final String TEST_NAME = "Test";
     static final String TEST_DESC = "test";
-    static final PaymentMethodRequestDto.StatusEnum TEST_STATUS = PaymentMethodRequestDto.StatusEnum.ENABLED;
+    static final PaymentMethodStatusDto TEST_STATUS = PaymentMethodStatusDto.ENABLED;
     static final String TEST_TYPE_CODE = "test";
 
     static final String TEST_LANG = "IT";
@@ -189,7 +183,6 @@ public class TestUtil {
     public static PaymentOptionDto getPaymentOptionRequest() {
         return new PaymentOptionDto()
                 .paymentAmount(BigInteger.TEN.longValue())
-                .paymentMethod("paymentMethodID")
                 .primaryCreditorInstitution("CF")
                 .bin("BIN_TEST")
                 .touchpoint("CHECKOUT")

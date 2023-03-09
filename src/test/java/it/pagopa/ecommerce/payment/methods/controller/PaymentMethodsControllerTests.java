@@ -3,11 +3,10 @@ package it.pagopa.ecommerce.payment.methods.controller;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import org.junit.jupiter.api.Test;
@@ -109,7 +108,7 @@ class PaymentMethodsControllerTests {
         PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
 
         PaymentMethodRequestDto patchRequest = new PaymentMethodRequestDto()
-                .status(PaymentMethodRequestDto.StatusEnum.ENABLED);
+                .status(PaymentMethodStatusDto.ENABLED);
 
         webClient
                 .patch().uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
@@ -146,6 +145,27 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
+    void shouldGetFees() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        PaymentOptionDto requestBody = TestUtil.getPaymentOptionRequest();
+        BundleOptionDto serviceResponse = TestUtil
+                .getBundleOptionDtoResponseFromClientResponse(TestUtil.getBundleOptionDtoClientResponse());
+        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+                .thenReturn(Mono.just(serviceResponse));
+
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/fee/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectStatus()
+                .isOk();
+    }
+
+    @Test
     void shouldReturnResponseEntityWithNotFound() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
                 .errorHandler(new PaymentMethodNotFoundException("paymentMethodId"));
@@ -167,6 +187,14 @@ class PaymentMethodsControllerTests {
                 .errorHandler(new RuntimeException());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals("Internal server error", responseEntity.getBody().getTitle());
+    }
+
+    @Test
+    void shouldReturnResponseEntityWithAfmError() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new AfmResponseException(HttpStatus.NOT_FOUND, "reason test"));
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("reason test", responseEntity.getBody().getDetail());
     }
 
 }

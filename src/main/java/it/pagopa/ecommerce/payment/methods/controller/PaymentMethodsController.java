@@ -2,14 +2,11 @@ package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
-import it.pagopa.ecommerce.payment.methods.server.model.PatchPaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
-import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +47,13 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Not found").detail("Payment method not found"),
                     HttpStatus.NOT_FOUND
+            );
+        } else if (exception instanceof AfmResponseException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(((AfmResponseException) exception).status.value())
+                            .title("Afm generic error")
+                            .detail(((AfmResponseException) exception).reason),
+                    ((AfmResponseException) exception).status
             );
         } else {
             return new ResponseEntity<>(
@@ -163,5 +167,18 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public Mono<ResponseEntity<BundleOptionDto>> calculateFees(
+                                                               String id,
+                                                               Mono<PaymentOptionDto> paymentOptionDto,
+                                                               Integer maxOccurrences,
+                                                               ServerWebExchange exchange
+    ) {
+
+        return paymentMethodService.computeFee(paymentOptionDto, id, maxOccurrences).map(
+                ResponseEntity::ok
+        );
     }
 }
