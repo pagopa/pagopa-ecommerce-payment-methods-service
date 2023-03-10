@@ -148,7 +148,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BundleOption'
+                $ref: '#/components/schemas/CalculateFeeResponse'
         '400':
           description: Bad request
           content:
@@ -242,7 +242,7 @@ components:
         - status
         - paymentTypeCode
         - ranges
-    PaymentOption:
+    CalculateFeeRequest:
       type: object
       properties:
         touchpoint:
@@ -267,7 +267,7 @@ components:
         - primaryCreditorInstitution
         - transferList
         - touchpoint
-    BundleOption:
+    CalculateFeeResponse:
       type: object
       properties:
         paymentMethodName:
@@ -276,15 +276,15 @@ components:
           $ref: "#/components/schemas/PaymentMethodStatus"
         belowThreshold:
           type: boolean
-        bundleOptions:
+        bundles:
           type: array
           items:
-            $ref: "#/components/schemas/Transfer"
+            $ref: "#/components/schemas/Bundle"
       required:
-        - bundleOptions
+        - bundles
         - paymentMethodName
         - paymentMethodStatus
-    Transfer:
+    Bundle:
       type: object
       properties:
         abi:
@@ -362,4 +362,4 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/PaymentOption"
+            $ref: "#/components/schemas/CalculateFeeRequest"

@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -170,14 +169,14 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<BundleOptionDto>> calculateFees(
-                                                               String id,
-                                                               Mono<PaymentOptionDto> paymentOptionDto,
-                                                               Integer maxOccurrences,
-                                                               ServerWebExchange exchange
+    public Mono<ResponseEntity<CalculateFeeResponseDto>> calculateFees(
+                                                                       String id,
+                                                                       Mono<CalculateFeeRequestDto> calculateFeeRequestDto,
+                                                                       Integer maxOccurrences,
+                                                                       ServerWebExchange exchange
     ) {
 
-        return paymentMethodService.computeFee(paymentOptionDto, id, maxOccurrences).map(
+        return paymentMethodService.computeFee(calculateFeeRequestDto, id, maxOccurrences).map(
                 ResponseEntity::ok
         );
     }

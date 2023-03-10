@@ -13,10 +13,10 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto;
+import it.pagopa.ecommerce.payment.methods.server.model.BundleDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
-import it.pagopa.ecommerce.payment.methods.server.model.TransferDto;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
@@ -164,10 +164,10 @@ public class PaymentMethodService {
                 .map(this::docToAggregate);
     }
 
-    public Mono<it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto> computeFee(
-                                                                                             Mono<PaymentOptionDto> paymentOptionDto,
-                                                                                             String paymentMethodId,
-                                                                                             Integer maxOccurrences
+    public Mono<CalculateFeeResponseDto> computeFee(
+                                                    Mono<CalculateFeeRequestDto> paymentOptionDto,
+                                                    String paymentMethodId,
+                                                    Integer maxOccurrences
     ) {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
@@ -224,19 +224,19 @@ public class PaymentMethodService {
                 );
     }
 
-    private BundleOptionDto bundleOptionToResponse(
-                                                   it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle,
-                                                   PaymentMethodDocument paymentMethodDocument
+    private CalculateFeeResponseDto bundleOptionToResponse(
+                                                           it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle,
+                                                           PaymentMethodDocument paymentMethodDocument
     ) {
-        return new it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto()
+        return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
                 .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
-                .bundleOptions(
+                .bundles(
                         bundle.getBundleOptions() != null ? bundle.getBundleOptions()
                                 .stream()
                                 .map(
-                                        t -> new TransferDto()
+                                        t -> new BundleDto()
                                                 .abi(t.getAbi())
                                                 .bundleDescription(t.getBundleDescription())
                                                 .bundleName(t.getBundleName())

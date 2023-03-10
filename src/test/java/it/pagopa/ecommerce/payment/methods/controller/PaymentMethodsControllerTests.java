@@ -147,9 +147,9 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldGetFees() {
         String paymentMethodId = UUID.randomUUID().toString();
-        PaymentOptionDto requestBody = TestUtil.getPaymentOptionRequest();
-        BundleOptionDto serviceResponse = TestUtil
-                .getBundleOptionDtoResponseFromClientResponse(TestUtil.getBundleOptionDtoClientResponse());
+        CalculateFeeRequestDto requestBody = TestUtil.getCalculateFeeRequest();
+        CalculateFeeResponseDto serviceResponse = TestUtil
+                .getCalculateFeeResponseFromClientResponse(TestUtil.getBundleOptionDtoClientResponse());
         Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
                 .thenReturn(Mono.just(serviceResponse));
 

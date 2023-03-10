@@ -132,16 +132,16 @@ public class TestUtil {
                 );
     }
 
-    public static BundleOptionDto getBundleOptionDtoResponseFromClientResponse(
-                                                                               it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse
+    public static CalculateFeeResponseDto getCalculateFeeResponseFromClientResponse(
+                                                                                    it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse
     ) {
-        return new BundleOptionDto()
+        return new CalculateFeeResponseDto()
                 .belowThreshold(gecResponse.getBelowThreshold())
-                .bundleOptions(
+                .bundles(
                         gecResponse.getBundleOptions() != null ? gecResponse.getBundleOptions()
                                 .stream()
                                 .map(
-                                        t -> new TransferDto()
+                                        t -> new BundleDto()
                                                 .abi(t.getAbi())
                                                 .bundleDescription(t.getBundleDescription())
                                                 .bundleName(t.getBundleName())
@@ -180,8 +180,8 @@ public class TestUtil {
                 );
     }
 
-    public static PaymentOptionDto getPaymentOptionRequest() {
-        return new PaymentOptionDto()
+    public static CalculateFeeRequestDto getCalculateFeeRequest() {
+        return new CalculateFeeRequestDto()
                 .paymentAmount(BigInteger.TEN.longValue())
                 .primaryCreditorInstitution("CF")
                 .bin("BIN_TEST")

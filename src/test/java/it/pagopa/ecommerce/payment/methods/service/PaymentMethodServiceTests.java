@@ -6,11 +6,11 @@ import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentOptionDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
-import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +28,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
@@ -181,7 +180,7 @@ class PaymentMethodServiceTests {
     @Test
     void shouldRetrieveFee() {
         String paymentMethodId = UUID.randomUUID().toString();
-        PaymentOptionDto paymentOptionDtoRequest = TestUtil.getPaymentOptionRequest();
+        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
@@ -203,9 +202,9 @@ class PaymentMethodServiceTests {
 
         paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
 
-        it.pagopa.ecommerce.payment.methods.server.model.BundleOptionDto serviceResponse = paymentMethodService
-                .computeFee(Mono.just(paymentOptionDtoRequest), paymentMethodId, null).block();
-        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundleOptions().size());
+        CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
+        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
     }
 
 }
