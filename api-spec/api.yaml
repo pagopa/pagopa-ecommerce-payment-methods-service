@@ -144,7 +144,7 @@ paths:
         $ref: "#/components/requestBodies/PostPaymentMethodPSP"
       responses:
         '200':
-          description: Return list of boundle returned by GEC
+          description: Return list of psp ordered by fee.
           content:
             application/json:
               schema:
