@@ -79,6 +79,7 @@ microservice-chart:
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     API_CONFIG_KEY: api-config-for-ecommerce-key
+    AFM_KEY: afm-api-key
     APPLICATIONINSIGHTS_CONNECTION_STRING: applicationinsights-connection-string
   keyvault:
     name: "pagopa-d-ecommerce-kv"
