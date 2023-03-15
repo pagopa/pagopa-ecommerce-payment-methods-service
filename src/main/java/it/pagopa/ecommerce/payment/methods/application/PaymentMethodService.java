@@ -208,20 +208,20 @@ public class PaymentMethodService {
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
                                                                                           List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
     ) {
+        List<String> idPsps = new ArrayList<>();
+
         return transfers
                 .stream()
-                .collect(
-                        Collectors.collectingAndThen(
-                                Collectors.toCollection(
-                                        () -> new TreeSet<>(
-                                                Comparator.comparing(
-                                                        it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getIdPsp
-                                                )
-                                        )
-                                ),
-                                ArrayList::new
-                        )
-                );
+                .filter(t -> {
+                    if (idPsps.contains(t.getIdPsp())) {
+                        return false;
+                    } else {
+                        idPsps.add(t.getIdPsp());
+                        return true;
+                    }
+                })
+                .collect(toList());
+
     }
 
     private CalculateFeeResponseDto bundleOptionToResponse(
