@@ -34,6 +34,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         {
                 PaymentMethodAlreadyInUseException.class,
                 PaymentMethodNotFoundException.class,
+                AfmResponseException.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
