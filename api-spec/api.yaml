@@ -17,6 +17,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentMethodResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
     get:
       operationId: getAllPaymentMethods
       summary: Retrieve all Payment Methods (by filter)
@@ -36,6 +48,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PaymentMethodResponse'
+        '500':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /payment-methods/{id}:
     patch:
       operationId: patchPaymentMethod
@@ -56,6 +74,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentMethodResponse'
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '404':
+          description: Payment method not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
     get:
       operationId: getPaymentMethod
       summary: Retrive payment method by ID
@@ -73,48 +110,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentMethodResponse'
-  /payment-methods/psps:
-    put:
-      operationId: scheduleUpdatePSPs
-      summary: Update psp list
-      responses:
-        '200':
-          description: Update successfully scheduled
-    get:
-      operationId: getPSPs
-      summary: Retrieve psps
-      parameters:
-        - in: query
-          name: amount
-          schema:
-            type: integer
-          description: Amount in cents
-          required: false
-        - in: query
-          name: lang
-          schema:
-            type: string
-            enum: [IT, EN, FR, DE, SL]
-          description: Service language
-          required: false
-        - in: query
-          name: paymentTypeCode
-          schema:
-            type: string
-          description: Payment Type Code
-          required: false
-      responses:
-        '200':
-          description: PSP list successfully retrieved
+        '404':
+          description: Payment method not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PSPsResponse'
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
 
-  /payment-methods/{id}/psps:
-    get:
-      operationId: getPaymentMethodsPSPs
-      summary: Retrive PSPs by payment method ID
+  /payment-methods/{id}/fee/calculate:
+    post:
+      operationId: calculateFees
+      summary: Retrieve payment method psps
       parameters:
         - name: id
           in: path
@@ -122,26 +134,39 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          name: amount
+        - name: maxOccurrences
+          in: query
+          description: max occurrences
+          required: false
           schema:
             type: integer
-          description: Amount in cents
-          required: false
-        - in: query
-          name: lang
-          schema:
-            type: string
-            enum: [IT, EN, FR, DE, SL]
-          description: Service language
-          required: false
+      requestBody:
+        $ref: "#/components/requestBodies/PostPaymentMethodPSP"
       responses:
         '200':
-          description: New payment method successfully updated
+          description: Return list of psp ordered by fee.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PSPsResponse'
+                $ref: '#/components/schemas/CalculateFeeResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
 components:
   schemas:
     PaymentMethodRequest:
@@ -155,8 +180,7 @@ components:
         asset:
           type: string
         status:
-          type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]
+          $ref: "#/components/schemas/PaymentMethodStatus"
         paymentTypeCode:
           type: string
         ranges:
@@ -187,8 +211,7 @@ components:
       description: Patch Payment Method Request
       properties:
         status:
-          type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]
+          $ref: "#/components/schemas/PaymentMethodStatus"
       required:
         - status
     PaymentMethodResponse:
@@ -204,8 +227,7 @@ components:
         asset:
           type: string
         status:
-          type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]
+          $ref: "#/components/schemas/PaymentMethodStatus"
         paymentTypeCode:
           type: string
         ranges:
@@ -220,62 +242,108 @@ components:
         - status
         - paymentTypeCode
         - ranges
-    PSPsResponse:
+    CalculateFeeRequest:
       type: object
-      description: Get available PSP list Response
       properties:
-        psp:
+        touchpoint:
+          type: string
+        bin:
+          type: string
+        idPspList:
           type: array
           items:
-            $ref: "#/components/schemas/Psp"
-    Psp:
+            type: string
+        paymentAmount:
+          type: integer
+          format: int64
+        primaryCreditorInstitution:
+          type: string
+        transferList:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransferListItem"
+      required:
+        - paymentAmount
+        - primaryCreditorInstitution
+        - transferList
+        - touchpoint
+    CalculateFeeResponse:
       type: object
-      description: PSP object
       properties:
-        code:
+        paymentMethodName:
           type: string
-        paymentTypeCode:
+        paymentMethodStatus:
+          $ref: "#/components/schemas/PaymentMethodStatus"
+        belowThreshold:
+          type: boolean
+        bundles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Bundle"
+      required:
+        - bundles
+        - paymentMethodName
+        - paymentMethodStatus
+    Bundle:
+      type: object
+      properties:
+        abi:
           type: string
-        channelCode:
+        bundleDescription:
           type: string
-        description:
+        bundleName:
+          type: string
+        idBrokerPsp:
+          type: string
+        idBundle:
+          type: string
+        idChannel:
+          type: string
+        idCiBundle:
+          type: string
+        idPsp:
+          type: string
+        onUs:
+          type: boolean
+        paymentMethod:
+          type: string
+        primaryCiIncurredFee:
+          type: integer
+          format: int64
+        taxPayerFee:
+          type: integer
+          format: int64
+        touchpoint:
+          type: string
+    TransferListItem:
+      type: object
+      properties:
+        creditorInstitution:
+          type: string
+        digitalStamp:
+          type: boolean
+        transferCategory:
+          type: string
+    ProblemJson:
+      type: object
+      properties:
+        detail:
           type: string
         status:
-          type: string
-          enum: ["ENABLED","DISABLED","INCOMING"]
-        businessName:
-          type: string
-        brokerName:
-          type: string
-        language:
-          type: string
-          enum:
-            - IT
-            - EN
-            - FR
-            - DE
-            - SL
-        minAmount:
+          maximum: 600
+          minimum: 100
           type: integer
-          format: int64
-        maxAmount:
-          type: integer
-          format: int64
-        fixedCost:
-          type: integer
-          format: int64
-      required:
-        - code
-        - paymentMethodID
-        - description
-        - status
-        - type
-        - name
-        - brokerName
-        - language
-        - minAmount
-        - maxAmount
-        - fixedCost
+          format: int32
+          example: 200
+        title:
+          type: string
+    PaymentMethodStatus:
+      type: string
+      description: the payment method status
+      enum:
+        - ENABLED
+        - DISABLED
+        - INCOMING
   requestBodies:
     PaymentMethodRequest:
       required: true
@@ -289,3 +357,9 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/PatchPaymentMethodRequest"
+    PostPaymentMethodPSP:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CalculateFeeRequest"

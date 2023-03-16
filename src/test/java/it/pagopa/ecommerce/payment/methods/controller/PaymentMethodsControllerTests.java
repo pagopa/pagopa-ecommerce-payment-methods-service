@@ -1,24 +1,18 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
-import it.pagopa.ecommerce.payment.methods.application.PspService;
-import it.pagopa.ecommerce.payment.methods.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PyamentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.server.model.PSPsResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PspDto;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ProblemJsonDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,12 +25,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.UUID;
 
-import static it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException.paymentMethodAlreadyInUse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
@@ -45,15 +37,8 @@ class PaymentMethodsControllerTests {
 
     @InjectMocks
     private PaymentMethodsController paymentMethodsController = new PaymentMethodsController();
-
     @Autowired
     private WebTestClient webClient;
-
-    @MockBean
-    private PspService pspService;
-
-    @MockBean
-    private ApiConfigClient apiConfigClient;
 
     @MockBean
     private PaymentMethodService paymentMethodService;
@@ -108,23 +93,31 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldGetPSPs() {
+    void shouldPatchPaymentMethod() {
+        UUID TEST_CAT = UUID.randomUUID();
 
-        PspDto pspDto = TestUtil.getTestPspDto();
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
-        Mockito.when(pspService.retrievePsps(null, null, null))
-                .thenReturn(Flux.just(pspDto));
+        Mockito.when(
+                paymentMethodService.updatePaymentMethodStatus(
+                        paymentMethod.getPaymentMethodID().value().toString(),
+                        PaymentMethodStatusEnum.ENABLED
+                )
+        ).thenReturn(Mono.just(paymentMethod));
 
-        PSPsResponseDto expectedResult = new PSPsResponseDto()
-                .psp(List.of(pspDto));
+        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
+
+        PaymentMethodRequestDto patchRequest = new PaymentMethodRequestDto()
+                .status(PaymentMethodStatusDto.ENABLED);
 
         webClient
-                .get()
-                .uri("/payment-methods/psps")
+                .patch().uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(patchRequest)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(PSPsResponseDto.class)
+                .expectBody(PaymentMethodResponseDto.class)
                 .isEqualTo(expectedResult);
     }
 
@@ -152,9 +145,30 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
+    void shouldGetFees() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto requestBody = TestUtil.getCalculateFeeRequest();
+        CalculateFeeResponseDto serviceResponse = TestUtil
+                .getCalculateFeeResponseFromClientResponse(TestUtil.getBundleOptionDtoClientResponse());
+        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+                .thenReturn(Mono.just(serviceResponse));
+
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/fee/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectStatus()
+                .isOk();
+    }
+
+    @Test
     void shouldReturnResponseEntityWithNotFound() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
-                .errorHandler(new PyamentMethodNotFoundException("paymentMethodId"));
+                .errorHandler(new PaymentMethodNotFoundException("paymentMethodId"));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals("Payment method not found", responseEntity.getBody().getDetail());
     }
@@ -176,74 +190,11 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldGetPaymentMethodPSPs() {
-        String TEST_METHOD_ID = UUID.randomUUID().toString();
-        PspDto pspDto = TestUtil.getTestPspDto();
-
-        Mockito.when(
-                paymentMethodService.retrievePaymentMethodById(
-                        any()
-                )
-        ).thenReturn(Mono.just(TestUtil.getPaymentMethod()));
-
-        Mockito.when(pspService.retrievePsps(any(), any(), any()))
-                .thenReturn(Flux.just(pspDto));
-
-        PSPsResponseDto expectedResult = new PSPsResponseDto()
-                .psp(List.of(pspDto));
-
-        webClient
-                .get()
-                .uri("/payment-methods/" + TEST_METHOD_ID + "/psps")
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(PSPsResponseDto.class)
-                .isEqualTo(expectedResult);
+    void shouldReturnResponseEntityWithAfmError() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new AfmResponseException(HttpStatus.NOT_FOUND, "reason test"));
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("reason test", responseEntity.getBody().getDetail());
     }
 
-    @Test
-    void shouldPatchPaymentMethod() {
-        UUID TEST_CAT = UUID.randomUUID();
-
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
-
-        Mockito.when(
-                paymentMethodService.updatePaymentMethodStatus(
-                        paymentMethod.getPaymentMethodID().value().toString(),
-                        PaymentMethodStatusEnum.ENABLED
-                )
-        ).thenReturn(Mono.just(paymentMethod));
-
-        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
-
-        PaymentMethodRequestDto patchRequest = new PaymentMethodRequestDto()
-                .status(PaymentMethodRequestDto.StatusEnum.ENABLED);
-
-        webClient
-                .patch().uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(patchRequest)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(PaymentMethodResponseDto.class)
-                .isEqualTo(expectedResult);
-    }
-
-    @Test
-    void shouldScheduleUpdate() {
-
-        Mockito.when(apiConfigClient.getPSPs(any(), any())).thenReturn(
-                Mono.just(TestUtil.getTestServices())
-        );
-
-        webClient
-                .put().uri("/payment-methods/psps")
-                .exchange()
-                .expectStatus()
-                .isAccepted();
-
-        Mockito.verify(pspService, Mockito.times(1)).updatePSPs(any());
-    }
 }

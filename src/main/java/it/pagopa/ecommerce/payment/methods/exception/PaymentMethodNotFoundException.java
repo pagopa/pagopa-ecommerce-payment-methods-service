@@ -1,8 +1,8 @@
 package it.pagopa.ecommerce.payment.methods.exception;
 
-public class PyamentMethodNotFoundException extends RuntimeException {
+public class PaymentMethodNotFoundException extends RuntimeException {
 
-    public PyamentMethodNotFoundException(String paymentMethodId) {
+    public PaymentMethodNotFoundException(String paymentMethodId) {
         super("paymentMethodId with id '" + paymentMethodId + "' not found");
     }
 }

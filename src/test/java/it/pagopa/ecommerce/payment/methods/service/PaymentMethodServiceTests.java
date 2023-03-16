@@ -1,12 +1,16 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
+import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +34,9 @@ import static org.mockito.ArgumentMatchers.any;
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 class PaymentMethodServiceTests {
+
+    @Mock
+    private AfmClient afmClient;
 
     @Mock
     private PaymentMethodRepository paymentMethodRepository;
@@ -168,4 +176,35 @@ class PaymentMethodServiceTests {
 
         assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
     }
+
+    @Test
+    void shouldRetrieveFee() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(
+                        Mono.just(
+                                new PaymentMethodDocument(
+                                        UUID.randomUUID().toString(),
+                                        "Carte",
+                                        "",
+                                        PaymentMethodStatusEnum.ENABLED.getCode(),
+                                        "asset",
+                                        List.of(Pair.of(0L, 100L)),
+                                        "CP"
+                                )
+                        )
+                );
+        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any()))
+                .thenReturn(Mono.just(gecResponse));
+
+        paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
+
+        CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
+        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+    }
+
 }

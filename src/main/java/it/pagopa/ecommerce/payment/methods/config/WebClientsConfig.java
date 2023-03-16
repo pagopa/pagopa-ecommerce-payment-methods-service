@@ -2,8 +2,8 @@ package it.pagopa.ecommerce.payment.methods.config;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import it.pagopa.generated.ecommerce.apiconfig.v1.ApiClient;
-import it.pagopa.generated.ecommerce.apiconfig.v1.api.PaymentServiceProvidersApi;
+import it.pagopa.generated.ecommerce.gec.v1.ApiClient;
+import it.pagopa.generated.ecommerce.gec.v1.api.CalculatorApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,25 +17,25 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebClientsConfig implements WebFluxConfigurer {
-    @Value("${apiConfig.client.maxInMemory}")
+    @Value("${afm.client.maxInMemory}")
     private int maxMemorySize;
 
-    @Bean(name = "apiConfigWebClient")
-    public PaymentServiceProvidersApi apiConfigWebClient(
-                                                         @Value("${apiConfig.uri}") String apiConfigWebClientUri,
-                                                         @Value(
-                                                             "${apiConfig.readTimeout}"
-                                                         ) int apiConfigWebClientReadTimeout,
-                                                         @Value(
-                                                             "${apiConfig.connectionTimeout}"
-                                                         ) int apiConfigWebClientConnectionTimeout
+    @Bean(name = "afmWebClient")
+    public CalculatorApi afmWebClient(
+                                      @Value("${afm.uri}") String afmWebClientUri,
+                                      @Value(
+                                          "${afm.readTimeout}"
+                                      ) int afmWebClientReadTimeout,
+                                      @Value(
+                                          "${afm.connectionTimeout}"
+                                      ) int afmWebClientConnectionTimeout
     ) {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, apiConfigWebClientConnectionTimeout)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, afmWebClientConnectionTimeout)
                 .doOnConnected(
                         connection -> connection.addHandlerLast(
                                 new ReadTimeoutHandler(
-                                        apiConfigWebClientReadTimeout,
+                                        afmWebClientReadTimeout,
                                         TimeUnit.MILLISECONDS
                                 )
                         )
@@ -47,8 +47,8 @@ public class WebClientsConfig implements WebFluxConfigurer {
                         .build()
         ).clientConnector(
                 new ReactorClientHttpConnector(httpClient)
-        ).baseUrl(apiConfigWebClientUri).build();
+        ).baseUrl(afmWebClientUri).build();
 
-        return new PaymentServiceProvidersApi(new ApiClient(webClient));
+        return new CalculatorApi(new ApiClient(webClient));
     }
 }

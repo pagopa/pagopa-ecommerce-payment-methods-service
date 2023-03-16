@@ -9,7 +9,7 @@ services:
       - "8080:8080"
     networks:
       - pagopa-ecommerce
-    env_file: .env.example
+    env_file: .env
 
   mongo:
     container_name: pagopa-ecommerce-mongo
@@ -37,18 +37,18 @@ services:
       mongo:
         condition: service_healthy
 
-  pagopa-api-config-mock:
+  pagopa-gec-mock:
     build:
       context: .
-      dockerfile: api-config-mock/Dockerfile.api-config-mock
-    container_name: pagopa-api-config-mock
+      dockerfile: gec-mock/Dockerfile.gec-mock
+    container_name: pagopa-GEC-mock
     volumes:
       - type: bind
-        source: ./api-config-mock
+        source: ./gec-mock
         target: /config
         read_only: true
     ports:
-      - "8084:3000"
+      - "8085:3000"
     networks:
       - pagopa-ecommerce
   

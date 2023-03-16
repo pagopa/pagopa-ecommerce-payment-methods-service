@@ -14,7 +14,22 @@
           "onUs": true,
           "paymentMethod": "paymentMethod1",
           "primaryCiIncurredFee": 0,
-          "taxPayerFee": 0,
+          "taxPayerFee": 100,
+          "touchpoint": "touchpoint1"
+        },
+        {
+          "abi": "abi1",
+          "bundleDescription": "bundleDescription1",
+          "bundleName": "bundleName1",
+          "idBrokerPsp": "idBrokerPsp1",
+          "idBundle": "idBundle1",
+          "idChannel": "idChannel1",
+          "idCiBundle": "idCiBundle1",
+          "idPsp": "idPsp1",
+          "onUs": true,
+          "paymentMethod": "PPAY",
+          "primaryCiIncurredFee": 0,
+          "taxPayerFee": 200,
           "touchpoint": "touchpoint1"
         },
         {
@@ -27,7 +42,7 @@
           "idCiBundle": "idCiBundle2",
           "idPsp": "idPsp2",
           "onUs": false,
-          "paymentMethod": "paymentMethod2",
+          "paymentMethod": "CP",
           "primaryCiIncurredFee": 0,
           "taxPayerFee": 0,
           "touchpoint": "touchpoint2"

@@ -1,21 +1,13 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
-import it.pagopa.ecommerce.payment.methods.application.PspService;
-import it.pagopa.ecommerce.payment.methods.client.ApiConfigClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PspAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PyamentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
-import it.pagopa.ecommerce.payment.methods.server.model.PSPsResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PatchPaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ProblemJsonDto;
-import it.pagopa.generated.ecommerce.apiconfig.v1.dto.ServicesDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -29,10 +21,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @Slf4j
@@ -41,17 +30,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Autowired
     private PaymentMethodService paymentMethodService;
 
-    @Autowired
-    private PspService pspService;
-
-    @Autowired
-    private ApiConfigClient apiConfigClient;
-
     @ExceptionHandler(
         {
                 PaymentMethodAlreadyInUseException.class,
-                PspAlreadyInUseException.class,
-                PyamentMethodNotFoundException.class
+                PaymentMethodNotFoundException.class,
+                AfmResponseException.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
@@ -60,15 +43,17 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),
                     HttpStatus.BAD_REQUEST
             );
-        } else if (exception instanceof PspAlreadyInUseException) {
-            return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Bad request").detail("PSP already in use"),
-                    HttpStatus.BAD_REQUEST
-            );
-        } else if (exception instanceof PyamentMethodNotFoundException) {
+        } else if (exception instanceof PaymentMethodNotFoundException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Not found").detail("Payment method not found"),
                     HttpStatus.NOT_FOUND
+            );
+        } else if (exception instanceof AfmResponseException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(((AfmResponseException) exception).status.value())
+                            .title("Afm generic error")
+                            .detail(((AfmResponseException) exception).reason),
+                    ((AfmResponseException) exception).status
             );
         } else {
             return new ResponseEntity<>(
@@ -92,7 +77,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                     responseDto.setName(paymentMethod.getPaymentMethodName().value());
                                     responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
                                     responseDto.setStatus(
-                                            PaymentMethodResponseDto.StatusEnum
+                                            PaymentMethodStatusDto
                                                     .valueOf(paymentMethod.getPaymentMethodStatus().value().toString())
                                     );
                                     responseDto.setRanges(
@@ -115,48 +100,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PSPsResponseDto>> getPSPs(
-                                                         Integer amount,
-                                                         String lang,
-                                                         String paymentTypeCode,
-                                                         ServerWebExchange exchange
-    ) {
-        return pspService.retrievePsps(amount, lang, paymentTypeCode).collectList().flatMap(
-                pspDtos -> {
-                    PSPsResponseDto responseDto = new PSPsResponseDto();
-                    responseDto.setPsp(pspDtos);
-
-                    return Mono.just(ResponseEntity.ok(responseDto));
-                }
-        );
-    }
-
-    @Override
     public Mono<ResponseEntity<PaymentMethodResponseDto>> getPaymentMethod(
                                                                            String id,
                                                                            ServerWebExchange exchange
     ) {
         return paymentMethodService.retrievePaymentMethodById(id)
                 .map(this::paymentMethodToResponse);
-    }
-
-    @Override
-    public Mono<ResponseEntity<PSPsResponseDto>> getPaymentMethodsPSPs(
-                                                                       String id,
-                                                                       Integer amount,
-                                                                       String lang,
-                                                                       ServerWebExchange exchange
-    ) {
-        return paymentMethodService.retrievePaymentMethodById(id)
-                .flatMap(
-                        pm -> pspService.retrievePsps(amount, lang, pm.getPaymentMethodTypeCode().value()).collectList()
-                                .flatMap(pspDtos -> {
-                                    PSPsResponseDto responseDto = new PSPsResponseDto();
-                                    responseDto.setPsp(pspDtos);
-
-                                    return Mono.just(ResponseEntity.ok(responseDto));
-                                })
-                );
     }
 
     @Override
@@ -195,45 +144,13 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 );
     }
 
-    @Override
-    public Mono<ResponseEntity<Void>> scheduleUpdatePSPs(ServerWebExchange exchange) {
-        AtomicReference<Integer> currentPage = new AtomicReference<>(0);
-
-        return apiConfigClient.getPSPs(0, 50).expand(
-                servicesDto -> {
-                    if (servicesDto.getPageInfo().getTotalPages().equals(currentPage.get() + 1)) {
-                        return Mono.empty();
-                    }
-                    return apiConfigClient.getPSPs(currentPage.updateAndGet(v -> v + 1), 50);
-                }
-        ).collectList().map(
-                services -> {
-                    ServicesDto servicesDto = new ServicesDto();
-
-                    for (ServicesDto service : services) {
-                        servicesDto.setServices(
-                                Stream.concat(
-                                        servicesDto.getServices().stream(),
-                                        service.getServices().stream()
-                                ).toList()
-                        );
-                    }
-
-                    pspService.updatePSPs(servicesDto);
-                    paymentMethodService.updatePaymentMethodRanges(servicesDto);
-
-                    return ResponseEntity.accepted().build();
-                }
-        );
-    }
-
     private ResponseEntity<PaymentMethodResponseDto> paymentMethodToResponse(PaymentMethod paymentMethod) {
         PaymentMethodResponseDto response = new PaymentMethodResponseDto();
         response.setId(paymentMethod.getPaymentMethodID().value().toString());
         response.setName(paymentMethod.getPaymentMethodName().value());
         response.setDescription(paymentMethod.getPaymentMethodDescription().value());
         response.setStatus(
-                PaymentMethodResponseDto.StatusEnum.valueOf(
+                PaymentMethodStatusDto.valueOf(
                         paymentMethod.getPaymentMethodStatus().value().toString()
                 )
         );
@@ -250,5 +167,18 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public Mono<ResponseEntity<CalculateFeeResponseDto>> calculateFees(
+                                                                       String id,
+                                                                       Mono<CalculateFeeRequestDto> calculateFeeRequestDto,
+                                                                       Integer maxOccurrences,
+                                                                       ServerWebExchange exchange
+    ) {
+
+        return paymentMethodService.computeFee(calculateFeeRequestDto, id, maxOccurrences).map(
+                ResponseEntity::ok
+        );
     }
 }

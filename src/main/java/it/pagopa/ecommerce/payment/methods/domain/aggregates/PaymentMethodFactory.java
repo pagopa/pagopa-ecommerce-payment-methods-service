@@ -46,8 +46,8 @@ public class PaymentMethodFactory {
                             paymentMethodName,
                             paymentMethodDescription,
                             paymentMethodStatus,
-                            paymentMethodRanges,
                             paymentMethodTypeCode,
+                            paymentMethodRanges,
                             paymentMethodAsset
                     );
                 }
