@@ -19,6 +19,7 @@ import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
+import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +177,11 @@ public class PaymentMethodService {
                                 po -> new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto()
                                         .bin(po.getBin())
                                         .paymentAmount(po.getPaymentAmount())
-                                        .idPspList(po.getIdPspList())
+                                        .idPspList(
+                                                po.getIdPspList().stream()
+                                                        .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
+                                                        .toList()
+                                        )
                                         .paymentMethod(pm.getPaymentMethodTypeCode())
                                         .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
                                         .touchpoint(po.getTouchpoint())
@@ -189,7 +194,7 @@ public class PaymentMethodService {
                                                                         .digitalStamp(t.getDigitalStamp())
                                                                         .transferCategory(t.getTransferCategory())
                                                         )
-                                                        .collect(toList())
+                                                        .toList()
                                         )
 
                         ).flatMap(reqBody -> afmClient.getFees(reqBody, maxOccurrences))
@@ -220,7 +225,7 @@ public class PaymentMethodService {
                         return true;
                     }
                 })
-                .collect(toList());
+                .toList();
 
     }
 
