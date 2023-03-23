@@ -178,7 +178,8 @@ public class PaymentMethodService {
                                         .bin(po.getBin())
                                         .paymentAmount(po.getPaymentAmount())
                                         .idPspList(
-                                                po.getIdPspList().stream()
+                                                Optional.ofNullable(po.getIdPspList()).orElseGet(ArrayList::new)
+                                                        .stream()
                                                         .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
                                                         .toList()
                                         )
