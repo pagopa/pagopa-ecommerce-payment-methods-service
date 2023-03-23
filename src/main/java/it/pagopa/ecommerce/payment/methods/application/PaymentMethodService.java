@@ -194,7 +194,7 @@ public class PaymentMethodService {
                                                                         .digitalStamp(t.getDigitalStamp())
                                                                         .transferCategory(t.getTransferCategory())
                                                         )
-                                                        .collect(toList())
+                                                        .toList()
                                         )
 
                         ).flatMap(reqBody -> afmClient.getFees(reqBody, maxOccurrences))
