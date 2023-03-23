@@ -10,6 +10,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStat
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
+import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
@@ -166,8 +167,14 @@ public class TestUtil {
                 .primaryCreditorInstitution("CF")
                 .bin("BIN_TEST")
                 .touchpoint("CHECKOUT")
-                .addIdPspListItem("string")
-                .idPspList(new ArrayList<>(List.of("first", "second")))
+                .idPspList(
+                        new ArrayList<>(
+                                List.of(
+                                        new PspSearchCriteriaDto().idPsp("firstPspId"),
+                                        new PspSearchCriteriaDto().idPsp("secondPspId")
+                                )
+                        )
+                )
                 .transferList(
                         new ArrayList<>(
                                 List.of(
