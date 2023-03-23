@@ -178,9 +178,9 @@ public class PaymentMethodService {
                                         .bin(po.getBin())
                                         .paymentAmount(po.getPaymentAmount())
                                         .idPspList(
-                                                po.getIdPspList().stream()
+                                                po.getIdPspList() != null ? po.getIdPspList().stream()
                                                         .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
-                                                        .toList()
+                                                        .toList() : null
                                         )
                                         .paymentMethod(pm.getPaymentMethodTypeCode())
                                         .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
