@@ -207,4 +207,36 @@ class PaymentMethodServiceTests {
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
     }
 
+    @Test
+    void shouldRetrieveFeeWithoutPspList() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        calculateFeeRequestDto.setIdPspList(null);
+        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(
+                        Mono.just(
+                                new PaymentMethodDocument(
+                                        UUID.randomUUID().toString(),
+                                        "Carte",
+                                        "",
+                                        PaymentMethodStatusEnum.ENABLED.getCode(),
+                                        "asset",
+                                        List.of(Pair.of(0L, 100L)),
+                                        "CP"
+                                )
+                        )
+                );
+
+        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any()))
+                .thenReturn(Mono.just(gecResponse));
+
+        paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
+
+        CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
+        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+    }
+
 }
