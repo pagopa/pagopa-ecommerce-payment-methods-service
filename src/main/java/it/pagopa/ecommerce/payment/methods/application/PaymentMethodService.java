@@ -180,7 +180,7 @@ public class PaymentMethodService {
                                         .idPspList(
                                                 po.getIdPspList().stream()
                                                         .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
-                                                        .collect(toList())
+                                                        .toList()
                                         )
                                         .paymentMethod(pm.getPaymentMethodTypeCode())
                                         .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
@@ -225,7 +225,7 @@ public class PaymentMethodService {
                         return true;
                     }
                 })
-                .collect(toList());
+                .toList();
 
     }
 
