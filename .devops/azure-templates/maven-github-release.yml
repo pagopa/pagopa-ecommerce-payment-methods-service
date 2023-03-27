@@ -118,27 +118,6 @@ steps:
           git add "$CHART_FILE"
         fi
   - task: Bash@3
-    displayName: Update Openapi/Swagger Version
-    name: update_version_openapi
-    inputs:
-      targetType: 'inline'
-      script: |
-        for i in openapi/*.json; do
-          [ -f "$i" ] || break
-          cat <<< "$(jq ".info.version = \"$(next_version_app.value)\"" "$i")" > "$i"
-          git add $i
-        done
-        for i in openapi/*.yaml; do
-          [ -f "$i" ] || break
-          yq -i ".info.version = \"$(next_version_app.value)\"" "$i"
-          git add "$i"
-        done
-        for i in openapi/*.yml; do
-          [ -f "$i" ] || break
-          yq -i ".info.version = \"$(next_version_app.value)\"" "$i"
-          git add "$i"
-        done
-  - task: Bash@3
     name: next_version_chart
     displayName: 'Read chart current version'
     inputs:
