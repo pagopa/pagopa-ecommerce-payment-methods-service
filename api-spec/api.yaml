@@ -62,9 +62,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PaymentMethodResponse'
+                $ref: '#/components/schemas/PaymentMethodsResponse'
         '500':
           description: Service unavailable
           content:
@@ -283,6 +281,14 @@ components:
         - status
         - paymentTypeCode
         - ranges
+    PaymentMethodsResponse:
+      type: object
+      description: Payment methods response
+      properties:
+        paymentMethods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodResponse'
     CalculateFeeRequest:
       description: Calculate fee request
       type: object
