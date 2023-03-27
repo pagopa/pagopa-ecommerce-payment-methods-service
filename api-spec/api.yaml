@@ -153,7 +153,7 @@ paths:
       operationId: calculateFees
       summary: Calculate payment method fees
       description: >
-        [GET with body payload](https://opensource.pagopa.it/restful-api-guidelines/#get-with-body) - no resources created:
+        GET with body payload - no resources created:
         Return the fees for the choosen payment method based on transaction amount etc.
       parameters:
         - name: id
