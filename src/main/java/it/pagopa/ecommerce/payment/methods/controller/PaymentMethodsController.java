@@ -48,12 +48,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     new ProblemJsonDto().status(404).title("Not found").detail("Payment method not found"),
                     HttpStatus.NOT_FOUND
             );
-        } else if (exception instanceof AfmResponseException) {
+        } else if (exception instanceof AfmResponseException afmException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(((AfmResponseException) exception).status.value())
+                    new ProblemJsonDto().status(afmException.status.value())
                             .title("Afm generic error")
-                            .detail(((AfmResponseException) exception).reason),
-                    ((AfmResponseException) exception).status
+                            .detail(afmException.reason),
+                    afmException.status
             );
         } else {
             return new ResponseEntity<>(
