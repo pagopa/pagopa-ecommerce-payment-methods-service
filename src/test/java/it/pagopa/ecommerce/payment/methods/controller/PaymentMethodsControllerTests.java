@@ -155,14 +155,14 @@ class PaymentMethodsControllerTests {
 
         webClient
                 .post()
-                .uri("/payment-methods/" + paymentMethodId + "/fee/calculate")
+                .uri("/payment-methods/" + paymentMethodId + "/fees")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectStatus()
-                .isOk();
+                .expectBody(CalculateFeeResponseDto.class)
+                .isEqualTo(serviceResponse);
     }
 
     @Test
