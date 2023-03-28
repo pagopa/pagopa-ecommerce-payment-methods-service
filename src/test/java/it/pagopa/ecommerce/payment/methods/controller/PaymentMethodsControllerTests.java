@@ -74,7 +74,7 @@ class PaymentMethodsControllerTests {
                 Flux.just(paymentMethod)
         );
 
-        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
+        PaymentMethodsResponseDto expectedResult = TestUtil.getPaymentMethodsResponse(paymentMethod);
 
         webClient
                 .get()
@@ -87,7 +87,7 @@ class PaymentMethodsControllerTests {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBodyList(PaymentMethodResponseDto.class)
+                .expectBodyList(PaymentMethodsResponseDto.class)
                 .hasSize(1)
                 .contains(expectedResult);
     }
@@ -155,14 +155,14 @@ class PaymentMethodsControllerTests {
 
         webClient
                 .post()
-                .uri("/payment-methods/" + paymentMethodId + "/fee/calculate")
+                .uri("/payment-methods/" + paymentMethodId + "/fees")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectStatus()
-                .isOk();
+                .expectBody(CalculateFeeResponseDto.class)
+                .isEqualTo(serviceResponse);
     }
 
     @Test

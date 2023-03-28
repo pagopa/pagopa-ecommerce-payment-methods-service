@@ -15,6 +15,7 @@ import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -71,6 +72,15 @@ public class TestUtil {
                 )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
                 .ranges(List.of(new RangeDto().min(0L).max(100L)));
+    }
+
+    public static PaymentMethodsResponseDto getPaymentMethodsResponse(PaymentMethod... paymentMethod) {
+        List<PaymentMethodResponseDto> paymentMethods = Arrays.asList(paymentMethod)
+                .stream()
+                .map(TestUtil::getPaymentMethodResponse)
+                .toList();
+        return new PaymentMethodsResponseDto()
+                .paymentMethods(paymentMethods);
     }
 
     public static long getTestAmount() {
