@@ -270,4 +270,15 @@ class PaymentMethodServiceTests {
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
     }
+
+    public void shouldGetNullPaymentMethod() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+
+        Mockito.when(paymentMethodRepository.findAll())
+                .thenReturn(Flux.just(null));
+
+        PaymentMethod paymentMethodCreated = paymentMethodService.retrievePaymentMethods(null).blockFirst();
+
+        assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
+    }
 }
