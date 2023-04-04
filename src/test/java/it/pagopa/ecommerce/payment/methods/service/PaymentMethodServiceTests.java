@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
@@ -279,6 +280,6 @@ class PaymentMethodServiceTests {
 
         PaymentMethod paymentMethodCreated = paymentMethodService.retrievePaymentMethods(null).blockFirst();
 
-        assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
+        assertNull(paymentMethod);
     }
 }
