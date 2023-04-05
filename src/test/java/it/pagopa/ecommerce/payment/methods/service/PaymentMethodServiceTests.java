@@ -240,6 +240,7 @@ class PaymentMethodServiceTests {
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
     }
 
+    @Test
     void shouldRetrieveFeeWithPspWithNullPaymentType() {
         String paymentMethodId = UUID.randomUUID().toString();
         CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
@@ -272,14 +273,4 @@ class PaymentMethodServiceTests {
         assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
     }
 
-    public void shouldGetNullPaymentMethod() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
-
-        Mockito.when(paymentMethodRepository.findAll())
-                .thenReturn(Flux.just(null));
-
-        PaymentMethod paymentMethodCreated = paymentMethodService.retrievePaymentMethods(null).blockFirst();
-
-        assertNull(paymentMethod);
-    }
 }
