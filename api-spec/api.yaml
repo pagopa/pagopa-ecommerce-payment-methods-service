@@ -62,7 +62,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentMethodsResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentMethodResponse'
         '500':
           description: Service unavailable
           content:

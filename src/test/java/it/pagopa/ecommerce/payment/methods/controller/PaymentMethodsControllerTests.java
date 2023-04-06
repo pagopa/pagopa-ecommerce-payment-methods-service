@@ -74,7 +74,7 @@ class PaymentMethodsControllerTests {
                 Flux.just(paymentMethod)
         );
 
-        PaymentMethodsResponseDto expectedResult = TestUtil.getPaymentMethodsResponse(paymentMethod);
+        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
 
         webClient
                 .get()
@@ -87,7 +87,7 @@ class PaymentMethodsControllerTests {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBodyList(PaymentMethodsResponseDto.class)
+                .expectBodyList(PaymentMethodResponseDto.class)
                 .hasSize(1)
                 .contains(expectedResult);
     }
