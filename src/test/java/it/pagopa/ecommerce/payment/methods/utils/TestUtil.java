@@ -143,6 +143,30 @@ public class TestUtil {
                 );
     }
 
+    public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionWithAnyValueDtoClientResponse() {
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transferList = new ArrayList<>();
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTest")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idCiBundle("idCiBundleTest")
+                        .idPsp("idPspTest")
+                        .onUs(true)
+                        .paymentMethod(null)
+                        .primaryCiIncurredFee(BigInteger.ZERO.longValue())
+                        .taxPayerFee(BigInteger.ZERO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        return new it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto()
+                .belowThreshold(true)
+                .bundleOptions(
+                        transferList
+                );
+    }
+
     public static CalculateFeeResponseDto getCalculateFeeResponseFromClientResponse(
                                                                                     it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse
     ) {

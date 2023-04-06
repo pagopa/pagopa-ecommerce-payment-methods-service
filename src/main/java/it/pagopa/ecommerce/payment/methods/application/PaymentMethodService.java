@@ -252,7 +252,12 @@ public class PaymentMethodService {
                                                 .idCiBundle(t.getIdCiBundle())
                                                 .idPsp(t.getIdPsp())
                                                 .onUs(t.getOnUs())
-                                                .paymentMethod(t.getPaymentMethod())
+                                                .paymentMethod(
+                                                        // A null value is considered as "any" in the AFM domain
+                                                        t.getPaymentMethod() == null
+                                                                ? paymentMethodDocument.getPaymentMethodTypeCode()
+                                                                : t.getPaymentMethod()
+                                                )
                                                 .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
                                                 .taxPayerFee(t.getTaxPayerFee())
                                                 .touchpoint(t.getTouchpoint())

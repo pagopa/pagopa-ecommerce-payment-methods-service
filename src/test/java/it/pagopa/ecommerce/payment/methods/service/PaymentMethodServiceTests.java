@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
@@ -237,6 +238,39 @@ class PaymentMethodServiceTests {
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+    }
+
+    @Test
+    void shouldRetrieveFeeWithPspWithNullPaymentType() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        calculateFeeRequestDto.setIdPspList(null);
+        BundleOptionDto gecResponse = TestUtil.getBundleOptionWithAnyValueDtoClientResponse();
+        String paymentTypeCode = "CP";
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(
+                        Mono.just(
+                                new PaymentMethodDocument(
+                                        UUID.randomUUID().toString(),
+                                        "Carte",
+                                        "",
+                                        PaymentMethodStatusEnum.ENABLED.getCode(),
+                                        "asset",
+                                        List.of(Pair.of(0L, 100L)),
+                                        paymentTypeCode
+                                )
+                        )
+                );
+
+        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any()))
+                .thenReturn(Mono.just(gecResponse));
+
+        paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
+
+        CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
+        assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
     }
 
 }
