@@ -64,42 +64,39 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PaymentMethodsResponseDto>> getAllPaymentMethods(
-                                                                                BigDecimal amount,
-                                                                                ServerWebExchange exchange
+    public Mono<ResponseEntity<Flux<PaymentMethodResponseDto>>> getAllPaymentMethods(
+                                                                                     BigDecimal amount,
+                                                                                     ServerWebExchange exchange
     ) {
-        return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
-                .map(paymentMethod -> {
-                    PaymentMethodResponseDto responseDto = new PaymentMethodResponseDto();
-                    responseDto.setId(paymentMethod.getPaymentMethodID().value().toString());
-                    responseDto.setName(paymentMethod.getPaymentMethodName().value());
-                    responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
-                    responseDto.setStatus(
-                            PaymentMethodStatusDto
-                                    .valueOf(paymentMethod.getPaymentMethodStatus().value().toString())
-                    );
-                    responseDto.setRanges(
-                            paymentMethod.getPaymentMethodRanges().stream().map(
-                                    r -> {
-                                        RangeDto rangeDto = new RangeDto();
-                                        rangeDto.setMin(r.min());
-                                        rangeDto.setMax(r.max());
-                                        return rangeDto;
-                                    }
-                            ).toList()
-                    );
-                    responseDto.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
-                    responseDto.setAsset(paymentMethod.getPaymentMethodAsset().value());
+        return Mono.just(
+                ResponseEntity.ok(
+                        paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
+                                .map(paymentMethod -> {
+                                    PaymentMethodResponseDto responseDto = new PaymentMethodResponseDto();
+                                    responseDto.setId(paymentMethod.getPaymentMethodID().value().toString());
+                                    responseDto.setName(paymentMethod.getPaymentMethodName().value());
+                                    responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
+                                    responseDto.setStatus(
+                                            PaymentMethodStatusDto
+                                                    .valueOf(paymentMethod.getPaymentMethodStatus().value().toString())
+                                    );
+                                    responseDto.setRanges(
+                                            paymentMethod.getPaymentMethodRanges().stream().map(
+                                                    r -> {
+                                                        RangeDto rangeDto = new RangeDto();
+                                                        rangeDto.setMin(r.min());
+                                                        rangeDto.setMax(r.max());
+                                                        return rangeDto;
+                                                    }
+                                            ).collect(Collectors.toList())
+                                    );
+                                    responseDto.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
+                                    responseDto.setAsset(paymentMethod.getPaymentMethodAsset().value());
 
-                    return responseDto;
-                })
-                .collectList()
-                .map(
-                        paymentMethods -> ResponseEntity.ok(
-                                new PaymentMethodsResponseDto()
-                                        .paymentMethods(paymentMethods)
-                        )
-                );
+                                    return responseDto;
+                                })
+                )
+        );
     }
 
     @Override
