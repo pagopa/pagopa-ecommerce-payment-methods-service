@@ -72,6 +72,11 @@ resources:
       name: pagopa/azure-pipeline-templates
       ref: refs/tags/v2.10.1
       endpoint: 'io-azure-devops-github-ro'
+    - repository: pagopaCheckoutTests
+        type: github
+        name: pagopa/pagopa-checkout-tests
+        ref: main
+        endpoint: 'io-azure-devops-github-ro'
 
 pool:
   vmImage: ubuntu-latest
@@ -192,6 +197,26 @@ stages:
                     GREEN_VERSION: $(green_version)
                     BLUE_VERSION: $(Build.SourceVersion)
 
+  - stage: "Blue_API_UAT_test"
+    displayName: 'Running API test on blue app'
+    dependsOn: Deploy_UAT_Blue
+    jobs:
+      - job: Bluegreen_WaitForApproval
+        displayName: Blue API tests
+        steps:
+          - checkout: pagopaCheckoutTests
+          - script: |
+              yarn global add newman
+            displayName: 'Newman installation'
+          - script: |
+              newman run api-tests/checkout-tests/checkout-api-dev.tests.json -e api-tests/dev.envs.json --ignore-redirects --reporters cli,junit --reporter-junit-export Results/api-TEST.xml
+            displayName: 'Run api test on blue app'
+            continueOnError: true
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/*-TEST.xml'
+              searchFolder: '$(System.DefaultWorkingDirectory)'
 
   - stage: "Bluegreen_WaitForApproval"
     displayName: 'UAT green approval deployment'
