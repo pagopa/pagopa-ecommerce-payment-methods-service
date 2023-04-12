@@ -131,22 +131,12 @@ stages:
     displayName: 'Running API test on dev app'
     dependsOn: Deploy_for_DEV
     jobs:
-      - job: ApiTests_dev
-        displayName: DEV API tests
+      - job: newman_api_test
         steps:
           - checkout: pagopaCheckoutTests
-          - script: |
-              yarn global add newman
-            displayName: 'Newman installation'
-          - script: |
-              newman run api-tests/checkout-tests/checkout-api-dev.tests.json -e api-tests/dev.envs.json --ignore-redirects --reporters cli,junit --reporter-junit-export Results/api-TEST.xml
-            displayName: 'Run api test on blue app'
-            continueOnError: true
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '**/*-TEST.xml'
-              searchFolder: '$(System.DefaultWorkingDirectory)'
+          - template: azure-templates/api-tests.yml
+            parameters:
+              ENV: "DEV"
 
   - stage: "Build_release_candidate"
     displayName: 'Build release candidate'
@@ -222,22 +212,12 @@ stages:
     displayName: 'Running API test on blue app'
     dependsOn: Deploy_UAT_Blue
     jobs:
-      - job: Bluegreen_WaitForApproval
-        displayName: Blue API tests
+      - job: newman_api_test
         steps:
           - checkout: pagopaCheckoutTests
-          - script: |
-              yarn global add newman
-            displayName: 'Newman installation'
-          - script: |
-              newman run api-tests/checkout-tests/checkout-api-dev.tests.json -e api-tests/dev.envs.json --ignore-redirects --reporters cli,junit --reporter-junit-export Results/api-TEST.xml
-            displayName: 'Run api test on blue app'
-            continueOnError: true
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '**/*-TEST.xml'
-              searchFolder: '$(System.DefaultWorkingDirectory)'
+          - template: azure-templates/api-tests.yml
+            parameters:
+              ENV: "UAT"
 
   - stage: "Bluegreen_WaitForApproval"
     displayName: 'UAT green approval deployment'
