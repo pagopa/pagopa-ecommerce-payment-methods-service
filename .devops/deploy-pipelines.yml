@@ -75,7 +75,7 @@ resources:
     - repository: pagopaCheckoutTests
       type: github
       name: pagopa/pagopa-checkout-tests
-      ref: main
+      ref: CHK-1388-add-header-for-blue-green-deployment
       endpoint: 'io-azure-devops-github-ro'
 
 pool:
@@ -136,7 +136,7 @@ stages:
           - checkout: pagopaCheckoutTests
           - template: azure-templates/api-tests.yml
             parameters:
-              ENV: "DEV"
+              ENV_FILE: "api-tests/dev.envs.json"
 
   - stage: "Build_release_candidate"
     displayName: 'Build release candidate'
@@ -208,7 +208,7 @@ stages:
                     GREEN_VERSION: $(green_version)
                     BLUE_VERSION: $(Build.SourceVersion)
 
-  - stage: "Blue_API_UAT_test"
+  - stage: "API_Blue_UAT_test"
     displayName: 'Running API test on blue app'
     dependsOn: Deploy_UAT_Blue
     jobs:
@@ -217,11 +217,11 @@ stages:
           - checkout: pagopaCheckoutTests
           - template: azure-templates/api-tests.yml
             parameters:
-              ENV: "UAT"
+              ENV_FILE: "api-tests/uat.blue.envs.json"
 
   - stage: "Bluegreen_WaitForApproval"
     displayName: 'UAT green approval deployment'
-    dependsOn: Deploy_UAT_Blue
+    dependsOn: API_Blue_UAT_test
     jobs:
       - job: Bluegreen_WaitForApproval
         displayName: Manual blue deploy approval
@@ -323,3 +323,14 @@ stages:
                     APP_NAME: $(K8S_IMAGE_REPOSITORY_NAME)
                     VALUE_FILE: "helm/values-uat.yaml"
                     GREEN_VERSION: $(green_version)
+
+  - stage: "API_Green_UAT_test"
+    displayName: 'Running API test on green app'
+    dependsOn: Deploy_UAT_Green
+    jobs:
+      - job: newman_api_test
+        steps:
+          - checkout: pagopaCheckoutTests
+          - template: azure-templates/api-tests.yml
+            parameters:
+              ENV_FILE: "api-tests/uat.envs.json"
