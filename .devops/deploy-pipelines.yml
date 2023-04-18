@@ -137,7 +137,7 @@ stages:
           - template: azure-templates/api-tests.yml
             parameters:
               ENV_FILE: "api-tests/dev.envs.json"
-              TEST_FILE_PREFIX: "dev-api"
+              TEST_FILE_PREFIX: "dev"
 
   - stage: "Build_release_candidate"
     displayName: 'Build release candidate'
@@ -219,7 +219,7 @@ stages:
           - template: azure-templates/api-tests.yml
             parameters:
               ENV_FILE: "api-tests/uat.payment-methods.blue.envs.json"
-              TEST_FILE_PREFIX: "uat-blue-api"
+              TEST_FILE_PREFIX: "uat-blue"
 
   - stage: "Bluegreen_WaitForApproval"
     displayName: 'UAT green approval deployment'
@@ -336,4 +336,4 @@ stages:
           - template: azure-templates/api-tests.yml
             parameters:
               ENV_FILE: "api-tests/uat.envs.json"
-              TEST_FILE_PREFIX: "uat-green-api"
+              TEST_FILE_PREFIX: "uat-green"
