@@ -27,5 +27,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           ignored_files: 'openapi.json, .github/'
-          min_size: 1
-          max_size: 1
