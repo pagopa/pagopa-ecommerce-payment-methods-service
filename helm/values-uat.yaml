@@ -16,19 +16,23 @@ microservice-chart:
         repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
         tag: "latest"
         pullPolicy: Always
-  envConfig:
-    MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
-    MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
-    MONGO_PORT: "10255"
-    MONGO_SSL_ENABLED: "true"
-    AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
-    AFM_READ_TIMEOUT: "10000"
-    AFM_CONNECTION_TIMEOUT: "10000"
-    SPRING_MAX_IN_MEM_SIZE: "16777216"
-  envSecret:
-    MONGO_PASSWORD: mongo-ecommerce-password
-    AFM_KEY: afm-api-key
-    APPLICATIONINSIGHTS_CONNECTION_STRING: applicationinsights-connection-string
+    envConfig:
+      MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
+      MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
+      MONGO_PORT: "10255"
+      MONGO_SSL_ENABLED: "true"
+      AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
+      AFM_READ_TIMEOUT: "10000"
+      AFM_CONNECTION_TIMEOUT: "10000"
+      SPRING_MAX_IN_MEM_SIZE: "16777216"
+      ELASTIC_APM_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
+      ELASTIC_APM_APPLICATION_PACKAGES: it.pagopa.ecommerce.payment.methods
+      ELASTIC_APM_SERVER_URL: http://quickstart-apm-http.elastic-system.svc:8200
+      ELASTIC_APM_LOG_SENDING: "true"
+    envSecret:
+      MONGO_PASSWORD: mongo-ecommerce-password
+      AFM_KEY: afm-api-key
+      ELASTIC_APM_SECRET_TOKEN: elastic-apm-secret-token
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "0.7.0"
@@ -94,10 +98,14 @@ microservice-chart:
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
+    ELASTIC_APM_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
+    ELASTIC_APM_APPLICATION_PACKAGES: it.pagopa.ecommerce.payment.methods
+    ELASTIC_APM_SERVER_URL: http://quickstart-apm-http.elastic-system.svc:8200
+    ELASTIC_APM_LOG_SENDING: "true"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     AFM_KEY: afm-api-key
-    APPLICATIONINSIGHTS_CONNECTION_STRING: applicationinsights-connection-string
+    ELASTIC_APM_SECRET_TOKEN: elastic-apm-secret-token
   keyvault:
     name: "pagopa-u-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
