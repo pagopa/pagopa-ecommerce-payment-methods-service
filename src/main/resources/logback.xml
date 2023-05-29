@@ -1,5 +1,5 @@
 <configuration>
-    <appender name="LOG_DATA_MASK" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="LOG_TRANSACTION_DATA" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="ch.qos.logback.classic.PatternLayout">
                 <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [contextKey=%X{contextKey} transaction-id=%X{transactionId}] - %msg%n</pattern>
