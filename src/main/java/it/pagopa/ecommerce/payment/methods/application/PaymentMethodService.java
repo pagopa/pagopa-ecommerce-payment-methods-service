@@ -31,8 +31,6 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 @ApplicationService
 @Slf4j
@@ -62,7 +60,7 @@ public class PaymentMethodService {
                                                    String paymentMethodTypeCode,
                                                    String paymentMethodAsset
     ) {
-        log.debug("[Payment Method Aggregate] Create new aggregate");
+        log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
                 new PaymentMethodID(UUID.randomUUID()),
                 new PaymentMethodName(paymentMethodName),
@@ -73,7 +71,7 @@ public class PaymentMethodService {
                 new PaymentMethodAsset(paymentMethodAsset)
         );
 
-        log.debug("[Payment Method Aggregate] Store new aggregate");
+        log.info("[Payment Method Aggregate] Store new aggregate");
 
         return paymentMethod.flatMap(
                 p -> paymentMethodRepository.save(
@@ -104,7 +102,7 @@ public class PaymentMethodService {
     }
 
     public Flux<PaymentMethod> retrievePaymentMethods(Integer amount) {
-        log.debug("[Payment Method Aggregate] Retrieve Aggregate");
+        log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         if (amount == null) {
             return paymentMethodRepository.findAll().map(this::docToAggregate);
@@ -125,7 +123,7 @@ public class PaymentMethodService {
                                                          String id,
                                                          PaymentMethodStatusEnum status
     ) {
-        log.debug("[Payment method Aggregate] Patch Aggregate");
+        log.info("[Payment method Aggregate] Patch Aggregate");
 
         return paymentMethodRepository
                 .findById(id)
@@ -157,7 +155,7 @@ public class PaymentMethodService {
     }
 
     public Mono<PaymentMethod> retrievePaymentMethodById(String id) {
-        log.debug("[Payment Method Aggregate] Retrieve Aggregate");
+        log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         return paymentMethodRepository
                 .findById(id)
@@ -170,6 +168,7 @@ public class PaymentMethodService {
                                                     String paymentMethodId,
                                                     Integer maxOccurrences
     ) {
+        log.info("[Payment Method] Retrieve bundles list");
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .flatMap(
