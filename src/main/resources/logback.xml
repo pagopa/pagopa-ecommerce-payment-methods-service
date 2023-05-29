@@ -7,6 +7,6 @@
         </encoder>
     </appender>
     <root level="INFO">
-        <appender-ref ref="LOG_DATA_MASK" />
+        <appender-ref ref="LOG_TRANSACTION_DATA" />
     </root>
 </configuration>
