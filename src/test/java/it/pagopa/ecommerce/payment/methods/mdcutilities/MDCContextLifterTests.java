@@ -34,7 +34,7 @@ class MDCContextLifterTests {
         context = Context.of(CONTEXT_KEY, CONTEXT_VALUE);
         contextLifter.copyToMdc(context);
         assertTrue(MDC.getCopyOfContextMap().containsKey(CONTEXT_KEY));
-        assertEquals(MDC.getCopyOfContextMap().get(CONTEXT_KEY), CONTEXT_VALUE);
+        assertEquals(CONTEXT_VALUE, MDC.getCopyOfContextMap().get(CONTEXT_KEY));
     }
 
     @Test
@@ -53,7 +53,7 @@ class MDCContextLifterTests {
         contextLifter.copyToMdc(context);
         assertTrue(MDC.getCopyOfContextMap().containsKey(CONTEXT_KEY));
         assertTrue(MDC.getCopyOfContextMap().containsKey(TRANSACTION_ID_KEY));
-        assertEquals(MDC.getCopyOfContextMap().get(TRANSACTION_ID_KEY), TRANSACTION_ID_VALUE);
+        assertEquals(TRANSACTION_ID_VALUE, MDC.getCopyOfContextMap().get(TRANSACTION_ID_KEY));
     }
 
     @Test

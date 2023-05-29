@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @ApplicationService
@@ -82,7 +83,7 @@ public class PaymentMethodService {
                                 p.getPaymentMethodStatus().value().toString(),
                                 p.getPaymentMethodAsset().value(),
                                 p.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
-                                        .collect(Collectors.toList()),
+                                        .toList(),
                                 p.getPaymentMethodTypeCode().value()
                         )
                 ).map(
@@ -94,7 +95,7 @@ public class PaymentMethodService {
                                 new PaymentMethodType(doc.getPaymentMethodTypeCode()),
                                 doc.getPaymentMethodRanges().stream()
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
-                                        .collect(Collectors.toList()),
+                                        .toList(),
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset())
                         )
                 )
