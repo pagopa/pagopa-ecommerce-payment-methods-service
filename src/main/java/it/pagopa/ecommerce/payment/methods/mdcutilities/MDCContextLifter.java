@@ -56,16 +56,16 @@ class MDCContextLifter<T> implements CoreSubscriber<T> {
      */
     public void copyToMdc(Context context) {
         if (!context.isEmpty()) {
-            Map<String, String> val = Optional.ofNullable(MDC.getCopyOfContextMap()).orElseGet(HashMap::new);
-            Map<String, String> map = context.stream()
+            Map<String, String> mdcContext = Optional.ofNullable(MDC.getCopyOfContextMap()).orElseGet(HashMap::new);
+            Map<String, String> reactorContext = context.stream()
                     .collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue().toString()));
 
-            if (map.getOrDefault("contextKey", "").equals(val.getOrDefault("contextKey", ""))) {
-                map.putAll(val);
-                MDC.setContextMap(map);
+            if (reactorContext.getOrDefault("contextKey", "").equals(mdcContext.getOrDefault("contextKey", ""))) {
+                reactorContext.putAll(mdcContext);
+                MDC.setContextMap(reactorContext);
             } else {
-                val.putAll(map);
-                MDC.setContextMap(val);
+                mdcContext.putAll(reactorContext);
+                MDC.setContextMap(mdcContext);
             }
         } else {
             MDC.clear();
