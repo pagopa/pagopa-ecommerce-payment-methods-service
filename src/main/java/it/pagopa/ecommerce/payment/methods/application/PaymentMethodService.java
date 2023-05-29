@@ -147,7 +147,7 @@ public class PaymentMethodService {
                                                 p.getPaymentMethodAsset().value(),
                                                 p.getPaymentMethodRanges().stream().map(
                                                         r -> Pair.of(r.min(), r.max())
-                                                ).collect(Collectors.toList()),
+                                                ).toList(),
                                                 p.getPaymentMethodTypeCode().value()
                                         )
                                 )
