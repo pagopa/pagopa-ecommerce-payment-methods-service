@@ -54,7 +54,7 @@ class MDCContextLifter<T> implements CoreSubscriber<T> {
      * this method should be same as Reactor [Context] state. One thread-local
      * access only.
      */
-    private void copyToMdc(Context context) {
+    public void copyToMdc(Context context) {
         if (!context.isEmpty()) {
             Map<String, String> val = Optional.ofNullable(MDC.getCopyOfContextMap()).orElseGet(HashMap::new);
             Map<String, String> map = context.stream()
