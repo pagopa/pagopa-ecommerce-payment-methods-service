@@ -30,8 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 @Service
 @ApplicationService
@@ -62,7 +61,7 @@ public class PaymentMethodService {
                                                    String paymentMethodTypeCode,
                                                    String paymentMethodAsset
     ) {
-        log.debug("[Payment Method Aggregate] Create new aggregate");
+        log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
                 new PaymentMethodID(UUID.randomUUID()),
                 new PaymentMethodName(paymentMethodName),
@@ -73,7 +72,7 @@ public class PaymentMethodService {
                 new PaymentMethodAsset(paymentMethodAsset)
         );
 
-        log.debug("[Payment Method Aggregate] Store new aggregate");
+        log.info("[Payment Method Aggregate] Store new aggregate");
 
         return paymentMethod.flatMap(
                 p -> paymentMethodRepository.save(
@@ -84,7 +83,7 @@ public class PaymentMethodService {
                                 p.getPaymentMethodStatus().value().toString(),
                                 p.getPaymentMethodAsset().value(),
                                 p.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
-                                        .collect(Collectors.toList()),
+                                        .toList(),
                                 p.getPaymentMethodTypeCode().value()
                         )
                 ).map(
@@ -96,7 +95,7 @@ public class PaymentMethodService {
                                 new PaymentMethodType(doc.getPaymentMethodTypeCode()),
                                 doc.getPaymentMethodRanges().stream()
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
-                                        .collect(Collectors.toList()),
+                                        .toList(),
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset())
                         )
                 )
@@ -104,7 +103,7 @@ public class PaymentMethodService {
     }
 
     public Flux<PaymentMethod> retrievePaymentMethods(Integer amount) {
-        log.debug("[Payment Method Aggregate] Retrieve Aggregate");
+        log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         if (amount == null) {
             return paymentMethodRepository.findAll().map(this::docToAggregate);
@@ -125,7 +124,7 @@ public class PaymentMethodService {
                                                          String id,
                                                          PaymentMethodStatusEnum status
     ) {
-        log.debug("[Payment method Aggregate] Patch Aggregate");
+        log.info("[Payment method Aggregate] Patch Aggregate");
 
         return paymentMethodRepository
                 .findById(id)
@@ -148,7 +147,7 @@ public class PaymentMethodService {
                                                 p.getPaymentMethodAsset().value(),
                                                 p.getPaymentMethodRanges().stream().map(
                                                         r -> Pair.of(r.min(), r.max())
-                                                ).collect(Collectors.toList()),
+                                                ).toList(),
                                                 p.getPaymentMethodTypeCode().value()
                                         )
                                 )
@@ -157,7 +156,7 @@ public class PaymentMethodService {
     }
 
     public Mono<PaymentMethod> retrievePaymentMethodById(String id) {
-        log.debug("[Payment Method Aggregate] Retrieve Aggregate");
+        log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         return paymentMethodRepository
                 .findById(id)
@@ -170,6 +169,7 @@ public class PaymentMethodService {
                                                     String paymentMethodId,
                                                     Integer maxOccurrences
     ) {
+        log.info("[Payment Method] Retrieve bundles list");
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .flatMap(
