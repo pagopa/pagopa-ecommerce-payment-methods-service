@@ -4,7 +4,7 @@ name: Create Dashboard
 on:
   push:
     branches:
-      - main
+      - opex-dashboard
     paths:
       - 'api-spec/api.yaml'
       - '.github/workflows/create_dashboard.yaml'
