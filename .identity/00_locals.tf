@@ -1,7 +1,3 @@
 locals {
-  github = {
-    org        = "pagopa"
-    repository = "pagopa-ecommerce-payment-methods-service"
-  }
-
+  app_name = "github-${var.github.org}-${var.github.repository}-${var.env}"
 }

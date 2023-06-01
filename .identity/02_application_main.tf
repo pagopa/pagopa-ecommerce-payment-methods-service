@@ -1,5 +1,5 @@
 resource "azuread_application" "main" {
-  display_name = "github-${local.github.org}-${local.github.repository}-${var.env}-main"
+  display_name = "${local.app_name}-main"
 }
 
 resource "azuread_service_principal" "main" {
@@ -12,12 +12,12 @@ resource "azuread_application_federated_identity_credential" "main" {
   description           = "github-federated"
   audiences             = ["api://AzureADTokenExchange"]
   issuer                = "https://token.actions.githubusercontent.com"
-  subject               = "repo:${local.github.org}/${local.github.repository}:environment:${var.env}"
+  subject               = "repo:${var.github.org}/${var.github.repository}:ref:refs/heads/main"
 }
 
 output "azure_main" {
   value = {
-    app_name       = "github-${local.github.org}-${local.github.repository}-${var.env}"
+    app_name       = "${local.app_name}-main"
     client_id      = azuread_service_principal.main.application_id
     application_id = azuread_service_principal.main.application_id
     object_id      = azuread_service_principal.main.object_id
