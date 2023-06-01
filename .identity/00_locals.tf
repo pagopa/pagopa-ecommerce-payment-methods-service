@@ -1,7 +1,7 @@
 locals {
   github = {
     org        = "pagopa"
-    repository = "pagopa-node-forwarder"
+    repository = "pagopa-ecommerce-payment-methods-service"
   }
 
 }
