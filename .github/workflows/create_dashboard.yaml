@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        environment: [prod]
+        environment: [prod, uat]
     environment:
       name: ${{ matrix.environment }}
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -61,7 +61,7 @@ jobs:
 
       # this action create a folder named /azure-dashboard
       # from https://github.com/pagopa/opex-dashboard-azure-action/commits/main
-      - uses: pagopa/opex-dashboard-action@ece3bc2b133be74cabb50aec14cdb9b8051b886f
+      - uses: pagopa/opex-dashboard-action@main
         with:
           template: ${{ env.TEMPLATE_DIR }}
           config: .opex/env/${{ matrix.environment }}/config.yaml
