@@ -12,12 +12,12 @@ resource "azuread_application_federated_identity_credential" "main" {
   description           = "github-federated"
   audiences             = ["api://AzureADTokenExchange"]
   issuer                = "https://token.actions.githubusercontent.com"
-  subject               = "repo:${var.github.org}/${var.github.repository}:ref:refs/heads/main"
+  subject               = "repo:${local.github.org}/${local.github.repository}:environment:${var.env}"
 }
 
 output "azure_main" {
   value = {
-    app_name       = "${local.app_name}-main"
+    app_name       = "github-${local.github.org}-${local.github.repository}-${var.env}"
     client_id      = azuread_service_principal.main.application_id
     application_id = azuread_service_principal.main.application_id
     object_id      = azuread_service_principal.main.object_id
