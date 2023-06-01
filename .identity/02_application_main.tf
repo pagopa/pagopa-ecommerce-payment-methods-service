@@ -1,5 +1,5 @@
 resource "azuread_application" "main" {
-  display_name = "${local.app_name}-main"
+  display_name = "github-${local.github.org}-${local.github.repository}-${var.env}-main"
 }
 
 resource "azuread_service_principal" "main" {
