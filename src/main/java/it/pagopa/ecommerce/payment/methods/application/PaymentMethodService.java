@@ -27,6 +27,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -174,31 +175,38 @@ public class PaymentMethodService {
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .flatMap(
                         pm -> paymentOptionDto.map(
-                                po -> new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto()
-                                        .bin(po.getBin())
-                                        .paymentAmount(po.getPaymentAmount())
-                                        .idPspList(
-                                                Optional.ofNullable(po.getIdPspList()).orElseGet(ArrayList::new)
-                                                        .stream()
-                                                        .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
-                                                        .toList()
-                                        )
-                                        .paymentMethod(pm.getPaymentMethodTypeCode())
-                                        .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
-                                        .touchpoint(po.getTouchpoint())
-                                        .transferList(
-                                                po.getTransferList()
-                                                        .stream()
-                                                        .map(
-                                                                t -> new TransferListItemDto()
-                                                                        .creditorInstitution(t.getCreditorInstitution())
-                                                                        .digitalStamp(t.getDigitalStamp())
-                                                                        .transferCategory(t.getTransferCategory())
-                                                        )
-                                                        .toList()
-                                        )
+                                po -> Tuples.of(
+                                        new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto()
+                                                .bin(po.getBin())
+                                                .paymentAmount(po.getPaymentAmount())
+                                                .idPspList(
+                                                        Optional.ofNullable(po.getIdPspList()).orElseGet(ArrayList::new)
+                                                                .stream()
+                                                                .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
+                                                                .toList()
+                                                )
+                                                .paymentMethod(pm.getPaymentMethodTypeCode())
+                                                .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
+                                                .touchpoint(po.getTouchpoint())
+                                                .transferList(
+                                                        po.getTransferList()
+                                                                .stream()
+                                                                .map(
+                                                                        t -> new TransferListItemDto()
+                                                                                .creditorInstitution(
+                                                                                        t.getCreditorInstitution()
+                                                                                )
+                                                                                .digitalStamp(t.getDigitalStamp())
+                                                                                .transferCategory(
+                                                                                        t.getTransferCategory()
+                                                                                )
+                                                                )
+                                                                .toList()
+                                                ),
+                                        po.getAllCCP()
+                                )
 
-                        ).flatMap(reqBody -> afmClient.getFees(reqBody, maxOccurrences))
+                        ).flatMap(tuple -> afmClient.getFees(tuple.getT1(), maxOccurrences, tuple.getT2()))
                                 .map(bo -> {
                                     bo.setBundleOptions(
                                             removeDuplicatePsp(bo.getBundleOptions())
