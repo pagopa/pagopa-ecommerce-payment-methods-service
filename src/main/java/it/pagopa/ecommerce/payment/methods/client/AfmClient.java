@@ -41,8 +41,8 @@ public class AfmClient {
                 .post()
                 .uri(
                         uriBuilder -> uriBuilder
-                                .queryParam("maxOccurrences", maxOccurrences)
                                 .queryParam("allCcp", allCCP)
+                                .queryParam("maxOccurrences", maxOccurrences)
                                 .build()
                 )
                 .header("ocp-apim-subscription-key", afmKey)

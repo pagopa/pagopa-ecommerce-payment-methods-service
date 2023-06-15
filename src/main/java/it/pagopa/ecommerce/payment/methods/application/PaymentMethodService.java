@@ -203,7 +203,7 @@ public class PaymentMethodService {
                                                                 )
                                                                 .toList()
                                                 ),
-                                        po.getAllCCP()
+                                        po.getIsAllCCP()
                                 )
 
                         ).flatMap(tuple -> afmClient.getFees(tuple.getT1(), maxOccurrences, tuple.getT2()))

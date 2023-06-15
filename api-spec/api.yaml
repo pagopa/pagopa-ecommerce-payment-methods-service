@@ -318,7 +318,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TransferListItem"
-        allCCP:
+        isAllCCP:
           description: Flag for the inclusion of Poste bundles. false -> excluded, true -> included
           type: boolean
       required:
