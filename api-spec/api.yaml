@@ -326,7 +326,7 @@ components:
         - primaryCreditorInstitution
         - transferList
         - touchpoint
-        - allCCP
+        - isAllCCP
     CalculateFeeResponse:
       description: Calculate fee response
       type: object
