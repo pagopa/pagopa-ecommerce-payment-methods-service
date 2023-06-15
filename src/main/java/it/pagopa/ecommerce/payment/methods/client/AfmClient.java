@@ -32,7 +32,8 @@ public class AfmClient {
 
     public Mono<BundleOptionDto> getFees(
                                          PaymentOptionDto paymentOptionDto,
-                                         Integer maxOccurrences
+                                         Integer maxOccurrences,
+                                         boolean allCCP
     ) {
         return calculatorApi
                 .getApiClient()
@@ -40,6 +41,7 @@ public class AfmClient {
                 .post()
                 .uri(
                         uriBuilder -> uriBuilder
+                                .queryParam("allCcp", allCCP)
                                 .queryParam("maxOccurrences", maxOccurrences)
                                 .build()
                 )

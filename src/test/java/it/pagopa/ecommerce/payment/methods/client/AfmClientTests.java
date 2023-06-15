@@ -52,7 +52,7 @@ public class AfmClientTests {
     }
 
     @Test
-    void shouldRetrieveFeeFromGEC() {
+    void shouldRetrieveFeeFromGECAllCCPFalse() {
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
         Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
@@ -65,7 +65,26 @@ public class AfmClientTests {
         Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.just(gecResponse));
 
         StepVerifier
-                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10))
+                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, false))
+                .expectNext(gecResponse)
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldRetrieveFeeFromGECAllCCPTrue() {
+        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+        Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
+        Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
+        Mockito.when(webClient.post()).thenReturn(requestBodyUriSpec);
+        Mockito.when(requestBodyUriSpec.uri(any(Function.class))).thenReturn(requestBodySpec);
+        Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
+        Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
+        Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
+        Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.just(gecResponse));
+
+        StepVerifier
+                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, true))
                 .expectNext(gecResponse)
                 .verifyComplete();
     }
@@ -84,7 +103,7 @@ public class AfmClientTests {
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)));
 
         StepVerifier
-                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10))
+                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, false))
                 .expectError(ResponseStatusException.class);
     }
 
@@ -101,7 +120,7 @@ public class AfmClientTests {
         Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.error(new Exception()));
 
         StepVerifier
-                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10))
+                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, false))
                 .expectError(Exception.class);
     }
 
