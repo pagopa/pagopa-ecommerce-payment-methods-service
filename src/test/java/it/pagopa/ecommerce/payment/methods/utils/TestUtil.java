@@ -238,6 +238,6 @@ public class TestUtil {
                                                 .digitalStamp(true)
                                 )
                         )
-                );
+                ).isAllCCP(false);
     }
 }

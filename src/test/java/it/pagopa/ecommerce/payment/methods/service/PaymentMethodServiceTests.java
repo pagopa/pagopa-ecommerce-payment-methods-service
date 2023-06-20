@@ -198,7 +198,7 @@ class PaymentMethodServiceTests {
                                 )
                         )
                 );
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any()))
+        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
@@ -230,7 +230,7 @@ class PaymentMethodServiceTests {
                         )
                 );
 
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any()))
+        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
@@ -263,7 +263,7 @@ class PaymentMethodServiceTests {
                         )
                 );
 
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any()))
+        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
