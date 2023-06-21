@@ -16,6 +16,7 @@
 		<java.version>17</java.version>
 		<jacoco.version>0.8.8</jacoco.version>
 		<spotless.version>2.28.0</spotless.version>
+		<ecs-logging-version>1.5.0</ecs-logging-version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -59,6 +60,11 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>co.elastic.logging</groupId>
+			<artifactId>logback-ecs-encoder</artifactId>
+			<version>${ecs-logging-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
