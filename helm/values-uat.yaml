@@ -21,7 +21,7 @@ microservice-chart:
       MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
       MONGO_PORT: "10255"
       MONGO_SSL_ENABLED: "true"
-      AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
+      AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
       AFM_READ_TIMEOUT: "10000"
       AFM_CONNECTION_TIMEOUT: "10000"
       SPRING_MAX_IN_MEM_SIZE: "16777216"
@@ -33,7 +33,7 @@ microservice-chart:
       ECS_SERVICE_ENVIRONMENT: uat
     envSecret:
       MONGO_PASSWORD: mongo-ecommerce-password
-      AFM_KEY: ecommerce-load-test-subscription-key
+      AFM_KEY: afm-api-key
       ELASTIC_APM_SECRET_TOKEN: elastic-apm-secret-token
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
@@ -82,8 +82,8 @@ microservice-chart:
       cpu: "200m"
   autoscaling:
     enable: true
-    minReplica: 2
-    maxReplica: 10
+    minReplica: 1
+    maxReplica: 2
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
     triggers:
@@ -97,7 +97,7 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
+    AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
@@ -109,7 +109,7 @@ microservice-chart:
     ECS_SERVICE_ENVIRONMENT: uat
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
-    AFM_KEY: ecommerce-load-test-subscription-key
+    AFM_KEY: afm-api-key
     ELASTIC_APM_SECRET_TOKEN: elastic-apm-secret-token
   keyvault:
     name: "pagopa-u-ecommerce-kv"
