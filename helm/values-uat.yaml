@@ -21,7 +21,7 @@ microservice-chart:
       MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
       MONGO_PORT: "10255"
       MONGO_SSL_ENABLED: "true"
-      AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
+      AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
       AFM_READ_TIMEOUT: "10000"
       AFM_CONNECTION_TIMEOUT: "10000"
       SPRING_MAX_IN_MEM_SIZE: "16777216"
@@ -81,8 +81,8 @@ microservice-chart:
       memory: "512Mi"
       cpu: "200m"
   autoscaling:
-    minReplica: 1
-    maxReplica: 2
+    minReplica: 2
+    maxReplica: 10
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
     triggers:
@@ -96,7 +96,7 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
+    AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
