@@ -28,14 +28,16 @@ microservice-chart:
       ELASTIC_APM_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
       ELASTIC_APM_APPLICATION_PACKAGES: it.pagopa.ecommerce.payment.methods
       ELASTIC_APM_SERVER_URL: http://quickstart-apm-http.elastic-system.svc:8200
-      ELASTIC_APM_LOG_SENDING: "true"
+      ELASTIC_APM_LOG_SENDING: "false"
+      ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
+      ECS_SERVICE_ENVIRONMENT: uat
     envSecret:
       MONGO_PASSWORD: mongo-ecommerce-password
       AFM_KEY: afm-api-key
       ELASTIC_APM_SECRET_TOKEN: elastic-apm-secret-token
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.10.2"
+    tag: "0.10.5"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -79,6 +81,7 @@ microservice-chart:
       memory: "512Mi"
       cpu: "200m"
   autoscaling:
+    enable: true
     minReplica: 1
     maxReplica: 2
     pollingInterval: 30 # seconds
@@ -101,7 +104,9 @@ microservice-chart:
     ELASTIC_APM_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
     ELASTIC_APM_APPLICATION_PACKAGES: it.pagopa.ecommerce.payment.methods
     ELASTIC_APM_SERVER_URL: http://quickstart-apm-http.elastic-system.svc:8200
-    ELASTIC_APM_LOG_SENDING: "true"
+    ELASTIC_APM_LOG_SENDING: "false"
+    ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
+    ECS_SERVICE_ENVIRONMENT: uat
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     AFM_KEY: afm-api-key
