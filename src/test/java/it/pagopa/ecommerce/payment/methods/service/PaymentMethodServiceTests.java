@@ -183,19 +183,19 @@ class PaymentMethodServiceTests {
         String paymentMethodId = UUID.randomUUID().toString();
         CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
-
+        PaymentMethodDocument paymentMethodDocument = new PaymentMethodDocument(
+                UUID.randomUUID().toString(),
+                "Carte",
+                "Description",
+                PaymentMethodStatusEnum.ENABLED.getCode(),
+                "asset",
+                List.of(Pair.of(0L, 100L)),
+                "CP"
+        );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(
                         Mono.just(
-                                new PaymentMethodDocument(
-                                        UUID.randomUUID().toString(),
-                                        "Carte",
-                                        "",
-                                        PaymentMethodStatusEnum.ENABLED.getCode(),
-                                        "asset",
-                                        List.of(Pair.of(0L, 100L)),
-                                        "CP"
-                                )
+                                paymentMethodDocument
                         )
                 );
         Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
@@ -206,6 +206,11 @@ class PaymentMethodServiceTests {
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals(
+                paymentMethodDocument.getPaymentMethodDescription(),
+                serviceResponse.getPaymentMethodDescription()
+        );
     }
 
     @Test
