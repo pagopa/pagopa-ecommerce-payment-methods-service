@@ -245,6 +245,7 @@ public class PaymentMethodService {
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
                 .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
+                .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
                 .bundles(
                         bundle.getBundleOptions() != null ? bundle.getBundleOptions()

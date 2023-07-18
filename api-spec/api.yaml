@@ -334,6 +334,9 @@ components:
         paymentMethodName:
           description: Payment method name
           type: string
+        paymentMethodDescription:
+          description: Payment method description
+          type: string
         paymentMethodStatus:
           $ref: "#/components/schemas/PaymentMethodStatus"
         belowThreshold:
@@ -348,6 +351,7 @@ components:
         - bundles
         - paymentMethodName
         - paymentMethodStatus
+        - paymentMethodDescription
     Bundle:
       description: Bundle object
       type: object
