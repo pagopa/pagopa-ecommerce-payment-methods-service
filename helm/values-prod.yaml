@@ -25,17 +25,16 @@ microservice-chart:
       AFM_READ_TIMEOUT: "10000"
       AFM_CONNECTION_TIMEOUT: "10000"
       SPRING_MAX_IN_MEM_SIZE: "16777216"
-      ELASTIC_APM_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
-      ELASTIC_APM_APPLICATION_PACKAGES: it.pagopa.ecommerce.payment.methods
-      ELASTIC_APM_SERVER_URL: http://quickstart-apm-http.elastic-system.svc:8200
-      ELASTIC_APM_LOG_SENDING: "true"
-      ELASTIC_APM_TRACE_CONTINUATION_STRATEGY: restart_external
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service-blue,deployment.environment=prod"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
+      OTEL_LOGS_EXPORTER: none
+      OTEL_TRACES_SAMPLER: "always_on"
       ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
       ECS_SERVICE_ENVIRONMENT: prod
     envSecret:
       MONGO_PASSWORD: mongo-ecommerce-password
       AFM_KEY: afm-api-key
-      ELASTIC_APM_SECRET_TOKEN: elastic-apm-secret-token
+      OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
   image:
     repository: pagopapcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "0.12.0"
@@ -102,17 +101,16 @@ microservice-chart:
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
-    ELASTIC_APM_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
-    ELASTIC_APM_APPLICATION_PACKAGES: it.pagopa.ecommerce.payment.methods
-    ELASTIC_APM_SERVER_URL: http://quickstart-apm-http.elastic-system.svc:8200
-    ELASTIC_APM_LOG_SENDING: "true"
-    ELASTIC_APM_TRACE_CONTINUATION_STRATEGY: restart_external
+    OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service,deployment.environment=prod"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
+    OTEL_LOGS_EXPORTER: none
+    OTEL_TRACES_SAMPLER: "always_on"
     ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
     ECS_SERVICE_ENVIRONMENT: prod
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     AFM_KEY: afm-api-key
-    ELASTIC_APM_SECRET_TOKEN: elastic-apm-secret-token
+    OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
   keyvault:
     name: "pagopa-p-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
