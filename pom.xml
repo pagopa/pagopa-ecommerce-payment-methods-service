@@ -17,6 +17,7 @@
 		<jacoco.version>0.8.8</jacoco.version>
 		<spotless.version>2.28.0</spotless.version>
 		<ecs-logging-version>1.5.0</ecs-logging-version>
+		<pagopa-ecommerce-commons.version>0.19.5</pagopa-ecommerce-commons.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -56,6 +57,11 @@
 			<version>0.1.0</version>
 		</dependency>
 		<dependency>
+			<groupId>it.pagopa</groupId>
+			<artifactId>pagopa-ecommerce-commons</artifactId>
+			<version>${pagopa-ecommerce-commons.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
@@ -90,6 +96,13 @@
 			<groupId>org.jacoco</groupId>
 			<artifactId>jacoco-maven-plugin</artifactId>
 			<version>${jacoco.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>it.pagopa</groupId>
+			<artifactId>pagopa-ecommerce-commons</artifactId>
+			<version>${pagopa-ecommerce-commons.version}</version>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -174,6 +187,26 @@
 						<phase>package</phase>
 						<goals>
 							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<version>2.0.0-M3</version>
+				<configuration>
+					<skipCheckoutIfExists>false</skipCheckoutIfExists>
+					<connectionUrl>scm:git:https://github.com/pagopa/pagopa-ecommerce-commons.git</connectionUrl>
+					<scmVersionType>branch</scmVersionType>
+					<scmVersion>CHK-1782-npg-client</scmVersion>
+					<goals>install -DskipTests</goals>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>bootstrap</goal>
 						</goals>
 					</execution>
 				</executions>
