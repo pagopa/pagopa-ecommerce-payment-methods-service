@@ -21,6 +21,9 @@ import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
+import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.generated.ecommerce.npg.v1.dto.CreateHostedOrderRequestDto;
+import it.pagopa.generated.ecommerce.npg.v1.dto.PostMessageDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -31,7 +34,6 @@ import reactor.util.function.Tuples;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @ApplicationService
@@ -39,6 +41,8 @@ import java.util.stream.Stream;
 public class PaymentMethodService {
 
     private final AfmClient afmClient;
+
+    private final NpgClient npgClient;
 
     private PaymentMethodRepository paymentMethodRepository;
 
@@ -48,9 +52,11 @@ public class PaymentMethodService {
     public PaymentMethodService(
             AfmClient afmClient,
             PaymentMethodRepository paymentMethodRepository,
-            PaymentMethodFactory paymentMethodFactory
+            PaymentMethodFactory paymentMethodFactory,
+            NpgClient npgClient
     ) {
         this.afmClient = afmClient;
+        this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
         this.paymentMethodRepository = paymentMethodRepository;
     }
