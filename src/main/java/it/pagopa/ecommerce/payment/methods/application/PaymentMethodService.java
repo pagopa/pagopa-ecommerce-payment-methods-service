@@ -22,8 +22,6 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.generated.ecommerce.npg.v1.dto.CreateHostedOrderRequestDto;
-import it.pagopa.generated.ecommerce.npg.v1.dto.PostMessageDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
