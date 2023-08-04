@@ -27,7 +27,7 @@ microservice-chart:
       SPRING_MAX_IN_MEM_SIZE: "16777216"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service-blue,deployment.environment=prod"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
-      OTEL_LOGS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: otlp
       OTEL_TRACES_SAMPLER: "always_on"
       ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
       ECS_SERVICE_ENVIRONMENT: prod
@@ -103,7 +103,7 @@ microservice-chart:
     SPRING_MAX_IN_MEM_SIZE: "16777216"
     OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service,deployment.environment=prod"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
-    OTEL_LOGS_EXPORTER: none
+    OTEL_LOGS_EXPORTER: otlp
     OTEL_TRACES_SAMPLER: "always_on"
     ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
     ECS_SERVICE_ENVIRONMENT: prod
