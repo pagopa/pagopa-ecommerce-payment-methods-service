@@ -27,17 +27,17 @@ public class NpgWebClientsConfig implements WebFluxConfigurer {
                                            @Value("${npg.uri}") String npgClientUrl,
                                            @Value(
                                                "${npg.readTimeout}"
-                                           ) int afmWebClientReadTimeout,
+                                           ) int npgWebClientReadTimeout,
                                            @Value(
                                                "${npg.connectionTimeout}"
-                                           ) int afmWebClientConnectionTimeout
+                                           ) int npgWebClientConnectionTimeout
     ) {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, afmWebClientConnectionTimeout)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, npgWebClientConnectionTimeout)
                 .doOnConnected(
                         connection -> connection.addHandlerLast(
                                 new ReadTimeoutHandler(
-                                        afmWebClientReadTimeout,
+                                        npgWebClientReadTimeout,
                                         TimeUnit.MILLISECONDS
                                 )
                         )
