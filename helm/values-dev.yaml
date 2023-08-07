@@ -89,7 +89,7 @@ microservice-chart:
     MONGO_PASSWORD: mongo-ecommerce-password
     AFM_KEY: afm-api-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
-    NPG_KEY: npg-key
+    NPG_API_KEY: npg-key
   keyvault:
     name: "pagopa-d-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
