@@ -183,4 +183,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 ResponseEntity::ok
         );
     }
+
+    @Override
+    public Mono<ResponseEntity<DubidubiduResponseDto>> postDubidubidu(
+                                                                      String id,
+                                                                      ServerWebExchange exchange
+    ) {
+        return Mono.just(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build());
+    }
 }
