@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
+import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -38,6 +39,9 @@ class PaymentMethodServiceTests {
 
     @Mock
     private AfmClient afmClient;
+
+    @Mock
+    private NpgClient npgClient;
 
     @Mock
     private PaymentMethodRepository paymentMethodRepository;
@@ -201,7 +205,12 @@ class PaymentMethodServiceTests {
         Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
-        paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
+        paymentMethodService = new PaymentMethodService(
+                afmClient,
+                paymentMethodRepository,
+                paymentMethodFactory,
+                npgClient
+        );
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
@@ -238,7 +247,12 @@ class PaymentMethodServiceTests {
         Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
-        paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
+        paymentMethodService = new PaymentMethodService(
+                afmClient,
+                paymentMethodRepository,
+                paymentMethodFactory,
+                npgClient
+        );
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
@@ -271,7 +285,12 @@ class PaymentMethodServiceTests {
         Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
-        paymentMethodService = new PaymentMethodService(afmClient, paymentMethodRepository, paymentMethodFactory);
+        paymentMethodService = new PaymentMethodService(
+                afmClient,
+                paymentMethodRepository,
+                paymentMethodFactory,
+                npgClient
+        );
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();

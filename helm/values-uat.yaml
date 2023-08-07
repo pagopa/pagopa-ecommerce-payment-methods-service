@@ -31,10 +31,14 @@ microservice-chart:
       OTEL_TRACES_SAMPLER: "always_on"
       ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
       ECS_SERVICE_ENVIRONMENT: uat
+      NPG_URI: "https://localhost/npg"
+      NPG_READ_TIMEOUT: 10000
+      NPG_CONNECTION_TIMEOUT: 10000
     envSecret:
       MONGO_PASSWORD: mongo-ecommerce-password
       AFM_KEY: afm-api-key
       OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
+      NPG_KEY: npg-key
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "0.12.2"
@@ -107,10 +111,14 @@ microservice-chart:
     OTEL_TRACES_SAMPLER: "always_on"
     ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
     ECS_SERVICE_ENVIRONMENT: uat
+    NPG_URI: "https://localhost/npg"
+    NPG_READ_TIMEOUT: 10000
+    NPG_CONNECTION_TIMEOUT: 10000
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     AFM_KEY: afm-api-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
+    NPG_KEY: npg-key
   keyvault:
     name: "pagopa-u-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
