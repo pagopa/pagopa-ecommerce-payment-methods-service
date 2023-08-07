@@ -57,7 +57,7 @@ public class NpgWebClientsConfig implements WebFluxConfigurer {
     @Bean
     public NpgClient npgClient(
                                PaymentServicesApi paymentServicesApi,
-                               @Value("${npg.client.key}") String npgKey
+                               @Value("${npg.client.apiKey}") String npgKey
     ) {
         return new NpgClient(paymentServicesApi, npgKey);
     }
