@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.config.PreauthorizationUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
@@ -65,17 +66,21 @@ public class PaymentMethodService {
 
     private final PaymentMethodFactory paymentMethodFactory;
 
+    private final PreauthorizationUrlConfig preauthorizationUrlConfig;
+
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
             PaymentMethodRepository paymentMethodRepository,
             PaymentMethodFactory paymentMethodFactory,
-            NpgClient npgClient
+            NpgClient npgClient,
+            PreauthorizationUrlConfig preauthorizationUrlConfig
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
         this.paymentMethodRepository = paymentMethodRepository;
+        this.preauthorizationUrlConfig = preauthorizationUrlConfig;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -125,8 +130,7 @@ public class PaymentMethodService {
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                                         .toList(),
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName())
-                        )
+                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName()))
                 )
         );
     }
@@ -253,21 +257,20 @@ public class PaymentMethodService {
                 .map(PaymentMethodDocument::getPaymentMethodServiceName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
                 .flatMap(paymentMethod -> {
-                    URI checkoutBasePath = URI.create("https://dev.checkout.pagopa.it"); // TODO: Use env var for this
                     PreauthorizationPaymentMethods preauthorizationPaymentMethods = PreauthorizationPaymentMethods
                             .fromValue(paymentMethod.serviceName);
+                    URI returnUrlBasePath = preauthorizationUrlConfig.basePath();
 
-                    // TODO: Make URLs configurable with env vars
                     UUID correlationId = UUID.randomUUID();
-                    URI resultUrl = URI.create("/esito").resolve(checkoutBasePath);
-                    URI merchantUrl = URI.create("http://localhost:1234");
-                    URI cancelUrl = URI.create("/cancel").resolve(checkoutBasePath);
-                    String orderId = "orderId";
-                    String customerId = "customerId";
+                    URI resultUrl = URI.create(preauthorizationUrlConfig.outcomeSuffix()).resolve(returnUrlBasePath);
+                    URI merchantUrl = returnUrlBasePath;
+                    URI cancelUrl = URI.create(preauthorizationUrlConfig.cancelSuffix()).resolve(returnUrlBasePath);
+                    String orderId = UUID.randomUUID().toString();
+                    String customerId = UUID.randomUUID().toString();
 
                     return npgClient.buildForm(
                             correlationId,
-                            checkoutBasePath,
+                            returnUrlBasePath,
                             resultUrl,
                             merchantUrl,
                             cancelUrl,
@@ -370,7 +373,6 @@ public class PaymentMethodService {
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                         .collect(Collectors.toList()),
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName())
-        );
+                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName()));
     }
 }

@@ -3,6 +3,7 @@ package it.pagopa.ecommerce.payment.methods.service;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.config.PreauthorizationUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
@@ -14,8 +15,6 @@ import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,14 +24,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
 @SpringBootTest
@@ -48,11 +46,18 @@ class PaymentMethodServiceTests {
 
     private final PaymentMethodFactory paymentMethodFactory = mock(PaymentMethodFactory.class);
 
+    private final PreauthorizationUrlConfig preauthorizationUrlConfig = new PreauthorizationUrlConfig(
+            URI.create("http://localhost:1234"),
+            "/esito",
+            "/annulla"
+    );
+
     private PaymentMethodService paymentMethodService = new PaymentMethodService(
             afmClient,
             paymentMethodRepository,
             paymentMethodFactory,
-            npgClient
+            npgClient,
+            preauthorizationUrlConfig
     );
 
     @Test
@@ -213,13 +218,6 @@ class PaymentMethodServiceTests {
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
-        paymentMethodService = new PaymentMethodService(
-                afmClient,
-                paymentMethodRepository,
-                paymentMethodFactory,
-                npgClient
-        );
-
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
@@ -256,13 +254,6 @@ class PaymentMethodServiceTests {
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
-        paymentMethodService = new PaymentMethodService(
-                afmClient,
-                paymentMethodRepository,
-                paymentMethodFactory,
-                npgClient
-        );
-
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
@@ -294,13 +285,6 @@ class PaymentMethodServiceTests {
 
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
-
-        paymentMethodService = new PaymentMethodService(
-                afmClient,
-                paymentMethodRepository,
-                paymentMethodFactory,
-                npgClient
-        );
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
