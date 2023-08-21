@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
@@ -13,10 +14,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.BundleDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
@@ -30,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,13 +37,33 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PaymentMethodService {
 
+    public enum PreauthorizationPaymentMethods {
+        CARDS("CARDS");
+
+        public final String value;
+
+        PreauthorizationPaymentMethods(String value) {
+            this.value = value;
+        }
+
+        public static PreauthorizationPaymentMethods fromValue(String value) {
+            for (PreauthorizationPaymentMethods method : PreauthorizationPaymentMethods.values()) {
+                if (method.value.equals(value)) {
+                    return method;
+                }
+            }
+
+            throw new IllegalArgumentException("Invalid preauthorization payment method: '%s'".formatted(value));
+        }
+    }
+
     private final AfmClient afmClient;
 
     private final NpgClient npgClient;
 
-    private PaymentMethodRepository paymentMethodRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
 
-    private PaymentMethodFactory paymentMethodFactory;
+    private final PaymentMethodFactory paymentMethodFactory;
 
     @Autowired
     public PaymentMethodService(
@@ -64,7 +83,8 @@ public class PaymentMethodService {
                                                    String paymentMethodDescription,
                                                    List<Pair<Long, Long>> ranges,
                                                    String paymentMethodTypeCode,
-                                                   String paymentMethodAsset
+                                                   String paymentMethodAsset,
+                                                   String serviceName
     ) {
         log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
@@ -74,7 +94,8 @@ public class PaymentMethodService {
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode),
-                new PaymentMethodAsset(paymentMethodAsset)
+                new PaymentMethodAsset(paymentMethodAsset),
+                NpgClient.PaymentMethod.fromServiceName(serviceName)
         );
 
         log.info("[Payment Method Aggregate] Store new aggregate");
@@ -89,7 +110,9 @@ public class PaymentMethodService {
                                 p.getPaymentMethodAsset().value(),
                                 p.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                                         .toList(),
-                                p.getPaymentMethodTypeCode().value()
+                                p.getPaymentMethodTypeCode().value(),
+                                p.getNpgPaymentMethod().serviceName
+
                         )
                 ).map(
                         doc -> new PaymentMethod(
@@ -101,7 +124,8 @@ public class PaymentMethodService {
                                 doc.getPaymentMethodRanges().stream()
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                                         .toList(),
-                                new PaymentMethodAsset(doc.getPaymentMethodAsset())
+                                new PaymentMethodAsset(doc.getPaymentMethodAsset()),
+                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName())
                         )
                 )
         );
@@ -153,7 +177,8 @@ public class PaymentMethodService {
                                                 p.getPaymentMethodRanges().stream().map(
                                                         r -> Pair.of(r.min(), r.max())
                                                 ).toList(),
-                                                p.getPaymentMethodTypeCode().value()
+                                                p.getPaymentMethodTypeCode().value(),
+                                                p.getNpgPaymentMethod().serviceName
                                         )
                                 )
                 )
@@ -221,6 +246,58 @@ public class PaymentMethodService {
 
                 );
 
+    }
+
+    public Mono<PreauthorizationResponseDto> preauthorizePaymentMethod(String id) {
+        return paymentMethodRepository.findById(id)
+                .map(PaymentMethodDocument::getPaymentMethodServiceName)
+                .map(NpgClient.PaymentMethod::fromServiceName)
+                .flatMap(paymentMethod -> {
+                    URI checkoutBasePath = URI.create("https://dev.checkout.pagopa.it"); // TODO: Use env var for this
+                    PreauthorizationPaymentMethods preauthorizationPaymentMethods = PreauthorizationPaymentMethods
+                            .fromValue(paymentMethod.serviceName);
+
+                    // TODO: Make URLs configurable with env vars
+                    UUID correlationId = UUID.randomUUID();
+                    URI resultUrl = URI.create("/esito").resolve(checkoutBasePath);
+                    URI merchantUrl = URI.create("http://localhost:1234");
+                    URI cancelUrl = URI.create("/cancel").resolve(checkoutBasePath);
+                    String orderId = "orderId";
+                    String customerId = "customerId";
+
+                    return npgClient.buildForm(
+                            correlationId,
+                            checkoutBasePath,
+                            resultUrl,
+                            merchantUrl,
+                            cancelUrl,
+                            orderId,
+                            customerId,
+                            paymentMethod
+                    ).map(form -> Tuples.of(form, preauthorizationPaymentMethods));
+                }).map(data -> {
+                    FieldsDto fields = data.getT1();
+                    PreauthorizationPaymentMethods paymentMethod = data.getT2();
+
+                    return new PreauthorizationResponseDto()
+                            .sessionId(fields.getSessionId())
+                            .fields(
+                                    new CardFormFieldsDto()
+                                            .paymentMethod(paymentMethod.value)
+                                            .form(
+                                                    fields.getFields()
+                                                            .stream()
+                                                            .map(
+                                                                    field -> new FieldDto()
+                                                                            .id(field.getId())
+                                                                            .type(field.getType())
+                                                                            .propertyClass(field.getPropertyClass())
+                                                                            .src(URI.create(field.getSrc()))
+                                                            )
+                                                            .collect(Collectors.toList())
+                                            )
+                            );
+                });
     }
 
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
@@ -292,8 +369,8 @@ public class PaymentMethodService {
                 doc.getPaymentMethodRanges().stream()
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                         .collect(Collectors.toList()),
-                new PaymentMethodAsset(doc.getPaymentMethodAsset())
+                new PaymentMethodAsset(doc.getPaymentMethodAsset()),
+                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName())
         );
     }
-
 }

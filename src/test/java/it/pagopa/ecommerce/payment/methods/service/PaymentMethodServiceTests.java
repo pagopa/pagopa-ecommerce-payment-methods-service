@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -31,35 +32,40 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 class PaymentMethodServiceTests {
 
-    @Mock
-    private AfmClient afmClient;
+    private final AfmClient afmClient = mock(AfmClient.class);
 
-    @Mock
-    private NpgClient npgClient;
+    private final NpgClient npgClient = mock(NpgClient.class);
 
-    @Mock
-    private PaymentMethodRepository paymentMethodRepository;
+    private final PaymentMethodRepository paymentMethodRepository = mock(PaymentMethodRepository.class);
 
-    @Mock
-    private PaymentMethodFactory paymentMethodFactory;
+    private final PaymentMethodFactory paymentMethodFactory = mock(PaymentMethodFactory.class);
 
-    @InjectMocks
-    private PaymentMethodService paymentMethodService;
+    private PaymentMethodService paymentMethodService = new PaymentMethodService(
+            afmClient,
+            paymentMethodRepository,
+            paymentMethodFactory,
+            npgClient
+    );
 
     @Test
     void shouldCreatePaymentMethod() {
+        Hooks.onOperatorDebug();
+
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
                 paymentMethodFactory.newPaymentMethod(
+                        any(),
                         any(),
                         any(),
                         any(),
@@ -84,7 +90,8 @@ class PaymentMethodServiceTests {
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
-                paymentMethod.getPaymentMethodAsset().value()
+                paymentMethod.getPaymentMethodAsset().value(),
+                paymentMethod.getNpgPaymentMethod().serviceName
         ).block();
 
         assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
@@ -194,7 +201,8 @@ class PaymentMethodServiceTests {
                 PaymentMethodStatusEnum.ENABLED.getCode(),
                 "asset",
                 List.of(Pair.of(0L, 100L)),
-                "CP"
+                "CP",
+                NpgClient.PaymentMethod.CARDS.serviceName
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(
@@ -202,7 +210,7 @@ class PaymentMethodServiceTests {
                                 paymentMethodDocument
                         )
                 );
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         paymentMethodService = new PaymentMethodService(
@@ -239,12 +247,13 @@ class PaymentMethodServiceTests {
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        "CP"
+                                        "CP",
+                                        NpgClient.PaymentMethod.CARDS.serviceName
                                 )
                         )
                 );
 
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         paymentMethodService = new PaymentMethodService(
@@ -277,12 +286,13 @@ class PaymentMethodServiceTests {
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        paymentTypeCode
+                                        paymentTypeCode,
+                                        NpgClient.PaymentMethod.CARDS.serviceName
                                 )
                         )
                 );
 
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         paymentMethodService = new PaymentMethodService(
@@ -296,5 +306,4 @@ class PaymentMethodServiceTests {
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
     }
-
 }

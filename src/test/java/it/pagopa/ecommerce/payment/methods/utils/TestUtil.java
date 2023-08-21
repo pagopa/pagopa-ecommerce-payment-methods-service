@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.utils;
 
+import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
@@ -38,6 +39,10 @@ public class TestUtil {
     static final String PSP_TEST_DESC = "test";
     static final String PSP_TEST_CHANNEL = "channel0";
 
+    static final NpgClient.PaymentMethod TEST_NPG_PAYMENT_METHOD = NpgClient.PaymentMethod.CARDS;
+
+    static final ServiceNameDto TEST_SERVICE_NAME = ServiceNameDto.CARDS;
+
     public static PaymentMethod getPaymentMethod() {
         return new PaymentMethod(
                 new PaymentMethodID(TEST_ID),
@@ -46,7 +51,8 @@ public class TestUtil {
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 new PaymentMethodType(TEST_TYPE_CODE),
                 List.of(new PaymentMethodRange(0L, 100L)),
-                new PaymentMethodAsset(TEST_ASSET)
+                new PaymentMethodAsset(TEST_ASSET),
+                TEST_NPG_PAYMENT_METHOD
         );
     }
 
@@ -57,7 +63,8 @@ public class TestUtil {
                 .status(TEST_STATUS)
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
-                .asset(TEST_ASSET);
+                .asset(TEST_ASSET)
+                .serviceName(TEST_SERVICE_NAME);
     }
 
     public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod) {
@@ -71,7 +78,8 @@ public class TestUtil {
                                 .fromValue(paymentMethod.getPaymentMethodStatus().value().getCode())
                 )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
-                .ranges(List.of(new RangeDto().min(0L).max(100L)));
+                .ranges(List.of(new RangeDto().min(0L).max(100L)))
+                .serviceName(ServiceNameDto.fromValue(paymentMethod.getNpgPaymentMethod().serviceName));
     }
 
     public static PaymentMethodsResponseDto getPaymentMethodsResponse(PaymentMethod... paymentMethod) {
@@ -115,7 +123,8 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodAsset().value(),
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
-                paymentMethod.getPaymentMethodTypeCode().value()
+                paymentMethod.getPaymentMethodTypeCode().value(),
+                paymentMethod.getNpgPaymentMethod().serviceName
         );
     }
 

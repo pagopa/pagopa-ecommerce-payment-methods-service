@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
+import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
@@ -24,6 +25,8 @@ public class PaymentMethod {
     private final List<PaymentMethodRange> paymentMethodRanges;
     private final PaymentMethodType paymentMethodTypeCode;
     private final PaymentMethodAsset paymentMethodAsset;
+
+    private final NpgClient.PaymentMethod npgPaymentMethod;
     private PaymentMethodStatus paymentMethodStatus;
 
     public PaymentMethod(
@@ -33,7 +36,8 @@ public class PaymentMethod {
             PaymentMethodStatus paymentMethodStatus,
             PaymentMethodType paymentMethodTypeCode,
             List<PaymentMethodRange> paymentMethodRanges,
-            PaymentMethodAsset paymentMethodAsset
+            PaymentMethodAsset paymentMethodAsset,
+            NpgClient.PaymentMethod npgPaymentMethod
     ) {
         this.paymentMethodID = paymentMethodID;
         this.paymentMethodName = paymentMethodName;
@@ -42,6 +46,7 @@ public class PaymentMethod {
         this.paymentMethodTypeCode = paymentMethodTypeCode;
         this.paymentMethodRanges = paymentMethodRanges;
         this.paymentMethodAsset = paymentMethodAsset;
+        this.npgPaymentMethod = npgPaymentMethod;
     }
 
     @AggregateID
