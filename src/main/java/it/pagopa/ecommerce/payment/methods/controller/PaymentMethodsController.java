@@ -100,8 +100,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 .map(r -> Pair.of(r.getMin(), r.getMax()))
                                 .toList(),
                         request.getPaymentTypeCode(),
-                        request.getAsset(),
-                        request.getServiceName().name()
+                        request.getAsset()
                 )
                         .map(this::paymentMethodToResponse)
         );
@@ -151,7 +150,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         );
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
-        response.setServiceName(ServiceNameDto.fromValue(paymentMethod.getNpgPaymentMethod().serviceName));
         return response;
     }
 

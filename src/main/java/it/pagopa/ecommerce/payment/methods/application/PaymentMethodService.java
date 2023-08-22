@@ -88,8 +88,7 @@ public class PaymentMethodService {
                                                    String paymentMethodDescription,
                                                    List<Pair<Long, Long>> ranges,
                                                    String paymentMethodTypeCode,
-                                                   String paymentMethodAsset,
-                                                   String serviceName
+                                                   String paymentMethodAsset
     ) {
         log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
@@ -100,7 +99,7 @@ public class PaymentMethodService {
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode),
                 new PaymentMethodAsset(paymentMethodAsset),
-                NpgClient.PaymentMethod.fromServiceName(serviceName)
+                NpgClient.PaymentMethod.fromServiceName(paymentMethodName)
         );
 
         log.info("[Payment Method Aggregate] Store new aggregate");
@@ -115,9 +114,7 @@ public class PaymentMethodService {
                                 p.getPaymentMethodAsset().value(),
                                 p.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                                         .toList(),
-                                p.getPaymentMethodTypeCode().value(),
-                                p.getNpgPaymentMethod().serviceName
-
+                                p.getPaymentMethodTypeCode().value()
                         )
                 ).map(
                         doc -> new PaymentMethod(
@@ -130,7 +127,8 @@ public class PaymentMethodService {
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                                         .toList(),
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName()))
+                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName())
+                        )
                 )
         );
     }
@@ -181,8 +179,7 @@ public class PaymentMethodService {
                                                 p.getPaymentMethodRanges().stream().map(
                                                         r -> Pair.of(r.min(), r.max())
                                                 ).toList(),
-                                                p.getPaymentMethodTypeCode().value(),
-                                                p.getNpgPaymentMethod().serviceName
+                                                p.getPaymentMethodTypeCode().value()
                                         )
                                 )
                 )
@@ -254,7 +251,7 @@ public class PaymentMethodService {
 
     public Mono<PreauthorizationResponseDto> preauthorizePaymentMethod(String id) {
         return paymentMethodRepository.findById(id)
-                .map(PaymentMethodDocument::getPaymentMethodServiceName)
+                .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
                 .flatMap(paymentMethod -> {
                     PreauthorizationPaymentMethods preauthorizationPaymentMethods = PreauthorizationPaymentMethods
@@ -373,6 +370,7 @@ public class PaymentMethodService {
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                         .collect(Collectors.toList()),
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodServiceName()));
+                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName())
+        );
     }
 }

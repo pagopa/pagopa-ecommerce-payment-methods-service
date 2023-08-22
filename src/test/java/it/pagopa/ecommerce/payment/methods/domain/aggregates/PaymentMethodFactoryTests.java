@@ -76,8 +76,7 @@ class PaymentMethodFactoryTests {
                                 paymentMethod.getPaymentMethodRanges().stream()
                                         .map(r -> Pair.of(r.min(), r.max()))
                                         .collect(Collectors.toList()),
-                                paymentMethod.getPaymentMethodTypeCode().value(),
-                                paymentMethod.getNpgPaymentMethod().serviceName
+                                paymentMethod.getPaymentMethodTypeCode().value()
                         )
                 )
         );

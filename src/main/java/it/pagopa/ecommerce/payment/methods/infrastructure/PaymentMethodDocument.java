@@ -24,5 +24,4 @@ public class PaymentMethodDocument {
     private List<Pair<Long, Long>> paymentMethodRanges;
     @Indexed(unique = true)
     private String paymentMethodTypeCode;
-    private String paymentMethodServiceName;
 }

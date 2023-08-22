@@ -260,15 +260,12 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/Range"
-        serviceName:
-            $ref: "#/components/schemas/ServiceName"
       required:
         - name
         - description
         - status
         - paymentTypeCode
         - ranges
-        - serviceName
     Range:
       type: object
       description: Payment amount range in eurocents
@@ -318,8 +315,6 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/Range"
-        serviceName:
-          $ref: "#/components/schemas/ServiceName"
       required:
         - id
         - name
@@ -327,7 +322,6 @@ components:
         - status
         - paymentTypeCode
         - ranges
-        - serviceName
     PaymentMethodsResponse:
       type: object
       description: Payment methods response
@@ -520,24 +514,6 @@ components:
           type: string
           format: uri
           example: "https://<fe>/field.html?id=CARDHOLDER_NAME&sid=052211e8-54c8-4e0a-8402-e10bcb8ff264"
-    ServiceName:
-      description: NPG service name for the payment method.
-      type: string
-      enum:
-        - CARDS
-        - PAYPAL
-        - PAYPAL_PAGAIN3
-        - GIROPAY
-        - IDEAL
-        - MYBANK
-        - GOOGLEPAY
-        - APPLEPAY
-        - BANCOMATPAY
-        - BANCONTACT
-        - MULTIBANCO
-        - WECHAT
-        - ALIPAY
-        - PIS
   requestBodies:
     PaymentMethodRequest:
       required: true

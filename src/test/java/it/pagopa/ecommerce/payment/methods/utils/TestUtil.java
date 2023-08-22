@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 public class TestUtil {
 
-    static final String TEST_NAME = "Test";
+    static final String TEST_NAME = NpgClient.PaymentMethod.CARDS.serviceName;
     static final String TEST_DESC = "test";
     static final PaymentMethodStatusDto TEST_STATUS = PaymentMethodStatusDto.ENABLED;
     static final String TEST_TYPE_CODE = "test";
@@ -44,28 +44,13 @@ public class TestUtil {
 
     static final NpgClient.PaymentMethod TEST_NPG_PAYMENT_METHOD = NpgClient.PaymentMethod.CARDS;
 
-    static final ServiceNameDto TEST_SERVICE_NAME = ServiceNameDto.CARDS;
-
     public static PaymentMethod getPaymentMethod() {
         return new PaymentMethod(
                 new PaymentMethodID(TEST_ID),
-                new PaymentMethodName("Test"),
-                new PaymentMethodDescription("Test"),
+                new PaymentMethodName(TEST_NAME),
+                new PaymentMethodDescription(TEST_DESC),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 new PaymentMethodType(TEST_TYPE_CODE),
-                List.of(new PaymentMethodRange(0L, 100L)),
-                new PaymentMethodAsset(TEST_ASSET),
-                TEST_NPG_PAYMENT_METHOD
-        );
-    }
-
-    public static PaymentMethod getPaymentMethod(String typeCode) {
-        return new PaymentMethod(
-                new PaymentMethodID(TEST_ID),
-                new PaymentMethodName("Test"),
-                new PaymentMethodDescription("Test"),
-                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
-                new PaymentMethodType(typeCode),
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
                 TEST_NPG_PAYMENT_METHOD
@@ -79,8 +64,7 @@ public class TestUtil {
                 .status(TEST_STATUS)
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
-                .asset(TEST_ASSET)
-                .serviceName(TEST_SERVICE_NAME);
+                .asset(TEST_ASSET);
     }
 
     public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod) {
@@ -94,8 +78,7 @@ public class TestUtil {
                                 .fromValue(paymentMethod.getPaymentMethodStatus().value().getCode())
                 )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
-                .ranges(List.of(new RangeDto().min(0L).max(100L)))
-                .serviceName(ServiceNameDto.fromValue(paymentMethod.getNpgPaymentMethod().serviceName));
+                .ranges(List.of(new RangeDto().min(0L).max(100L)));
     }
 
     public static PaymentMethodsResponseDto getPaymentMethodsResponse(PaymentMethod... paymentMethod) {
@@ -139,8 +122,7 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodAsset().value(),
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
-                paymentMethod.getPaymentMethodTypeCode().value(),
-                paymentMethod.getNpgPaymentMethod().serviceName
+                paymentMethod.getPaymentMethodTypeCode().value()
         );
     }
 

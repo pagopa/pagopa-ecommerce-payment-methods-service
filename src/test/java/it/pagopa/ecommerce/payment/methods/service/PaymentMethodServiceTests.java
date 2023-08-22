@@ -96,8 +96,7 @@ class PaymentMethodServiceTests {
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
-                paymentMethod.getPaymentMethodAsset().value(),
-                paymentMethod.getNpgPaymentMethod().serviceName
+                paymentMethod.getPaymentMethodAsset().value()
         ).block();
 
         assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
@@ -202,13 +201,12 @@ class PaymentMethodServiceTests {
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         PaymentMethodDocument paymentMethodDocument = new PaymentMethodDocument(
                 UUID.randomUUID().toString(),
-                "Carte",
+                NpgClient.PaymentMethod.CARDS.serviceName,
                 "Description",
                 PaymentMethodStatusEnum.ENABLED.getCode(),
                 "asset",
                 List.of(Pair.of(0L, 100L)),
-                "CP",
-                NpgClient.PaymentMethod.CARDS.serviceName
+                "CP"
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(
@@ -241,13 +239,12 @@ class PaymentMethodServiceTests {
                         Mono.just(
                                 new PaymentMethodDocument(
                                         UUID.randomUUID().toString(),
-                                        "Carte",
+                                        NpgClient.PaymentMethod.CARDS.serviceName,
                                         "",
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        "CP",
-                                        NpgClient.PaymentMethod.CARDS.serviceName
+                                        "CP"
                                 )
                         )
                 );
@@ -273,13 +270,12 @@ class PaymentMethodServiceTests {
                         Mono.just(
                                 new PaymentMethodDocument(
                                         UUID.randomUUID().toString(),
-                                        "Carte",
+                                        NpgClient.PaymentMethod.CARDS.serviceName,
                                         "",
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        paymentTypeCode,
-                                        NpgClient.PaymentMethod.CARDS.serviceName
+                                        paymentTypeCode
                                 )
                         )
                 );
@@ -294,7 +290,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnPreauthorizationFieldsForValidPaymentMethod() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod("CP");
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         FieldsDto npgResponse = TestUtil.npgResponse();
