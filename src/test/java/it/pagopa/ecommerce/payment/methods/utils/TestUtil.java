@@ -1,6 +1,9 @@
 package it.pagopa.ecommerce.payment.methods.utils;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldDto;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.StateDto;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
@@ -50,6 +53,19 @@ public class TestUtil {
                 new PaymentMethodDescription("Test"),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 new PaymentMethodType(TEST_TYPE_CODE),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset(TEST_ASSET),
+                TEST_NPG_PAYMENT_METHOD
+        );
+    }
+
+    public static PaymentMethod getPaymentMethod(String typeCode) {
+        return new PaymentMethod(
+                new PaymentMethodID(TEST_ID),
+                new PaymentMethodName("Test"),
+                new PaymentMethodDescription("Test"),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType(typeCode),
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
                 TEST_NPG_PAYMENT_METHOD
@@ -248,5 +264,19 @@ public class TestUtil {
                                 )
                         )
                 ).isAllCCP(false);
+    }
+
+    public static FieldsDto npgResponse() {
+        return new FieldsDto()
+                .sessionId("sessionId")
+                .url("url")
+                .state(StateDto.CARD_DATA_COLLECTION)
+                .securityToken("securityToken")
+                .fields(
+                        List.of(
+                                new FieldDto().id("fieldId1").type("field1Type").src("fieldId1Src")
+                                        .propertyClass("fieldId1PropertyClass")
+                        )
+                );
     }
 }

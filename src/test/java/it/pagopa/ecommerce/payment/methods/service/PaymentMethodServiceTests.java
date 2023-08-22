@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.PreauthorizationUrlConfig;
@@ -8,8 +9,7 @@ import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
@@ -23,6 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.net.URI;
 import java.util.List;
@@ -289,5 +290,40 @@ class PaymentMethodServiceTests {
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
+    }
+
+    @Test
+    void shouldReturnPreauthorizationFieldsForValidPaymentMethod() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod("CP");
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+        FieldsDto npgResponse = TestUtil.npgResponse();
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(
+                        Mono.just(npgResponse)
+                );
+
+        PreauthorizationResponseDto expected = new PreauthorizationResponseDto()
+                .sessionId(npgResponse.getSessionId())
+                .fields(
+                        new CardFormFieldsDto()
+                                .paymentMethod(PaymentMethodService.PreauthorizationPaymentMethods.CARDS.value)
+                                .form(
+                                        npgResponse.getFields().stream().map(
+                                                field -> new FieldDto()
+                                                        .id(field.getId())
+                                                        .type(field.getType())
+                                                        .propertyClass(field.getPropertyClass())
+                                                        .src(URI.create(field.getSrc()))
+                                        )
+                                                .collect(Collectors.toList())
+                                )
+                );
+
+        StepVerifier.create(paymentMethodService.preauthorizePaymentMethod(paymentMethodId))
+                .expectNext(expected)
+                .verifyComplete();
     }
 }
