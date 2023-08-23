@@ -13,6 +13,8 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRang
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
@@ -68,19 +70,23 @@ public class PaymentMethodService {
 
     private final PreauthorizationUrlConfig preauthorizationUrlConfig;
 
+    private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
+
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
             PaymentMethodRepository paymentMethodRepository,
             PaymentMethodFactory paymentMethodFactory,
             NpgClient npgClient,
-            PreauthorizationUrlConfig preauthorizationUrlConfig
+            PreauthorizationUrlConfig preauthorizationUrlConfig,
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
         this.paymentMethodRepository = paymentMethodRepository;
         this.preauthorizationUrlConfig = preauthorizationUrlConfig;
+        this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -275,6 +281,12 @@ public class PaymentMethodService {
                             customerId,
                             paymentMethod
                     ).map(form -> Tuples.of(form, preauthorizationPaymentMethods));
+                }).map(data -> {
+                    FieldsDto fields = data.getT1();
+
+                    npgSessionsTemplateWrapper
+                            .save(new NpgSessionDocument(fields.getSessionId(), fields.getSecurityToken()));
+                    return data;
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
                     PreauthorizationPaymentMethods paymentMethod = data.getT2();

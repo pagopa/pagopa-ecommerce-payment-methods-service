@@ -7,6 +7,7 @@ import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.PreauthorizationUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
@@ -53,12 +54,15 @@ class PaymentMethodServiceTests {
             "/annulla"
     );
 
-    private PaymentMethodService paymentMethodService = new PaymentMethodService(
+    private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper = mock(NpgSessionsTemplateWrapper.class);
+
+    private final PaymentMethodService paymentMethodService = new PaymentMethodService(
             afmClient,
             paymentMethodRepository,
             paymentMethodFactory,
             npgClient,
-            preauthorizationUrlConfig
+            preauthorizationUrlConfig,
+            npgSessionsTemplateWrapper
     );
 
     @Test
@@ -300,6 +304,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(
                         Mono.just(npgResponse)
                 );
+        Mockito.doNothing().when(npgSessionsTemplateWrapper).save(any());
 
         PreauthorizationResponseDto expected = new PreauthorizationResponseDto()
                 .sessionId(npgResponse.getSessionId())
