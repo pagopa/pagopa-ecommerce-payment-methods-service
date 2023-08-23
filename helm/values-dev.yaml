@@ -85,6 +85,9 @@ microservice-chart:
     NPG_URI: "https://localhost/npg"
     NPG_READ_TIMEOUT: 10000
     NPG_CONNECTION_TIMEOUT: 10000
+    PREAUTHORIZATION_URL_BASEPATH: "https://dev.checkout.pagopa.it"
+    PREAUTHORIZATION_URL_OUTCOME_SUFFIX: "/esito"
+    PREAUTHORIZATION_URL_CANCEL_SUFFIX: "/cancel"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     AFM_KEY: afm-api-key

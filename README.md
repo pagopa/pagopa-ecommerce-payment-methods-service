@@ -1,4 +1,4 @@
-## pagopa-ecommerce-psp-matcher-service
+## pagopa-ecommerce-payment-methods-service
 ## Code formatting
 Code formatting checks are automatically performed during build phase.
 If the code is not well formatted an error is raised blocking the maven build.
