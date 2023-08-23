@@ -29,6 +29,15 @@ public class PaymentMethod {
     private final NpgClient.PaymentMethod npgPaymentMethod;
     private PaymentMethodStatus paymentMethodStatus;
 
+    /*
+     * @formatter:off
+     *
+     * Warning java:S107 - Methods should not have too many parameters
+     * Suppressed because PaymentMethod is a simple data container with no logic.
+     *
+     * @formatter:on
+     */
+    @SuppressWarnings("java:S107")
     public PaymentMethod(
             PaymentMethodID paymentMethodID,
             PaymentMethodName paymentMethodName,

@@ -23,6 +23,15 @@ public class PaymentMethodFactory {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
+    /*
+     * @formatter:off
+     *
+     * Warning java:S107 - Methods should not have too many parameters
+     * Suppressed because this method wraps `PaymentMethod` constructor.
+     *
+     * @formatter:on
+     */
+    @SuppressWarnings("java:S107")
     @AggregateFactory(PaymentMethod.class)
     public Mono<PaymentMethod> newPaymentMethod(
                                                 PaymentMethodID paymentMethodID,
