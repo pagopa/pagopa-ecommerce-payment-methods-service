@@ -4,8 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.net.URI;
 
-@ConfigurationProperties(prefix = "preauthorization-url")
-public record PreauthorizationUrlConfig(
+@ConfigurationProperties(prefix = "session-url")
+public record SessionUrlConfig(
         URI basePath,
         String outcomeSuffix,
         String cancelSuffix

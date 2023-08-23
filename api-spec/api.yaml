@@ -146,11 +146,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
 
-  /payment-methods/{id}/preauthorizations:
+  /payment-methods/{id}/sessions:
     post:
       tags:
         - payment-methods
-      operationId: createPreauthorization
+      operationId: createSession
       summary: Create frontend field data paired with a payment gateway session
       description: |-
         This endpoint returns an object containing data on how a frontend can build a form
@@ -170,7 +170,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PreauthorizationResponse'
+                $ref: '#/components/schemas/CreateSessionResponse'
         404:
           description: Payment method not found
           content:
@@ -473,7 +473,7 @@ components:
         - ENABLED
         - DISABLED
         - INCOMING
-    PreauthorizationResponse:
+    CreateSessionResponse:
       type: object
       description: Form data needed to create a payment method input form
       properties:

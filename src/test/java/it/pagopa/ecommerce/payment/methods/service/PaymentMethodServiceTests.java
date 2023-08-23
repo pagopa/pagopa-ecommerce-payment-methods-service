@@ -4,7 +4,7 @@ import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
-import it.pagopa.ecommerce.payment.methods.config.PreauthorizationUrlConfig;
+import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
@@ -48,7 +48,7 @@ class PaymentMethodServiceTests {
 
     private final PaymentMethodFactory paymentMethodFactory = mock(PaymentMethodFactory.class);
 
-    private final PreauthorizationUrlConfig preauthorizationUrlConfig = new PreauthorizationUrlConfig(
+    private final SessionUrlConfig sessionUrlConfig = new SessionUrlConfig(
             URI.create("http://localhost:1234"),
             "/esito",
             "/annulla"
@@ -61,7 +61,7 @@ class PaymentMethodServiceTests {
             paymentMethodRepository,
             paymentMethodFactory,
             npgClient,
-            preauthorizationUrlConfig,
+            sessionUrlConfig,
             npgSessionsTemplateWrapper
     );
 
@@ -293,7 +293,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldReturnPreauthorizationFieldsForValidPaymentMethod() {
+    void shouldCreateSessionForValidPaymentMethod() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
@@ -306,11 +306,11 @@ class PaymentMethodServiceTests {
                 );
         Mockito.doNothing().when(npgSessionsTemplateWrapper).save(any());
 
-        PreauthorizationResponseDto expected = new PreauthorizationResponseDto()
+        CreateSessionResponseDto expected = new CreateSessionResponseDto()
                 .sessionId(npgResponse.getSessionId())
                 .fields(
                         new CardFormFieldsDto()
-                                .paymentMethod(PaymentMethodService.PreauthorizationPaymentMethods.CARDS.value)
+                                .paymentMethod(PaymentMethodService.SessionPaymentMethod.CARDS.value)
                                 .form(
                                         npgResponse.getFields().stream().map(
                                                 field -> new FieldDto()
@@ -323,7 +323,7 @@ class PaymentMethodServiceTests {
                                 )
                 );
 
-        StepVerifier.create(paymentMethodService.preauthorizePaymentMethod(paymentMethodId))
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
                 .expectNext(expected)
                 .verifyComplete();
     }

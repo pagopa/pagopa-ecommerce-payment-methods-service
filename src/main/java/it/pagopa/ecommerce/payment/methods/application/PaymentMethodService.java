@@ -2,7 +2,7 @@ package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
-import it.pagopa.ecommerce.payment.methods.config.PreauthorizationUrlConfig;
+import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
@@ -40,23 +40,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PaymentMethodService {
 
-    public enum PreauthorizationPaymentMethods {
+    public enum SessionPaymentMethod {
         CARDS("CARDS");
 
         public final String value;
 
-        PreauthorizationPaymentMethods(String value) {
+        SessionPaymentMethod(String value) {
             this.value = value;
         }
 
-        public static PreauthorizationPaymentMethods fromValue(String value) {
-            for (PreauthorizationPaymentMethods method : PreauthorizationPaymentMethods.values()) {
+        public static SessionPaymentMethod fromValue(String value) {
+            for (SessionPaymentMethod method : SessionPaymentMethod.values()) {
                 if (method.value.equals(value)) {
                     return method;
                 }
             }
 
-            throw new IllegalArgumentException("Invalid preauthorization payment method: '%s'".formatted(value));
+            throw new IllegalArgumentException("Invalid session payment method: '%s'".formatted(value));
         }
     }
 
@@ -68,7 +68,7 @@ public class PaymentMethodService {
 
     private final PaymentMethodFactory paymentMethodFactory;
 
-    private final PreauthorizationUrlConfig preauthorizationUrlConfig;
+    private final SessionUrlConfig sessionUrlConfig;
 
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
 
@@ -78,14 +78,14 @@ public class PaymentMethodService {
             PaymentMethodRepository paymentMethodRepository,
             PaymentMethodFactory paymentMethodFactory,
             NpgClient npgClient,
-            PreauthorizationUrlConfig preauthorizationUrlConfig,
+            SessionUrlConfig sessionUrlConfig,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
         this.paymentMethodRepository = paymentMethodRepository;
-        this.preauthorizationUrlConfig = preauthorizationUrlConfig;
+        this.sessionUrlConfig = sessionUrlConfig;
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
     }
 
@@ -255,19 +255,19 @@ public class PaymentMethodService {
 
     }
 
-    public Mono<PreauthorizationResponseDto> preauthorizePaymentMethod(String id) {
+    public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(String id) {
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
                 .flatMap(paymentMethod -> {
-                    PreauthorizationPaymentMethods preauthorizationPaymentMethods = PreauthorizationPaymentMethods
+                    SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
-                    URI returnUrlBasePath = preauthorizationUrlConfig.basePath();
+                    URI returnUrlBasePath = sessionUrlConfig.basePath();
 
                     UUID correlationId = UUID.randomUUID();
-                    URI resultUrl = URI.create(preauthorizationUrlConfig.outcomeSuffix()).resolve(returnUrlBasePath);
+                    URI resultUrl = URI.create(sessionUrlConfig.outcomeSuffix()).resolve(returnUrlBasePath);
                     URI merchantUrl = returnUrlBasePath;
-                    URI cancelUrl = URI.create(preauthorizationUrlConfig.cancelSuffix()).resolve(returnUrlBasePath);
+                    URI cancelUrl = URI.create(sessionUrlConfig.cancelSuffix()).resolve(returnUrlBasePath);
                     String orderId = UUID.randomUUID().toString();
                     String customerId = UUID.randomUUID().toString();
 
@@ -280,7 +280,7 @@ public class PaymentMethodService {
                             orderId,
                             customerId,
                             paymentMethod
-                    ).map(form -> Tuples.of(form, preauthorizationPaymentMethods));
+                    ).map(form -> Tuples.of(form, sessionPaymentMethod));
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
 
@@ -289,9 +289,9 @@ public class PaymentMethodService {
                     return data;
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
-                    PreauthorizationPaymentMethods paymentMethod = data.getT2();
+                    SessionPaymentMethod paymentMethod = data.getT2();
 
-                    return new PreauthorizationResponseDto()
+                    return new CreateSessionResponseDto()
                             .sessionId(fields.getSessionId())
                             .fields(
                                     new CardFormFieldsDto()

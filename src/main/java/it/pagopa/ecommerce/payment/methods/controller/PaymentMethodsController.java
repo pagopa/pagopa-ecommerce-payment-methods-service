@@ -167,10 +167,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PreauthorizationResponseDto>> createPreauthorization(
-                                                                                    String id,
-                                                                                    ServerWebExchange exchange
+    public Mono<ResponseEntity<CreateSessionResponseDto>> createSession(
+                                                                        String id,
+                                                                        ServerWebExchange exchange
     ) {
-        return paymentMethodService.preauthorizePaymentMethod(id).map(ResponseEntity::ok);
+        return paymentMethodService.createSessionForPaymentMethod(id).map(ResponseEntity::ok);
     }
 }
