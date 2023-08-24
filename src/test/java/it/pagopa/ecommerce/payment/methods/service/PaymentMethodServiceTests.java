@@ -308,7 +308,7 @@ class PaymentMethodServiceTests {
 
         CreateSessionResponseDto expected = new CreateSessionResponseDto()
                 .sessionId(npgResponse.getSessionId())
-                .fields(
+                .paymentMethodData(
                         new CardFormFieldsDto()
                                 .paymentMethod(PaymentMethodService.SessionPaymentMethod.CARDS.value)
                                 .form(

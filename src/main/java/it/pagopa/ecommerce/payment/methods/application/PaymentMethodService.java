@@ -293,7 +293,7 @@ public class PaymentMethodService {
 
                     return new CreateSessionResponseDto()
                             .sessionId(fields.getSessionId())
-                            .fields(
+                            .paymentMethodData(
                                     new CardFormFieldsDto()
                                             .paymentMethod(paymentMethod.value)
                                             .form(
