@@ -312,6 +312,13 @@ public class PaymentMethodService {
                 });
     }
 
+    public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
+                                                                        String id,
+                                                                        String sessionId
+    ) {
+        return Mono.just(new SessionPaymentMethodResponseDto());
+    }
+
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
                                                                                           List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
     ) {

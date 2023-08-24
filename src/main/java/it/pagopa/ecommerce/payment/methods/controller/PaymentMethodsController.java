@@ -173,4 +173,13 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     ) {
         return paymentMethodService.createSessionForPaymentMethod(id).map(ResponseEntity::ok);
     }
+
+    @Override
+    public Mono<ResponseEntity<SessionPaymentMethodResponseDto>> getSessionPaymentMethod(
+                                                                                         String id,
+                                                                                         String sessionId,
+                                                                                         ServerWebExchange exchange
+    ) {
+        return paymentMethodService.getCardDataInformation(id, sessionId).map(ResponseEntity::ok);
+    }
 }
