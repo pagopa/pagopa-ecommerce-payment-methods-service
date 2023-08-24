@@ -234,7 +234,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /payment-methods/{id}/sessions/{id_session}:
+  /payment-methods/{id}/sessions/{sessionId}:
     get:
       tags:
         - payment-methods
