@@ -1,0 +1,27 @@
+package it.pagopa.ecommerce.payment.methods.infrastructure;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.lang.NonNull;
+
+@RedisHash(value = "keys", timeToLive = 10 * 60)
+public record NpgSessionDocument(
+        @NonNull @Id String sessionId,
+        @NonNull String securityToken
+) {
+    /*
+     * @formatter:off
+     *
+     * Warning java:S6207 - Redundant constructors/methods should be avoided in records
+     * Suppressed because this constructor is just to add the `@PersistenceConstructor` annotation
+     * and is currently the canonical way to add annotations to record constructors
+     *
+     * @formatter:on
+     */
+    @SuppressWarnings("java:S6207")
+    @PersistenceConstructor
+    public NpgSessionDocument {
+        // Do nothing
+    }
+}

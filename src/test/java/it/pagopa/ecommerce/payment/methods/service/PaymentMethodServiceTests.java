@@ -1,65 +1,81 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 class PaymentMethodServiceTests {
 
-    @Mock
-    private AfmClient afmClient;
+    private final AfmClient afmClient = mock(AfmClient.class);
 
-    @Mock
-    private NpgClient npgClient;
+    private final NpgClient npgClient = mock(NpgClient.class);
 
-    @Mock
-    private PaymentMethodRepository paymentMethodRepository;
+    private final PaymentMethodRepository paymentMethodRepository = mock(PaymentMethodRepository.class);
 
-    @Mock
-    private PaymentMethodFactory paymentMethodFactory;
+    private final PaymentMethodFactory paymentMethodFactory = mock(PaymentMethodFactory.class);
 
-    @InjectMocks
-    private PaymentMethodService paymentMethodService;
+    private final SessionUrlConfig sessionUrlConfig = new SessionUrlConfig(
+            URI.create("http://localhost:1234"),
+            "/esito",
+            "/annulla"
+    );
+
+    private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper = mock(NpgSessionsTemplateWrapper.class);
+
+    private final PaymentMethodService paymentMethodService = new PaymentMethodService(
+            afmClient,
+            paymentMethodRepository,
+            paymentMethodFactory,
+            npgClient,
+            sessionUrlConfig,
+            npgSessionsTemplateWrapper
+    );
 
     @Test
     void shouldCreatePaymentMethod() {
+        Hooks.onOperatorDebug();
+
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
                 paymentMethodFactory.newPaymentMethod(
+                        any(),
                         any(),
                         any(),
                         any(),
@@ -189,7 +205,7 @@ class PaymentMethodServiceTests {
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         PaymentMethodDocument paymentMethodDocument = new PaymentMethodDocument(
                 UUID.randomUUID().toString(),
-                "Carte",
+                NpgClient.PaymentMethod.CARDS.serviceName,
                 "Description",
                 PaymentMethodStatusEnum.ENABLED.getCode(),
                 "asset",
@@ -202,15 +218,8 @@ class PaymentMethodServiceTests {
                                 paymentMethodDocument
                         )
                 );
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
-
-        paymentMethodService = new PaymentMethodService(
-                afmClient,
-                paymentMethodRepository,
-                paymentMethodFactory,
-                npgClient
-        );
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
@@ -234,7 +243,7 @@ class PaymentMethodServiceTests {
                         Mono.just(
                                 new PaymentMethodDocument(
                                         UUID.randomUUID().toString(),
-                                        "Carte",
+                                        NpgClient.PaymentMethod.CARDS.serviceName,
                                         "",
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
@@ -244,15 +253,8 @@ class PaymentMethodServiceTests {
                         )
                 );
 
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
-
-        paymentMethodService = new PaymentMethodService(
-                afmClient,
-                paymentMethodRepository,
-                paymentMethodFactory,
-                npgClient
-        );
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
@@ -272,7 +274,7 @@ class PaymentMethodServiceTests {
                         Mono.just(
                                 new PaymentMethodDocument(
                                         UUID.randomUUID().toString(),
-                                        "Carte",
+                                        NpgClient.PaymentMethod.CARDS.serviceName,
                                         "",
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
@@ -282,19 +284,47 @@ class PaymentMethodServiceTests {
                         )
                 );
 
-        Mockito.when(afmClient.getFees(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
-
-        paymentMethodService = new PaymentMethodService(
-                afmClient,
-                paymentMethodRepository,
-                paymentMethodFactory,
-                npgClient
-        );
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
         assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
     }
 
+    @Test
+    void shouldCreateSessionForValidPaymentMethod() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+        FieldsDto npgResponse = TestUtil.npgResponse();
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(
+                        Mono.just(npgResponse)
+                );
+        Mockito.doNothing().when(npgSessionsTemplateWrapper).save(any());
+
+        CreateSessionResponseDto expected = new CreateSessionResponseDto()
+                .sessionId(npgResponse.getSessionId())
+                .paymentMethodData(
+                        new CardFormFieldsDto()
+                                .paymentMethod(PaymentMethodService.SessionPaymentMethod.CARDS.value)
+                                .form(
+                                        npgResponse.getFields().stream().map(
+                                                field -> new FieldDto()
+                                                        .id(field.getId())
+                                                        .type(field.getType())
+                                                        .propertyClass(field.getPropertyClass())
+                                                        .src(URI.create(field.getSrc()))
+                                        )
+                                                .collect(Collectors.toList())
+                                )
+                );
+
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+                .expectNext(expected)
+                .verifyComplete();
+    }
 }

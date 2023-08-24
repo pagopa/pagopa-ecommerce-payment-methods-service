@@ -49,7 +49,8 @@ class PaymentMethodFactoryTests {
                 paymentMethod.getPaymentMethodStatus(),
                 paymentMethod.getPaymentMethodRanges(),
                 paymentMethod.getPaymentMethodTypeCode(),
-                paymentMethod.getPaymentMethodAsset()
+                paymentMethod.getPaymentMethodAsset(),
+                paymentMethod.getNpgPaymentMethod()
         ).block();
 
         assertNotNull(paymentMethodProduct);
@@ -89,7 +90,8 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getPaymentMethodStatus(),
                         paymentMethod.getPaymentMethodRanges(),
                         paymentMethod.getPaymentMethodTypeCode(),
-                        paymentMethod.getPaymentMethodAsset()
+                        paymentMethod.getPaymentMethodAsset(),
+                        paymentMethod.getNpgPaymentMethod()
                 ).block()
         );
     }

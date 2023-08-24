@@ -1,5 +1,9 @@
 package it.pagopa.ecommerce.payment.methods.utils;
 
+import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldDto;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.StateDto;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
@@ -22,7 +26,7 @@ import java.util.stream.Collectors;
 
 public class TestUtil {
 
-    static final String TEST_NAME = "Test";
+    static final String TEST_NAME = NpgClient.PaymentMethod.CARDS.serviceName;
     static final String TEST_DESC = "test";
     static final PaymentMethodStatusDto TEST_STATUS = PaymentMethodStatusDto.ENABLED;
     static final String TEST_TYPE_CODE = "test";
@@ -38,15 +42,18 @@ public class TestUtil {
     static final String PSP_TEST_DESC = "test";
     static final String PSP_TEST_CHANNEL = "channel0";
 
+    static final NpgClient.PaymentMethod TEST_NPG_PAYMENT_METHOD = NpgClient.PaymentMethod.CARDS;
+
     public static PaymentMethod getPaymentMethod() {
         return new PaymentMethod(
                 new PaymentMethodID(TEST_ID),
-                new PaymentMethodName("Test"),
-                new PaymentMethodDescription("Test"),
+                new PaymentMethodName(TEST_NAME),
+                new PaymentMethodDescription(TEST_DESC),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 new PaymentMethodType(TEST_TYPE_CODE),
                 List.of(new PaymentMethodRange(0L, 100L)),
-                new PaymentMethodAsset(TEST_ASSET)
+                new PaymentMethodAsset(TEST_ASSET),
+                TEST_NPG_PAYMENT_METHOD
         );
     }
 
@@ -239,5 +246,19 @@ public class TestUtil {
                                 )
                         )
                 ).isAllCCP(false);
+    }
+
+    public static FieldsDto npgResponse() {
+        return new FieldsDto()
+                .sessionId("sessionId")
+                .url("url")
+                .state(StateDto.CARD_DATA_COLLECTION)
+                .securityToken("securityToken")
+                .fields(
+                        List.of(
+                                new FieldDto().id("fieldId1").type("field1Type").src("fieldId1Src")
+                                        .propertyClass("fieldId1PropertyClass")
+                        )
+                );
     }
 }

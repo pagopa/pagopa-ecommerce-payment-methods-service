@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
+import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
@@ -22,6 +23,15 @@ public class PaymentMethodFactory {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
+    /*
+     * @formatter:off
+     *
+     * Warning java:S107 - Methods should not have too many parameters
+     * Suppressed because this method wraps `PaymentMethod` constructor.
+     *
+     * @formatter:on
+     */
+    @SuppressWarnings("java:S107")
     @AggregateFactory(PaymentMethod.class)
     public Mono<PaymentMethod> newPaymentMethod(
                                                 PaymentMethodID paymentMethodID,
@@ -30,7 +40,8 @@ public class PaymentMethodFactory {
                                                 PaymentMethodStatus paymentMethodStatus,
                                                 List<PaymentMethodRange> paymentMethodRanges,
                                                 PaymentMethodType paymentMethodTypeCode,
-                                                PaymentMethodAsset paymentMethodAsset
+                                                PaymentMethodAsset paymentMethodAsset,
+                                                NpgClient.PaymentMethod npgPaymentMethod
     ) {
 
         return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
@@ -48,7 +59,8 @@ public class PaymentMethodFactory {
                             paymentMethodStatus,
                             paymentMethodTypeCode,
                             paymentMethodRanges,
-                            paymentMethodAsset
+                            paymentMethodAsset,
+                            npgPaymentMethod
                     );
                 }
                 );

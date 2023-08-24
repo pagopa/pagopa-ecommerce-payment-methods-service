@@ -1,6 +1,8 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
@@ -11,12 +13,11 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRang
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.BundleDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
@@ -30,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,25 +40,53 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PaymentMethodService {
 
+    public enum SessionPaymentMethod {
+        CARDS("CARDS");
+
+        public final String value;
+
+        SessionPaymentMethod(String value) {
+            this.value = value;
+        }
+
+        public static SessionPaymentMethod fromValue(String value) {
+            for (SessionPaymentMethod method : SessionPaymentMethod.values()) {
+                if (method.value.equals(value)) {
+                    return method;
+                }
+            }
+
+            throw new IllegalArgumentException("Invalid session payment method: '%s'".formatted(value));
+        }
+    }
+
     private final AfmClient afmClient;
 
     private final NpgClient npgClient;
 
-    private PaymentMethodRepository paymentMethodRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
 
-    private PaymentMethodFactory paymentMethodFactory;
+    private final PaymentMethodFactory paymentMethodFactory;
+
+    private final SessionUrlConfig sessionUrlConfig;
+
+    private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
 
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
             PaymentMethodRepository paymentMethodRepository,
             PaymentMethodFactory paymentMethodFactory,
-            NpgClient npgClient
+            NpgClient npgClient,
+            SessionUrlConfig sessionUrlConfig,
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
         this.paymentMethodRepository = paymentMethodRepository;
+        this.sessionUrlConfig = sessionUrlConfig;
+        this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -74,7 +104,8 @@ public class PaymentMethodService {
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode),
-                new PaymentMethodAsset(paymentMethodAsset)
+                new PaymentMethodAsset(paymentMethodAsset),
+                NpgClient.PaymentMethod.fromServiceName(paymentMethodName)
         );
 
         log.info("[Payment Method Aggregate] Store new aggregate");
@@ -101,7 +132,8 @@ public class PaymentMethodService {
                                 doc.getPaymentMethodRanges().stream()
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                                         .toList(),
-                                new PaymentMethodAsset(doc.getPaymentMethodAsset())
+                                new PaymentMethodAsset(doc.getPaymentMethodAsset()),
+                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName())
                         )
                 )
         );
@@ -223,6 +255,63 @@ public class PaymentMethodService {
 
     }
 
+    public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(String id) {
+        return paymentMethodRepository.findById(id)
+                .map(PaymentMethodDocument::getPaymentMethodName)
+                .map(NpgClient.PaymentMethod::fromServiceName)
+                .flatMap(paymentMethod -> {
+                    SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
+                            .fromValue(paymentMethod.serviceName);
+                    URI returnUrlBasePath = sessionUrlConfig.basePath();
+
+                    UUID correlationId = UUID.randomUUID();
+                    URI resultUrl = URI.create(sessionUrlConfig.outcomeSuffix()).resolve(returnUrlBasePath);
+                    URI merchantUrl = returnUrlBasePath;
+                    URI cancelUrl = URI.create(sessionUrlConfig.cancelSuffix()).resolve(returnUrlBasePath);
+                    String orderId = UUID.randomUUID().toString();
+                    String customerId = UUID.randomUUID().toString();
+
+                    return npgClient.buildForm(
+                            correlationId,
+                            returnUrlBasePath,
+                            resultUrl,
+                            merchantUrl,
+                            cancelUrl,
+                            orderId,
+                            customerId,
+                            paymentMethod
+                    ).map(form -> Tuples.of(form, sessionPaymentMethod));
+                }).map(data -> {
+                    FieldsDto fields = data.getT1();
+
+                    npgSessionsTemplateWrapper
+                            .save(new NpgSessionDocument(fields.getSessionId(), fields.getSecurityToken()));
+                    return data;
+                }).map(data -> {
+                    FieldsDto fields = data.getT1();
+                    SessionPaymentMethod paymentMethod = data.getT2();
+
+                    return new CreateSessionResponseDto()
+                            .sessionId(fields.getSessionId())
+                            .paymentMethodData(
+                                    new CardFormFieldsDto()
+                                            .paymentMethod(paymentMethod.value)
+                                            .form(
+                                                    fields.getFields()
+                                                            .stream()
+                                                            .map(
+                                                                    field -> new FieldDto()
+                                                                            .id(field.getId())
+                                                                            .type(field.getType())
+                                                                            .propertyClass(field.getPropertyClass())
+                                                                            .src(URI.create(field.getSrc()))
+                                                            )
+                                                            .collect(Collectors.toList())
+                                            )
+                            );
+                });
+    }
+
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
                                                                                           List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
     ) {
@@ -292,8 +381,8 @@ public class PaymentMethodService {
                 doc.getPaymentMethodRanges().stream()
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                         .collect(Collectors.toList()),
-                new PaymentMethodAsset(doc.getPaymentMethodAsset())
+                new PaymentMethodAsset(doc.getPaymentMethodAsset()),
+                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName())
         );
     }
-
 }

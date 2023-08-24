@@ -21,6 +21,9 @@ microservice-chart:
       MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
       MONGO_PORT: "10255"
       MONGO_SSL_ENABLED: "true"
+      REDIS_HOST: pagopa-u-weu-ecommerce-redis.redis.cache.windows.net
+      REDIS_PORT: "6380"
+      REDIS_SSL_ENABLED: "true"
       AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
       AFM_READ_TIMEOUT: "10000"
       AFM_CONNECTION_TIMEOUT: "10000"
@@ -34,8 +37,13 @@ microservice-chart:
       NPG_URI: "https://localhost/npg"
       NPG_READ_TIMEOUT: 10000
       NPG_CONNECTION_TIMEOUT: 10000
+      SESSION_URL_BASEPATH: "https://uat.checkout.pagopa.it"
+      SESSION_URL_OUTCOME_SUFFIX: "/esito"
+      SESSION_URL_CANCEL_SUFFIX: "/cancel"
+      NPG_SESSIONS_TTL: 600
     envSecret:
       MONGO_PASSWORD: mongo-ecommerce-password
+      REDIS_PASSWORD: redis-ecommerce-password
       AFM_KEY: afm-api-key
       OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
       NPG_API_KEY: npg-key
@@ -101,6 +109,9 @@ microservice-chart:
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
+    REDIS_HOST: pagopa-u-weu-ecommerce-redis.redis.cache.windows.net
+    REDIS_PORT: "6380"
+    REDIS_SSL_ENABLED: "true"
     AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
@@ -114,8 +125,13 @@ microservice-chart:
     NPG_URI: "https://localhost/npg"
     NPG_READ_TIMEOUT: 10000
     NPG_CONNECTION_TIMEOUT: 10000
+    SESSION_URL_BASEPATH: "https://uat.checkout.pagopa.it"
+    SESSION_URL_OUTCOME_SUFFIX: "/esito"
+    SESSION_URL_CANCEL_SUFFIX: "/cancel"
+    NPG_SESSIONS_TTL: 600
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
+    REDIS_PASSWORD: redis-ecommerce-password
     AFM_KEY: afm-api-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-key

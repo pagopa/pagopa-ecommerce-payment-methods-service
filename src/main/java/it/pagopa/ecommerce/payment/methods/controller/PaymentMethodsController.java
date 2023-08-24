@@ -68,30 +68,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                 ServerWebExchange exchange
     ) {
         return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
-                .map(paymentMethod -> {
-                    PaymentMethodResponseDto responseDto = new PaymentMethodResponseDto();
-                    responseDto.setId(paymentMethod.getPaymentMethodID().value().toString());
-                    responseDto.setName(paymentMethod.getPaymentMethodName().value());
-                    responseDto.setDescription(paymentMethod.getPaymentMethodDescription().value());
-                    responseDto.setStatus(
-                            PaymentMethodStatusDto
-                                    .valueOf(paymentMethod.getPaymentMethodStatus().value().toString())
-                    );
-                    responseDto.setRanges(
-                            paymentMethod.getPaymentMethodRanges().stream().map(
-                                    r -> {
-                                        RangeDto rangeDto = new RangeDto();
-                                        rangeDto.setMin(r.min());
-                                        rangeDto.setMax(r.max());
-                                        return rangeDto;
-                                    }
-                            ).toList()
-                    );
-                    responseDto.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
-                    responseDto.setAsset(paymentMethod.getPaymentMethodAsset().value());
-
-                    return responseDto;
-                })
+                .map(PaymentMethodsController::paymentMethodToDto)
                 .collectList()
                 .map(
                         paymentMethods -> ResponseEntity.ok(
@@ -147,6 +124,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     private ResponseEntity<PaymentMethodResponseDto> paymentMethodToResponse(PaymentMethod paymentMethod) {
+        PaymentMethodResponseDto response = paymentMethodToDto(paymentMethod);
+        return ResponseEntity.ok(response);
+    }
+
+    private static PaymentMethodResponseDto paymentMethodToDto(PaymentMethod paymentMethod) {
         PaymentMethodResponseDto response = new PaymentMethodResponseDto();
         response.setId(paymentMethod.getPaymentMethodID().value().toString());
         response.setName(paymentMethod.getPaymentMethodName().value());
@@ -168,7 +150,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         );
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     @Override
@@ -185,10 +167,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PreauthorizationResponseDto>> createPreauthorization(
-                                                                                    String id,
-                                                                                    ServerWebExchange exchange
+    public Mono<ResponseEntity<CreateSessionResponseDto>> createSession(
+                                                                        String id,
+                                                                        ServerWebExchange exchange
     ) {
-        return Mono.just(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build());
+        return paymentMethodService.createSessionForPaymentMethod(id).map(ResponseEntity::ok);
     }
 }
