@@ -248,7 +248,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: id_session
+        - name: sessionId
           in: path
           description: Session payment method ID related to NPG
           required: true
@@ -581,12 +581,11 @@ components:
             - MAESTRO
             - AMEX
       required:
-        - id
-        - name
-        - description
-        - status
-        - paymentTypeCode
-        - ranges
+        - sessionId
+        - bin
+        - lastFourDigits
+        - expiringDate
+        - brand
   requestBodies:
     PaymentMethodRequest:
       required: true
