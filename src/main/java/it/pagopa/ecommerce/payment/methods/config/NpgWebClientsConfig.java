@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.config;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.generated.npg.v1.ApiClient;
 import it.pagopa.ecommerce.commons.generated.npg.v1.api.PaymentServicesApi;
@@ -49,9 +50,10 @@ public class NpgWebClientsConfig implements WebFluxConfigurer {
     @Bean
     public NpgClient npgClient(
                                PaymentServicesApi paymentServicesApi,
-                               @Value("${npg.client.apiKey}") String npgKey
+                               @Value("${npg.client.apiKey}") String npgKey,
+                               Tracer tracer
     ) {
-        return new NpgClient(paymentServicesApi, npgKey);
+        return new NpgClient(paymentServicesApi, npgKey, tracer);
     }
 
 }

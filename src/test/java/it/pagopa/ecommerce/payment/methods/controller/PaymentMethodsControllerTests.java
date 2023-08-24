@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
+import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -42,6 +43,9 @@ class PaymentMethodsControllerTests {
 
     @MockBean
     private PaymentMethodService paymentMethodService;
+
+    @MockBean
+    private Tracer tracer;
 
     @Test
     void shouldCreateNewmethod() {
