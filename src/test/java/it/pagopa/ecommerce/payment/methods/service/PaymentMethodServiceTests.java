@@ -350,7 +350,7 @@ class PaymentMethodServiceTests {
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
                 .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
-                .brand(SessionPaymentMethodResponseDto.BrandEnum.fromValue(npgResponse.getCircuit()));
+                .brand(npgResponse.getCircuit());
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgClient.getCardData(any(), any())).thenReturn(Mono.just(npgResponse));

@@ -329,7 +329,7 @@ public class PaymentMethodService {
                 )
                 .map(
                         el -> new SessionPaymentMethodResponseDto().bin(el.getBin()).sessionId(sessionId)
-                                .brand(SessionPaymentMethodResponseDto.BrandEnum.fromValue(el.getCircuit()))
+                                .brand(el.getCircuit())
                                 .expiringDate(el.getExpiringDate()).lastFourDigits(el.getLastFourDigits())
 
                 );

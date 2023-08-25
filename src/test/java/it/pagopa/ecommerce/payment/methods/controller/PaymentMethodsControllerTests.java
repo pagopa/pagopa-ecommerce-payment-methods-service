@@ -174,7 +174,7 @@ class PaymentMethodsControllerTests {
         String paymentMethodId = "paymentMethodId";
         String sessionId = "sessionId";
         SessionPaymentMethodResponseDto response = new SessionPaymentMethodResponseDto().sessionId(sessionId)
-                .bin("123456").brand(SessionPaymentMethodResponseDto.BrandEnum.VISA).expiringDate("0424")
+                .bin("123456").brand("VISA").expiringDate("0424")
                 .lastFourDigits("1234");
         Mockito.when(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
                 .thenReturn(Mono.just(response));
