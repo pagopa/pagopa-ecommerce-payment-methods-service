@@ -312,6 +312,29 @@ public class PaymentMethodService {
                 });
     }
 
+    public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
+                                                                        String id,
+                                                                        String sessionId
+    ) {
+        log.info(
+                "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and sessionId: {}",
+                id,
+                sessionId
+        );
+        return paymentMethodRepository
+                .findById(id)
+                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
+                .flatMap(
+                        el -> npgClient.getCardData(UUID.randomUUID(), sessionId)
+                )
+                .map(
+                        el -> new SessionPaymentMethodResponseDto().bin(el.getBin()).sessionId(sessionId)
+                                .brand(el.getCircuit())
+                                .expiringDate(el.getExpiringDate()).lastFourDigits(el.getLastFourDigits())
+
+                );
+    }
+
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
                                                                                           List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
     ) {

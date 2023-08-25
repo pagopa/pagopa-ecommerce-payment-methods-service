@@ -170,6 +170,26 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
+    void shouldRetrieveCardDataFromWithSessionId() {
+        String paymentMethodId = "paymentMethodId";
+        String sessionId = "sessionId";
+        SessionPaymentMethodResponseDto response = new SessionPaymentMethodResponseDto().sessionId(sessionId)
+                .bin("123456").brand("VISA").expiringDate("0424")
+                .lastFourDigits("1234");
+        Mockito.when(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
+                .thenReturn(Mono.just(response));
+
+        webClient
+                .get()
+                .uri("/payment-methods/" + paymentMethodId + "/sessions/" + sessionId)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(SessionPaymentMethodResponseDto.class)
+                .isEqualTo(response);
+    }
+
+    @Test
     void shouldReturnResponseEntityWithNotFound() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
                 .errorHandler(new PaymentMethodNotFoundException("paymentMethodId"));

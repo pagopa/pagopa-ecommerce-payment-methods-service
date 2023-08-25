@@ -1,12 +1,14 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
@@ -327,4 +329,34 @@ class PaymentMethodServiceTests {
                 .expectNext(expected)
                 .verifyComplete();
     }
+
+    @Test
+    void shouldRetrieveCardDataForInvalidPaymentMethodId() {
+        String paymentMethodId = "paymentMethodId";
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.empty());
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, any()))
+                .expectErrorMatches(e -> e instanceof PaymentMethodNotFoundException)
+                .verify();
+
+    }
+
+    @Test
+    void shouldRetrieveCardDataWithSuccess() {
+        String paymentMethodId = "paymentMethodId";
+        String sessionId = "sessionId";
+        CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
+                .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
+                .lastFourDigits(npgResponse.getLastFourDigits())
+                .brand(npgResponse.getCircuit());
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(npgClient.getCardData(any(), any())).thenReturn(Mono.just(npgResponse));
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
+                .expectNext(expectedResponse)
+                .verifyComplete();
+    }
+
 }

@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.utils;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.StateDto;
@@ -260,5 +261,9 @@ public class TestUtil {
                                         .propertyClass("fieldId1PropertyClass")
                         )
                 );
+    }
+
+    public static CardDataResponseDto npgCardDataResponse() {
+        return new CardDataResponseDto().bin("12345678").expiringDate("0424").lastFourDigits("1234").circuit("VISA");
     }
 }
