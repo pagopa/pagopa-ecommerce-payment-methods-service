@@ -344,7 +344,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldRetrieveCardDataForInvalidSessionId() {
+    void shouldReturnErrorForInvalidSessionId() {
         String paymentMethodId = "paymentMethodId";
         String sessionId = "sessionId";
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
