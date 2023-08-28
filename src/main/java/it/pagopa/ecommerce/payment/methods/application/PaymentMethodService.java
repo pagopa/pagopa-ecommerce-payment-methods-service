@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
@@ -13,6 +14,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRang
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
@@ -285,7 +287,16 @@ public class PaymentMethodService {
                     FieldsDto fields = data.getT1();
 
                     npgSessionsTemplateWrapper
-                            .save(new NpgSessionDocument(fields.getSessionId(), fields.getSecurityToken()));
+                            .save(
+                                    new NpgSessionDocument(
+                                            fields.getSessionId(),
+                                            fields.getSecurityToken(),
+                                            null,
+                                            null,
+                                            null,
+                                            null
+                                    )
+                            );
                     return data;
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
@@ -324,14 +335,50 @@ public class PaymentMethodService {
         return paymentMethodRepository
                 .findById(id)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
-                .flatMap(
-                        el -> npgClient.getCardData(UUID.randomUUID(), sessionId)
-                )
                 .map(
-                        el -> new SessionPaymentMethodResponseDto().bin(el.getBin()).sessionId(sessionId)
-                                .brand(el.getCircuit())
-                                .expiringDate(el.getExpiringDate()).lastFourDigits(el.getLastFourDigits())
+                        el -> npgSessionsTemplateWrapper.findById(sessionId)
+                )
+                .flatMap(
+                        session -> session.map(
+                                sx -> {
+                                    Mono<SessionPaymentMethodResponseDto> response;
+                                    if (sx.bin() != null) {
+                                        log.info("Cache hit for sessionId: {}", sessionId);
+                                        response = Mono.just(
+                                                new SessionPaymentMethodResponseDto().bin(sx.bin()).sessionId(sessionId)
+                                                        .brand(sx.circuit())
+                                                        .expiringDate(sx.expiringDate())
+                                                        .lastFourDigits(sx.lastFourDigits())
+                                        );
+                                    } else {
+                                        log.info("Cache miss for sessionId: {}", sessionId);
+                                        response = npgClient.getCardData(UUID.randomUUID(), sessionId)
+                                                .doOnSuccess(
+                                                        el -> npgSessionsTemplateWrapper.save(
+                                                                new NpgSessionDocument(
+                                                                        sx.sessionId(),
+                                                                        sx.securityToken(),
+                                                                        el.getBin(),
+                                                                        el.getLastFourDigits(),
+                                                                        el.getExpiringDate(),
+                                                                        el.getCircuit()
+                                                                )
+                                                        )
+                                                )
+                                                .map(
+                                                        el -> new SessionPaymentMethodResponseDto().bin(el.getBin())
+                                                                .sessionId(sessionId)
+                                                                .brand(el.getCircuit())
+                                                                .expiringDate(el.getExpiringDate())
+                                                                .lastFourDigits(el.getLastFourDigits())
+                                                );
+                                    }
+                                    return response;
+                                }
 
+                        ).orElse(
+                                Mono.error(new SessionIdNotFoundException(sessionId))
+                        )
                 );
     }
 
@@ -403,7 +450,7 @@ public class PaymentMethodService {
                 new PaymentMethodType(doc.getPaymentMethodTypeCode()),
                 doc.getPaymentMethodRanges().stream()
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
-                        .collect(Collectors.toList()),
+                        .toList(),
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
                 NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName())
         );

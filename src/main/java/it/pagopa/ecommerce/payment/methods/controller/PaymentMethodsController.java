@@ -5,6 +5,7 @@ import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
@@ -33,6 +34,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         {
                 PaymentMethodAlreadyInUseException.class,
                 PaymentMethodNotFoundException.class,
+                SessionIdNotFoundException.class,
                 AfmResponseException.class
         }
     )
@@ -53,6 +55,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                             .title("Afm generic error")
                             .detail(afmException.reason),
                     afmException.status
+            );
+        } else if (exception instanceof SessionIdNotFoundException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(404).title("Not found").detail("Session id not found"),
+                    HttpStatus.NOT_FOUND
             );
         } else {
             return new ResponseEntity<>(
