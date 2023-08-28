@@ -35,12 +35,12 @@ microservice-chart:
       ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
       ECS_SERVICE_ENVIRONMENT: uat
       NPG_URI: "https://localhost/npg"
-      NPG_READ_TIMEOUT: 10000
-      NPG_CONNECTION_TIMEOUT: 10000
+      NPG_READ_TIMEOUT: "10000"
+      NPG_CONNECTION_TIMEOUT: "10000"
       SESSION_URL_BASEPATH: "https://uat.checkout.pagopa.it"
       SESSION_URL_OUTCOME_SUFFIX: "/esito"
       SESSION_URL_CANCEL_SUFFIX: "/cancel"
-      NPG_SESSIONS_TTL: 600
+      NPG_SESSIONS_TTL: "600"
     envSecret:
       MONGO_PASSWORD: mongo-ecommerce-password
       REDIS_PASSWORD: redis-ecommerce-password
