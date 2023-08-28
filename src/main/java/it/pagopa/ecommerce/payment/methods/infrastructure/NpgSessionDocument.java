@@ -4,11 +4,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 @RedisHash(value = "keys", timeToLive = 10 * 60)
 public record NpgSessionDocument(
         @NonNull @Id String sessionId,
-        @NonNull String securityToken
+        @NonNull String securityToken,
+        @Nullable CardDataDocument cardData
+
 ) {
     /*
      * @formatter:off

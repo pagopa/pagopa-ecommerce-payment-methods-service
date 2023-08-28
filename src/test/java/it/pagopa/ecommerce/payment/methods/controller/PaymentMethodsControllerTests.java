@@ -7,6 +7,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
@@ -187,6 +188,14 @@ class PaymentMethodsControllerTests {
                 .isOk()
                 .expectBody(SessionPaymentMethodResponseDto.class)
                 .isEqualTo(response);
+    }
+
+    @Test
+    void shouldReturnResponseSessionIdNotFound() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new SessionIdNotFoundException("sessionId"));
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("Session id not found", responseEntity.getBody().getDetail());
     }
 
     @Test

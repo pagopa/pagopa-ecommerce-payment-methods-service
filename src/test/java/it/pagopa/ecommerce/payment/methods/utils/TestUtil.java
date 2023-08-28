@@ -13,6 +13,8 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.infrastructure.CardDataDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
@@ -265,5 +267,22 @@ public class TestUtil {
 
     public static CardDataResponseDto npgCardDataResponse() {
         return new CardDataResponseDto().bin("12345678").expiringDate("0424").lastFourDigits("1234").circuit("VISA");
+    }
+
+    public static NpgSessionDocument npgSessionDocument(
+                                                        String sessionId,
+                                                        boolean hasCardDataInformation
+    ) {
+        NpgSessionDocument document;
+        if (hasCardDataInformation) {
+            document = new NpgSessionDocument(
+                    sessionId,
+                    "securityToken",
+                    new CardDataDocument("12345678", "1234", "0424", "VISA")
+            );
+        } else {
+            document = new NpgSessionDocument(sessionId, "securityToken", null);
+        }
+        return document;
     }
 }
