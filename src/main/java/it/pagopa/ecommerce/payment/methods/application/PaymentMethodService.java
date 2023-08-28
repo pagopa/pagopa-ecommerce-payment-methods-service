@@ -15,10 +15,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStat
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
-import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
@@ -291,9 +288,6 @@ public class PaymentMethodService {
                                     new NpgSessionDocument(
                                             fields.getSessionId(),
                                             fields.getSecurityToken(),
-                                            null,
-                                            null,
-                                            null,
                                             null
                                     )
                             );
@@ -342,13 +336,14 @@ public class PaymentMethodService {
                         session -> session.map(
                                 sx -> {
                                     Mono<SessionPaymentMethodResponseDto> response;
-                                    if (sx.bin() != null) {
+                                    if (sx.cardData() != null) {
                                         log.info("Cache hit for sessionId: {}", sessionId);
                                         response = Mono.just(
-                                                new SessionPaymentMethodResponseDto().bin(sx.bin()).sessionId(sessionId)
-                                                        .brand(sx.circuit())
-                                                        .expiringDate(sx.expiringDate())
-                                                        .lastFourDigits(sx.lastFourDigits())
+                                                new SessionPaymentMethodResponseDto().bin(sx.cardData().bin())
+                                                        .sessionId(sessionId)
+                                                        .brand(sx.cardData().circuit())
+                                                        .expiringDate(sx.cardData().expiringDate())
+                                                        .lastFourDigits(sx.cardData().lastFourDigits())
                                         );
                                     } else {
                                         log.info("Cache miss for sessionId: {}", sessionId);
@@ -358,10 +353,12 @@ public class PaymentMethodService {
                                                                 new NpgSessionDocument(
                                                                         sx.sessionId(),
                                                                         sx.securityToken(),
-                                                                        el.getBin(),
-                                                                        el.getLastFourDigits(),
-                                                                        el.getExpiringDate(),
-                                                                        el.getCircuit()
+                                                                        new CardDataDocument(
+                                                                                el.getBin(),
+                                                                                el.getLastFourDigits(),
+                                                                                el.getExpiringDate(),
+                                                                                el.getCircuit()
+                                                                        )
                                                                 )
                                                         )
                                                 )

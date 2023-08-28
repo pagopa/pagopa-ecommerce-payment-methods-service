@@ -13,6 +13,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.infrastructure.CardDataDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
@@ -274,9 +275,13 @@ public class TestUtil {
     ) {
         NpgSessionDocument document;
         if (hasCardDataInformation) {
-            document = new NpgSessionDocument(sessionId, "securityToken", "12345678", "1234", "0424", "VISA");
+            document = new NpgSessionDocument(
+                    sessionId,
+                    "securityToken",
+                    new CardDataDocument("12345678", "1234", "0424", "VISA")
+            );
         } else {
-            document = new NpgSessionDocument(sessionId, "securityToken", null, null, null, null);
+            document = new NpgSessionDocument(sessionId, "securityToken", null);
         }
         return document;
     }
