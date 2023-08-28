@@ -355,6 +355,9 @@ class PaymentMethodServiceTests {
                 .expectErrorMatches(e -> e instanceof SessionIdNotFoundException)
                 .verify();
 
+        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
+        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(0)).save(any());
+        Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any());
     }
 
     @Test
