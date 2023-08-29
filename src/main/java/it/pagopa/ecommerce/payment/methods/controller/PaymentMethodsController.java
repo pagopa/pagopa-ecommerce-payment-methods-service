@@ -193,4 +193,20 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         return paymentMethodService.getCardDataInformation(id, URLEncoder.encode(sessionId, Charset.defaultCharset()))
                 .map(ResponseEntity::ok);
     }
+
+    @Override
+    public Mono<ResponseEntity<Void>> validateSession(
+                                                      String id,
+                                                      String sessionId,
+                                                      Mono<SessionValidateRequestDto> sessionValidateRequestDto,
+                                                      ServerWebExchange exchange
+    ) {
+        return sessionValidateRequestDto
+                .map(SessionValidateRequestDto::getSecurityToken)
+                .map(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken))
+                .flatMap(isValid -> isValid.map(Mono::just).orElseGet(Mono::empty))
+                .filter(Boolean::booleanValue)
+                .map(_unused -> ResponseEntity.noContent().<Void>build())
+                .switchIfEmpty(Mono.error(new SessionIdNotFoundException(sessionId)));
+    }
 }

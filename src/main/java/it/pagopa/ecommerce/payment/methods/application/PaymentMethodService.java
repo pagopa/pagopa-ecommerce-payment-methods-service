@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
-import com.azure.cosmos.implementation.uuid.impl.UUIDUtil;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
@@ -387,6 +386,13 @@ public class PaymentMethodService {
                                 Mono.error(new SessionIdNotFoundException(sessionId))
                         )
                 );
+    }
+
+    public Optional<Boolean> isSessionValid(
+                                            String sessionId,
+                                            String securityToken
+    ) {
+        return npgSessionsTemplateWrapper.findById(sessionId).map(d -> d.securityToken().equals(securityToken));
     }
 
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
