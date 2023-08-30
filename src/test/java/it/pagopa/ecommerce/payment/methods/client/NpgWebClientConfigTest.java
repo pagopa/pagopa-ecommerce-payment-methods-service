@@ -11,12 +11,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static it.pagopa.ecommerce.commons.queues.StrictJsonSerializerProvider.OBJECT_MAPPER;
+
 @ExtendWith(MockitoExtension.class)
-class NpgWebClientTestConfig {
+class NpgWebClientConfigTest {
     private final Tracer tracer = Mockito.mock(Tracer.class);
 
     @Test
-    public void testNpgWebClientConfigApi() {
+    void testNpgWebClientConfigApi() {
         NpgWebClientsConfig config = new NpgWebClientsConfig();
         PaymentServicesApi api = config.npgWebClient("localhost/test", 10000, 10000);
         Assert.assertNotNull(api);
@@ -24,10 +26,10 @@ class NpgWebClientTestConfig {
     }
 
     @Test
-    public void testNpgWebClientConfigNpgClient() {
+    void testNpgWebClientConfigNpgClient() {
         NpgWebClientsConfig config = new NpgWebClientsConfig();
         PaymentServicesApi api = config.npgWebClient("localhost/test", 10000, 10000);
-        NpgClient npgClient = config.npgClient(api, "test-key", tracer);
+        NpgClient npgClient = config.npgClient(api, "test-key", tracer, OBJECT_MAPPER);
         Assert.assertNotNull(npgClient);
         Assert.assertEquals(NpgClient.class, npgClient.getClass());
     }
