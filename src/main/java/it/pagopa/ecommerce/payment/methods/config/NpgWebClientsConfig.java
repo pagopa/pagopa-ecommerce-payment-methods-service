@@ -7,6 +7,7 @@ import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.generated.npg.v1.ApiClient;
 import it.pagopa.ecommerce.commons.generated.npg.v1.api.PaymentServicesApi;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +46,7 @@ public class NpgWebClientsConfig implements WebFluxConfigurer {
                 new ReactorClientHttpConnector(httpClient)
         ).baseUrl(npgClientUrl).build();
 
-        return new PaymentServicesApi(new ApiClient(webClient));
+        return new PaymentServicesApi(new ApiClient(webClient).setBasePath(npgClientUrl));
     }
 
     @Bean
