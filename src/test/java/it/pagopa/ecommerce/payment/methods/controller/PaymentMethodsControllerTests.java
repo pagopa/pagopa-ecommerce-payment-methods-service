@@ -237,7 +237,8 @@ class PaymentMethodsControllerTests {
         String sessionId = "sessionId";
         String securityToken = "securityToken";
         SessionValidateRequestDto requestBody = new SessionValidateRequestDto().securityToken(securityToken);
-        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken)).thenReturn(Optional.of(true));
+        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken, paymentMethodId))
+                .thenReturn(Mono.just(Optional.of(true)));
 
         webClient
                 .post()
@@ -260,7 +261,8 @@ class PaymentMethodsControllerTests {
         String sessionId = "sessionId";
         String securityToken = "securityToken";
         SessionValidateRequestDto requestBody = new SessionValidateRequestDto().securityToken(securityToken);
-        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken)).thenReturn(Optional.of(false));
+        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken, paymentMethodId))
+                .thenReturn(Mono.just(Optional.of(false)));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Session id not found");
 
@@ -285,7 +287,8 @@ class PaymentMethodsControllerTests {
         String sessionId = "sessionId";
         String securityToken = "securityToken";
         SessionValidateRequestDto requestBody = new SessionValidateRequestDto().securityToken(securityToken);
-        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken)).thenReturn(Optional.empty());
+        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken, paymentMethodId))
+                .thenReturn(Mono.just(Optional.empty()));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Session id not found");
 

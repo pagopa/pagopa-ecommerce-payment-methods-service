@@ -388,11 +388,18 @@ public class PaymentMethodService {
                 );
     }
 
-    public Optional<Boolean> isSessionValid(
-                                            String sessionId,
-                                            String securityToken
+    public Mono<Optional<Boolean>> isSessionValid(
+                                                  String paymentMethodId,
+                                                  String sessionId,
+                                                  String securityToken
     ) {
-        return npgSessionsTemplateWrapper.findById(sessionId).map(d -> d.securityToken().equals(securityToken));
+        return paymentMethodRepository
+                .findById(paymentMethodId)
+                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+                .map(
+                        _unused -> npgSessionsTemplateWrapper.findById(sessionId)
+                                .map(d -> d.securityToken().equals(securityToken))
+                );
     }
 
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(

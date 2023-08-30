@@ -203,7 +203,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     ) {
         return sessionValidateRequestDto
                 .map(SessionValidateRequestDto::getSecurityToken)
-                .map(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken))
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken, id))
                 .flatMap(isValid -> isValid.map(Mono::just).orElseGet(Mono::empty))
                 .filter(Boolean::booleanValue)
                 .map(_unused -> ResponseEntity.noContent().<Void>build())
