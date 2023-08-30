@@ -21,6 +21,8 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.stream.Collectors;
 
 @RestController
@@ -188,6 +190,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                          ServerWebExchange exchange
     ) {
         log.info("[Payment Method controller] Retrieve card data from NPG");
-        return paymentMethodService.getCardDataInformation(id, sessionId).map(ResponseEntity::ok);
+        return paymentMethodService.getCardDataInformation(id, URLEncoder.encode(sessionId, Charset.defaultCharset()))
+                .map(ResponseEntity::ok);
     }
 }
