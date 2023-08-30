@@ -59,6 +59,8 @@ class PaymentMethodServiceTests {
             "/annulla"
     );
 
+    private final String npgDefaultApiKey = UUID.randomUUID().toString();
+
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper = mock(NpgSessionsTemplateWrapper.class);
 
     private final PaymentMethodService paymentMethodService = new PaymentMethodService(
@@ -67,7 +69,8 @@ class PaymentMethodServiceTests {
             paymentMethodFactory,
             npgClient,
             sessionUrlConfig,
-            npgSessionsTemplateWrapper
+            npgSessionsTemplateWrapper,
+            npgDefaultApiKey
     );
 
     @Test
@@ -305,7 +308,7 @@ class PaymentMethodServiceTests {
         FieldsDto npgResponse = TestUtil.npgResponse();
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
-        Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any()))
+        Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(
                         Mono.just(npgResponse)
                 );
@@ -357,7 +360,7 @@ class PaymentMethodServiceTests {
 
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(0)).save(any());
-        Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any());
+        Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any(), any());
     }
 
     @Test
@@ -375,14 +378,14 @@ class PaymentMethodServiceTests {
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
-        Mockito.when(npgClient.getCardData(any(), any())).thenReturn(Mono.just(npgResponse));
+        Mockito.when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
         /* Tests */
         StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).save(any());
-        Mockito.verify(npgClient, Mockito.times(1)).getCardData(any(), any());
+        Mockito.verify(npgClient, Mockito.times(1)).getCardData(any(), any(), any());
     }
 
     @Test
@@ -407,7 +410,7 @@ class PaymentMethodServiceTests {
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(0)).save(any());
-        Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any());
+        Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any(), any());
     }
 
 }
