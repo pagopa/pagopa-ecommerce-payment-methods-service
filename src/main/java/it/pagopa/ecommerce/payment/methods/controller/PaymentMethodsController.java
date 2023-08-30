@@ -36,7 +36,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 SessionIdNotFoundException.class,
                 AfmResponseException.class,
                 InvalidSessionException.class,
-                MismatchedSecurityTokenException.class
+                MismatchedSecurityTokenException.class,
+                SessionAlreadyAssociatedToTransaction.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
@@ -72,6 +73,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         } else if (exception instanceof InvalidSessionException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session"),
+                    HttpStatus.CONFLICT
+            );
+        } else if (exception instanceof SessionAlreadyAssociatedToTransaction) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(409).title("Session already associated to transaction")
+                            .detail(exception.getMessage()),
                     HttpStatus.CONFLICT
             );
         } else {
@@ -224,5 +231,17 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .flatMap(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken, id))
                 .map(transactionId -> new SessionValidateResponseDto().transactionId(transactionId))
                 .map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> updateSession(
+                                                    String id,
+                                                    String sessionId,
+                                                    Mono<PatchSessionRequestDto> patchSessionRequestDto,
+                                                    ServerWebExchange exchange
+    ) {
+        return patchSessionRequestDto
+                .flatMap(updateData -> paymentMethodService.updateSession(id, sessionId, updateData))
+                .map(_updatedDocument -> ResponseEntity.ok(null));
     }
 }
