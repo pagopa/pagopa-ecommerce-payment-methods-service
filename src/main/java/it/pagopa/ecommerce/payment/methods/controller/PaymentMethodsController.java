@@ -202,6 +202,13 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                       ServerWebExchange exchange
     ) {
         return sessionValidateRequestDto
+                .doOnNext(
+                        req -> log.info(
+                                "Requesting session validation for paymentMethodId={}, sessionId={}",
+                                id,
+                                sessionId
+                        )
+                )
                 .map(SessionValidateRequestDto::getSecurityToken)
                 .flatMap(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken, id))
                 .flatMap(isValid -> isValid.map(Mono::just).orElseGet(Mono::empty))
