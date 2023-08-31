@@ -271,17 +271,19 @@ public class TestUtil {
 
     public static NpgSessionDocument npgSessionDocument(
                                                         String sessionId,
-                                                        boolean hasCardDataInformation
+                                                        boolean hasCardDataInformation,
+                                                        String transactionId
     ) {
         NpgSessionDocument document;
         if (hasCardDataInformation) {
             document = new NpgSessionDocument(
                     sessionId,
                     "securityToken",
-                    new CardDataDocument("12345678", "1234", "0424", "VISA")
+                    new CardDataDocument("12345678", "1234", "0424", "VISA"),
+                    transactionId
             );
         } else {
-            document = new NpgSessionDocument(sessionId, "securityToken", null);
+            document = new NpgSessionDocument(sessionId, "securityToken", null, transactionId);
         }
         return document;
     }

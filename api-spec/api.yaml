@@ -296,10 +296,20 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/PostSessionValidate"
       responses:
-        '204':
+        '200':
           description: Session is valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionValidateResponse'
         '404':
           description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '409':
+          description: Invalid session
           content:
             application/json:
               schema:
@@ -625,6 +635,15 @@ components:
           description: Security token provided by the payment gateway
       required:
         - securityToken
+    SessionValidateResponse:
+      type: object
+      description: Session validation successful response
+      properties:
+        transactionId:
+          type: string
+          description: Transaction id associated to this NPG session
+      required:
+        - transactionId
   requestBodies:
     PaymentMethodRequest:
       required: true

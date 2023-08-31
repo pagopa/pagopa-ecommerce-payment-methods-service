@@ -2,10 +2,7 @@ package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
@@ -37,7 +34,9 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 PaymentMethodAlreadyInUseException.class,
                 PaymentMethodNotFoundException.class,
                 SessionIdNotFoundException.class,
-                AfmResponseException.class
+                AfmResponseException.class,
+                InvalidSessionException.class,
+                MismatchedSecurityTokenException.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
@@ -62,6 +61,16 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Not found").detail("Session id not found"),
                     HttpStatus.NOT_FOUND
+            );
+        } else if (exception instanceof MismatchedSecurityTokenException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(404).title("Not found").detail("Session id not found"),
+                    HttpStatus.NOT_FOUND
+            );
+        } else if (exception instanceof InvalidSessionException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session"),
+                    HttpStatus.CONFLICT
             );
         } else {
             return new ResponseEntity<>(
@@ -195,11 +204,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> validateSession(
-                                                      String id,
-                                                      String sessionId,
-                                                      Mono<SessionValidateRequestDto> sessionValidateRequestDto,
-                                                      ServerWebExchange exchange
+    public Mono<ResponseEntity<SessionValidateResponseDto>> validateSession(
+                                                                            String id,
+                                                                            String sessionId,
+                                                                            Mono<SessionValidateRequestDto> sessionValidateRequestDto,
+                                                                            ServerWebExchange exchange
     ) {
         return sessionValidateRequestDto
                 .doOnNext(
@@ -211,9 +220,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 )
                 .map(SessionValidateRequestDto::getSecurityToken)
                 .flatMap(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken, id))
-                .flatMap(isValid -> isValid.map(Mono::just).orElseGet(Mono::empty))
-                .filter(Boolean::booleanValue)
-                .map(_unused -> ResponseEntity.noContent().<Void>build())
-                .switchIfEmpty(Mono.error(new SessionIdNotFoundException(sessionId)));
+                .map(transactionId -> new SessionValidateResponseDto().transactionId(transactionId))
+                .map(ResponseEntity::ok);
     }
 }
