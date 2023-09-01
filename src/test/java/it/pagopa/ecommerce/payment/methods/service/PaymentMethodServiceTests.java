@@ -8,6 +8,7 @@ import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
+import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
@@ -38,6 +39,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 @SpringBootTest
@@ -374,7 +377,7 @@ class PaymentMethodServiceTests {
                 .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
                 .brand(npgResponse.getCircuit());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, false);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, false, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
@@ -399,7 +402,7 @@ class PaymentMethodServiceTests {
                 .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
                 .brand(npgResponse.getCircuit());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, true);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, true, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
@@ -413,4 +416,75 @@ class PaymentMethodServiceTests {
         Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any(), any());
     }
 
+    @Test
+    void shouldReturnTransactionIdForValidSession() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("sessionId", false, "transactionId");
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(Mono.just(TestUtil.getTestPaymentDoc(paymentMethod)));
+        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Optional.of(npgSessionDocument));
+
+        StepVerifier
+                .create(
+                        paymentMethodService.isSessionValid(
+                                paymentMethodId,
+                                npgSessionDocument.sessionId(),
+                                npgSessionDocument.securityToken()
+                        )
+                )
+                .expectNext(npgSessionDocument.transactionId())
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorForInvalidSession() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("sessionId", false, null);
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(Mono.just(TestUtil.getTestPaymentDoc(paymentMethod)));
+        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Optional.of(npgSessionDocument));
+
+        StepVerifier
+                .create(
+                        paymentMethodService
+                                .isSessionValid(paymentMethodId, npgSessionDocument.sessionId(), "OTHER_SECURITY_TOKEN")
+                )
+                .expectError(InvalidSessionException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorForSessionNotFound() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(Mono.just(TestUtil.getTestPaymentDoc(paymentMethod)));
+        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Optional.empty());
+
+        StepVerifier
+                .create(
+                        paymentMethodService
+                                .isSessionValid(paymentMethodId, "NON_EXISTING_SESSION_ID", "SECURITY_TOKEN")
+                )
+                .expectError(SessionIdNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorForNonExistingMethod() {
+        Mockito.when(paymentMethodRepository.findById(anyString())).thenReturn(Mono.empty());
+
+        StepVerifier
+                .create(
+                        paymentMethodService
+                                .isSessionValid("NON_EXISTING_METHOD_ID", "NON_EXISTING_SESSION_ID", "SECURITY_TOKEN")
+                )
+                .expectError(PaymentMethodNotFoundException.class)
+                .verify();
+    }
 }

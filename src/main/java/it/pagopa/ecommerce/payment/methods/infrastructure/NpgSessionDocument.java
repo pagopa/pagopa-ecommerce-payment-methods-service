@@ -10,7 +10,8 @@ import org.springframework.lang.Nullable;
 public record NpgSessionDocument(
         @NonNull @Id String sessionId,
         @NonNull String securityToken,
-        @Nullable CardDataDocument cardData
+        @Nullable CardDataDocument cardData,
+        @Nullable String transactionId
 
 ) {
     /*

@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
-import com.azure.cosmos.implementation.uuid.impl.UUIDUtil;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
@@ -13,6 +12,8 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
+import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
@@ -294,6 +295,7 @@ public class PaymentMethodService {
                                     new NpgSessionDocument(
                                             fields.getSessionId(),
                                             fields.getSecurityToken(),
+                                            null,
                                             null
                                     )
                             );
@@ -368,7 +370,8 @@ public class PaymentMethodService {
                                                                                 el.getLastFourDigits(),
                                                                                 el.getExpiringDate(),
                                                                                 el.getCircuit()
-                                                                        )
+                                                                        ),
+                                                                        null
                                                                 )
                                                         )
                                                 )
@@ -387,6 +390,36 @@ public class PaymentMethodService {
                                 Mono.error(new SessionIdNotFoundException(sessionId))
                         )
                 );
+    }
+
+    public Mono<String> isSessionValid(
+                                       String paymentMethodId,
+                                       String sessionId,
+                                       String securityToken
+    ) {
+        return paymentMethodRepository
+                .findById(paymentMethodId)
+                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+                .map(
+                        ignore -> npgSessionsTemplateWrapper.findById(sessionId)
+                )
+                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new SessionIdNotFoundException(sessionId))))
+                .flatMap(doc -> {
+                    String transactionId = doc.transactionId();
+                    if (transactionId == null) {
+                        return Mono.error(new InvalidSessionException(sessionId));
+                    } else {
+                        return Mono.just(doc);
+                    }
+                })
+                .flatMap(doc -> {
+                    if (!doc.securityToken().equals(securityToken)) {
+                        return Mono.error(new MismatchedSecurityTokenException(sessionId, doc.transactionId()));
+                    } else {
+                        return Mono.just(doc);
+                    }
+                })
+                .mapNotNull(NpgSessionDocument::transactionId);
     }
 
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(

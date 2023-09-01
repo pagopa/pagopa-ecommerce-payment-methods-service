@@ -4,10 +4,7 @@ import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
@@ -27,6 +24,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -230,4 +228,81 @@ class PaymentMethodsControllerTests {
         assertEquals("reason test", responseEntity.getBody().getDetail());
     }
 
+    @Test
+    void shouldReturnTransactionIdForValidSession() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String sessionId = "sessionId";
+        String securityToken = "securityToken";
+        String transactionId = "transactionId";
+        SessionValidateRequestDto requestBody = new SessionValidateRequestDto().securityToken(securityToken);
+        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken, paymentMethodId))
+                .thenReturn(Mono.just(transactionId));
+
+        SessionValidateResponseDto expected = new SessionValidateResponseDto().transactionId(transactionId);
+        webClient
+                .post()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/validate")
+                                .build(paymentMethodId, sessionId)
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(SessionValidateResponseDto.class)
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void shouldReturn404ForInvalidSession() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String sessionId = "sessionId";
+        String securityToken = "securityToken";
+        SessionValidateRequestDto requestBody = new SessionValidateRequestDto().securityToken(securityToken);
+        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken, paymentMethodId))
+                .thenReturn(Mono.error(new InvalidSessionException(sessionId)));
+
+        ProblemJsonDto expected = new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session");
+
+        webClient
+                .post()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/validate")
+                                .build(paymentMethodId, sessionId)
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT)
+                .expectBody(ProblemJsonDto.class)
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void shouldReturn404ForSessionNotFound() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String sessionId = "sessionId";
+        String securityToken = "securityToken";
+        SessionValidateRequestDto requestBody = new SessionValidateRequestDto().securityToken(securityToken);
+        Mockito.when(paymentMethodService.isSessionValid(sessionId, securityToken, paymentMethodId))
+                .thenReturn(Mono.error(new SessionIdNotFoundException(sessionId)));
+
+        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Session id not found");
+
+        webClient
+                .post()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/validate")
+                                .build(paymentMethodId, sessionId)
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(ProblemJsonDto.class)
+                .isEqualTo(expected);
+    }
 }

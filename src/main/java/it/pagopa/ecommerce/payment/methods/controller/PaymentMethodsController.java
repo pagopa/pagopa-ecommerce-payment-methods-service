@@ -2,10 +2,7 @@ package it.pagopa.ecommerce.payment.methods.controller;
 
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
@@ -37,10 +34,14 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 PaymentMethodAlreadyInUseException.class,
                 PaymentMethodNotFoundException.class,
                 SessionIdNotFoundException.class,
-                AfmResponseException.class
+                AfmResponseException.class,
+                InvalidSessionException.class,
+                MismatchedSecurityTokenException.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
+        String notFoundTitle = "Not found";
+
         if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),
@@ -48,7 +49,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             );
         } else if (exception instanceof PaymentMethodNotFoundException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Not found").detail("Payment method not found"),
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Payment method not found"),
                     HttpStatus.NOT_FOUND
             );
         } else if (exception instanceof AfmResponseException afmException) {
@@ -60,8 +61,18 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             );
         } else if (exception instanceof SessionIdNotFoundException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Not found").detail("Session id not found"),
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Session id not found"),
                     HttpStatus.NOT_FOUND
+            );
+        } else if (exception instanceof MismatchedSecurityTokenException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Session id not found"),
+                    HttpStatus.NOT_FOUND
+            );
+        } else if (exception instanceof InvalidSessionException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session"),
+                    HttpStatus.CONFLICT
             );
         } else {
             return new ResponseEntity<>(
@@ -191,6 +202,27 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     ) {
         log.info("[Payment Method controller] Retrieve card data from NPG");
         return paymentMethodService.getCardDataInformation(id, URLEncoder.encode(sessionId, Charset.defaultCharset()))
+                .map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<SessionValidateResponseDto>> validateSession(
+                                                                            String id,
+                                                                            String sessionId,
+                                                                            Mono<SessionValidateRequestDto> sessionValidateRequestDto,
+                                                                            ServerWebExchange exchange
+    ) {
+        return sessionValidateRequestDto
+                .doOnNext(
+                        req -> log.info(
+                                "Requesting session validation for paymentMethodId={}, sessionId={}",
+                                id,
+                                sessionId
+                        )
+                )
+                .map(SessionValidateRequestDto::getSecurityToken)
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken, id))
+                .map(transactionId -> new SessionValidateResponseDto().transactionId(transactionId))
                 .map(ResponseEntity::ok);
     }
 }
