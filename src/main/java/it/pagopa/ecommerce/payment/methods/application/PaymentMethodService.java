@@ -1,6 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
-import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
+import com.azure.cosmos.implementation.uuid.impl.UUIDUtil;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
@@ -269,11 +269,11 @@ public class PaymentMethodService {
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
 
                     UUID correlationId = UUID.randomUUID();
-                    URI resultUrl = URI.create(sessionUrlConfig.outcomeSuffix()).resolve(returnUrlBasePath);
+                    URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
                     URI merchantUrl = returnUrlBasePath;
-                    URI cancelUrl = URI.create(sessionUrlConfig.cancelSuffix()).resolve(returnUrlBasePath);
-                    String orderId = UUID.randomUUID().toString();
-                    String customerId = UUID.randomUUID().toString();
+                    URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
+                    String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+                    String customerId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
 
                     return npgClient.buildForm(
                             correlationId,

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import reactor.netty.http.client.HttpClient;
 
 import java.util.concurrent.TimeUnit;
@@ -41,11 +42,14 @@ public class NpgWebClientsConfig implements WebFluxConfigurer {
                         )
                 );
 
+        DefaultUriBuilderFactory defaultUriBuilderFactory = new DefaultUriBuilderFactory();
+        defaultUriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+
         WebClient webClient = ApiClient.buildWebClientBuilder().clientConnector(
                 new ReactorClientHttpConnector(httpClient)
-        ).baseUrl(npgClientUrl).build();
+        ).uriBuilderFactory(defaultUriBuilderFactory).baseUrl(npgClientUrl).build();
 
-        return new PaymentServicesApi(new ApiClient(webClient));
+        return new PaymentServicesApi(new ApiClient(webClient).setBasePath(npgClientUrl));
     }
 
     @Bean
