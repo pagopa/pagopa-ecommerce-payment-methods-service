@@ -24,6 +24,7 @@ import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -71,6 +72,8 @@ public class PaymentMethodService {
 
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
 
+    private final String npgDefaultApiKey;
+
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
@@ -78,7 +81,8 @@ public class PaymentMethodService {
             PaymentMethodFactory paymentMethodFactory,
             NpgClient npgClient,
             SessionUrlConfig sessionUrlConfig,
-            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
+            @Value("${npg.client.apiKey}") String npgDefaultApiKey
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
@@ -86,6 +90,7 @@ public class PaymentMethodService {
         this.paymentMethodRepository = paymentMethodRepository;
         this.sessionUrlConfig = sessionUrlConfig;
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
+        this.npgDefaultApiKey = npgDefaultApiKey;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -278,7 +283,8 @@ public class PaymentMethodService {
                             cancelUrl,
                             orderId,
                             customerId,
-                            paymentMethod
+                            paymentMethod,
+                            npgDefaultApiKey
                     ).map(form -> Tuples.of(form, sessionPaymentMethod));
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
@@ -347,7 +353,11 @@ public class PaymentMethodService {
                                         );
                                     } else {
                                         log.info("Cache miss for sessionId: {}", sessionId);
-                                        response = npgClient.getCardData(UUID.randomUUID(), sessionId)
+                                        response = npgClient.getCardData(
+                                                UUID.randomUUID(),
+                                                sessionId,
+                                                npgDefaultApiKey
+                                        )
                                                 .doOnSuccess(
                                                         el -> npgSessionsTemplateWrapper.save(
                                                                 new NpgSessionDocument(
