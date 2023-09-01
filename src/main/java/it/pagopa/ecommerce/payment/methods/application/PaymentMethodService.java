@@ -401,7 +401,7 @@ public class PaymentMethodService {
                 .findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .map(
-                        _unused -> npgSessionsTemplateWrapper.findById(sessionId)
+                        ignore -> npgSessionsTemplateWrapper.findById(sessionId)
                 )
                 .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new SessionIdNotFoundException(sessionId))))
                 .flatMap(doc -> {

@@ -40,6 +40,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
+        String notFoundTitle = "Not found";
+
         if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),
@@ -47,7 +49,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             );
         } else if (exception instanceof PaymentMethodNotFoundException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Not found").detail("Payment method not found"),
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Payment method not found"),
                     HttpStatus.NOT_FOUND
             );
         } else if (exception instanceof AfmResponseException afmException) {
@@ -59,12 +61,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             );
         } else if (exception instanceof SessionIdNotFoundException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Not found").detail("Session id not found"),
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Session id not found"),
                     HttpStatus.NOT_FOUND
             );
         } else if (exception instanceof MismatchedSecurityTokenException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Not found").detail("Session id not found"),
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Session id not found"),
                     HttpStatus.NOT_FOUND
             );
         } else if (exception instanceof InvalidSessionException) {
