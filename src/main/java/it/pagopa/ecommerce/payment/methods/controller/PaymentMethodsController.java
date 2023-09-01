@@ -242,6 +242,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     ) {
         return patchSessionRequestDto
                 .flatMap(updateData -> paymentMethodService.updateSession(id, sessionId, updateData))
-                .map(_updatedDocument -> ResponseEntity.ok(null));
+                .map(ignored -> ResponseEntity.ok(null));
     }
 }

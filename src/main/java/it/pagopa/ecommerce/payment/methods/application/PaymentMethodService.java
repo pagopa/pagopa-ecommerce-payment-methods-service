@@ -430,7 +430,7 @@ public class PaymentMethodService {
     ) {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .map(_unused -> npgSessionsTemplateWrapper.findById(sessionId))
+                .map(ignore -> npgSessionsTemplateWrapper.findById(sessionId))
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
                 .switchIfEmpty(Mono.error(new SessionIdNotFoundException(sessionId)))
                 .flatMap(document -> {
