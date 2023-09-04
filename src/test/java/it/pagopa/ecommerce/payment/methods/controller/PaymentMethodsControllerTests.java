@@ -192,7 +192,7 @@ class PaymentMethodsControllerTests {
                 .bodyValue(requestBody)
                 .exchange()
                 .expectStatus()
-                .isOk()
+                .isNoContent()
                 .expectBody()
                 .isEmpty();
     }
