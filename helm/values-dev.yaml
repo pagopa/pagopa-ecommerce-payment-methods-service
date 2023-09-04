@@ -72,7 +72,7 @@ microservice-chart:
     MONGO_USERNAME: pagopa-d-weu-ecommerce-cosmos-account
     MONGO_PORT: "10255"
     MONGO_SSL_ENABLED: "true"
-    REDIS_HOST: pagopa-u-weu-ecommerce-redis.redis.cache.windows.net
+    REDIS_HOST: pagopa-d-weu-ecommerce-redis.redis.cache.windows.net
     REDIS_PORT: "6380"
     REDIS_SSL_ENABLED: "true"
     AFM_URI: "https://api.dev.platform.pagopa.it/afm/calculator-service/v1/fees"
