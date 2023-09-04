@@ -226,7 +226,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 sessionId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken, id))
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, sessionId, securityToken))
                 .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId))
                 .map(ResponseEntity::ok);
     }
