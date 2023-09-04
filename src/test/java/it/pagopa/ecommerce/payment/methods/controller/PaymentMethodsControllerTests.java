@@ -24,13 +24,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
@@ -267,19 +265,19 @@ class PaymentMethodsControllerTests {
         Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, sessionId, securityToken))
                 .thenReturn(Mono.just(transactionId));
 
-        SessionValidateResponseDto expected = new SessionValidateResponseDto().transactionId(transactionId);
+        SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
+                .transactionId(transactionId);
         webClient
-                .post()
+                .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/validate")
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
                                 .build(paymentMethodId, sessionId)
                 )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
+                .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(SessionValidateResponseDto.class)
+                .expectBody(SessionGetTransactionIdResponseDto.class)
                 .isEqualTo(expected);
     }
 
@@ -295,13 +293,12 @@ class PaymentMethodsControllerTests {
         ProblemJsonDto expected = new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session");
 
         webClient
-                .post()
+                .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/validate")
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
                                 .build(paymentMethodId, sessionId)
                 )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
+                .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.CONFLICT)
@@ -321,13 +318,12 @@ class PaymentMethodsControllerTests {
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Session id not found");
 
         webClient
-                .post()
+                .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/validate")
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
                                 .build(paymentMethodId, sessionId)
                 )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
+                .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
                 .expectStatus()
                 .isNotFound()

@@ -315,13 +315,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /payment-methods/{id}/sessions/{sessionId}/validate:
-    post:
+  /payment-methods/{id}/sessions/{sessionId}/transactionId:
+    get:
       tags:
         - payment-methods
-      operationId: validateSession
-      summary: Validate sessionId - securityToken pair
-      description: API for validate a sessionId - securityToken pair
+      operationId: getTransactionIdForSession
+      summary: Get eCommerce transaction id for the given NPG session
+      description: API to get a transaction id from a NPG session
       parameters:
         - name: id
           in: path
@@ -335,15 +335,15 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        $ref: "#/components/requestBodies/PostSessionValidate"
+      security:
+        - BearerAuth: []
       responses:
         '200':
-          description: Session is valid
+          description: Session found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionValidateResponse'
+                $ref: '#/components/schemas/SessionGetTransactionIdResponse'
         '404':
           description: Session not found
           content:
@@ -668,18 +668,9 @@ components:
         - lastFourDigits
         - expiringDate
         - brand
-    SessionValidateRequest:
+    SessionGetTransactionIdResponse:
       type: object
-      description: Session validation request body
-      properties:
-        securityToken:
-          type: string
-          description: Security token provided by the payment gateway
-      required:
-        - securityToken
-    SessionValidateResponse:
-      type: object
-      description: Session validation successful response
+      description: Transaction id for session successful response
       properties:
         transactionId:
           type: string
@@ -714,15 +705,13 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/CalculateFeeRequest"
-    PostSessionValidate:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/SessionValidateRequest"
     PatchSession:
       required: true
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/PatchSessionRequest"
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
