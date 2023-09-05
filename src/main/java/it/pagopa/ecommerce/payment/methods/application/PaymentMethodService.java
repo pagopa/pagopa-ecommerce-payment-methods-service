@@ -1,30 +1,22 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
+import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.domain.v1.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
-import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
-import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
-import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
-import it.pagopa.ecommerce.commons.client.NpgClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
@@ -34,7 +26,11 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.net.URI;
-import java.util.*;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -423,7 +419,9 @@ public class PaymentMethodService {
                         return Mono.just(doc);
                     }
                 })
-                .mapNotNull(NpgSessionDocument::transactionId);
+                .mapNotNull(NpgSessionDocument::transactionId)
+                .map(TransactionId::new)
+                .map(TransactionId::base64);
     }
 
     public Mono<NpgSessionDocument> updateSession(
