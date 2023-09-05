@@ -20,6 +20,8 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -245,9 +247,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     private Mono<String> getAuthenticationToken(ServerWebExchange exchange) {
         return Mono.justOrEmpty(
-                exchange.getRequest()
-                        .getHeaders()
-                        .get("Authorization")
+                Optional.ofNullable(
+                        exchange.getRequest()
+                                .getHeaders()
+                                .get("Authorization")
+                )
+                        .orElse(List.of())
                         .stream()
                         .findFirst()
                         .filter(header -> header.startsWith("Bearer "))
