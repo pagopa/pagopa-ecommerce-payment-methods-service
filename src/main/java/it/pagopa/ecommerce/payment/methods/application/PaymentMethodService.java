@@ -15,6 +15,7 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
 import it.pagopa.ecommerce.payment.methods.exception.SessionIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
@@ -400,9 +401,11 @@ public class PaymentMethodService {
         return paymentMethodRepository
                 .findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+                .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
                 .map(
                         ignore -> npgSessionsTemplateWrapper.findById(sessionId)
                 )
+                .doOnNext(doc -> log.info("Found session for id {}: {}", sessionId, doc.isPresent()))
                 .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new SessionIdNotFoundException(sessionId))))
                 .flatMap(doc -> {
                     String transactionId = doc.transactionId();
@@ -414,12 +417,49 @@ public class PaymentMethodService {
                 })
                 .flatMap(doc -> {
                     if (!doc.securityToken().equals(securityToken)) {
+                        log.warn("Invalid security token for requested session id {}", sessionId);
                         return Mono.error(new MismatchedSecurityTokenException(sessionId, doc.transactionId()));
                     } else {
                         return Mono.just(doc);
                     }
                 })
                 .mapNotNull(NpgSessionDocument::transactionId);
+    }
+
+    public Mono<NpgSessionDocument> updateSession(
+                                                  String paymentMethodId,
+                                                  String sessionId,
+                                                  PatchSessionRequestDto updateData
+    ) {
+        return paymentMethodRepository.findById(paymentMethodId)
+                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+                .map(ignore -> npgSessionsTemplateWrapper.findById(sessionId))
+                .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
+                .switchIfEmpty(Mono.error(new SessionIdNotFoundException(sessionId)))
+                .flatMap(document -> {
+                    if (document.transactionId() != null) {
+                        return Mono.error(
+                                new SessionAlreadyAssociatedToTransaction(
+                                        sessionId,
+                                        document.transactionId(),
+                                        updateData.getTransactionId()
+                                )
+                        );
+                    } else {
+                        return Mono.just(document);
+                    }
+                })
+                .map(d -> {
+                    NpgSessionDocument updatedDocument = new NpgSessionDocument(
+                            d.sessionId(),
+                            d.securityToken(),
+                            d.cardData(),
+                            updateData.getTransactionId()
+                    );
+                    npgSessionsTemplateWrapper.save(updatedDocument);
+
+                    return updatedDocument;
+                });
     }
 
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
