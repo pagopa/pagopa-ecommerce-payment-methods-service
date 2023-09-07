@@ -273,13 +273,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /payment-methods/{id}/sessions/{sessionId}/validate:
-    post:
+    patch:
       tags:
         - payment-methods
-      operationId: validateSession
-      summary: Validate sessionId - securityToken pair
-      description: API for validate a sessionId - securityToken pair
+      operationId: updateSession
+      summary: Update session data
+      description: API for updating session data
       parameters:
         - name: id
           in: path
@@ -294,14 +293,57 @@ paths:
           schema:
             type: string
       requestBody:
-        $ref: "#/components/requestBodies/PostSessionValidate"
+        $ref: "#/components/requestBodies/PatchSession"
       responses:
-        '200':
-          description: Session is valid
+        '204':
+          description: Session updated
+        '404':
+          description: Session not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionValidateResponse'
+                $ref: '#/components/schemas/ProblemJson'
+        '409':
+          description: Session already associated to transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /payment-methods/{id}/sessions/{sessionId}/transactionId:
+    get:
+      tags:
+        - payment-methods
+      operationId: getTransactionIdForSession
+      summary: Get eCommerce transaction id for the given NPG session
+      description: API to get a transaction id from a NPG session
+      parameters:
+        - name: id
+          in: path
+          description: Payment Method ID
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: path
+          description: Session payment method ID related to NPG
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionGetTransactionIdResponse'
         '404':
           description: Session not found
           content:
@@ -626,22 +668,22 @@ components:
         - lastFourDigits
         - expiringDate
         - brand
-    SessionValidateRequest:
+    SessionGetTransactionIdResponse:
       type: object
-      description: Session validation request body
-      properties:
-        securityToken:
-          type: string
-          description: Security token provided by the payment gateway
-      required:
-        - securityToken
-    SessionValidateResponse:
-      type: object
-      description: Session validation successful response
+      description: Transaction id for session successful response
       properties:
         transactionId:
           type: string
           description: Transaction id associated to this NPG session
+      required:
+        - transactionId
+    PatchSessionRequest:
+      type: object
+      description: Session data to update
+      properties:
+        transactionId:
+          type: string
+          description: Transaction id to associate to this session
       required:
         - transactionId
   requestBodies:
@@ -663,9 +705,13 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/CalculateFeeRequest"
-    PostSessionValidate:
+    PatchSession:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SessionValidateRequest"
+            $ref: "#/components/schemas/PatchSessionRequest"
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

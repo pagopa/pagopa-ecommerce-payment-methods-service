@@ -20,6 +20,8 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,7 +38,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 SessionIdNotFoundException.class,
                 AfmResponseException.class,
                 InvalidSessionException.class,
-                MismatchedSecurityTokenException.class
+                MismatchedSecurityTokenException.class,
+                SessionAlreadyAssociatedToTransaction.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
@@ -72,6 +75,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         } else if (exception instanceof InvalidSessionException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session"),
+                    HttpStatus.CONFLICT
+            );
+        } else if (exception instanceof SessionAlreadyAssociatedToTransaction) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(409).title("Session already associated to transaction")
+                            .detail(exception.getMessage()),
                     HttpStatus.CONFLICT
             );
         } else {
@@ -206,13 +215,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<SessionValidateResponseDto>> validateSession(
-                                                                            String id,
-                                                                            String sessionId,
-                                                                            Mono<SessionValidateRequestDto> sessionValidateRequestDto,
-                                                                            ServerWebExchange exchange
+    public Mono<ResponseEntity<SessionGetTransactionIdResponseDto>> getTransactionIdForSession(
+                                                                                               String id,
+                                                                                               String sessionId,
+                                                                                               ServerWebExchange exchange
     ) {
-        return sessionValidateRequestDto
+        return getAuthenticationToken(exchange)
                 .doOnNext(
                         req -> log.info(
                                 "Requesting session validation for paymentMethodId={}, sessionId={}",
@@ -220,9 +228,35 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 sessionId
                         )
                 )
-                .map(SessionValidateRequestDto::getSecurityToken)
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(sessionId, securityToken, id))
-                .map(transactionId -> new SessionValidateResponseDto().transactionId(transactionId))
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, sessionId, securityToken))
+                .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId))
                 .map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> updateSession(
+                                                    String id,
+                                                    String sessionId,
+                                                    Mono<PatchSessionRequestDto> patchSessionRequestDto,
+                                                    ServerWebExchange exchange
+    ) {
+        return patchSessionRequestDto
+                .flatMap(updateData -> paymentMethodService.updateSession(id, sessionId, updateData))
+                .map(ignored -> ResponseEntity.noContent().build());
+    }
+
+    private Mono<String> getAuthenticationToken(ServerWebExchange exchange) {
+        return Mono.justOrEmpty(
+                Optional.ofNullable(
+                        exchange.getRequest()
+                                .getHeaders()
+                                .get("Authorization")
+                )
+                        .orElse(List.of())
+                        .stream()
+                        .findFirst()
+                        .filter(header -> header.startsWith("Bearer "))
+                        .map(header -> header.substring("Bearer ".length()))
+        );
     }
 }

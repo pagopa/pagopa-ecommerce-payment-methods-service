@@ -287,4 +287,20 @@ public class TestUtil {
         }
         return document;
     }
+
+    public static PatchSessionRequestDto patchSessionRequest() {
+        return new PatchSessionRequestDto().transactionId("transactionId");
+    }
+
+    public static NpgSessionDocument patchSessionResponse(
+                                                          NpgSessionDocument document,
+                                                          String newTransactionId
+    ) {
+        return new NpgSessionDocument(
+                document.sessionId(),
+                document.securityToken(),
+                document.cardData(),
+                newTransactionId
+        );
+    }
 }
