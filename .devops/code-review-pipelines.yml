@@ -13,7 +13,7 @@ resources:
     - repository: pagopaEcommerceLocal
       type: github
       name: pagopa/pagopa-ecommerce-local
-      ref: main
+      ref: CHK-1877-collection-test-for-payment-method
       endpoint: 'io-azure-devops-github-ro'
 
 stages:
