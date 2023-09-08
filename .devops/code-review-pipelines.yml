@@ -96,7 +96,7 @@ stages:
             displayName: 'Health check'
           - script: yarn global add newman
             displayName: 'newman installation'
-          - script: newman run api-tests/ecommerce-for-checkout/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/ecommerce-for-checkout/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
+          - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
             displayName: 'Run api test'
             continueOnError: false
           - task: PublishTestResults@2
