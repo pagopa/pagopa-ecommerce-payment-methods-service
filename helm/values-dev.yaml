@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.16.2"
+    tag: "0.17.1"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -45,10 +45,10 @@ microservice-chart:
   resources:
     requests:
       memory: "512Mi"
-      cpu: "200m"
+      cpu: "300m"
     limits:
       memory: "512Mi"
-      cpu: "200m"
+      cpu: "300m"
   autoscaling:
     minReplica: 1
     maxReplica: 2
