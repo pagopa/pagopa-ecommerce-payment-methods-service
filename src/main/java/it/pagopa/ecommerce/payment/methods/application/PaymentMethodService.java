@@ -273,8 +273,10 @@ public class PaymentMethodService {
 
                     UUID correlationId = UUID.randomUUID();
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
-                    //SESSION_URL_NOTIFICATION_URL: "https://api.dev.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{0}/outcomes?paymentMethodId={1}"
-                    URI notificationUrl = URI.create(MessageFormat.format(sessionUrlConfig.notificationUrl(),"sessionId",id));
+                    // SESSION_URL_NOTIFICATION_URL:
+                    // "https://api.dev.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{0}/outcomes?paymentMethodId={1}"
+                    URI notificationUrl = URI
+                            .create(MessageFormat.format(sessionUrlConfig.notificationUrl(), "sessionId", id));
                     URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
                     String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
                     String customerId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
