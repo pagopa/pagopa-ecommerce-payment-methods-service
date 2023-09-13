@@ -60,7 +60,8 @@ class PaymentMethodServiceTests {
     private final SessionUrlConfig sessionUrlConfig = new SessionUrlConfig(
             URI.create("http://localhost:1234"),
             "/esito",
-            "/annulla"
+            "/annulla",
+            "/notificationUrl"
     );
 
     private final String npgDefaultApiKey = UUID.randomUUID().toString();
