@@ -210,7 +210,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                          ServerWebExchange exchange
     ) {
         log.info("[Payment Method controller] Retrieve card data from NPG");
-        return paymentMethodService.getCardDataInformation(id, URLEncoder.encode(sessionId, Charset.defaultCharset()))
+        return paymentMethodService.getCardDataInformation(id, sessionId)
                 .map(ResponseEntity::ok);
     }
 
