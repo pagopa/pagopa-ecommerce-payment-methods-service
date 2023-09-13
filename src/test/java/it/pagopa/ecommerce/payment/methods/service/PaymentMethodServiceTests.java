@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.domain.v1.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
@@ -422,7 +423,9 @@ class PaymentMethodServiceTests {
     void shouldReturnTransactionIdForValidSession() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("sessionId", false, "transactionId");
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("sessionId", false, transactionId.value());
+        String encodedTransactionId = transactionId.base64();
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(TestUtil.getTestPaymentDoc(paymentMethod)));
@@ -436,7 +439,7 @@ class PaymentMethodServiceTests {
                                 npgSessionDocument.securityToken()
                         )
                 )
-                .expectNext(npgSessionDocument.transactionId())
+                .expectNext(encodedTransactionId)
                 .verifyComplete();
     }
 
