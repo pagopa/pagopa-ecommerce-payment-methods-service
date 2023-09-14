@@ -209,11 +209,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Override
     public Mono<ResponseEntity<SessionPaymentMethodResponseDto>> getSessionPaymentMethod(
                                                                                          String id,
-                                                                                         String sessionId,
+                                                                                         String orderId,
                                                                                          ServerWebExchange exchange
     ) {
         log.info("[Payment Method controller] Retrieve card data from NPG");
-        return paymentMethodService.getCardDataInformation(id, URLEncoder.encode(sessionId, Charset.defaultCharset()))
+        return paymentMethodService.getCardDataInformation(id, orderId)
                 .map(ResponseEntity::ok);
     }
 

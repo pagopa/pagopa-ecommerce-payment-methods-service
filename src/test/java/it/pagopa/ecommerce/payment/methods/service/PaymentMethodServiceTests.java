@@ -372,21 +372,24 @@ class PaymentMethodServiceTests {
     @Test
     void shouldRetrieveCardDataWithCacheMiss() {
         String paymentMethodId = "paymentMethodId";
+        String orderId = "orderId";
         String sessionId = "sessionId";
         CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
-                .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
+                .bin(npgResponse.getBin())
+                .sessionId(sessionId)
+                .expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
                 .brand(npgResponse.getCircuit());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("orderId", sessionId, false, null);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(orderId, sessionId, false, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
-        Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
+        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Optional.of(npgSessionDocument));
         Mockito.when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
         /* Tests */
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
@@ -397,21 +400,21 @@ class PaymentMethodServiceTests {
     @Test
     void shouldRetrieveCardDataWithCacheHit() {
         String paymentMethodId = "paymentMethodId";
-        String sessionId = "sessionId";
+        String orderId = "orderId";
         CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
-                .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
+                .bin(npgResponse.getBin()).sessionId(orderId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
                 .brand(npgResponse.getCircuit());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("orderId", sessionId, true, null);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(orderId, "sessionId", true, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
-        Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
+        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Optional.of(npgSessionDocument));
 
         /* Tests */
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());

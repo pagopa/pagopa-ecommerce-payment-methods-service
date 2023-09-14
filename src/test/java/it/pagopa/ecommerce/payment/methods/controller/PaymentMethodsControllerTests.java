@@ -198,16 +198,17 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldRetrieveCardDataFromWithSessionId() {
         String paymentMethodId = "paymentMethodId";
-        String sessionId = "sessionId";
-        SessionPaymentMethodResponseDto response = new SessionPaymentMethodResponseDto().sessionId(sessionId)
+        String orderId = "orderId";
+        SessionPaymentMethodResponseDto response = new SessionPaymentMethodResponseDto()
+                .sessionId("sessionId")
                 .bin("123456").brand("VISA").expiringDate("0424")
                 .lastFourDigits("1234");
-        Mockito.when(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
+        Mockito.when(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
                 .thenReturn(Mono.just(response));
 
         webClient
                 .get()
-                .uri("/payment-methods/" + paymentMethodId + "/sessions/" + sessionId)
+                .uri("/payment-methods/" + paymentMethodId + "/sessions/" + orderId)
                 .exchange()
                 .expectStatus()
                 .isOk()

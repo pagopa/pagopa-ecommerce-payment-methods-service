@@ -333,37 +333,37 @@ public class PaymentMethodService {
 
     public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
                                                                         String id,
-                                                                        String sessionId
+                                                                        String orderId
     ) {
         log.info(
-                "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and sessionId: {}",
+                "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and orderId: {}",
                 id,
-                sessionId
+                orderId
         );
         return paymentMethodRepository
                 .findById(id)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
                 .map(
-                        el -> npgSessionsTemplateWrapper.findById(sessionId)
+                        el -> npgSessionsTemplateWrapper.findById(orderId)
                 )
                 .flatMap(
                         session -> session.map(
                                 sx -> {
                                     Mono<SessionPaymentMethodResponseDto> response;
                                     if (sx.cardData() != null) {
-                                        log.info("Cache hit for sessionId: {}", sessionId);
+                                        log.info("Cache hit for orderId: {}", orderId);
                                         response = Mono.just(
                                                 new SessionPaymentMethodResponseDto().bin(sx.cardData().bin())
-                                                        .sessionId(sessionId)
+                                                        .sessionId(sx.sessionId())
                                                         .brand(sx.cardData().circuit())
                                                         .expiringDate(sx.cardData().expiringDate())
                                                         .lastFourDigits(sx.cardData().lastFourDigits())
                                         );
                                     } else {
-                                        log.info("Cache miss for sessionId: {}", sessionId);
+                                        log.info("Cache miss for orderId: {}", orderId);
                                         response = npgClient.getCardData(
                                                 UUID.randomUUID(),
-                                                sessionId,
+                                                orderId,
                                                 npgDefaultApiKey
                                         )
                                                 .doOnSuccess(
@@ -384,7 +384,7 @@ public class PaymentMethodService {
                                                 )
                                                 .map(
                                                         el -> new SessionPaymentMethodResponseDto().bin(el.getBin())
-                                                                .sessionId(sessionId)
+                                                                .sessionId(sx.sessionId())
                                                                 .brand(el.getCircuit())
                                                                 .expiringDate(el.getExpiringDate())
                                                                 .lastFourDigits(el.getLastFourDigits())
@@ -394,7 +394,7 @@ public class PaymentMethodService {
                                 }
 
                         ).orElse(
-                                Mono.error(new SessionIdNotFoundException(sessionId))
+                                Mono.error(new SessionIdNotFoundException(orderId))
                         )
                 );
     }
