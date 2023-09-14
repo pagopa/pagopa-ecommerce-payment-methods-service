@@ -177,14 +177,14 @@ class PaymentMethodsControllerTests {
         NpgSessionDocument originalSession = TestUtil.npgSessionDocument("orderId", "sessionId", false, null);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.sessionId(), requestBody))
+        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
                 .thenReturn(Mono.just(updatedDocument));
 
         webClient
                 .patch()
                 .uri(
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
-                                .build(paymentMethodId, originalSession.sessionId())
+                                .build(paymentMethodId, originalSession.orderId())
                 )
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
@@ -316,7 +316,7 @@ class PaymentMethodsControllerTests {
         Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
                 .thenReturn(Mono.error(new OrderIdNotFoundException(orderId)));
 
-        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Session id not found");
+        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Order id not found");
 
         webClient
                 .get()

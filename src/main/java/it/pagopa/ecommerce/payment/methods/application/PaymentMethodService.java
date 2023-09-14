@@ -423,7 +423,7 @@ public class PaymentMethodService {
                 })
                 .flatMap(doc -> {
                     if (!doc.securityToken().equals(securityToken)) {
-                        log.warn("Invalid security token for requested session id {}", orderId);
+                        log.warn("Invalid security token for requested order id {}", orderId);
                         return Mono.error(new MismatchedSecurityTokenException(orderId, doc.transactionId()));
                     } else {
                         return Mono.just(doc);
@@ -436,19 +436,19 @@ public class PaymentMethodService {
 
     public Mono<NpgSessionDocument> updateSession(
                                                   String paymentMethodId,
-                                                  String sessionId,
+                                                  String orderId,
                                                   PatchSessionRequestDto updateData
     ) {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .map(ignore -> npgSessionsTemplateWrapper.findById(sessionId))
+                .map(ignore -> npgSessionsTemplateWrapper.findById(orderId))
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
-                .switchIfEmpty(Mono.error(new OrderIdNotFoundException(sessionId)))
+                .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
                     if (document.transactionId() != null) {
                         return Mono.error(
                                 new SessionAlreadyAssociatedToTransaction(
-                                        sessionId,
+                                        orderId,
                                         document.transactionId(),
                                         updateData.getTransactionId()
                                 )

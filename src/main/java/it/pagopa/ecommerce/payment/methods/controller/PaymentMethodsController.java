@@ -237,12 +237,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Override
     public Mono<ResponseEntity<Void>> updateSession(
                                                     String id,
-                                                    String sessionId,
+                                                    String orderId,
                                                     Mono<PatchSessionRequestDto> patchSessionRequestDto,
                                                     ServerWebExchange exchange
     ) {
         return patchSessionRequestDto
-                .flatMap(updateData -> paymentMethodService.updateSession(id, sessionId, updateData))
+                .flatMap(updateData -> paymentMethodService.updateSession(id, orderId, updateData))
                 .map(ignored -> ResponseEntity.noContent().build());
     }
 
