@@ -353,7 +353,8 @@ public class PaymentMethodService {
                                     if (sx.cardData() != null) {
                                         log.info("Cache hit for orderId: {}", orderId);
                                         response = Mono.just(
-                                                new SessionPaymentMethodResponseDto().bin(sx.cardData().bin())
+                                                new SessionPaymentMethodResponseDto()
+                                                        .bin(sx.cardData().bin())
                                                         .sessionId(sx.sessionId())
                                                         .brand(sx.cardData().circuit())
                                                         .expiringDate(sx.cardData().expiringDate())
@@ -363,7 +364,7 @@ public class PaymentMethodService {
                                         log.info("Cache miss for orderId: {}", orderId);
                                         response = npgClient.getCardData(
                                                 UUID.randomUUID(),
-                                                orderId,
+                                                sx.sessionId(),
                                                 npgDefaultApiKey
                                         )
                                                 .doOnSuccess(

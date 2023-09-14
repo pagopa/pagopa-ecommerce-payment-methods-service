@@ -401,14 +401,15 @@ class PaymentMethodServiceTests {
     void shouldRetrieveCardDataWithCacheHit() {
         String paymentMethodId = "paymentMethodId";
         String orderId = "orderId";
+        String sessionId = "sessionId";
         CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
-                .bin(npgResponse.getBin()).sessionId(orderId).expiringDate(npgResponse.getExpiringDate())
+                .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
                 .brand(npgResponse.getCircuit());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(orderId, "sessionId", true, null);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(orderId, sessionId, true, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Optional.of(npgSessionDocument));
