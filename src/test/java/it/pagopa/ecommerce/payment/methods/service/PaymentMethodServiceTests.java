@@ -380,7 +380,7 @@ class PaymentMethodServiceTests {
                 .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
                 .brand(npgResponse.getCircuit());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, false, null);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("orderId", sessionId, false, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
@@ -405,7 +405,7 @@ class PaymentMethodServiceTests {
                 .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
                 .brand(npgResponse.getCircuit());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, true, null);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("orderId", sessionId, true, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
@@ -424,7 +424,8 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("sessionId", false, transactionId.value());
+        NpgSessionDocument npgSessionDocument = TestUtil
+                .npgSessionDocument("orderId", "sessionId", false, transactionId.value());
         String encodedTransactionId = transactionId.base64();
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
@@ -447,7 +448,7 @@ class PaymentMethodServiceTests {
     void shouldReturnErrorForInvalidSession() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("sessionId", false, null);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("orderId", "sessionId", false, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(TestUtil.getTestPaymentDoc(paymentMethod)));
@@ -502,12 +503,13 @@ class PaymentMethodServiceTests {
         String transactionId = "transactionId";
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, true, null);
+        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("orderId", sessionId, true, null);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));
 
         NpgSessionDocument expectedResponse = new NpgSessionDocument(
+                npgSessionDocument.orderId(),
                 npgSessionDocument.sessionId(),
                 npgSessionDocument.securityToken(),
                 npgSessionDocument.cardData(),
@@ -528,7 +530,8 @@ class PaymentMethodServiceTests {
         String transactionId = "transactionId";
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
-        NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument(sessionId, true, "OTHER_TRANSACTION_ID");
+        NpgSessionDocument npgSessionDocument = TestUtil
+                .npgSessionDocument("orderId", sessionId, true, "OTHER_TRANSACTION_ID");
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.of(npgSessionDocument));

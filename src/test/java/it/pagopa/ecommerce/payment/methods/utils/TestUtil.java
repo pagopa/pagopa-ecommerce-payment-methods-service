@@ -270,6 +270,7 @@ public class TestUtil {
     }
 
     public static NpgSessionDocument npgSessionDocument(
+                                                        String orderId,
                                                         String sessionId,
                                                         boolean hasCardDataInformation,
                                                         String transactionId
@@ -277,13 +278,14 @@ public class TestUtil {
         NpgSessionDocument document;
         if (hasCardDataInformation) {
             document = new NpgSessionDocument(
+                    orderId,
                     sessionId,
                     "securityToken",
                     new CardDataDocument("12345678", "1234", "0424", "VISA"),
                     transactionId
             );
         } else {
-            document = new NpgSessionDocument(sessionId, "securityToken", null, transactionId);
+            document = new NpgSessionDocument(orderId, sessionId, "securityToken", null, transactionId);
         }
         return document;
     }
@@ -297,6 +299,7 @@ public class TestUtil {
                                                           String newTransactionId
     ) {
         return new NpgSessionDocument(
+                document.orderId(),
                 document.sessionId(),
                 document.securityToken(),
                 document.cardData(),

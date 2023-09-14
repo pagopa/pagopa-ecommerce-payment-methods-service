@@ -174,7 +174,7 @@ class PaymentMethodsControllerTests {
         PatchSessionRequestDto requestBody = TestUtil.patchSessionRequest();
         String newTransactionId = requestBody.getTransactionId();
 
-        NpgSessionDocument originalSession = TestUtil.npgSessionDocument("sessionId", false, null);
+        NpgSessionDocument originalSession = TestUtil.npgSessionDocument("orderId", "sessionId", false, null);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
         Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.sessionId(), requestBody))

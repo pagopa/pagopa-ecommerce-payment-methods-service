@@ -298,6 +298,7 @@ public class PaymentMethodService {
                     npgSessionsTemplateWrapper
                             .save(
                                     new NpgSessionDocument(
+                                            orderId,
                                             fields.getSessionId(),
                                             fields.getSecurityToken(),
                                             null,
@@ -368,6 +369,7 @@ public class PaymentMethodService {
                                                 .doOnSuccess(
                                                         el -> npgSessionsTemplateWrapper.save(
                                                                 new NpgSessionDocument(
+                                                                        sx.orderId(),
                                                                         sx.sessionId(),
                                                                         sx.securityToken(),
                                                                         new CardDataDocument(
@@ -457,6 +459,7 @@ public class PaymentMethodService {
                 })
                 .map(d -> {
                     NpgSessionDocument updatedDocument = new NpgSessionDocument(
+                            d.orderId(),
                             d.sessionId(),
                             d.securityToken(),
                             d.cardData(),
