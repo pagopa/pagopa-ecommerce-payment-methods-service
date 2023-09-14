@@ -605,14 +605,14 @@ components:
       type: object
       description: Form data needed to create a payment method input form
       properties:
-        sessionId:
+        orderId:
           type: string
           description: Identifier of the payment gateway session associated to the form
         paymentMethodData:
           $ref: "#/components/schemas/CardFormFields"
       required:
         - paymentMethodData
-        - sessionId
+        - orderId
     CardFormFields:
       type: object
       description: Form fields for credit cards
