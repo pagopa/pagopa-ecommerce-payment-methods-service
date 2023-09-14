@@ -219,9 +219,9 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturnResponseSessionIdNotFound() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
-                .errorHandler(new SessionIdNotFoundException("sessionId"));
+                .errorHandler(new OrderIdNotFoundException("orderId"));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals("Session id not found", responseEntity.getBody().getDetail());
+        assertEquals("Order id not found", responseEntity.getBody().getDetail());
     }
 
     @Test
@@ -259,11 +259,11 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturnTransactionIdForValidSession() {
         String paymentMethodId = UUID.randomUUID().toString();
-        String sessionId = "sessionId";
+        String orderId = "orderId";
         String securityToken = "securityToken";
         String transactionId = "transactionId";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, sessionId, securityToken))
+        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -271,8 +271,8 @@ class PaymentMethodsControllerTests {
         webClient
                 .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
-                                .build(paymentMethodId, sessionId)
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
@@ -285,19 +285,19 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturn404ForInvalidSession() {
         String paymentMethodId = UUID.randomUUID().toString();
-        String sessionId = "sessionId";
+        String orderId = "orderId";
         String securityToken = "securityToken";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, sessionId, securityToken))
-                .thenReturn(Mono.error(new InvalidSessionException(sessionId)));
+        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
+                .thenReturn(Mono.error(new InvalidSessionException(orderId)));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session");
 
         webClient
                 .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
-                                .build(paymentMethodId, sessionId)
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
@@ -310,19 +310,19 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturn404ForSessionNotFound() {
         String paymentMethodId = UUID.randomUUID().toString();
-        String sessionId = "sessionId";
+        String orderId = "orderId";
         String securityToken = "securityToken";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, sessionId, securityToken))
-                .thenReturn(Mono.error(new SessionIdNotFoundException(sessionId)));
+        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
+                .thenReturn(Mono.error(new OrderIdNotFoundException(orderId)));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Session id not found");
 
         webClient
                 .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
-                                .build(paymentMethodId, sessionId)
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()

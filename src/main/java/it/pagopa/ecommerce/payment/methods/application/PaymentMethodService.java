@@ -394,14 +394,14 @@ public class PaymentMethodService {
                                 }
 
                         ).orElse(
-                                Mono.error(new SessionIdNotFoundException(orderId))
+                                Mono.error(new OrderIdNotFoundException(orderId))
                         )
                 );
     }
 
     public Mono<String> isSessionValid(
                                        String paymentMethodId,
-                                       String sessionId,
+                                       String orderId,
                                        String securityToken
     ) {
         return paymentMethodRepository
@@ -409,22 +409,22 @@ public class PaymentMethodService {
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
                 .map(
-                        ignore -> npgSessionsTemplateWrapper.findById(sessionId)
+                        ignore -> npgSessionsTemplateWrapper.findById(orderId)
                 )
-                .doOnNext(doc -> log.info("Found session for id {}: {}", sessionId, doc.isPresent()))
-                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new SessionIdNotFoundException(sessionId))))
+                .doOnNext(doc -> log.info("Found session for order id {}: {}", orderId, doc.isPresent()))
+                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new OrderIdNotFoundException(orderId))))
                 .flatMap(doc -> {
                     String transactionId = doc.transactionId();
                     if (transactionId == null) {
-                        return Mono.error(new InvalidSessionException(sessionId));
+                        return Mono.error(new InvalidSessionException(orderId));
                     } else {
                         return Mono.just(doc);
                     }
                 })
                 .flatMap(doc -> {
                     if (!doc.securityToken().equals(securityToken)) {
-                        log.warn("Invalid security token for requested session id {}", sessionId);
-                        return Mono.error(new MismatchedSecurityTokenException(sessionId, doc.transactionId()));
+                        log.warn("Invalid security token for requested session id {}", orderId);
+                        return Mono.error(new MismatchedSecurityTokenException(orderId, doc.transactionId()));
                     } else {
                         return Mono.just(doc);
                     }
@@ -443,7 +443,7 @@ public class PaymentMethodService {
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .map(ignore -> npgSessionsTemplateWrapper.findById(sessionId))
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
-                .switchIfEmpty(Mono.error(new SessionIdNotFoundException(sessionId)))
+                .switchIfEmpty(Mono.error(new OrderIdNotFoundException(sessionId)))
                 .flatMap(document -> {
                     if (document.transactionId() != null) {
                         return Mono.error(

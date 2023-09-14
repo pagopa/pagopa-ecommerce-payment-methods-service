@@ -315,7 +315,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /payment-methods/{id}/sessions/{sessionId}/transactionId:
+  /payment-methods/{id}/sessions/{orderId}/transactionId:
     get:
       tags:
         - payment-methods
@@ -329,9 +329,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: sessionId
+        - name: orderId
           in: path
-          description: Session payment method ID related to NPG
+          description: Order id related to NPG session
           required: true
           schema:
             type: string
