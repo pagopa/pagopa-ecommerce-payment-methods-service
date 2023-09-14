@@ -21,16 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -272,17 +272,27 @@ public class PaymentMethodService {
                     URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
                     String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
                     String customerId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+                    URI notificationUrl = UriComponentsBuilder
+                            .fromHttpUrl(sessionUrlConfig.notificationUrl())
+                            .build(
+                                    Map.of(
+                                            "orderId",
+                                            orderId,
+                                            "paymentMethodId",
+                                            id
+                                    )
+                            );
 
                     return npgClient.buildForm(
-                            correlationId,
-                            returnUrlBasePath,
-                            resultUrl,
-                            merchantUrl,
-                            cancelUrl,
-                            orderId,
-                            customerId,
-                            paymentMethod,
-                            npgDefaultApiKey
+                            correlationId, // correlationId
+                            merchantUrl, // merchantUrl
+                            resultUrl, // resultUrl
+                            notificationUrl, // notificationUrl
+                            cancelUrl, // cancelUrl
+                            orderId, // orderId
+                            customerId, // customerId
+                            paymentMethod, // paymentMethod
+                            npgDefaultApiKey // defaultApiKey
                     ).map(form -> Tuples.of(form, sessionPaymentMethod));
                 }).map(data -> {
                     FieldsDto fields = data.getT1();

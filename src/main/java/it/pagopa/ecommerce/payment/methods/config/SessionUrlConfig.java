@@ -8,6 +8,8 @@ import java.net.URI;
 public record SessionUrlConfig(
         URI basePath,
         String outcomeSuffix,
-        String cancelSuffix
+        String cancelSuffix,
+
+        String notificationUrl
 ) {
 }
