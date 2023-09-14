@@ -16,20 +16,16 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -257,7 +253,10 @@ public class PaymentMethodService {
 
     }
 
-    public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(String id) {
+    public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
+                                                                        String id,
+                                                                        String orderId
+    ) {
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
@@ -270,7 +269,6 @@ public class PaymentMethodService {
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
                     URI merchantUrl = returnUrlBasePath;
                     URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
-                    String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
                     String customerId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
                     URI notificationUrl = UriComponentsBuilder
                             .fromHttpUrl(sessionUrlConfig.notificationUrl())
@@ -312,7 +310,7 @@ public class PaymentMethodService {
                     SessionPaymentMethod paymentMethod = data.getT2();
 
                     return new CreateSessionResponseDto()
-                            .sessionId(fields.getSessionId())
+                            .orderId(orderId)
                             .paymentMethodData(
                                     new CardFormFieldsDto()
                                             .paymentMethod(paymentMethod.value)

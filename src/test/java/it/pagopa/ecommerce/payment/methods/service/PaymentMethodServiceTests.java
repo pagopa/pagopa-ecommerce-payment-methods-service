@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 @SpringBootTest
@@ -312,6 +311,7 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         FieldsDto npgResponse = TestUtil.npgResponse();
+        String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any()))
@@ -321,7 +321,7 @@ class PaymentMethodServiceTests {
         Mockito.doNothing().when(npgSessionsTemplateWrapper).save(any());
 
         CreateSessionResponseDto expected = new CreateSessionResponseDto()
-                .sessionId(npgResponse.getSessionId())
+                .orderId(orderId)
                 .paymentMethodData(
                         new CardFormFieldsDto()
                                 .paymentMethod(PaymentMethodService.SessionPaymentMethod.CARDS.value)
@@ -337,7 +337,7 @@ class PaymentMethodServiceTests {
                                 )
                 );
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, orderId))
                 .expectNext(expected)
                 .verifyComplete();
     }
