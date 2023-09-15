@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
@@ -344,5 +345,31 @@ class PaymentMethodsControllerTests {
                 );
 
         assertEquals(HttpStatus.CONFLICT, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnErrorOnMismatchedSecurityToken() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String orderId = "orderId";
+        String securityToken = "securityToken";
+        String transactionId = "transactionId";
+
+        Mockito.when(paymentMethodService.isSessionValid(eq(paymentMethodId), eq(orderId), any()))
+                .thenReturn(Mono.error(new MismatchedSecurityTokenException(orderId, transactionId)));
+
+        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Order id not found");
+
+        webClient
+                .get()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
+                )
+                .headers(h -> h.setBearerAuth(securityToken))
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(ProblemJsonDto.class)
+                .isEqualTo(expected);
     }
 }
