@@ -8,7 +8,8 @@ import org.springframework.lang.Nullable;
 
 @RedisHash(value = "keys", timeToLive = 10 * 60)
 public record NpgSessionDocument(
-        @NonNull @Id String sessionId,
+        @NonNull @Id String orderId,
+        @NonNull String sessionId,
         @NonNull String securityToken,
         @Nullable CardDataDocument cardData,
         @Nullable String transactionId

@@ -18,10 +18,9 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,7 +34,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         {
                 PaymentMethodAlreadyInUseException.class,
                 PaymentMethodNotFoundException.class,
-                SessionIdNotFoundException.class,
+                OrderIdNotFoundException.class,
                 AfmResponseException.class,
                 InvalidSessionException.class,
                 MismatchedSecurityTokenException.class,
@@ -62,14 +61,14 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                             .detail(afmException.reason),
                     afmException.status
             );
-        } else if (exception instanceof SessionIdNotFoundException) {
+        } else if (exception instanceof OrderIdNotFoundException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Session id not found"),
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Order id not found"),
                     HttpStatus.NOT_FOUND
             );
         } else if (exception instanceof MismatchedSecurityTokenException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Session id not found"),
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail("Order id not found"),
                     HttpStatus.NOT_FOUND
             );
         } else if (exception instanceof InvalidSessionException) {
@@ -200,35 +199,37 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                         String id,
                                                                         ServerWebExchange exchange
     ) {
-        return paymentMethodService.createSessionForPaymentMethod(id).map(ResponseEntity::ok);
+        String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+
+        return paymentMethodService.createSessionForPaymentMethod(id, orderId).map(ResponseEntity::ok);
     }
 
     @Override
     public Mono<ResponseEntity<SessionPaymentMethodResponseDto>> getSessionPaymentMethod(
                                                                                          String id,
-                                                                                         String sessionId,
+                                                                                         String orderId,
                                                                                          ServerWebExchange exchange
     ) {
         log.info("[Payment Method controller] Retrieve card data from NPG");
-        return paymentMethodService.getCardDataInformation(id, URLEncoder.encode(sessionId, Charset.defaultCharset()))
+        return paymentMethodService.getCardDataInformation(id, orderId)
                 .map(ResponseEntity::ok);
     }
 
     @Override
     public Mono<ResponseEntity<SessionGetTransactionIdResponseDto>> getTransactionIdForSession(
                                                                                                String id,
-                                                                                               String sessionId,
+                                                                                               String orderId,
                                                                                                ServerWebExchange exchange
     ) {
         return getAuthenticationToken(exchange)
                 .doOnNext(
                         req -> log.info(
-                                "Requesting session validation for paymentMethodId={}, sessionId={}",
+                                "Requesting session validation for paymentMethodId={}, orderId={}",
                                 id,
-                                sessionId
+                                orderId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, sessionId, securityToken))
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
                 .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId))
                 .map(ResponseEntity::ok);
     }
@@ -236,12 +237,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Override
     public Mono<ResponseEntity<Void>> updateSession(
                                                     String id,
-                                                    String sessionId,
+                                                    String orderId,
                                                     Mono<PatchSessionRequestDto> patchSessionRequestDto,
                                                     ServerWebExchange exchange
     ) {
         return patchSessionRequestDto
-                .flatMap(updateData -> paymentMethodService.updateSession(id, sessionId, updateData))
+                .flatMap(updateData -> paymentMethodService.updateSession(id, orderId, updateData))
                 .map(ignored -> ResponseEntity.noContent().build());
     }
 

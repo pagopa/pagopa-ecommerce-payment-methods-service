@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
@@ -174,17 +175,17 @@ class PaymentMethodsControllerTests {
         PatchSessionRequestDto requestBody = TestUtil.patchSessionRequest();
         String newTransactionId = requestBody.getTransactionId();
 
-        NpgSessionDocument originalSession = TestUtil.npgSessionDocument("sessionId", false, null);
+        NpgSessionDocument originalSession = TestUtil.npgSessionDocument("orderId", "sessionId", false, null);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.sessionId(), requestBody))
+        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
                 .thenReturn(Mono.just(updatedDocument));
 
         webClient
                 .patch()
                 .uri(
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
-                                .build(paymentMethodId, originalSession.sessionId())
+                                .build(paymentMethodId, originalSession.orderId())
                 )
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
@@ -198,16 +199,17 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldRetrieveCardDataFromWithSessionId() {
         String paymentMethodId = "paymentMethodId";
-        String sessionId = "sessionId";
-        SessionPaymentMethodResponseDto response = new SessionPaymentMethodResponseDto().sessionId(sessionId)
+        String orderId = "orderId";
+        SessionPaymentMethodResponseDto response = new SessionPaymentMethodResponseDto()
+                .sessionId("sessionId")
                 .bin("123456").brand("VISA").expiringDate("0424")
                 .lastFourDigits("1234");
-        Mockito.when(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
+        Mockito.when(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
                 .thenReturn(Mono.just(response));
 
         webClient
                 .get()
-                .uri("/payment-methods/" + paymentMethodId + "/sessions/" + sessionId)
+                .uri("/payment-methods/" + paymentMethodId + "/sessions/" + orderId)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -218,9 +220,9 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturnResponseSessionIdNotFound() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
-                .errorHandler(new SessionIdNotFoundException("sessionId"));
+                .errorHandler(new OrderIdNotFoundException("orderId"));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals("Session id not found", responseEntity.getBody().getDetail());
+        assertEquals("Order id not found", responseEntity.getBody().getDetail());
     }
 
     @Test
@@ -258,11 +260,11 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturnTransactionIdForValidSession() {
         String paymentMethodId = UUID.randomUUID().toString();
-        String sessionId = "sessionId";
+        String orderId = "orderId";
         String securityToken = "securityToken";
         String transactionId = "transactionId";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, sessionId, securityToken))
+        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -270,8 +272,8 @@ class PaymentMethodsControllerTests {
         webClient
                 .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
-                                .build(paymentMethodId, sessionId)
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
@@ -284,19 +286,19 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturn404ForInvalidSession() {
         String paymentMethodId = UUID.randomUUID().toString();
-        String sessionId = "sessionId";
+        String orderId = "orderId";
         String securityToken = "securityToken";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, sessionId, securityToken))
-                .thenReturn(Mono.error(new InvalidSessionException(sessionId)));
+        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
+                .thenReturn(Mono.error(new InvalidSessionException(orderId)));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session");
 
         webClient
                 .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
-                                .build(paymentMethodId, sessionId)
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
@@ -309,19 +311,19 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturn404ForSessionNotFound() {
         String paymentMethodId = UUID.randomUUID().toString();
-        String sessionId = "sessionId";
+        String orderId = "orderId";
         String securityToken = "securityToken";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, sessionId, securityToken))
-                .thenReturn(Mono.error(new SessionIdNotFoundException(sessionId)));
+        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
+                .thenReturn(Mono.error(new OrderIdNotFoundException(orderId)));
 
-        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Session id not found");
+        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Order id not found");
 
         webClient
                 .get()
                 .uri(
-                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}/transactionId")
-                                .build(paymentMethodId, sessionId)
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
@@ -343,5 +345,31 @@ class PaymentMethodsControllerTests {
                 );
 
         assertEquals(HttpStatus.CONFLICT, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnErrorOnMismatchedSecurityToken() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String orderId = "orderId";
+        String securityToken = "securityToken";
+        String transactionId = "transactionId";
+
+        Mockito.when(paymentMethodService.isSessionValid(eq(paymentMethodId), eq(orderId), any()))
+                .thenReturn(Mono.error(new MismatchedSecurityTokenException(orderId, transactionId)));
+
+        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Order id not found");
+
+        webClient
+                .get()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
+                )
+                .headers(h -> h.setBearerAuth(securityToken))
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(ProblemJsonDto.class)
+                .isEqualTo(expected);
     }
 }

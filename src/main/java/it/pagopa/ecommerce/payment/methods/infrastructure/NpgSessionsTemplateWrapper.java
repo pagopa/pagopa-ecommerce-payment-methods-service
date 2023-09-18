@@ -23,6 +23,6 @@ public class NpgSessionsTemplateWrapper extends RedisTemplateWrapper<NpgSessionD
 
     @Override
     protected String getKeyFromEntity(NpgSessionDocument value) {
-        return value.sessionId();
+        return value.orderId();
     }
 }

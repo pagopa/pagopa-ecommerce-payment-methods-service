@@ -234,7 +234,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /payment-methods/{id}/sessions/{sessionId}:
+  /payment-methods/{id}/sessions/{orderId}:
     get:
       tags:
         - payment-methods
@@ -248,9 +248,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: sessionId
+        - name: orderId
           in: path
-          description: Session payment method ID related to NPG
+          description: Order id related to NPG session
           required: true
           schema:
             type: string
@@ -286,9 +286,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: sessionId
+        - name: orderId
           in: path
-          description: Session payment method ID related to NPG
+          description: Order id related to NPG session
           required: true
           schema:
             type: string
@@ -315,7 +315,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-  /payment-methods/{id}/sessions/{sessionId}/transactionId:
+  /payment-methods/{id}/sessions/{orderId}/transactionId:
     get:
       tags:
         - payment-methods
@@ -329,9 +329,9 @@ paths:
           required: true
           schema:
             type: string
-        - name: sessionId
+        - name: orderId
           in: path
-          description: Session payment method ID related to NPG
+          description: Order id related to NPG session
           required: true
           schema:
             type: string
@@ -605,14 +605,14 @@ components:
       type: object
       description: Form data needed to create a payment method input form
       properties:
-        sessionId:
+        orderId:
           type: string
           description: Identifier of the payment gateway session associated to the form
         paymentMethodData:
           $ref: "#/components/schemas/CardFormFields"
       required:
         - paymentMethodData
-        - sessionId
+        - orderId
     CardFormFields:
       type: object
       description: Form fields for credit cards

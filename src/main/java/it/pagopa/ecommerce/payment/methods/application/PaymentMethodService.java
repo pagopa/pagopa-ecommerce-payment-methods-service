@@ -16,21 +16,17 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -257,7 +253,10 @@ public class PaymentMethodService {
 
     }
 
-    public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(String id) {
+    public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
+                                                                        String id,
+                                                                        String orderId
+    ) {
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
@@ -270,19 +269,28 @@ public class PaymentMethodService {
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
                     URI merchantUrl = returnUrlBasePath;
                     URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
-                    String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
                     String customerId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+                    URI notificationUrl = UriComponentsBuilder
+                            .fromHttpUrl(sessionUrlConfig.notificationUrl())
+                            .build(
+                                    Map.of(
+                                            "orderId",
+                                            orderId,
+                                            "paymentMethodId",
+                                            id
+                                    )
+                            );
 
                     return npgClient.buildForm(
-                            correlationId,
-                            returnUrlBasePath,
-                            resultUrl,
-                            merchantUrl,
-                            cancelUrl,
-                            orderId,
-                            customerId,
-                            paymentMethod,
-                            npgDefaultApiKey
+                            correlationId, // correlationId
+                            merchantUrl, // merchantUrl
+                            resultUrl, // resultUrl
+                            notificationUrl, // notificationUrl
+                            cancelUrl, // cancelUrl
+                            orderId, // orderId
+                            customerId, // customerId
+                            paymentMethod, // paymentMethod
+                            npgDefaultApiKey // defaultApiKey
                     ).map(form -> Tuples.of(form, sessionPaymentMethod));
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
@@ -290,6 +298,7 @@ public class PaymentMethodService {
                     npgSessionsTemplateWrapper
                             .save(
                                     new NpgSessionDocument(
+                                            orderId,
                                             fields.getSessionId(),
                                             fields.getSecurityToken(),
                                             null,
@@ -302,7 +311,7 @@ public class PaymentMethodService {
                     SessionPaymentMethod paymentMethod = data.getT2();
 
                     return new CreateSessionResponseDto()
-                            .sessionId(fields.getSessionId())
+                            .orderId(orderId)
                             .paymentMethodData(
                                     new CardFormFieldsDto()
                                             .paymentMethod(paymentMethod.value)
@@ -324,42 +333,44 @@ public class PaymentMethodService {
 
     public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
                                                                         String id,
-                                                                        String sessionId
+                                                                        String orderId
     ) {
         log.info(
-                "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and sessionId: {}",
+                "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and orderId: {}",
                 id,
-                sessionId
+                orderId
         );
         return paymentMethodRepository
                 .findById(id)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
                 .map(
-                        el -> npgSessionsTemplateWrapper.findById(sessionId)
+                        el -> npgSessionsTemplateWrapper.findById(orderId)
                 )
                 .flatMap(
                         session -> session.map(
                                 sx -> {
                                     Mono<SessionPaymentMethodResponseDto> response;
                                     if (sx.cardData() != null) {
-                                        log.info("Cache hit for sessionId: {}", sessionId);
+                                        log.info("Cache hit for orderId: {}", orderId);
                                         response = Mono.just(
-                                                new SessionPaymentMethodResponseDto().bin(sx.cardData().bin())
-                                                        .sessionId(sessionId)
+                                                new SessionPaymentMethodResponseDto()
+                                                        .bin(sx.cardData().bin())
+                                                        .sessionId(sx.sessionId())
                                                         .brand(sx.cardData().circuit())
                                                         .expiringDate(sx.cardData().expiringDate())
                                                         .lastFourDigits(sx.cardData().lastFourDigits())
                                         );
                                     } else {
-                                        log.info("Cache miss for sessionId: {}", sessionId);
+                                        log.info("Cache miss for orderId: {}", orderId);
                                         response = npgClient.getCardData(
                                                 UUID.randomUUID(),
-                                                sessionId,
+                                                sx.sessionId(),
                                                 npgDefaultApiKey
                                         )
                                                 .doOnSuccess(
                                                         el -> npgSessionsTemplateWrapper.save(
                                                                 new NpgSessionDocument(
+                                                                        sx.orderId(),
                                                                         sx.sessionId(),
                                                                         sx.securityToken(),
                                                                         new CardDataDocument(
@@ -374,7 +385,7 @@ public class PaymentMethodService {
                                                 )
                                                 .map(
                                                         el -> new SessionPaymentMethodResponseDto().bin(el.getBin())
-                                                                .sessionId(sessionId)
+                                                                .sessionId(sx.sessionId())
                                                                 .brand(el.getCircuit())
                                                                 .expiringDate(el.getExpiringDate())
                                                                 .lastFourDigits(el.getLastFourDigits())
@@ -384,14 +395,14 @@ public class PaymentMethodService {
                                 }
 
                         ).orElse(
-                                Mono.error(new SessionIdNotFoundException(sessionId))
+                                Mono.error(new OrderIdNotFoundException(orderId))
                         )
                 );
     }
 
     public Mono<String> isSessionValid(
                                        String paymentMethodId,
-                                       String sessionId,
+                                       String orderId,
                                        String securityToken
     ) {
         return paymentMethodRepository
@@ -399,22 +410,22 @@ public class PaymentMethodService {
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
                 .map(
-                        ignore -> npgSessionsTemplateWrapper.findById(sessionId)
+                        ignore -> npgSessionsTemplateWrapper.findById(orderId)
                 )
-                .doOnNext(doc -> log.info("Found session for id {}: {}", sessionId, doc.isPresent()))
-                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new SessionIdNotFoundException(sessionId))))
+                .doOnNext(doc -> log.info("Found session for order id {}: {}", orderId, doc.isPresent()))
+                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new OrderIdNotFoundException(orderId))))
                 .flatMap(doc -> {
                     String transactionId = doc.transactionId();
                     if (transactionId == null) {
-                        return Mono.error(new InvalidSessionException(sessionId));
+                        return Mono.error(new InvalidSessionException(orderId));
                     } else {
                         return Mono.just(doc);
                     }
                 })
                 .flatMap(doc -> {
                     if (!doc.securityToken().equals(securityToken)) {
-                        log.warn("Invalid security token for requested session id {}", sessionId);
-                        return Mono.error(new MismatchedSecurityTokenException(sessionId, doc.transactionId()));
+                        log.warn("Invalid security token for requested order id {}", orderId);
+                        return Mono.error(new MismatchedSecurityTokenException(orderId, doc.transactionId()));
                     } else {
                         return Mono.just(doc);
                     }
@@ -426,19 +437,19 @@ public class PaymentMethodService {
 
     public Mono<NpgSessionDocument> updateSession(
                                                   String paymentMethodId,
-                                                  String sessionId,
+                                                  String orderId,
                                                   PatchSessionRequestDto updateData
     ) {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .map(ignore -> npgSessionsTemplateWrapper.findById(sessionId))
+                .map(ignore -> npgSessionsTemplateWrapper.findById(orderId))
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
-                .switchIfEmpty(Mono.error(new SessionIdNotFoundException(sessionId)))
+                .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
                     if (document.transactionId() != null) {
                         return Mono.error(
                                 new SessionAlreadyAssociatedToTransaction(
-                                        sessionId,
+                                        orderId,
                                         document.transactionId(),
                                         updateData.getTransactionId()
                                 )
@@ -449,6 +460,7 @@ public class PaymentMethodService {
                 })
                 .map(d -> {
                     NpgSessionDocument updatedDocument = new NpgSessionDocument(
+                            d.orderId(),
                             d.sessionId(),
                             d.securityToken(),
                             d.cardData(),
