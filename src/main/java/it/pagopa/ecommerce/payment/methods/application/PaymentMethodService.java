@@ -1,7 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.commons.domain.v1.TransactionId;
+import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;

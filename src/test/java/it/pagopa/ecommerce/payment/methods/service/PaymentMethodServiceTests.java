@@ -1,7 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.service;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.commons.domain.v1.TransactionId;
+import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
@@ -10,9 +10,9 @@ import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
+import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
-import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
