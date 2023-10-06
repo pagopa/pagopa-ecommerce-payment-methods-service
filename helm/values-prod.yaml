@@ -50,7 +50,7 @@ microservice-chart:
       NPG_API_KEY: npg-api-key
   image:
     repository: pagopapcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.17.3"
+    tag: "0.17.4"
     pullPolicy: Always
   livenessProbe:
     httpGet:
