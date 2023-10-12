@@ -149,7 +149,7 @@ stages:
               TEST_FILE_PREFIX: "dev"
 
   - stage: "E2E_Tests_Checkout_DEV_environment"
-    displayName: 'Running API test on dev app'
+    displayName: 'Running E2E test on dev app'
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: Deploy_for_DEV
