@@ -149,6 +149,7 @@ stages:
               TEST_FILE_PREFIX: "dev"
 
   - stage: "E2E_Tests_Checkout_DEV_environment"
+    displayName: 'Running API test on dev app'
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: Deploy_for_DEV
@@ -373,6 +374,7 @@ stages:
               TEST_FILE_PREFIX: "uat-green"
 
   - stage: "E2E_Tests_Checkout_UAT_environment"
+    displayName: 'Running E2E test on green app'
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: Deploy_UAT_Green
