@@ -13,6 +13,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
+import it.pagopa.ecommerce.payment.methods.utils.UniqueIdUtils;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,8 @@ public class PaymentMethodService {
 
     private final String npgDefaultApiKey;
 
+    private final UniqueIdUtils uniqueIdUtils;
+
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
@@ -76,7 +79,8 @@ public class PaymentMethodService {
             NpgClient npgClient,
             SessionUrlConfig sessionUrlConfig,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
-            @Value("${npg.client.apiKey}") String npgDefaultApiKey
+            @Value("${npg.client.apiKey}") String npgDefaultApiKey,
+            UniqueIdUtils uniqueIdUtils
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
@@ -85,6 +89,7 @@ public class PaymentMethodService {
         this.sessionUrlConfig = sessionUrlConfig;
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
         this.npgDefaultApiKey = npgDefaultApiKey;
+        this.uniqueIdUtils = uniqueIdUtils;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -254,9 +259,9 @@ public class PaymentMethodService {
     }
 
     public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
-                                                                        String id,
-                                                                        String orderId
+                                                                        String id
     ) {
+        String orderId = uniqueIdUtils.generateUniqueId();
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
@@ -264,7 +269,6 @@ public class PaymentMethodService {
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
-
                     UUID correlationId = UUID.randomUUID();
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
                     URI merchantUrl = returnUrlBasePath;

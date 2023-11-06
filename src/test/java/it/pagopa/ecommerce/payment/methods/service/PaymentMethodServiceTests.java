@@ -20,6 +20,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepositor
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import it.pagopa.ecommerce.payment.methods.utils.UniqueIdUtils;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,6 +69,8 @@ class PaymentMethodServiceTests {
 
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper = mock(NpgSessionsTemplateWrapper.class);
 
+    private final UniqueIdUtils uniqueIdUtils = mock(UniqueIdUtils.class);
+
     private final PaymentMethodService paymentMethodService = new PaymentMethodService(
             afmClient,
             paymentMethodRepository,
@@ -75,7 +78,8 @@ class PaymentMethodServiceTests {
             npgClient,
             sessionUrlConfig,
             npgSessionsTemplateWrapper,
-            npgDefaultApiKey
+            npgDefaultApiKey,
+            uniqueIdUtils
     );
 
     @Test
@@ -313,6 +317,7 @@ class PaymentMethodServiceTests {
         FieldsDto npgResponse = TestUtil.npgResponse();
         String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
 
+        Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(orderId);
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(
@@ -337,7 +342,7 @@ class PaymentMethodServiceTests {
                                 )
                 );
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, orderId))
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
                 .expectNext(expected)
                 .verifyComplete();
     }

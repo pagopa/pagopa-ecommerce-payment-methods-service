@@ -20,7 +20,6 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -199,9 +198,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                         String id,
                                                                         ServerWebExchange exchange
     ) {
-        String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
-
-        return paymentMethodService.createSessionForPaymentMethod(id, orderId).map(ResponseEntity::ok);
+        return paymentMethodService.createSessionForPaymentMethod(id).map(ResponseEntity::ok);
     }
 
     @Override
