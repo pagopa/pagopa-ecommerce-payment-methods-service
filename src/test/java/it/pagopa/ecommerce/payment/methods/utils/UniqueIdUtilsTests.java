@@ -21,6 +21,7 @@ class UniqueIdUtilsTests {
         StepVerifier.create(uniqueIdUtils.generateUniqueId())
                 .expectErrorMatches(e -> e instanceof UniqueIdGenerationException)
                 .verify();
+        Mockito.verify(uniqueIdTemplateWrapper, Mockito.times(3)).saveIfAbsent(any(), any());
     }
 
     @Test
@@ -31,6 +32,7 @@ class UniqueIdUtilsTests {
                         response -> response.length() == 18 && response.startsWith(PRODUCT_PREFIX)
                 )
                 .verifyComplete();
+        Mockito.verify(uniqueIdTemplateWrapper, Mockito.times(3)).saveIfAbsent(any(), any());
     }
 
     @Test
@@ -41,5 +43,6 @@ class UniqueIdUtilsTests {
                         response -> response.length() == 18 && response.startsWith(PRODUCT_PREFIX)
                 )
                 .verifyComplete();
+        Mockito.verify(uniqueIdTemplateWrapper, Mockito.times(1)).saveIfAbsent(any(), any());
     }
 }
