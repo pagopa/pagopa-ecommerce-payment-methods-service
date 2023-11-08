@@ -317,7 +317,7 @@ class PaymentMethodServiceTests {
         FieldsDto npgResponse = TestUtil.npgResponse();
         String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
 
-        Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(orderId);
+        Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(
