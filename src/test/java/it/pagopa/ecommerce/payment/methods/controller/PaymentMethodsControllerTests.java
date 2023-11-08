@@ -247,7 +247,7 @@ class PaymentMethodsControllerTests {
     void shouldReturnResponseUniqueId() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
                 .errorHandler(new UniqueIdGenerationException());
-        assertEquals(HttpStatus.CONFLICT, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals("Internal system error", responseEntity.getBody().getTitle());
         assertEquals("Error when generating unique id", responseEntity.getBody().getDetail());
     }

@@ -68,8 +68,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             );
         } else if (exception instanceof UniqueIdGenerationException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(409).title("Internal system error").detail(exception.getMessage()),
-                    HttpStatus.CONFLICT
+                    new ProblemJsonDto().status(500).title("Internal system error").detail(exception.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR
             );
         } else if (exception instanceof MismatchedSecurityTokenException) {
             return new ResponseEntity<>(
