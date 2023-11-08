@@ -17,6 +17,7 @@ public class UniqueIdUtils {
     private static final String ALPHANUMERICS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._";
     private static final int MAX_LENGTH = 18;
     private static final int MAX_NUMBER_ATTEMPTS = 3;
+    private static final String PRODUCT_PREFIX = "E";
 
     @Autowired
     public UniqueIdUtils(UniqueIdTemplateWrapper uniqueIdTemplateWrapper) {
@@ -39,9 +40,10 @@ public class UniqueIdUtils {
     }
 
     private static String generateRandomIdentifier() {
-        String timestampToString = String.valueOf(System.currentTimeMillis());
-        int randomStringLength = MAX_LENGTH - timestampToString.length();
-        return timestampToString + generateRandomString(randomStringLength);
+        StringBuilder uniqueId = new StringBuilder(PRODUCT_PREFIX);
+        uniqueId.append(System.currentTimeMillis());
+        int randomStringLength = MAX_LENGTH - uniqueId.length();
+        return uniqueId.append(generateRandomString(randomStringLength)).toString();
     }
 
     private static String generateRandomString(int length) {
