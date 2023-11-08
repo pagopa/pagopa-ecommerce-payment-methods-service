@@ -35,7 +35,7 @@ public class UniqueIdUtils {
                 uniqueId = generateRandomIdentifier();
             }
         }
-        return isSuccessfullySaved ? Mono.error(new UniqueIdGenerationException()) : Mono.just(uniqueId);
+        return !isSuccessfullySaved ? Mono.error(new UniqueIdGenerationException()) : Mono.just(uniqueId);
     }
 
     private static String generateRandomIdentifier() {
