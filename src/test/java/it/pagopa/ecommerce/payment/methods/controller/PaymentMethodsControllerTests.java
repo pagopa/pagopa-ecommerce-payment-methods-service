@@ -23,7 +23,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -203,7 +202,6 @@ class PaymentMethodsControllerTests {
         CreateSessionResponseDto responseDto = TestUtil.createSessionResponseDto(paymentMethodId);
         Mockito.when(paymentMethodService.createSessionForPaymentMethod(any()))
                 .thenReturn(Mono.just(responseDto));
-        Hooks.onOperatorDebug();
         webClient
                 .post()
                 .uri("/payment-methods/" + paymentMethodId + "/sessions")
