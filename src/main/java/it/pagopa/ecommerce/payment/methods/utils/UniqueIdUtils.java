@@ -26,12 +26,12 @@ public class UniqueIdUtils {
 
     public Mono<String> generateUniqueId() {
         boolean isSuccessfullySaved = false;
-        int index = 0;
+        int attempt = 0;
         String uniqueId = generateRandomIdentifier();
-        while (index <= MAX_NUMBER_ATTEMPTS && !isSuccessfullySaved) {
+        while (attempt < MAX_NUMBER_ATTEMPTS && !isSuccessfullySaved) {
             isSuccessfullySaved = uniqueIdTemplateWrapper
                     .saveIfAbsent(new UniqueIdDocument(uniqueId), Duration.ofSeconds(60));
-            index++;
+            attempt++;
             if (!isSuccessfullySaved) {
                 uniqueId = generateRandomIdentifier();
             }

@@ -54,7 +54,7 @@ public class RedisConfig {
 
         return new UniqueIdTemplateWrapper(
                 redisTemplate,
-                "keys",
+                "uniqueId",
                 Duration.ofSeconds(60)
         );
     }
