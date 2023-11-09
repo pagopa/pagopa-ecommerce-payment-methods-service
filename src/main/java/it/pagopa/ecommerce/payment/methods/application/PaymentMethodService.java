@@ -279,7 +279,6 @@ public class PaymentMethodService {
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
                     URI merchantUrl = returnUrlBasePath;
                     URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
-                    String customerId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
                     URI notificationUrl = UriComponentsBuilder
                             .fromHttpUrl(sessionUrlConfig.notificationUrl())
                             .build(
@@ -298,7 +297,7 @@ public class PaymentMethodService {
                             notificationUrl, // notificationUrl
                             cancelUrl, // cancelUrl
                             orderId, // orderId
-                            customerId, // customerId
+                            null, // customerId
                             paymentMethod, // paymentMethod
                             npgDefaultApiKey // defaultApiKey
                     ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId));
