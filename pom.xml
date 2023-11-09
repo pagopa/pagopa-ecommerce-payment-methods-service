@@ -17,7 +17,7 @@
 		<jacoco.version>0.8.8</jacoco.version>
 		<spotless.version>2.28.0</spotless.version>
 		<ecs-logging-version>1.5.0</ecs-logging-version>
-		<pagopa-ecommerce-commons.version>0.27.0</pagopa-ecommerce-commons.version>
+		<pagopa-ecommerce-commons.version>0.28.0</pagopa-ecommerce-commons.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -230,8 +230,6 @@
 					<scmVersionType>tag</scmVersionType>
 					<scmVersion>${pagopa-ecommerce-commons.version}</scmVersion>
 					<scmVersionType>branch</scmVersionType>
-					<scmVersion>CHK-2095-NX-redisTemplateWrapper</scmVersion>
-					<goals>install -DskipTests</goals>
 				</configuration>
 				<executions>
 					<execution>
