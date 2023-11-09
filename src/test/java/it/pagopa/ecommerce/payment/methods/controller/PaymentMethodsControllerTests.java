@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
 import io.opentelemetry.api.trace.Tracer;
+import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -281,6 +282,14 @@ class PaymentMethodsControllerTests {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
                 .errorHandler(new AfmResponseException(HttpStatus.NOT_FOUND, "reason test"));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("reason test", responseEntity.getBody().getDetail());
+    }
+
+    @Test
+    void shouldReturnResponseEntityWithNpgError() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new NpgResponseException("reason test", new RuntimeException("inner test")));
+        assertEquals(HttpStatus.BAD_GATEWAY, responseEntity.getStatusCode());
         assertEquals("reason test", responseEntity.getBody().getDetail());
     }
 
