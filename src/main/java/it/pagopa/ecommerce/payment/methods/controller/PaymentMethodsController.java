@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
+import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.exception.*;
@@ -86,6 +87,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     new ProblemJsonDto().status(409).title("Session already associated to transaction")
                             .detail(exception.getMessage()),
                     HttpStatus.CONFLICT
+            );
+        } else if (exception instanceof NpgResponseException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(502).title("Bad Gateway")
+                            .detail(exception.getMessage()),
+                    HttpStatus.BAD_GATEWAY
             );
         } else {
             return new ResponseEntity<>(
