@@ -197,6 +197,24 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
+    void shouldPostCreateSession() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CreateSessionResponseDto responseDto = TestUtil.createSessionResponseDto(paymentMethodId);
+        Mockito.when(paymentMethodService.createSessionForPaymentMethod(any()))
+                .thenReturn(Mono.just(responseDto));
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(CreateSessionResponseDto.class)
+                .isEqualTo(responseDto);
+    }
+
+    @Test
     void shouldRetrieveCardDataFromWithSessionId() {
         String paymentMethodId = "paymentMethodId";
         String orderId = "orderId";
@@ -223,6 +241,15 @@ class PaymentMethodsControllerTests {
                 .errorHandler(new OrderIdNotFoundException("orderId"));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals("Order id not found", responseEntity.getBody().getDetail());
+    }
+
+    @Test
+    void shouldReturnResponseUniqueId() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new UniqueIdGenerationException());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Internal system error", responseEntity.getBody().getTitle());
+        assertEquals("Error when generating unique id", responseEntity.getBody().getDetail());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
+import io.vavr.Tuple;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
@@ -261,11 +262,16 @@ public class PaymentMethodService {
     public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
                                                                         String id
     ) {
-        String orderId = uniqueIdUtils.generateUniqueId();
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
-                .flatMap(paymentMethod -> {
+                .flatMap(
+                        paymentMethod -> uniqueIdUtils.generateUniqueId()
+                                .map(orderId -> Tuples.of(orderId, paymentMethod))
+                )
+                .flatMap(data -> {
+                    NpgClient.PaymentMethod paymentMethod = data.getT2();
+                    String orderId = data.getT1();
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
@@ -273,7 +279,6 @@ public class PaymentMethodService {
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
                     URI merchantUrl = returnUrlBasePath;
                     URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
-                    String customerId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
                     URI notificationUrl = UriComponentsBuilder
                             .fromHttpUrl(sessionUrlConfig.notificationUrl())
                             .build(
@@ -292,13 +297,13 @@ public class PaymentMethodService {
                             notificationUrl, // notificationUrl
                             cancelUrl, // cancelUrl
                             orderId, // orderId
-                            customerId, // customerId
+                            null, // customerId
                             paymentMethod, // paymentMethod
                             npgDefaultApiKey // defaultApiKey
-                    ).map(form -> Tuples.of(form, sessionPaymentMethod));
+                    ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId));
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
-
+                    String orderId = data.getT3();
                     npgSessionsTemplateWrapper
                             .save(
                                     new NpgSessionDocument(
@@ -313,7 +318,7 @@ public class PaymentMethodService {
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
                     SessionPaymentMethod paymentMethod = data.getT2();
-
+                    String orderId = data.getT3();
                     return new CreateSessionResponseDto()
                             .orderId(orderId)
                             .paymentMethodData(

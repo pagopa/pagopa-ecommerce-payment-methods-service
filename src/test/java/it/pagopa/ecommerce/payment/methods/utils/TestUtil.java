@@ -21,6 +21,7 @@ import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -305,5 +306,22 @@ public class TestUtil {
                 document.cardData(),
                 newTransactionId
         );
+    }
+
+    public static CreateSessionResponseDto createSessionResponseDto(String paymentMethodId) {
+        return new CreateSessionResponseDto()
+                .orderId("orderId")
+                .paymentMethodData(
+                        new CardFormFieldsDto().paymentMethod(paymentMethodId).form(
+                                List.of(
+                                        new it.pagopa.ecommerce.payment.methods.server.model.FieldDto()
+                                                .type("TEXT")
+
+                                                .id("CARD_NUMBER")
+                                                .src(URI.create("http://localhost")).propertyClass("CARD_FIELD")
+                                )
+                        )
+                );
+
     }
 }

@@ -34,6 +34,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 PaymentMethodAlreadyInUseException.class,
                 PaymentMethodNotFoundException.class,
                 OrderIdNotFoundException.class,
+                UniqueIdGenerationException.class,
                 AfmResponseException.class,
                 InvalidSessionException.class,
                 MismatchedSecurityTokenException.class,
@@ -64,6 +65,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title(notFoundTitle).detail("Order id not found"),
                     HttpStatus.NOT_FOUND
+            );
+        } else if (exception instanceof UniqueIdGenerationException) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(500).title("Internal system error").detail(exception.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR
             );
         } else if (exception instanceof MismatchedSecurityTokenException) {
             return new ResponseEntity<>(
