@@ -56,7 +56,7 @@ class PaymentMethodsControllerTests {
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any()))
+        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(paymentMethod));
 
         webClient
@@ -78,7 +78,7 @@ class PaymentMethodsControllerTests {
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any()))
+        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(paymentMethod));
 
         webClient

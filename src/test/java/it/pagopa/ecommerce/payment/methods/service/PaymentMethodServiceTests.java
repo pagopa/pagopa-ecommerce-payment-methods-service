@@ -99,6 +99,7 @@ class PaymentMethodServiceTests {
                         any(),
                         any(),
                         any(),
+                        any(),
                         any()
                 )
         )
@@ -117,7 +118,8 @@ class PaymentMethodServiceTests {
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
-                paymentMethod.getPaymentMethodAsset().value()
+                paymentMethod.getPaymentMethodAsset().value(),
+                paymentMethod.getClientIdEnum()
         ).block();
 
         assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
@@ -227,7 +229,8 @@ class PaymentMethodServiceTests {
                 PaymentMethodStatusEnum.ENABLED.getCode(),
                 "asset",
                 List.of(Pair.of(0L, 100L)),
-                "CP"
+                "CP",
+                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(
@@ -265,7 +268,8 @@ class PaymentMethodServiceTests {
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        "CP"
+                                        "CP",
+                                        PaymentMethodRequestDto.ClientIdEnum.IO.getValue()
                                 )
                         )
                 );
@@ -296,7 +300,8 @@ class PaymentMethodServiceTests {
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        paymentTypeCode
+                                        paymentTypeCode,
+                                        PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
                                 )
                         )
                 );

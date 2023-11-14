@@ -57,7 +57,8 @@ public class TestUtil {
                 new PaymentMethodType(TEST_TYPE_CODE),
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
-                TEST_NPG_PAYMENT_METHOD
+                TEST_NPG_PAYMENT_METHOD,
+                getClientIdCheckout()
         );
     }
 
@@ -138,7 +139,8 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodAsset().value(),
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
-                paymentMethod.getPaymentMethodTypeCode().value()
+                paymentMethod.getPaymentMethodTypeCode().value(),
+                paymentMethod.getClientIdEnum().getValue()
         );
     }
 

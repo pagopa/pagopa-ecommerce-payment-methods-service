@@ -50,7 +50,8 @@ class PaymentMethodFactoryTests {
                 paymentMethod.getPaymentMethodRanges(),
                 paymentMethod.getPaymentMethodTypeCode(),
                 paymentMethod.getPaymentMethodAsset(),
-                paymentMethod.getNpgPaymentMethod()
+                paymentMethod.getNpgPaymentMethod(),
+                paymentMethod.getClientIdEnum()
         ).block();
 
         assertNotNull(paymentMethodProduct);
@@ -76,7 +77,8 @@ class PaymentMethodFactoryTests {
                                 paymentMethod.getPaymentMethodRanges().stream()
                                         .map(r -> Pair.of(r.min(), r.max()))
                                         .collect(Collectors.toList()),
-                                paymentMethod.getPaymentMethodTypeCode().value()
+                                paymentMethod.getPaymentMethodTypeCode().value(),
+                                paymentMethod.getNpgPaymentMethod().toString()
                         )
                 )
         );
@@ -91,7 +93,8 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getPaymentMethodRanges(),
                         paymentMethod.getPaymentMethodTypeCode(),
                         paymentMethod.getPaymentMethodAsset(),
-                        paymentMethod.getNpgPaymentMethod()
+                        paymentMethod.getNpgPaymentMethod(),
+                        paymentMethod.getClientIdEnum()
                 ).block()
         );
     }
