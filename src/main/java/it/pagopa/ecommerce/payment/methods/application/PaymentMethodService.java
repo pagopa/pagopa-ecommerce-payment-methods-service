@@ -210,7 +210,7 @@ public class PaymentMethodService {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         return paymentMethodRepository
-                .findByIdAndClientId(id, clientId)
+                .findByPaymentMethodIDAndClientId(id, clientId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
                 .map(this::docToAggregate);
     }
