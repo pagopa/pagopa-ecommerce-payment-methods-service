@@ -96,8 +96,11 @@ class PaymentMethodsControllerTests {
     void shouldGetAllMethodsForCheckout() {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
-        Mockito.when(paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount())).thenReturn(
+        Mockito.when(
+                paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount(), clientIdCheckout.getValue())
+        ).thenReturn(
                 Flux.just(paymentMethod)
         );
 
@@ -124,10 +127,12 @@ class PaymentMethodsControllerTests {
     void shouldGetAllMethodsForIo() {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount())).thenReturn(
-                Flux.just(paymentMethod)
-        );
+        Mockito.when(paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount(), clientIdIO.getValue()))
+                .thenReturn(
+                        Flux.just(paymentMethod)
+                );
 
         PaymentMethodsResponseDto expectedResult = TestUtil.getPaymentMethodsResponse(paymentMethod);
 
@@ -180,10 +185,12 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldGetAMethodForCheckout() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
                 paymentMethodService.retrievePaymentMethodById(
-                        paymentMethod.getPaymentMethodID().value().toString()
+                        paymentMethod.getPaymentMethodID().value().toString(),
+                        clientIdCheckout.getValue()
                 )
         ).thenReturn(Mono.just(paymentMethod));
 
@@ -204,10 +211,12 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldGetAMethodForIo() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
         Mockito.when(
                 paymentMethodService.retrievePaymentMethodById(
-                        paymentMethod.getPaymentMethodID().value().toString()
+                        paymentMethod.getPaymentMethodID().value().toString(),
+                        clientIdIO.getValue()
                 )
         ).thenReturn(Mono.just(paymentMethod));
 

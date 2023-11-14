@@ -108,7 +108,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                 BigDecimal amount,
                                                                                 ServerWebExchange exchange
     ) {
-        return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
+        return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null, xClientId)
                 .map(PaymentMethodsController::paymentMethodToDto)
                 .collectList()
                 .map(
@@ -125,7 +125,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                            String xClientId,
                                                                            ServerWebExchange exchange
     ) {
-        return paymentMethodService.retrievePaymentMethodById(id)
+        return paymentMethodService.retrievePaymentMethodById(id, xClientId)
                 .map(this::paymentMethodToResponse);
     }
 

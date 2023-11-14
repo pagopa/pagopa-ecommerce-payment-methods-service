@@ -146,14 +146,17 @@ public class PaymentMethodService {
         );
     }
 
-    public Flux<PaymentMethod> retrievePaymentMethods(Integer amount) {
+    public Flux<PaymentMethod> retrievePaymentMethods(
+                                                      Integer amount,
+                                                      String clientId
+    ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         if (amount == null) {
-            return paymentMethodRepository.findAll().map(this::docToAggregate);
+            return paymentMethodRepository.findByClientId(clientId).map(this::docToAggregate);
         } else {
             return paymentMethodRepository
-                    .findAll()
+                    .findByClientId(clientId)
                     .filter(
                             doc -> doc.getPaymentMethodRanges().stream()
                                     .anyMatch(
@@ -200,11 +203,14 @@ public class PaymentMethodService {
                 .map(this::docToAggregate);
     }
 
-    public Mono<PaymentMethod> retrievePaymentMethodById(String id) {
+    public Mono<PaymentMethod> retrievePaymentMethodById(
+                                                         String id,
+                                                         String clientId
+    ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         return paymentMethodRepository
-                .findById(id)
+                .findByIdAndClientId(id, clientId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
                 .map(this::docToAggregate);
     }
