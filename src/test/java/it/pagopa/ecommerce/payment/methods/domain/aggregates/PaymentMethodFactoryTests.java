@@ -36,13 +36,13 @@ class PaymentMethodFactoryTests {
     void shouldCreateNewmethod() {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
-        PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
+        PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
                 paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
                         paymentMethod.getPaymentMethodName().value(),
                         paymentMethod.getPaymentMethodTypeCode().value(),
-                        clientIdIO.getValue()
+                        clientIdCheckout.getValue()
                 )
         ).thenReturn(Mono.empty());
 
@@ -64,13 +64,13 @@ class PaymentMethodFactoryTests {
     @Test
     void shouldThrowDuplicatedMethodException() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
-        PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
+        PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
                 paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
                         paymentMethod.getPaymentMethodName().value(),
                         paymentMethod.getPaymentMethodTypeCode().value(),
-                        clientIdIO.getValue()
+                        clientIdCheckout.getValue()
                 )
         ).thenReturn(
                 Mono.just(
@@ -84,7 +84,7 @@ class PaymentMethodFactoryTests {
                                         .map(r -> Pair.of(r.min(), r.max()))
                                         .collect(Collectors.toList()),
                                 paymentMethod.getPaymentMethodTypeCode().value(),
-                                paymentMethod.getNpgPaymentMethod().toString()
+                                clientIdCheckout.getValue()
                         )
                 )
         );
