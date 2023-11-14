@@ -46,9 +46,10 @@ public class PaymentMethodFactory {
                                                 PaymentMethodRequestDto.ClientIdEnum clientId
     ) {
 
-        return paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
+        return paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
                 paymentMethodName.value(),
-                paymentMethodTypeCode.value()
+                paymentMethodTypeCode.value(),
+                clientId.getValue()
         ).hasElement()
                 .map(hasPaymentMethod -> {
                     if (Boolean.TRUE.equals(hasPaymentMethod)) {

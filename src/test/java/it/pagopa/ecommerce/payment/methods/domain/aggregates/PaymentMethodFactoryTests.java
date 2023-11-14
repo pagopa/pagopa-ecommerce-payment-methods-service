@@ -3,6 +3,7 @@ package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +36,13 @@ class PaymentMethodFactoryTests {
     void shouldCreateNewmethod() {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
+
         Mockito.when(
-                paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
+                paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
                         paymentMethod.getPaymentMethodName().value(),
-                        paymentMethod.getPaymentMethodTypeCode().value()
+                        paymentMethod.getPaymentMethodTypeCode().value(),
+                        clientIdIO.getValue()
                 )
         ).thenReturn(Mono.empty());
 
@@ -60,11 +64,13 @@ class PaymentMethodFactoryTests {
     @Test
     void shouldThrowDuplicatedMethodException() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
         Mockito.when(
-                paymentMethodRepository.findByPaymentMethodNameOrPaymentMethodTypeCode(
+                paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
                         paymentMethod.getPaymentMethodName().value(),
-                        paymentMethod.getPaymentMethodTypeCode().value()
+                        paymentMethod.getPaymentMethodTypeCode().value(),
+                        clientIdIO.getValue()
                 )
         ).thenReturn(
                 Mono.just(

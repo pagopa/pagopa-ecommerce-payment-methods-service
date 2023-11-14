@@ -20,4 +20,11 @@ public interface PaymentMethodRepository extends ReactiveCrudRepository<PaymentM
                                                                  String paymentMethodID,
                                                                  String clientId
     );
+
+    Mono<PaymentMethodDocument> findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
+                                                                                           String paymentMethodName,
+                                                                                           String paymentMethodTypeCode,
+                                                                                           String clientId
+    );
+
 }
