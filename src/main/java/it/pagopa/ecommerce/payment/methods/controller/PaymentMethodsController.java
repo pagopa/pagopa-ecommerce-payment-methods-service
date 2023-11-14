@@ -104,6 +104,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Override
     public Mono<ResponseEntity<PaymentMethodsResponseDto>> getAllPaymentMethods(
+                                                                                String xClientId,
                                                                                 BigDecimal amount,
                                                                                 ServerWebExchange exchange
     ) {
@@ -121,6 +122,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Override
     public Mono<ResponseEntity<PaymentMethodResponseDto>> getPaymentMethod(
                                                                            String id,
+                                                                           String xClientId,
                                                                            ServerWebExchange exchange
     ) {
         return paymentMethodService.retrievePaymentMethodById(id)

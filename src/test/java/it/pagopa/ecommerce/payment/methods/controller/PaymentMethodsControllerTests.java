@@ -49,8 +49,8 @@ class PaymentMethodsControllerTests {
     private Tracer tracer;
 
     @Test
-    void shouldCreateNewmethod() {
-        PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequest();
+    void shouldCreateNewMethodForCheckout() {
+        PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequestForCheckout();
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
@@ -71,7 +71,29 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldGetAllMethods() {
+    void shouldCreateNewMethodForIO() {
+        PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequestForIO();
+
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+
+        PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
+
+        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any()))
+                .thenReturn(Mono.just(paymentMethod));
+
+        webClient
+                .post().uri("/payment-methods")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentMethodRequestDto)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(PaymentMethodResponseDto.class)
+                .isEqualTo(methodResponse);
+    }
+
+    @Test
+    void shouldGetAllMethodsForCheckout() {
 
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
@@ -89,6 +111,35 @@ class PaymentMethodsControllerTests {
                                 .queryParam("amount", TestUtil.getTestAmount())
                                 .build()
                 )
+                .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(PaymentMethodsResponseDto.class)
+                .hasSize(1)
+                .contains(expectedResult);
+    }
+
+    @Test
+    void shouldGetAllMethodsForIo() {
+
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+
+        Mockito.when(paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount())).thenReturn(
+                Flux.just(paymentMethod)
+        );
+
+        PaymentMethodsResponseDto expectedResult = TestUtil.getPaymentMethodsResponse(paymentMethod);
+
+        webClient
+                .get()
+                .uri(
+                        uriBuilder -> uriBuilder
+                                .path("/payment-methods")
+                                .queryParam("amount", TestUtil.getTestAmount())
+                                .build()
+                )
+                .header("x-client-id", TestUtil.getClientIdIO().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -127,7 +178,7 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldGetAMethod() {
+    void shouldGetAMethodForCheckout() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         Mockito.when(
@@ -141,6 +192,31 @@ class PaymentMethodsControllerTests {
         webClient
                 .get()
                 .uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(PaymentMethodResponseDto.class)
+                .hasSize(1)
+                .contains(expectedResult);
+    }
+
+    @Test
+    void shouldGetAMethodForIo() {
+        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+
+        Mockito.when(
+                paymentMethodService.retrievePaymentMethodById(
+                        paymentMethod.getPaymentMethodID().value().toString()
+                )
+        ).thenReturn(Mono.just(paymentMethod));
+
+        PaymentMethodResponseDto expectedResult = TestUtil.getPaymentMethodResponse(paymentMethod);
+
+        webClient
+                .get()
+                .uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .header("x-client-id", TestUtil.getClientIdIO().toString())
                 .exchange()
                 .expectStatus()
                 .isOk()

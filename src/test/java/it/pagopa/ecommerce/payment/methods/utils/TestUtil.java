@@ -61,8 +61,20 @@ public class TestUtil {
         );
     }
 
-    public static PaymentMethodRequestDto getPaymentMethodRequest() {
+    public static PaymentMethodRequestDto getPaymentMethodRequestForCheckout() {
         return new PaymentMethodRequestDto()
+                .clientId(getClientIdCheckout())
+                .name(TEST_NAME)
+                .description(TEST_DESC)
+                .status(TEST_STATUS)
+                .paymentTypeCode(TEST_TYPE_CODE)
+                .ranges(List.of(new RangeDto().max(100L).min(0L)))
+                .asset(TEST_ASSET);
+    }
+
+    public static PaymentMethodRequestDto getPaymentMethodRequestForIO() {
+        return new PaymentMethodRequestDto()
+                .clientId(getClientIdIO())
                 .name(TEST_NAME)
                 .description(TEST_DESC)
                 .status(TEST_STATUS)
@@ -323,5 +335,13 @@ public class TestUtil {
                         )
                 );
 
+    }
+
+    public static PaymentMethodRequestDto.ClientIdEnum getClientIdCheckout() {
+        return PaymentMethodRequestDto.ClientIdEnum.CHECKOUT;
+    }
+
+    public static PaymentMethodRequestDto.ClientIdEnum getClientIdIO() {
+        return PaymentMethodRequestDto.ClientIdEnum.IO;
     }
 }
