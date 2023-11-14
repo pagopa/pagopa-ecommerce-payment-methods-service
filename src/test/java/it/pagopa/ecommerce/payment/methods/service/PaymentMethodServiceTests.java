@@ -132,7 +132,7 @@ class PaymentMethodServiceTests {
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(paymentMethodRepository.findAll())
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodCreated = paymentMethodService
@@ -148,7 +148,7 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodRepository.findAll())
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentMethodCreated = paymentMethodService
@@ -165,7 +165,7 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodRepository.findAll())
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentmethodCreated = paymentMethodService
@@ -217,7 +217,7 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
-                paymentMethodRepository.findByIdAndClientId(
+                paymentMethodRepository.findByPaymentMethodIDAndClientId(
                         paymentMethod.getPaymentMethodID().value().toString(),
                         clientIdIO.getValue()
                 )
