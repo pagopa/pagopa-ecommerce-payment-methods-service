@@ -13,11 +13,6 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-@CompoundIndexes(
-    {
-            @CompoundIndex(name = "paymentMethodName_paymentMethodTypeCode_clientId", unique = true)
-    }
-)
 @Document(collection = "payment-methods")
 public class PaymentMethodDocument {
 
