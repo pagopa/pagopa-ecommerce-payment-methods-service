@@ -26,6 +26,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -288,7 +289,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturnResponseEntityWithNpgError() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
-                .errorHandler(new NpgResponseException("reason test", new RuntimeException("inner test")));
+                .errorHandler(new NpgResponseException("reason test", Optional.of(HttpStatus.INTERNAL_SERVER_ERROR), new RuntimeException("inner test")));
         assertEquals(HttpStatus.BAD_GATEWAY, responseEntity.getStatusCode());
         assertEquals("reason test", responseEntity.getBody().getDetail());
     }
