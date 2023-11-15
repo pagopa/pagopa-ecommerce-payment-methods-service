@@ -56,7 +56,7 @@ class PaymentMethodsControllerTests {
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any(), any()))
+        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any(), eq(CLientID.CHECKOUT)))
                 .thenReturn(Mono.just(paymentMethod));
 
         webClient
