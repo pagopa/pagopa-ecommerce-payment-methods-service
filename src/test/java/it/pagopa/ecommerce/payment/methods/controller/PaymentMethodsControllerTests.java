@@ -289,7 +289,13 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturnResponseEntityWithNpgError() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
-                .errorHandler(new NpgResponseException("reason test", Optional.of(HttpStatus.INTERNAL_SERVER_ERROR), new RuntimeException("inner test")));
+                .errorHandler(
+                        new NpgResponseException(
+                                "reason test",
+                                Optional.of(HttpStatus.INTERNAL_SERVER_ERROR),
+                                new RuntimeException("inner test")
+                        )
+                );
         assertEquals(HttpStatus.BAD_GATEWAY, responseEntity.getStatusCode());
         assertEquals("reason test", responseEntity.getBody().getDetail());
     }
