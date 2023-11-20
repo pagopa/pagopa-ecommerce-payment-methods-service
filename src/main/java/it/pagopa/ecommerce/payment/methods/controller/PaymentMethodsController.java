@@ -104,10 +104,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Override
     public Mono<ResponseEntity<PaymentMethodsResponseDto>> getAllPaymentMethods(
+                                                                                String xClientId,
                                                                                 BigDecimal amount,
                                                                                 ServerWebExchange exchange
     ) {
-        return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null)
+        return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null, xClientId)
                 .map(PaymentMethodsController::paymentMethodToDto)
                 .collectList()
                 .map(
@@ -121,9 +122,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Override
     public Mono<ResponseEntity<PaymentMethodResponseDto>> getPaymentMethod(
                                                                            String id,
+                                                                           String xClientId,
                                                                            ServerWebExchange exchange
     ) {
-        return paymentMethodService.retrievePaymentMethodById(id)
+        return paymentMethodService.retrievePaymentMethodById(id, xClientId)
                 .map(this::paymentMethodToResponse);
     }
 
@@ -140,7 +142,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 .map(r -> Pair.of(r.getMin(), r.getMax()))
                                 .toList(),
                         request.getPaymentTypeCode(),
-                        request.getAsset()
+                        request.getAsset(),
+                        request.getClientId()
                 )
                         .map(this::paymentMethodToResponse)
         );

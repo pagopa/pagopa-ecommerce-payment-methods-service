@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
-import io.vavr.Tuple;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
@@ -98,7 +97,8 @@ public class PaymentMethodService {
                                                    String paymentMethodDescription,
                                                    List<Pair<Long, Long>> ranges,
                                                    String paymentMethodTypeCode,
-                                                   String paymentMethodAsset
+                                                   String paymentMethodAsset,
+                                                   PaymentMethodRequestDto.ClientIdEnum clientId
     ) {
         log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
@@ -109,7 +109,8 @@ public class PaymentMethodService {
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode),
                 new PaymentMethodAsset(paymentMethodAsset),
-                NpgClient.PaymentMethod.fromServiceName(paymentMethodName)
+                NpgClient.PaymentMethod.fromServiceName(paymentMethodName),
+                clientId
         );
 
         log.info("[Payment Method Aggregate] Store new aggregate");
@@ -124,7 +125,8 @@ public class PaymentMethodService {
                                 p.getPaymentMethodAsset().value(),
                                 p.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                                         .toList(),
-                                p.getPaymentMethodTypeCode().value()
+                                p.getPaymentMethodTypeCode().value(),
+                                p.getClientIdEnum().getValue()
                         )
                 ).map(
                         doc -> new PaymentMethod(
@@ -137,20 +139,24 @@ public class PaymentMethodService {
                                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                                         .toList(),
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName())
+                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
+                                clientId
                         )
                 )
         );
     }
 
-    public Flux<PaymentMethod> retrievePaymentMethods(Integer amount) {
+    public Flux<PaymentMethod> retrievePaymentMethods(
+                                                      Integer amount,
+                                                      String clientId
+    ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         if (amount == null) {
-            return paymentMethodRepository.findAll().map(this::docToAggregate);
+            return paymentMethodRepository.findByClientId(clientId).map(this::docToAggregate);
         } else {
             return paymentMethodRepository
-                    .findAll()
+                    .findByClientId(clientId)
                     .filter(
                             doc -> doc.getPaymentMethodRanges().stream()
                                     .anyMatch(
@@ -189,18 +195,22 @@ public class PaymentMethodService {
                                                 p.getPaymentMethodRanges().stream().map(
                                                         r -> Pair.of(r.min(), r.max())
                                                 ).toList(),
-                                                p.getPaymentMethodTypeCode().value()
+                                                p.getPaymentMethodTypeCode().value(),
+                                                p.getClientIdEnum().getValue()
                                         )
                                 )
                 )
                 .map(this::docToAggregate);
     }
 
-    public Mono<PaymentMethod> retrievePaymentMethodById(String id) {
+    public Mono<PaymentMethod> retrievePaymentMethodById(
+                                                         String id,
+                                                         String clientId
+    ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
         return paymentMethodRepository
-                .findById(id)
+                .findByPaymentMethodIDAndClientId(id, clientId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
                 .map(this::docToAggregate);
     }
@@ -551,7 +561,8 @@ public class PaymentMethodService {
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                         .toList(),
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName())
+                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
+                PaymentMethodRequestDto.ClientIdEnum.fromValue(doc.getClientId())
         );
     }
 }

@@ -58,6 +58,15 @@ paths:
           required: false
           schema:
             type: number
+        - name: x-client-id
+          in: header
+          description: client id related to a given touchpoint
+          required: true
+          schema:
+            type: string
+            enum:
+              - IO
+              - CHECKOUT
       responses:
         '200':
           description: Payment method successfully retrieved
@@ -126,6 +135,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-client-id
+          in: header
+          description: client id related to a given touchpoint
+          required: true
+          schema:
+            type: string
+            enum:
+              - IO
+              - CHECKOUT
       responses:
         '200':
           description: New payment method successfully updated
@@ -368,6 +386,12 @@ components:
       type: object
       description: New Payment method Request
       properties:
+        clientId:
+          type: string
+          description: client id related to a given touchpoint
+          enum:
+            - IO
+            - CHECKOUT
         name:
           type: string
           description: Payment method name
@@ -394,6 +418,7 @@ components:
         - status
         - paymentTypeCode
         - ranges
+        - clientId
     Range:
       type: object
       description: Payment amount range in eurocents

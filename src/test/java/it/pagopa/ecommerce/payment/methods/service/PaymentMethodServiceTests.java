@@ -99,6 +99,7 @@ class PaymentMethodServiceTests {
                         any(),
                         any(),
                         any(),
+                        any(),
                         any()
                 )
         )
@@ -117,7 +118,8 @@ class PaymentMethodServiceTests {
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
-                paymentMethod.getPaymentMethodAsset().value()
+                paymentMethod.getPaymentMethodAsset().value(),
+                paymentMethod.getClientIdEnum()
         ).block();
 
         assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
@@ -126,13 +128,15 @@ class PaymentMethodServiceTests {
     @Test
     void shouldRetrievePaymentMethods() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumCheckout = TestUtil.getClientIdCheckout();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(paymentMethodRepository.findAll())
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
-        PaymentMethod paymentMethodCreated = paymentMethodService.retrievePaymentMethods(null).blockFirst();
+        PaymentMethod paymentMethodCreated = paymentMethodService
+                .retrievePaymentMethods(null, clientIdEnumCheckout.getValue()).blockFirst();
 
         assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
     }
@@ -142,11 +146,13 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodRepository.findAll())
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
-        List<PaymentMethod> paymentMethodCreated = paymentMethodService.retrievePaymentMethods(101)
+        List<PaymentMethod> paymentMethodCreated = paymentMethodService
+                .retrievePaymentMethods(101, clientIdEnumIo.getValue())
                 .collectList().block();
 
         assertEquals(0, paymentMethodCreated.size());
@@ -157,11 +163,13 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodRepository.findAll())
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
-        List<PaymentMethod> paymentmethodCreated = paymentMethodService.retrievePaymentMethods(50)
+        List<PaymentMethod> paymentmethodCreated = paymentMethodService
+                .retrievePaymentMethods(50, clientIdEnumIo.getValue())
                 .collectList().block();
 
         assertEquals(1, paymentmethodCreated.size());
@@ -204,13 +212,21 @@ class PaymentMethodServiceTests {
     @Test
     void shouldRetrievePaymentMethodById() {
         PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
+
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(paymentMethodRepository.findById(paymentMethod.getPaymentMethodID().value().toString()))
+        Mockito.when(
+                paymentMethodRepository.findByPaymentMethodIDAndClientId(
+                        paymentMethod.getPaymentMethodID().value().toString(),
+                        clientIdIO.getValue()
+                )
+        )
                 .thenReturn(Mono.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodCreated = paymentMethodService
-                .retrievePaymentMethodById(paymentMethod.getPaymentMethodID().value().toString()).block();
+                .retrievePaymentMethodById(paymentMethod.getPaymentMethodID().value().toString(), clientIdIO.getValue())
+                .block();
 
         assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
     }
@@ -227,7 +243,8 @@ class PaymentMethodServiceTests {
                 PaymentMethodStatusEnum.ENABLED.getCode(),
                 "asset",
                 List.of(Pair.of(0L, 100L)),
-                "CP"
+                "CP",
+                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(
@@ -265,7 +282,8 @@ class PaymentMethodServiceTests {
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        "CP"
+                                        "CP",
+                                        PaymentMethodRequestDto.ClientIdEnum.IO.getValue()
                                 )
                         )
                 );
@@ -296,7 +314,8 @@ class PaymentMethodServiceTests {
                                         PaymentMethodStatusEnum.ENABLED.getCode(),
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
-                                        paymentTypeCode
+                                        paymentTypeCode,
+                                        PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
                                 )
                         )
                 );
