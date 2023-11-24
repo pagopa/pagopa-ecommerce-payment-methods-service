@@ -151,12 +151,12 @@ microservice-chart:
                 operator: In
                 values:
                   - user
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchLabels:
-                      app.kubernetes.io/instance: pagopaecommercepaymentmethodsservice
-                  namespaces: [ "ecommerce" ]
-                  topologyKey: topology.kubernetes.io/zone
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/instance: pagopaecommercepaymentmethodsservice
+              namespaces: [ "ecommerce" ]
+              topologyKey: topology.kubernetes.io/zone
