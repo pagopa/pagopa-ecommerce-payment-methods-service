@@ -50,7 +50,7 @@ microservice-chart:
       NPG_API_KEY: npg-api-key
   image:
     repository: pagopapcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "0.19.0"
+    tag: "0.20.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -153,10 +153,10 @@ microservice-chart:
                   - user
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/instance: pagopaecommercepaymentmethodsservice
-              namespaces: [ "ecommerce" ]
-              topologyKey: topology.kubernetes.io/zone
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: pagopaecommercepaymentmethodsservice
+            namespaces: ["ecommerce"]
+            topologyKey: topology.kubernetes.io/zone
