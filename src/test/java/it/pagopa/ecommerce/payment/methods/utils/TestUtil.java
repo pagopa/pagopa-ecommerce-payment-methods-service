@@ -4,7 +4,7 @@ import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
-import it.pagopa.ecommerce.commons.generated.npg.v1.dto.StateDto;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.WorkflowStateDto;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
@@ -270,7 +270,7 @@ public class TestUtil {
         return new FieldsDto()
                 .sessionId("sessionId")
                 .url("url")
-                .state(StateDto.CARD_DATA_COLLECTION)
+                .state(WorkflowStateDto.CARD_DATA_COLLECTION)
                 .securityToken("securityToken")
                 .fields(
                         List.of(
