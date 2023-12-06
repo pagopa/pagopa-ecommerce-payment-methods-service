@@ -258,7 +258,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
         assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
         assertEquals(
@@ -294,7 +294,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
     }
 
@@ -326,7 +326,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null).block();
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
         assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
     }
 
@@ -641,7 +641,7 @@ class PaymentMethodServiceTests {
 
         StepVerifier.create(
                 paymentMethodService
-                        .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null)
+                        .computeFee(calculateFeeRequestDto, paymentMethodId, null)
         )
                 .expectError(NoBundleFoundException.class)
                 .verify();

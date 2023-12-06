@@ -1,8 +1,11 @@
 package it.pagopa.ecommerce.payment.methods.exception;
 
+import lombok.Getter;
+
 /**
  * Exception raised when no bundle is found for searched payment method
  */
+@Getter
 public class NoBundleFoundException extends RuntimeException {
 
     private final String paymentMethodId;

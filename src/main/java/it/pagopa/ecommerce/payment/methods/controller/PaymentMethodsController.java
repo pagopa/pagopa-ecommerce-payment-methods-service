@@ -211,9 +211,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                        ServerWebExchange exchange
     ) {
 
-        return paymentMethodService.computeFee(calculateFeeRequestDto, id, maxOccurrences).map(
-                ResponseEntity::ok
-        );
+        return calculateFeeRequestDto.flatMap(request -> paymentMethodService.computeFee(request, id, maxOccurrences))
+                .map(
+                        ResponseEntity::ok
+                );
     }
 
     @Override
