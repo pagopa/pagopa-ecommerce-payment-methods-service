@@ -216,7 +216,7 @@ public class PaymentMethodService {
     }
 
     public Mono<CalculateFeeResponseDto> computeFee(
-                                                    Mono<CalculateFeeRequestDto> paymentOptionDto,
+                                                    CalculateFeeRequestDto paymentOptionDto,
                                                     String paymentMethodId,
                                                     Integer maxOccurrences
     ) {
@@ -224,7 +224,7 @@ public class PaymentMethodService {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .flatMap(
-                        pm -> paymentOptionDto.map(
+                        pm -> Mono.just(paymentOptionDto).map(
                                 po -> Tuples.of(
                                         new it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto()
                                                 .bin(po.getBin())
@@ -266,13 +266,11 @@ public class PaymentMethodService {
                                 .map(bo -> bundleOptionToResponse(bo, pm))
                                 .filter(response -> !response.getBundles().isEmpty())
                                 .switchIfEmpty(
-                                        paymentOptionDto.flatMap(
-                                                po -> Mono.error(
-                                                        new NoBundleFoundException(
-                                                                paymentMethodId,
-                                                                po.getPaymentAmount(),
-                                                                po.getTouchpoint()
-                                                        )
+                                        Mono.error(
+                                                new NoBundleFoundException(
+                                                        paymentMethodId,
+                                                        paymentOptionDto.getPaymentAmount(),
+                                                        paymentOptionDto.getTouchpoint()
                                                 )
                                         )
                                 )
