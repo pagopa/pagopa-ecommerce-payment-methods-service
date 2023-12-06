@@ -264,6 +264,18 @@ public class PaymentMethodService {
                                     return bo;
                                 })
                                 .map(bo -> bundleOptionToResponse(bo, pm))
+                                .filter(response -> !response.getBundles().isEmpty())
+                                .switchIfEmpty(
+                                        paymentOptionDto.flatMap(
+                                                po -> Mono.error(
+                                                        new NoBundleFoundException(
+                                                                paymentMethodId,
+                                                                po.getPaymentAmount(),
+                                                                po.getTouchpoint()
+                                                        )
+                                                )
+                                        )
+                                )
 
                 );
 
@@ -494,19 +506,21 @@ public class PaymentMethodService {
     private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
                                                                                           List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
     ) {
-        List<String> idPsps = new ArrayList<>();
-
-        return transfers
-                .stream()
-                .filter(t -> {
-                    if (idPsps.contains(t.getIdPsp())) {
-                        return false;
-                    } else {
-                        idPsps.add(t.getIdPsp());
-                        return true;
-                    }
-                })
-                .toList();
+        Set<String> idPsps = new HashSet<>();
+        return Optional.ofNullable(transfers)
+                .map(
+                        transferDtos -> transferDtos.stream()
+                                .filter(t -> {
+                                    if (idPsps.contains(t.getIdPsp())) {
+                                        return false;
+                                    } else {
+                                        idPsps.add(t.getIdPsp());
+                                        return true;
+                                    }
+                                })
+                                .toList()
+                )
+                .orElse(List.of());
 
     }
 

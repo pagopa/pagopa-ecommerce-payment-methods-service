@@ -502,4 +502,26 @@ class PaymentMethodsControllerTests {
                 .expectBody(ProblemJsonDto.class)
                 .isEqualTo(expected);
     }
+
+    @Test
+    void shouldReturn404ForNoBundleReturned() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto requestBody = TestUtil.getCalculateFeeRequest();
+        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+                .thenReturn(Mono.error(new NoBundleFoundException("paymentMethodId", 100, "CHECKOUT")));
+        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail(
+                "No bundle found for payment method with id: [paymentMethodId] and transaction amount: [100] for touch point: [CHECKOUT]"
+        );
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/fees")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(ProblemJsonDto.class)
+                .isEqualTo(expected);
+    }
+
 }
