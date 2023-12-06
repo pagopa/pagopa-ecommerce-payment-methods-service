@@ -39,7 +39,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 AfmResponseException.class,
                 InvalidSessionException.class,
                 MismatchedSecurityTokenException.class,
-                SessionAlreadyAssociatedToTransaction.class
+                SessionAlreadyAssociatedToTransaction.class,
+                NoBundleFoundException.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
@@ -93,6 +94,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     new ProblemJsonDto().status(502).title("Bad Gateway")
                             .detail(exception.getMessage()),
                     HttpStatus.BAD_GATEWAY
+            );
+        } else if (exception instanceof NoBundleFoundException ex) {
+            return new ResponseEntity<>(
+                    new ProblemJsonDto().status(404).title(notFoundTitle).detail(ex.getMessage())
+                            .detail(exception.getMessage()),
+                    HttpStatus.NOT_FOUND
             );
         } else {
             return new ResponseEntity<>(

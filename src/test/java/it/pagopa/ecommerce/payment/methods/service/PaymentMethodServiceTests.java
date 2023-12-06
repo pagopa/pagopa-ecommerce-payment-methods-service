@@ -9,10 +9,7 @@ import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
-import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
-import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
+import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
@@ -22,8 +19,12 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.ecommerce.payment.methods.utils.UniqueIdUtils;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
+import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -606,4 +608,43 @@ class PaymentMethodServiceTests {
                 .expectError(PaymentMethodNotFoundException.class)
                 .verify();
     }
+
+    public static Stream<Arguments> gecInvalidTransferDtoSource() {
+        return Stream.of(Arguments.of(List.<TransferDto>of()), Arguments.of((List<TransferDto>) null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("gecInvalidTransferDtoSource")
+    void shouldReturnNoBundleFoundExceptionForNoBundleReturnedByGec(List<TransferDto> invalidTransferDto) {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+        gecResponse.setBundleOptions(invalidTransferDto);
+        PaymentMethodDocument paymentMethodDocument = new PaymentMethodDocument(
+                UUID.randomUUID().toString(),
+                NpgClient.PaymentMethod.CARDS.serviceName,
+                "Description",
+                PaymentMethodStatusEnum.ENABLED.getCode(),
+                "asset",
+                List.of(Pair.of(0L, 100L)),
+                "CP",
+                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
+        );
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(
+                        Mono.just(
+                                paymentMethodDocument
+                        )
+                );
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+                .thenReturn(Mono.just(gecResponse));
+
+        StepVerifier.create(
+                paymentMethodService
+                        .computeFee(Mono.just(calculateFeeRequestDto), paymentMethodId, null)
+        )
+                .expectError(NoBundleFoundException.class)
+                .verify();
+    }
+
 }
