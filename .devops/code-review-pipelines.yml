@@ -14,7 +14,6 @@ resources:
       type: github
       name: pagopa/pagopa-ecommerce-local
       ref: main
-      
       endpoint: 'io-azure-devops-github-ro'
 
 stages:
