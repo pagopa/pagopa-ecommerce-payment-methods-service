@@ -17,7 +17,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepositor
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
-import it.pagopa.ecommerce.payment.methods.utils.UniqueIdUtils;
+import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
 import org.junit.jupiter.api.Test;
