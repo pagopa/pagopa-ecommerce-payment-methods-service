@@ -304,9 +304,23 @@ public class PaymentMethodService {
                         paymentMethod -> uniqueIdUtils.generateUniqueId()
                                 .map(orderId -> Tuples.of(orderId, paymentMethod))
                 )
+                .flatMap(
+                        orderIdAndPaymentMethod -> jwtTokenUtils.generateToken(
+                                npgJwtSigningKey,
+                                npgNotificationTokenValidityTime,
+                                new Claims(null, orderIdAndPaymentMethod.getT1(), id)
+                        ).map(
+                                notificationSessionToken -> Tuples.of(
+                                        orderIdAndPaymentMethod.getT1(),
+                                        orderIdAndPaymentMethod.getT2(),
+                                        notificationSessionToken
+                                )
+                        )
+                )
                 .flatMap(data -> {
                     NpgClient.PaymentMethod paymentMethod = data.getT2();
                     String orderId = data.getT1();
+                    String notificationSessionToken = data.getT3();
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
@@ -321,11 +335,7 @@ public class PaymentMethodService {
                                             "orderId",
                                             orderId,
                                             "sessionToken",
-                                            jwtTokenUtils.generateToken(
-                                                    npgJwtSigningKey,
-                                                    npgNotificationTokenValidityTime,
-                                                    new Claims(null, orderId, id)
-                                            )
+                                            notificationSessionToken
                                     )
                             );
 
