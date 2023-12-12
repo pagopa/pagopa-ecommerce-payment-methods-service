@@ -77,7 +77,7 @@ class PaymentMethodServiceTests {
 
     private final UniqueIdUtils uniqueIdUtils = mock(UniqueIdUtils.class);
 
-    private final SecretKey jwtSecretKey = new SecretsConfigurations().jwtSigningKey(STRONG_KEY);
+    private final SecretKey jwtSecretKey = new SecretsConfigurations().npgJwtSigningKey(STRONG_KEY);
 
     private final JwtTokenUtils jwtTokenUtils = new JwtTokenUtils();
     private final PaymentMethodService paymentMethodService = new PaymentMethodService(

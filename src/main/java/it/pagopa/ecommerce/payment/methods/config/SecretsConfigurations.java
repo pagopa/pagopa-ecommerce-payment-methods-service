@@ -13,7 +13,7 @@ import javax.crypto.SecretKey;
 @Configuration
 public class SecretsConfigurations {
     @Bean
-    public SecretKey jwtSigningKey(@Value("${npg.notification.jwt.secret}") String jwtSecret) {
+    public SecretKey npgJwtSigningKey(@Value("${npg.notification.jwt.secret}") String jwtSecret) {
         try {
             return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
         } catch (WeakKeyException | DecodingException e) {
