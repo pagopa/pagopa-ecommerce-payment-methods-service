@@ -1,8 +1,10 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.domain.Claims;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
+import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.crypto.SecretKey;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,6 +74,12 @@ public class PaymentMethodService {
 
     private final UniqueIdUtils uniqueIdUtils;
 
+    private final SecretKey jwtSigningKey;
+
+    private final int npgNotificationTokenValidityTime;
+
+    private final JwtTokenUtils jwtTokenUtils;
+
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
@@ -80,7 +89,10 @@ public class PaymentMethodService {
             SessionUrlConfig sessionUrlConfig,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
             @Value("${npg.client.apiKey}") String npgDefaultApiKey,
-            UniqueIdUtils uniqueIdUtils
+            UniqueIdUtils uniqueIdUtils,
+            SecretKey jwtSigningKey,
+            @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
+            JwtTokenUtils jwtTokenUtils
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
@@ -90,6 +102,9 @@ public class PaymentMethodService {
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
         this.npgDefaultApiKey = npgDefaultApiKey;
         this.uniqueIdUtils = uniqueIdUtils;
+        this.jwtSigningKey = jwtSigningKey;
+        this.npgNotificationTokenValidityTime = npgNotificationTokenValidityTime;
+        this.jwtTokenUtils = jwtTokenUtils;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -305,8 +320,12 @@ public class PaymentMethodService {
                                     Map.of(
                                             "orderId",
                                             orderId,
-                                            "paymentMethodId",
-                                            id
+                                            "sessionToken",
+                                            jwtTokenUtils.generateToken(
+                                                    jwtSigningKey,
+                                                    npgNotificationTokenValidityTime,
+                                                    new Claims(null, orderId, id)
+                                            )
                                     )
                             );
 
