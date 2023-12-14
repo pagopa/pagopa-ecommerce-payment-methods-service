@@ -28,7 +28,7 @@ These are all environment variables needed by the application:
 | NPG_API_KEY                        | NPG api key                                                                                      | string |         |
 | NPG_SESSIONS_TTL                   | NPG TTL in second for npg session object                                                         | number |         |
 | NPG_NOTIFICATION_JWT_VALIDITY_TIME | Validity time in second used for generate token jwt used into notification url                   | number |         |
-| NPG_NOTIFICATION_JWT_SECRET        | Secret for generate jwt used into notification url                                               | number |         |
+| NPG_NOTIFICATION_JWT_SECRET        | Secret for generate jwt used into notification url                                               | string |         |
 | SESSION_URL_BASEPATH               | Url used into npg order build request to enhance the merchantUrl field                           | string |         |
 | SESSION_URL_OUTCOME_SUFFIX         | Suffix concatenated to the merchant url to enhance the resultUrl field in the order build to NPG | string |         |
 | SESSION_URL_CANCEL_SUFFIX          | Suffix concatenated to the merchant url to enhance the cancelUrl field in the order build to NPG | string |         |
