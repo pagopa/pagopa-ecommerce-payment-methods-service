@@ -309,11 +309,14 @@ public class PaymentMethodService {
                                 npgJwtSigningKey,
                                 npgNotificationTokenValidityTime,
                                 new Claims(null, orderIdAndPaymentMethod.getT1(), id)
-                        ).map(
-                                notificationSessionToken -> Tuples.of(
-                                        orderIdAndPaymentMethod.getT1(),
-                                        orderIdAndPaymentMethod.getT2(),
-                                        notificationSessionToken
+                        ).fold(
+                                Mono::error,
+                                token -> Mono.just(
+                                        Tuples.of(
+                                                orderIdAndPaymentMethod.getT1(),
+                                                orderIdAndPaymentMethod.getT2(),
+                                                token
+                                        )
                                 )
                         )
                 )
