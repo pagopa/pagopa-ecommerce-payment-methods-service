@@ -2,8 +2,8 @@ package it.pagopa.ecommerce.payment.methods.config;
 
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.UniqueIdDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.UniqueIdTemplateWrapper;
+import it.pagopa.ecommerce.commons.repositories.UniqueIdDocument;
+import it.pagopa.ecommerce.commons.redis.templatewrappers.UniqueIdTemplateWrapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
+import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -40,7 +41,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 InvalidSessionException.class,
                 MismatchedSecurityTokenException.class,
                 SessionAlreadyAssociatedToTransaction.class,
-                NoBundleFoundException.class
+                NoBundleFoundException.class,
+                JWTTokenGenerationException.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {

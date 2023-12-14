@@ -1,8 +1,10 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.domain.Claims;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
+import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -13,7 +15,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
-import it.pagopa.ecommerce.payment.methods.utils.UniqueIdUtils;
+import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.crypto.SecretKey;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,6 +74,12 @@ public class PaymentMethodService {
 
     private final UniqueIdUtils uniqueIdUtils;
 
+    private final SecretKey npgJwtSigningKey;
+
+    private final int npgNotificationTokenValidityTime;
+
+    private final JwtTokenUtils jwtTokenUtils;
+
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
@@ -80,7 +89,10 @@ public class PaymentMethodService {
             SessionUrlConfig sessionUrlConfig,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
             @Value("${npg.client.apiKey}") String npgDefaultApiKey,
-            UniqueIdUtils uniqueIdUtils
+            UniqueIdUtils uniqueIdUtils,
+            SecretKey npgJwtSigningKey,
+            @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
+            JwtTokenUtils jwtTokenUtils
     ) {
         this.afmClient = afmClient;
         this.npgClient = npgClient;
@@ -90,6 +102,9 @@ public class PaymentMethodService {
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
         this.npgDefaultApiKey = npgDefaultApiKey;
         this.uniqueIdUtils = uniqueIdUtils;
+        this.npgJwtSigningKey = npgJwtSigningKey;
+        this.npgNotificationTokenValidityTime = npgNotificationTokenValidityTime;
+        this.jwtTokenUtils = jwtTokenUtils;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -289,9 +304,26 @@ public class PaymentMethodService {
                         paymentMethod -> uniqueIdUtils.generateUniqueId()
                                 .map(orderId -> Tuples.of(orderId, paymentMethod))
                 )
+                .flatMap(
+                        orderIdAndPaymentMethod -> jwtTokenUtils.generateToken(
+                                npgJwtSigningKey,
+                                npgNotificationTokenValidityTime,
+                                new Claims(null, orderIdAndPaymentMethod.getT1(), id)
+                        ).fold(
+                                Mono::error,
+                                token -> Mono.just(
+                                        Tuples.of(
+                                                orderIdAndPaymentMethod.getT1(),
+                                                orderIdAndPaymentMethod.getT2(),
+                                                token
+                                        )
+                                )
+                        )
+                )
                 .flatMap(data -> {
                     NpgClient.PaymentMethod paymentMethod = data.getT2();
                     String orderId = data.getT1();
+                    String notificationSessionToken = data.getT3();
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
@@ -305,8 +337,8 @@ public class PaymentMethodService {
                                     Map.of(
                                             "orderId",
                                             orderId,
-                                            "paymentMethodId",
-                                            id
+                                            "sessionToken",
+                                            notificationSessionToken
                                     )
                             );
 

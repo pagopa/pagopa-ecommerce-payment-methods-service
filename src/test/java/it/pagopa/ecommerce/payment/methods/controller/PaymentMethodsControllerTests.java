@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
 import io.opentelemetry.api.trace.Tracer;
+import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -347,6 +348,14 @@ class PaymentMethodsControllerTests {
                 .errorHandler(new PaymentMethodNotFoundException("paymentMethodId"));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals("Payment method not found", responseEntity.getBody().getDetail());
+    }
+
+    @Test
+    void shouldReturnResponseEntityWithJwtGenerationError() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new JWTTokenGenerationException());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Internal server error", responseEntity.getBody().getTitle());
     }
 
     @Test
