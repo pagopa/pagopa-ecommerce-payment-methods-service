@@ -533,4 +533,31 @@ class PaymentMethodsControllerTests {
                 .isEqualTo(expected);
     }
 
+    @Test
+    void shouldReturnBadGatewayForNpgException() {
+        String paymentMethodId = UUID.randomUUID().toString();
+
+        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+                .thenReturn(
+                        Mono.error(
+                                new NpgResponseException(
+                                        "error message",
+                                        Optional.of(HttpStatus.INTERNAL_SERVER_ERROR),
+                                        new RuntimeException("NPG cause")
+                                )
+                        )
+                );
+
+        webClient
+                .post()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions")
+                                .build(paymentMethodId)
+                )
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.BAD_GATEWAY)
+                .expectBody(ProblemJsonDto.class)
+                .value(p -> assertEquals(502, p.getStatus()));
+    }
 }

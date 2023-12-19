@@ -42,7 +42,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 MismatchedSecurityTokenException.class,
                 SessionAlreadyAssociatedToTransaction.class,
                 NoBundleFoundException.class,
-                JWTTokenGenerationException.class
+                JWTTokenGenerationException.class,
+                NpgResponseException.class
         }
     )
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
