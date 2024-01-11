@@ -58,7 +58,8 @@ public class TestUtil {
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
                 TEST_NPG_PAYMENT_METHOD,
-                getClientIdCheckout()
+                getClientIdCheckout(),
+                false
         );
     }
 
@@ -70,7 +71,8 @@ public class TestUtil {
                 .status(TEST_STATUS)
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
-                .asset(TEST_ASSET);
+                .asset(TEST_ASSET)
+                .isRedirect(false);
     }
 
     public static PaymentMethodRequestDto getPaymentMethodRequestForIO() {
@@ -81,7 +83,8 @@ public class TestUtil {
                 .status(TEST_STATUS)
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
-                .asset(TEST_ASSET);
+                .asset(TEST_ASSET)
+                .isRedirect(false);
     }
 
     public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod) {
@@ -140,7 +143,8 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
-                paymentMethod.getClientIdEnum().getValue()
+                paymentMethod.getClientIdEnum().getValue(),
+                paymentMethod.isRedirect()
         );
     }
 

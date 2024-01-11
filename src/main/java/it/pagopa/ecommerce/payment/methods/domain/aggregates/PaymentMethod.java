@@ -31,6 +31,8 @@ public class PaymentMethod {
 
     private PaymentMethodStatus paymentMethodStatus;
 
+    private final boolean isRedirect;
+
     /*
      * @formatter:off
      *
@@ -49,7 +51,8 @@ public class PaymentMethod {
             List<PaymentMethodRange> paymentMethodRanges,
             PaymentMethodAsset paymentMethodAsset,
             NpgClient.PaymentMethod npgPaymentMethod,
-            PaymentMethodRequestDto.ClientIdEnum clientIdEnum
+            PaymentMethodRequestDto.ClientIdEnum clientIdEnum,
+            boolean isRedirect
     ) {
         this.paymentMethodID = paymentMethodID;
         this.paymentMethodName = paymentMethodName;
@@ -60,6 +63,7 @@ public class PaymentMethod {
         this.paymentMethodAsset = paymentMethodAsset;
         this.npgPaymentMethod = npgPaymentMethod;
         this.clientIdEnum = clientIdEnum;
+        this.isRedirect = isRedirect;
     }
 
     @AggregateID

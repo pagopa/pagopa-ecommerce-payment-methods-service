@@ -412,6 +412,11 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/Range"
+        isRedirect:
+          type: boolean
+          description: |
+            Boolean flag indicating whether the payment method
+            is integrated with Checkout Redirect (`true`) or with NPG (`false`)
       required:
         - name
         - description
@@ -419,6 +424,7 @@ components:
         - paymentTypeCode
         - ranges
         - clientId
+        - isRedirect
     Range:
       type: object
       description: Payment amount range in eurocents

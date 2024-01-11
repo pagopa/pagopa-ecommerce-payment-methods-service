@@ -55,7 +55,8 @@ class PaymentMethodFactoryTests {
                 paymentMethod.getPaymentMethodTypeCode(),
                 paymentMethod.getPaymentMethodAsset(),
                 paymentMethod.getNpgPaymentMethod(),
-                paymentMethod.getClientIdEnum()
+                paymentMethod.getClientIdEnum(),
+                paymentMethod.isRedirect()
         ).block();
 
         assertNotNull(paymentMethodProduct);
@@ -84,7 +85,8 @@ class PaymentMethodFactoryTests {
                                         .map(r -> Pair.of(r.min(), r.max()))
                                         .collect(Collectors.toList()),
                                 paymentMethod.getPaymentMethodTypeCode().value(),
-                                clientIdCheckout.getValue()
+                                clientIdCheckout.getValue(),
+                                paymentMethod.isRedirect()
                         )
                 )
         );
@@ -100,7 +102,8 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getPaymentMethodTypeCode(),
                         paymentMethod.getPaymentMethodAsset(),
                         paymentMethod.getNpgPaymentMethod(),
-                        paymentMethod.getClientIdEnum()
+                        paymentMethod.getClientIdEnum(),
+                        paymentMethod.isRedirect()
                 ).block()
         );
     }

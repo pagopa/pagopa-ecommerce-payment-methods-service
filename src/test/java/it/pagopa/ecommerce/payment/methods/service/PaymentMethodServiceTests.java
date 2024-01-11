@@ -114,7 +114,8 @@ class PaymentMethodServiceTests {
                         any(),
                         any(),
                         any(),
-                        any()
+                        any(),
+                        anyBoolean()
                 )
         )
                 .thenReturn(Mono.just(paymentMethod));
@@ -133,7 +134,8 @@ class PaymentMethodServiceTests {
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
                 paymentMethod.getPaymentMethodAsset().value(),
-                paymentMethod.getClientIdEnum()
+                paymentMethod.getClientIdEnum(),
+                false
         ).block();
 
         assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
@@ -258,7 +260,8 @@ class PaymentMethodServiceTests {
                 "asset",
                 List.of(Pair.of(0L, 100L)),
                 "CP",
-                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
+                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
+                false
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(
@@ -297,7 +300,8 @@ class PaymentMethodServiceTests {
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
                                         "CP",
-                                        PaymentMethodRequestDto.ClientIdEnum.IO.getValue()
+                                        PaymentMethodRequestDto.ClientIdEnum.IO.getValue(),
+                                        false
                                 )
                         )
                 );
@@ -329,7 +333,8 @@ class PaymentMethodServiceTests {
                                         "asset",
                                         List.of(Pair.of(0L, 100L)),
                                         paymentTypeCode,
-                                        PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
+                                        PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
+                                        false
                                 )
                         )
                 );
@@ -659,7 +664,8 @@ class PaymentMethodServiceTests {
                 "asset",
                 List.of(Pair.of(0L, 100L)),
                 "CP",
-                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue()
+                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
+                false
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(

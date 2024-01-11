@@ -22,4 +22,5 @@ public class PaymentMethodDocument {
     private List<Pair<Long, Long>> paymentMethodRanges;
     private String paymentMethodTypeCode;
     private String clientId;
+    private boolean isRedirect;
 }

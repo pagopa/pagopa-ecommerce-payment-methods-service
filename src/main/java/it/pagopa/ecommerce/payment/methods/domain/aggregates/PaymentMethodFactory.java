@@ -43,7 +43,8 @@ public class PaymentMethodFactory {
                                                 PaymentMethodType paymentMethodTypeCode,
                                                 PaymentMethodAsset paymentMethodAsset,
                                                 NpgClient.PaymentMethod npgPaymentMethod,
-                                                PaymentMethodRequestDto.ClientIdEnum clientId
+                                                PaymentMethodRequestDto.ClientIdEnum clientId,
+                                                boolean isRedirect
     ) {
 
         return paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
@@ -64,7 +65,8 @@ public class PaymentMethodFactory {
                             paymentMethodRanges,
                             paymentMethodAsset,
                             npgPaymentMethod,
-                            clientId
+                            clientId,
+                            isRedirect
                     );
                 }
                 );
