@@ -14,6 +14,7 @@ import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
+import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodManagementEnum;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
@@ -114,7 +115,7 @@ public class PaymentMethodService {
                                                    String paymentMethodTypeCode,
                                                    String paymentMethodAsset,
                                                    PaymentMethodRequestDto.ClientIdEnum clientId,
-                                                   boolean isRedirect
+                                                   PaymentMethodManagementTypeDto methodAuthManagement
     ) {
         log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
@@ -127,7 +128,7 @@ public class PaymentMethodService {
                 new PaymentMethodAsset(paymentMethodAsset),
                 NpgClient.PaymentMethod.fromServiceName(paymentMethodName),
                 clientId,
-                isRedirect
+                new PaymentMethodManagement(PaymentMethodManagementEnum.valueOf(methodAuthManagement.getValue()))
         );
 
         log.info("[Payment Method Aggregate] Store new aggregate");
@@ -144,7 +145,7 @@ public class PaymentMethodService {
                                         .toList(),
                                 p.getPaymentMethodTypeCode().value(),
                                 p.getClientIdEnum().getValue(),
-                                p.isRedirect()
+                                p.getPaymentMethodManagement().value().getCode()
                         )
                 ).map(
                         doc -> new PaymentMethod(
@@ -159,7 +160,7 @@ public class PaymentMethodService {
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
                                 NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
                                 clientId,
-                                doc.isRedirect()
+                                new PaymentMethodManagement(PaymentMethodManagementEnum.valueOf(doc.getMethodAuthManagement()))
                         )
                 )
         );
@@ -216,7 +217,7 @@ public class PaymentMethodService {
                                                 ).toList(),
                                                 p.getPaymentMethodTypeCode().value(),
                                                 p.getClientIdEnum().getValue(),
-                                                p.isRedirect()
+                                                p.getPaymentMethodManagement().value().getCode()
                                         )
                                 )
                 )
@@ -612,7 +613,7 @@ public class PaymentMethodService {
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
                 NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
                 PaymentMethodRequestDto.ClientIdEnum.fromValue(doc.getClientId()),
-                doc.isRedirect()
+                new PaymentMethodManagement(PaymentMethodManagementEnum.valueOf(doc.getMethodAuthManagement()))
         );
     }
 }

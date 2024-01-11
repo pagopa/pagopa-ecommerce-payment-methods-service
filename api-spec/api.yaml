@@ -412,11 +412,8 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/Range"
-        isRedirect:
-          type: boolean
-          description: |
-            Boolean flag indicating whether the payment method
-            is integrated with Checkout Redirect (`true`) or with NPG (`false`)
+        methodManagement:
+          $ref: "#/components/schemas/PaymentMethodManagementType"
       required:
         - name
         - description
@@ -424,7 +421,7 @@ components:
         - paymentTypeCode
         - ranges
         - clientId
-        - isRedirect
+        - methodManagement
     Range:
       type: object
       description: Payment amount range in eurocents
@@ -465,6 +462,8 @@ components:
           description: Payment method asset name
         status:
           $ref: "#/components/schemas/PaymentMethodStatus"
+        methodManagement:
+          $ref: "#/components/schemas/PaymentMethodManagementType"
         paymentTypeCode:
           type: string
           description: Payment method type code
@@ -632,6 +631,17 @@ components:
         - ENABLED
         - DISABLED
         - INCOMING
+    PaymentMethodManagementType:
+      type: string
+      description: |
+        describes how to manage the payment method authorization flow in wallet and eCommerce domain
+        REDIRECT if it must be managed with a redirect flow, 
+        ONBOARDABLE if it must be managed with NPG and it is possible to save the payment method in the wallet, 
+        NOT_ONBOARDABLE if it must be managed with NPG but the method cannot be saved
+      enum:
+        - REDIRECT
+        - ONBOARDABLE
+        - NOT_ONBOARDABLE
     CreateSessionResponse:
       type: object
       description: Form data needed to create a payment method input form

@@ -154,7 +154,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         request.getPaymentTypeCode(),
                         request.getAsset(),
                         request.getClientId(),
-                        request.getIsRedirect()
+                        request.getMethodAuthManagement()
                 )
                         .map(this::paymentMethodToResponse)
         );
