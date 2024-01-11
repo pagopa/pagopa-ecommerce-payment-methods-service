@@ -60,7 +60,7 @@ class PaymentMethodsControllerTests {
 
         Mockito.when(
                 paymentMethodService
-                        .createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdCheckout), anyBoolean())
+                        .createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdCheckout), any())
         )
                 .thenReturn(Mono.just(paymentMethod));
 
@@ -86,7 +86,7 @@ class PaymentMethodsControllerTests {
 
         Mockito.when(
                 paymentMethodService
-                        .createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdIO), anyBoolean())
+                        .createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdIO), any())
         )
                 .thenReturn(Mono.just(paymentMethod));
 

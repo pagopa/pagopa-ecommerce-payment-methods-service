@@ -20,6 +20,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWra
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
+import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodManagementEnum;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
@@ -115,7 +116,7 @@ class PaymentMethodServiceTests {
                         any(),
                         any(),
                         any(),
-                        anyBoolean()
+                        any()
                 )
         )
                 .thenReturn(Mono.just(paymentMethod));
@@ -135,7 +136,7 @@ class PaymentMethodServiceTests {
                 paymentMethod.getPaymentMethodTypeCode().value(),
                 paymentMethod.getPaymentMethodAsset().value(),
                 paymentMethod.getClientIdEnum(),
-                false
+                paymentMethod.getPaymentMethodManagement().value()
         ).block();
 
         assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
@@ -261,7 +262,7 @@ class PaymentMethodServiceTests {
                 List.of(Pair.of(0L, 100L)),
                 "CP",
                 PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
-                false
+                PaymentMethodManagementEnum.ONBOARDABLE.getCode()
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(
@@ -301,7 +302,7 @@ class PaymentMethodServiceTests {
                                         List.of(Pair.of(0L, 100L)),
                                         "CP",
                                         PaymentMethodRequestDto.ClientIdEnum.IO.getValue(),
-                                        false
+                                        PaymentMethodManagementEnum.ONBOARDABLE.getCode()
                                 )
                         )
                 );
@@ -334,7 +335,7 @@ class PaymentMethodServiceTests {
                                         List.of(Pair.of(0L, 100L)),
                                         paymentTypeCode,
                                         PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
-                                        false
+                                        PaymentMethodManagementEnum.ONBOARDABLE.getCode()
                                 )
                         )
                 );
@@ -665,7 +666,7 @@ class PaymentMethodServiceTests {
                 List.of(Pair.of(0L, 100L)),
                 "CP",
                 PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
-                false
+                PaymentMethodManagementEnum.ONBOARDABLE.getCode()
         );
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(

@@ -6,13 +6,7 @@ import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.WorkflowStateDto;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.CardDataDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
@@ -59,7 +53,7 @@ public class TestUtil {
                 new PaymentMethodAsset(TEST_ASSET),
                 TEST_NPG_PAYMENT_METHOD,
                 getClientIdCheckout(),
-                false
+                new PaymentMethodManagement(PaymentMethodManagementEnum.ONBOARDABLE)
         );
     }
 
@@ -72,7 +66,7 @@ public class TestUtil {
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
                 .asset(TEST_ASSET)
-                .isRedirect(false);
+                .methodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE);
     }
 
     public static PaymentMethodRequestDto getPaymentMethodRequestForIO() {
@@ -84,7 +78,7 @@ public class TestUtil {
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
                 .asset(TEST_ASSET)
-                .isRedirect(false);
+                .methodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE);
     }
 
     public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod) {
@@ -144,7 +138,7 @@ public class TestUtil {
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
                 paymentMethod.getClientIdEnum().getValue(),
-                paymentMethod.isRedirect()
+                paymentMethod.getPaymentMethodManagement().value().getCode()
         );
     }
 

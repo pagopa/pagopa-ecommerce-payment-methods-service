@@ -511,7 +511,7 @@ components:
           description: The primary creditor institution
           type: string
         transferList:
-          description: Transfert list
+          description: Transfer list
           type: array
           items:
             $ref: "#/components/schemas/TransferListItem"

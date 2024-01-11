@@ -115,7 +115,7 @@ public class PaymentMethodService {
                                                    String paymentMethodTypeCode,
                                                    String paymentMethodAsset,
                                                    PaymentMethodRequestDto.ClientIdEnum clientId,
-                                                   PaymentMethodManagementTypeDto methodAuthManagement
+                                                   PaymentMethodManagementEnum methodAuthManagement
     ) {
         log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
@@ -128,7 +128,7 @@ public class PaymentMethodService {
                 new PaymentMethodAsset(paymentMethodAsset),
                 NpgClient.PaymentMethod.fromServiceName(paymentMethodName),
                 clientId,
-                new PaymentMethodManagement(PaymentMethodManagementEnum.valueOf(methodAuthManagement.getValue()))
+                new PaymentMethodManagement(methodAuthManagement)
         );
 
         log.info("[Payment Method Aggregate] Store new aggregate");
@@ -160,7 +160,9 @@ public class PaymentMethodService {
                                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
                                 NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
                                 clientId,
-                                new PaymentMethodManagement(PaymentMethodManagementEnum.valueOf(doc.getMethodAuthManagement()))
+                                new PaymentMethodManagement(
+                                        PaymentMethodManagementEnum.valueOf(doc.getMethodAuthManagement())
+                                )
                         )
                 )
         );
