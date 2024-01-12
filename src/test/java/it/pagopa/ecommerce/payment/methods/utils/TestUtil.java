@@ -92,7 +92,11 @@ public class TestUtil {
                                 .fromValue(paymentMethod.getPaymentMethodStatus().value().getCode())
                 )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
-                .ranges(List.of(new RangeDto().min(0L).max(100L)));
+                .ranges(List.of(new RangeDto().min(0L).max(100L)))
+                .methodManagement(
+                        PaymentMethodManagementTypeDto
+                                .valueOf(paymentMethod.getPaymentMethodManagement().value().getCode())
+                );
     }
 
     public static PaymentMethodsResponseDto getPaymentMethodsResponse(PaymentMethod... paymentMethod) {

@@ -206,6 +206,9 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         );
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
+        response.setMethodManagement(
+                PaymentMethodManagementTypeDto.valueOf(paymentMethod.getPaymentMethodManagement().value().getCode())
+        );
         return response;
     }
 

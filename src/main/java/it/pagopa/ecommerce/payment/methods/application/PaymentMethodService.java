@@ -161,7 +161,7 @@ public class PaymentMethodService {
                                 NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
                                 clientId,
                                 new PaymentMethodManagement(
-                                        PaymentMethodManagementEnum.valueOf(doc.getMethodAuthManagement())
+                                        PaymentMethodManagementEnum.valueOf(doc.getMethodManagement())
                                 )
                         )
                 )
@@ -615,7 +615,7 @@ public class PaymentMethodService {
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
                 NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
                 PaymentMethodRequestDto.ClientIdEnum.fromValue(doc.getClientId()),
-                new PaymentMethodManagement(PaymentMethodManagementEnum.valueOf(doc.getMethodAuthManagement()))
+                new PaymentMethodManagement(PaymentMethodManagementEnum.valueOf(doc.getMethodManagement()))
         );
     }
 }

@@ -5,7 +5,6 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.util.Pair;
-import org.springframework.lang.Nullable;
 
 import java.util.List;
 
@@ -23,5 +22,5 @@ public class PaymentMethodDocument {
     private List<Pair<Long, Long>> paymentMethodRanges;
     private String paymentMethodTypeCode;
     private String clientId;
-    private String methodAuthManagement;
+    private String methodManagement;
 }
