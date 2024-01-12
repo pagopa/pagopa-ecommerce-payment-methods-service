@@ -86,7 +86,7 @@ class PaymentMethodFactoryTests {
                                         .collect(Collectors.toList()),
                                 paymentMethod.getPaymentMethodTypeCode().value(),
                                 clientIdCheckout.getValue(),
-                                paymentMethod.getPaymentMethodManagement().value().getCode()
+                                paymentMethod.getPaymentMethodManagement().value().getValue()
                         )
                 )
         );

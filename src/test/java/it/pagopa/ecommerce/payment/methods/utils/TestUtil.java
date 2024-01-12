@@ -53,7 +53,7 @@ public class TestUtil {
                 new PaymentMethodAsset(TEST_ASSET),
                 TEST_NPG_PAYMENT_METHOD,
                 getClientIdCheckout(),
-                new PaymentMethodManagement(PaymentMethodManagementEnum.ONBOARDABLE)
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE)
         );
     }
 
@@ -93,10 +93,7 @@ public class TestUtil {
                 )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
                 .ranges(List.of(new RangeDto().min(0L).max(100L)))
-                .methodManagement(
-                        PaymentMethodManagementTypeDto
-                                .valueOf(paymentMethod.getPaymentMethodManagement().value().getCode())
-                );
+                .methodManagement(paymentMethod.getPaymentMethodManagement().value());
     }
 
     public static PaymentMethodsResponseDto getPaymentMethodsResponse(PaymentMethod... paymentMethod) {
@@ -142,7 +139,7 @@ public class TestUtil {
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
                 paymentMethod.getClientIdEnum().getValue(),
-                paymentMethod.getPaymentMethodManagement().value().getCode()
+                paymentMethod.getPaymentMethodManagement().value().getValue()
         );
     }
 

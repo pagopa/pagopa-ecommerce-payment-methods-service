@@ -8,7 +8,6 @@ import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodMana
 import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
-import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodManagementEnum;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,7 +155,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         request.getPaymentTypeCode(),
                         request.getAsset(),
                         request.getClientId(),
-                        PaymentMethodManagementEnum.valueOf(request.getMethodManagement().getValue())
+                        request.getMethodManagement()
                 )
                         .map(this::paymentMethodToResponse)
         );
@@ -207,7 +206,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
         response.setMethodManagement(
-                PaymentMethodManagementTypeDto.valueOf(paymentMethod.getPaymentMethodManagement().value().getCode())
+                paymentMethod.getPaymentMethodManagement().value()
         );
         return response;
     }

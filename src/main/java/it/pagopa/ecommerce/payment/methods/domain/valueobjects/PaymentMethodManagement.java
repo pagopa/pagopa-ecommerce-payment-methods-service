@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.domain.valueobjects;
 
-import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodManagementEnum;
-import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
 import lombok.EqualsAndHashCode;
 import org.springframework.lang.NonNull;
 
@@ -11,16 +10,16 @@ import java.util.Objects;
 @EqualsAndHashCode
 public class PaymentMethodManagement {
 
-    private final PaymentMethodManagementEnum status;
+    private final PaymentMethodManagementTypeDto managementMethodType;
 
-    public PaymentMethodManagement(@NonNull PaymentMethodManagementEnum status) {
+    public PaymentMethodManagement(@NonNull PaymentMethodManagementTypeDto managementMethodType) {
 
-        this.status = Objects.requireNonNull(status);
+        this.managementMethodType = Objects.requireNonNull(managementMethodType);
     }
 
-    public @NonNull PaymentMethodManagementEnum value() {
+    public @NonNull PaymentMethodManagementTypeDto value() {
 
-        return status;
+        return managementMethodType;
     }
 
 }
