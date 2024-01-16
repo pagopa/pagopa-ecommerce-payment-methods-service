@@ -1,13 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +37,8 @@ public class PaymentMethodFactory {
                                                 PaymentMethodType paymentMethodTypeCode,
                                                 PaymentMethodAsset paymentMethodAsset,
                                                 NpgClient.PaymentMethod npgPaymentMethod,
-                                                PaymentMethodRequestDto.ClientIdEnum clientId
+                                                PaymentMethodRequestDto.ClientIdEnum clientId,
+                                                PaymentMethodManagement paymentMethodManagement
     ) {
 
         return paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
@@ -64,7 +59,8 @@ public class PaymentMethodFactory {
                             paymentMethodRanges,
                             paymentMethodAsset,
                             npgPaymentMethod,
-                            clientId
+                            clientId,
+                            paymentMethodManagement
                     );
                 }
                 );

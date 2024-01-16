@@ -31,8 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
@@ -59,7 +58,10 @@ class PaymentMethodsControllerTests {
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdCheckout)))
+        Mockito.when(
+                paymentMethodService
+                        .createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdCheckout), any())
+        )
                 .thenReturn(Mono.just(paymentMethod));
 
         webClient
@@ -82,7 +84,10 @@ class PaymentMethodsControllerTests {
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        Mockito.when(paymentMethodService.createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdIO)))
+        Mockito.when(
+                paymentMethodService
+                        .createPaymentMethod(any(), any(), any(), any(), any(), eq(clientIdIO), any())
+        )
                 .thenReturn(Mono.just(paymentMethod));
 
         webClient

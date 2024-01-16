@@ -4,6 +4,7 @@ import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodManagement;
 import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
@@ -153,7 +154,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 .toList(),
                         request.getPaymentTypeCode(),
                         request.getAsset(),
-                        request.getClientId()
+                        request.getClientId(),
+                        request.getMethodManagement()
                 )
                         .map(this::paymentMethodToResponse)
         );
@@ -203,6 +205,9 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         );
         response.setPaymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value());
         response.setAsset(paymentMethod.getPaymentMethodAsset().value());
+        response.setMethodManagement(
+                paymentMethod.getPaymentMethodManagement().value()
+        );
         return response;
     }
 

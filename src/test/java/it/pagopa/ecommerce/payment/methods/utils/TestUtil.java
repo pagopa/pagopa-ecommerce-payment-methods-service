@@ -6,13 +6,7 @@ import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.WorkflowStateDto;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.CardDataDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
@@ -58,7 +52,8 @@ public class TestUtil {
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
                 TEST_NPG_PAYMENT_METHOD,
-                getClientIdCheckout()
+                getClientIdCheckout(),
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE)
         );
     }
 
@@ -70,7 +65,8 @@ public class TestUtil {
                 .status(TEST_STATUS)
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
-                .asset(TEST_ASSET);
+                .asset(TEST_ASSET)
+                .methodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE);
     }
 
     public static PaymentMethodRequestDto getPaymentMethodRequestForIO() {
@@ -81,7 +77,8 @@ public class TestUtil {
                 .status(TEST_STATUS)
                 .paymentTypeCode(TEST_TYPE_CODE)
                 .ranges(List.of(new RangeDto().max(100L).min(0L)))
-                .asset(TEST_ASSET);
+                .asset(TEST_ASSET)
+                .methodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE);
     }
 
     public static PaymentMethodResponseDto getPaymentMethodResponse(PaymentMethod paymentMethod) {
@@ -95,7 +92,8 @@ public class TestUtil {
                                 .fromValue(paymentMethod.getPaymentMethodStatus().value().getCode())
                 )
                 .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
-                .ranges(List.of(new RangeDto().min(0L).max(100L)));
+                .ranges(List.of(new RangeDto().min(0L).max(100L)))
+                .methodManagement(paymentMethod.getPaymentMethodManagement().value());
     }
 
     public static PaymentMethodsResponseDto getPaymentMethodsResponse(PaymentMethod... paymentMethod) {
@@ -140,7 +138,8 @@ public class TestUtil {
                 paymentMethod.getPaymentMethodRanges().stream().map(r -> Pair.of(r.min(), r.max()))
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
-                paymentMethod.getClientIdEnum().getValue()
+                paymentMethod.getClientIdEnum().getValue(),
+                paymentMethod.getPaymentMethodManagement().value().getValue()
         );
     }
 

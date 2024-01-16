@@ -1,13 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.AllArgsConstructor;
@@ -31,6 +25,8 @@ public class PaymentMethod {
 
     private PaymentMethodStatus paymentMethodStatus;
 
+    private PaymentMethodManagement paymentMethodManagement;
+
     /*
      * @formatter:off
      *
@@ -49,7 +45,8 @@ public class PaymentMethod {
             List<PaymentMethodRange> paymentMethodRanges,
             PaymentMethodAsset paymentMethodAsset,
             NpgClient.PaymentMethod npgPaymentMethod,
-            PaymentMethodRequestDto.ClientIdEnum clientIdEnum
+            PaymentMethodRequestDto.ClientIdEnum clientIdEnum,
+            PaymentMethodManagement paymentMethodManagement
     ) {
         this.paymentMethodID = paymentMethodID;
         this.paymentMethodName = paymentMethodName;
@@ -60,6 +57,7 @@ public class PaymentMethod {
         this.paymentMethodAsset = paymentMethodAsset;
         this.npgPaymentMethod = npgPaymentMethod;
         this.clientIdEnum = clientIdEnum;
+        this.paymentMethodManagement = paymentMethodManagement;
     }
 
     @AggregateID
