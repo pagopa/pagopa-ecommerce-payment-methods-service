@@ -565,4 +565,30 @@ class PaymentMethodsControllerTests {
                 .expectBody(ProblemJsonDto.class)
                 .value(p -> assertEquals(502, p.getStatus()));
     }
+
+    @Test
+    void shouldReturnBadRequestForIllegalArgumentException() {
+        String paymentMethodId = UUID.randomUUID().toString();
+
+        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+                .thenReturn(
+                        Mono.error(
+                                new IllegalArgumentException(
+                                        "error message"
+                                )
+                        )
+                );
+
+        webClient
+                .post()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions")
+                                .build(paymentMethodId)
+                )
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.BAD_REQUEST)
+                .expectBody(ProblemJsonDto.class)
+                .value(p -> assertEquals(400, p.getStatus()));
+    }
 }
