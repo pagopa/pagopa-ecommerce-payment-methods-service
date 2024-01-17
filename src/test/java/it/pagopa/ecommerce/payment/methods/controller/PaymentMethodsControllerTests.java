@@ -53,7 +53,7 @@ class PaymentMethodsControllerTests {
     void shouldCreateNewMethodForCheckout() {
         PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequestForCheckout();
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
@@ -79,7 +79,7 @@ class PaymentMethodsControllerTests {
     void shouldCreateNewMethodForIO() {
         PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequestForIO();
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
@@ -104,7 +104,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldGetAllMethodsForCheckout() {
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
@@ -135,7 +135,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldGetAllMethodsForIo() {
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
         Mockito.when(paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount(), clientIdIO.getValue()))
@@ -166,7 +166,7 @@ class PaymentMethodsControllerTests {
     void shouldPatchPaymentMethod() {
         UUID TEST_CAT = UUID.randomUUID();
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
 
         Mockito.when(
                 paymentMethodService.updatePaymentMethodStatus(
@@ -193,7 +193,7 @@ class PaymentMethodsControllerTests {
 
     @Test
     void shouldGetAMethodForCheckout() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
@@ -219,7 +219,7 @@ class PaymentMethodsControllerTests {
 
     @Test
     void shouldGetAMethodForIo() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
         Mockito.when(

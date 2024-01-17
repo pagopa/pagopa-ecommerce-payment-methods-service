@@ -42,7 +42,7 @@ public class TestUtil {
 
     static final NpgClient.PaymentMethod TEST_NPG_PAYMENT_METHOD = NpgClient.PaymentMethod.CARDS;
 
-    public static PaymentMethod getPaymentMethod() {
+    public static PaymentMethod getNPGPaymentMethod() {
         return new PaymentMethod(
                 new PaymentMethodID(TEST_ID),
                 new PaymentMethodName(TEST_NAME),
@@ -51,9 +51,22 @@ public class TestUtil {
                 new PaymentMethodType(TEST_TYPE_CODE),
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
-                TEST_NPG_PAYMENT_METHOD,
                 getClientIdCheckout(),
                 new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE)
+        );
+    }
+
+    public static PaymentMethod getRedirectPaymentMethod() {
+        return new PaymentMethod(
+                new PaymentMethodID(TEST_ID),
+                new PaymentMethodName("TEST_NAME"),
+                new PaymentMethodDescription(TEST_DESC),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType("REDIRECT"),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset(TEST_ASSET),
+                getClientIdCheckout(),
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT)
         );
     }
 

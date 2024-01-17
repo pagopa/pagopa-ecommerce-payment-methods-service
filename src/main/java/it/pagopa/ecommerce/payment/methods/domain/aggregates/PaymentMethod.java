@@ -44,7 +44,6 @@ public class PaymentMethod {
             PaymentMethodType paymentMethodTypeCode,
             List<PaymentMethodRange> paymentMethodRanges,
             PaymentMethodAsset paymentMethodAsset,
-            NpgClient.PaymentMethod npgPaymentMethod,
             PaymentMethodRequestDto.ClientIdEnum clientIdEnum,
             PaymentMethodManagement paymentMethodManagement
     ) {
@@ -55,7 +54,7 @@ public class PaymentMethod {
         this.paymentMethodTypeCode = paymentMethodTypeCode;
         this.paymentMethodRanges = paymentMethodRanges;
         this.paymentMethodAsset = paymentMethodAsset;
-        this.npgPaymentMethod = npgPaymentMethod;
+        this.npgPaymentMethod = npgPaymentMethodFromName(paymentMethodName, paymentMethodManagement);
         this.clientIdEnum = clientIdEnum;
         this.paymentMethodManagement = paymentMethodManagement;
     }
@@ -68,5 +67,15 @@ public class PaymentMethod {
     public void setPaymentMethodStatus(PaymentMethodStatusEnum paymentMethodStatus) {
 
         this.paymentMethodStatus = new PaymentMethodStatus(paymentMethodStatus);
+    }
+
+    private static NpgClient.PaymentMethod npgPaymentMethodFromName(
+                                                                    PaymentMethodName paymentMethodName,
+                                                                    PaymentMethodManagement methodAuthManagement
+    ) {
+        return switch (methodAuthManagement.value()) {
+            case ONBOARDABLE, NOT_ONBOARDABLE -> NpgClient.PaymentMethod.fromServiceName(paymentMethodName.value());
+            case REDIRECT -> null;
+        };
     }
 }

@@ -125,7 +125,6 @@ public class PaymentMethodService {
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode),
                 new PaymentMethodAsset(paymentMethodAsset),
-                NpgClient.PaymentMethod.fromServiceName(paymentMethodName),
                 clientId,
                 new PaymentMethodManagement(methodAuthManagement)
         );
@@ -147,22 +146,26 @@ public class PaymentMethodService {
                                 p.getPaymentMethodManagement().value().getValue()
                         )
                 ).map(
-                        doc -> new PaymentMethod(
-                                new PaymentMethodID(UUID.fromString(doc.getPaymentMethodID())),
-                                new PaymentMethodName(doc.getPaymentMethodName()),
-                                new PaymentMethodDescription(doc.getPaymentMethodDescription()),
-                                new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())),
-                                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
-                                doc.getPaymentMethodRanges().stream()
-                                        .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
-                                        .toList(),
-                                new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
-                                clientId,
-                                new PaymentMethodManagement(
-                                        PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
-                                )
-                        )
+                        doc -> {
+                            PaymentMethodManagement paymentMethodManagement = new PaymentMethodManagement(
+                                    PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
+                            );
+                            return new PaymentMethod(
+                                    new PaymentMethodID(UUID.fromString(doc.getPaymentMethodID())),
+                                    new PaymentMethodName(doc.getPaymentMethodName()),
+                                    new PaymentMethodDescription(doc.getPaymentMethodDescription()),
+                                    new PaymentMethodStatus(
+                                            PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())
+                                    ),
+                                    new PaymentMethodType(doc.getPaymentMethodTypeCode()),
+                                    doc.getPaymentMethodRanges().stream()
+                                            .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
+                                            .toList(),
+                                    new PaymentMethodAsset(doc.getPaymentMethodAsset()),
+                                    clientId,
+                                    paymentMethodManagement
+                            );
+                        }
                 )
         );
     }
@@ -602,6 +605,10 @@ public class PaymentMethodService {
             return null;
         }
 
+        PaymentMethodManagement paymentMethodManagement = new PaymentMethodManagement(
+                PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
+        );
+
         return new PaymentMethod(
                 new PaymentMethodID(UUID.fromString(doc.getPaymentMethodID())),
                 new PaymentMethodName(doc.getPaymentMethodName()),
@@ -612,9 +619,8 @@ public class PaymentMethodService {
                         .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
                         .toList(),
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                NpgClient.PaymentMethod.fromServiceName(doc.getPaymentMethodName()),
                 PaymentMethodRequestDto.ClientIdEnum.fromValue(doc.getClientId()),
-                new PaymentMethodManagement(PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement()))
+                paymentMethodManagement
         );
     }
 }

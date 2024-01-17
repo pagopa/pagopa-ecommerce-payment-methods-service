@@ -100,13 +100,12 @@ class PaymentMethodServiceTests {
     void shouldCreatePaymentMethod() {
         Hooks.onOperatorDebug();
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
                 paymentMethodFactory.newPaymentMethod(
-                        any(),
                         any(),
                         any(),
                         any(),
@@ -143,7 +142,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrievePaymentMethods() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdEnumCheckout = TestUtil.getClientIdCheckout();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
@@ -159,7 +158,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldNotRetrievePaymentMethodsWithAmount() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
@@ -176,7 +175,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrievePaymentMethodsWithAmount() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
@@ -194,7 +193,7 @@ class PaymentMethodServiceTests {
     @Test
     void shouldPatchPaymentMethod() {
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         paymentMethodDocument.setPaymentMethodStatus(PaymentMethodStatusEnum.DISABLED.getCode());
@@ -227,7 +226,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrievePaymentMethodById() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
@@ -349,7 +348,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldCreateSessionWithJwtException() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
@@ -366,7 +365,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldCreateSessionForValidPaymentMethod() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         FieldsDto npgResponse = TestUtil.npgResponse();
@@ -418,7 +417,7 @@ class PaymentMethodServiceTests {
     void shouldReturnErrorForInvalidSessionId() {
         String paymentMethodId = "paymentMethodId";
         String sessionId = "sessionId";
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Optional.empty());
@@ -437,7 +436,7 @@ class PaymentMethodServiceTests {
         String orderId = "orderId";
         String sessionId = "sessionId";
         CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
                 .bin(npgResponse.getBin())
@@ -465,7 +464,7 @@ class PaymentMethodServiceTests {
         String orderId = "orderId";
         String sessionId = "sessionId";
         CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
                 .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
@@ -487,7 +486,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnTransactionIdForValidSession() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
         NpgSessionDocument npgSessionDocument = TestUtil
@@ -512,7 +511,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorForInvalidSession() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         NpgSessionDocument npgSessionDocument = TestUtil.npgSessionDocument("orderId", "sessionId", false, null);
 
@@ -531,7 +530,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorForSessionNotFound() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
@@ -564,7 +563,7 @@ class PaymentMethodServiceTests {
     void shouldUpdateSessionData() {
         String sessionId = "sessionId";
         String orderId = "orderId";
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
@@ -592,7 +591,7 @@ class PaymentMethodServiceTests {
     void shouldReturnErrorOnSessionAlreadyAssociatedToTransactionId() {
         String sessionId = "sessionId";
         String orderId = "orderId";
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
@@ -613,7 +612,7 @@ class PaymentMethodServiceTests {
     void shouldReturnErrorOnNonExistingSession() {
         String sessionId = "sessionId";
         String orderId = "orderId";
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
@@ -631,7 +630,7 @@ class PaymentMethodServiceTests {
     @Test
     void shouldReturnErrorOnNonExistingPaymentMethod() {
         String orderId = "orderId";
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
