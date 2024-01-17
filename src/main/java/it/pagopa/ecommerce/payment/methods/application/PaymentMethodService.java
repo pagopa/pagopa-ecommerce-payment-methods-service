@@ -146,26 +146,23 @@ public class PaymentMethodService {
                                 p.getPaymentMethodManagement().value().getValue()
                         )
                 ).map(
-                        doc -> {
-                            PaymentMethodManagement paymentMethodManagement = new PaymentMethodManagement(
-                                    PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
-                            );
-                            return new PaymentMethod(
-                                    new PaymentMethodID(UUID.fromString(doc.getPaymentMethodID())),
-                                    new PaymentMethodName(doc.getPaymentMethodName()),
-                                    new PaymentMethodDescription(doc.getPaymentMethodDescription()),
-                                    new PaymentMethodStatus(
-                                            PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())
-                                    ),
-                                    new PaymentMethodType(doc.getPaymentMethodTypeCode()),
-                                    doc.getPaymentMethodRanges().stream()
-                                            .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
-                                            .toList(),
-                                    new PaymentMethodAsset(doc.getPaymentMethodAsset()),
-                                    clientId,
-                                    paymentMethodManagement
-                            );
-                        }
+                        doc -> new PaymentMethod(
+                                new PaymentMethodID(UUID.fromString(doc.getPaymentMethodID())),
+                                new PaymentMethodName(doc.getPaymentMethodName()),
+                                new PaymentMethodDescription(doc.getPaymentMethodDescription()),
+                                new PaymentMethodStatus(
+                                        PaymentMethodStatusEnum.valueOf(doc.getPaymentMethodStatus())
+                                ),
+                                new PaymentMethodType(doc.getPaymentMethodTypeCode()),
+                                doc.getPaymentMethodRanges().stream()
+                                        .map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond()))
+                                        .toList(),
+                                new PaymentMethodAsset(doc.getPaymentMethodAsset()),
+                                clientId,
+                                new PaymentMethodManagement(
+                                        PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
+                                )
+                        )
                 )
         );
     }
@@ -605,10 +602,6 @@ public class PaymentMethodService {
             return null;
         }
 
-        PaymentMethodManagement paymentMethodManagement = new PaymentMethodManagement(
-                PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
-        );
-
         return new PaymentMethod(
                 new PaymentMethodID(UUID.fromString(doc.getPaymentMethodID())),
                 new PaymentMethodName(doc.getPaymentMethodName()),
@@ -620,7 +613,9 @@ public class PaymentMethodService {
                         .toList(),
                 new PaymentMethodAsset(doc.getPaymentMethodAsset()),
                 PaymentMethodRequestDto.ClientIdEnum.fromValue(doc.getClientId()),
-                paymentMethodManagement
+                new PaymentMethodManagement(
+                        PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
+                )
         );
     }
 }
