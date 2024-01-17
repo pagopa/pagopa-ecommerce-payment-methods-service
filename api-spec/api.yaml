@@ -480,6 +480,7 @@ components:
         - status
         - paymentTypeCode
         - ranges
+        - methodManagement
     PaymentMethodsResponse:
       type: object
       description: Payment methods response
