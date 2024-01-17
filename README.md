@@ -4,7 +4,6 @@
 
 This is a PagoPA microservice that handles payment methods' lifecycle and workflow.
 
-
 ### Environment variables
 
 These are all environment variables needed by the application:
