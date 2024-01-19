@@ -52,7 +52,7 @@ microservice-chart:
       NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.1.4"
+    tag: "1.1.5"
     pullPolicy: Always
   livenessProbe:
     httpGet:
