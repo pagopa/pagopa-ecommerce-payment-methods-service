@@ -36,7 +36,6 @@ public class PaymentMethodFactory {
                                                 List<PaymentMethodRange> paymentMethodRanges,
                                                 PaymentMethodType paymentMethodTypeCode,
                                                 PaymentMethodAsset paymentMethodAsset,
-                                                NpgClient.PaymentMethod npgPaymentMethod,
                                                 PaymentMethodRequestDto.ClientIdEnum clientId,
                                                 PaymentMethodManagement paymentMethodManagement
     ) {
@@ -58,7 +57,6 @@ public class PaymentMethodFactory {
                             paymentMethodTypeCode,
                             paymentMethodRanges,
                             paymentMethodAsset,
-                            npgPaymentMethod,
                             clientId,
                             paymentMethodManagement
                     );

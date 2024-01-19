@@ -4,7 +4,6 @@ import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodManagement;
 import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.server.api.PaymentMethodsApi;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
@@ -52,7 +51,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
         if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
-                    new ProblemJsonDto().status(404).title("Bad request").detail("Payment method already in use"),
+                    new ProblemJsonDto().status(400).title("Bad request").detail("Payment method already in use"),
                     HttpStatus.BAD_REQUEST
             );
         } else if (exception instanceof PaymentMethodNotFoundException) {
@@ -111,6 +110,17 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ProblemJsonDto> illegalArgumentExceptionHandler(IllegalArgumentException exception) {
+        return new ResponseEntity<>(
+                new ProblemJsonDto()
+                        .status(400)
+                        .title("Bad request")
+                        .detail(exception.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
     }
 
     @Override

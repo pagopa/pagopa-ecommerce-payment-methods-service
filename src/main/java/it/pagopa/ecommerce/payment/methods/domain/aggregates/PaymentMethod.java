@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.AllArgsConstructor;
@@ -44,10 +45,18 @@ public class PaymentMethod {
             PaymentMethodType paymentMethodTypeCode,
             List<PaymentMethodRange> paymentMethodRanges,
             PaymentMethodAsset paymentMethodAsset,
-            NpgClient.PaymentMethod npgPaymentMethod,
             PaymentMethodRequestDto.ClientIdEnum clientIdEnum,
             PaymentMethodManagement paymentMethodManagement
     ) {
+        if ((paymentMethodManagement.value().equals(PaymentMethodManagementTypeDto.REDIRECT)
+                || paymentMethodTypeCode.value().equals("REDIRECT"))
+                && !paymentMethodManagement.value().getValue().equals(paymentMethodTypeCode.value())) {
+            throw new IllegalArgumentException(
+                    "In case of REDIRECT method, type code and method management must match! Type code: %s, management: %s"
+                            .formatted(paymentMethodTypeCode.value(), paymentMethodManagement.value())
+            );
+        }
+
         this.paymentMethodID = paymentMethodID;
         this.paymentMethodName = paymentMethodName;
         this.paymentMethodDescription = paymentMethodDescription;
@@ -55,7 +64,7 @@ public class PaymentMethod {
         this.paymentMethodTypeCode = paymentMethodTypeCode;
         this.paymentMethodRanges = paymentMethodRanges;
         this.paymentMethodAsset = paymentMethodAsset;
-        this.npgPaymentMethod = npgPaymentMethod;
+        this.npgPaymentMethod = npgPaymentMethodFromName(paymentMethodName, paymentMethodManagement);
         this.clientIdEnum = clientIdEnum;
         this.paymentMethodManagement = paymentMethodManagement;
     }
@@ -68,5 +77,15 @@ public class PaymentMethod {
     public void setPaymentMethodStatus(PaymentMethodStatusEnum paymentMethodStatus) {
 
         this.paymentMethodStatus = new PaymentMethodStatus(paymentMethodStatus);
+    }
+
+    private static NpgClient.PaymentMethod npgPaymentMethodFromName(
+                                                                    PaymentMethodName paymentMethodName,
+                                                                    PaymentMethodManagement methodAuthManagement
+    ) {
+        return switch (methodAuthManagement.value()) {
+            case ONBOARDABLE, NOT_ONBOARDABLE -> NpgClient.PaymentMethod.fromServiceName(paymentMethodName.value());
+            case REDIRECT -> null;
+        };
     }
 }

@@ -33,9 +33,9 @@ class PaymentMethodFactoryTests {
     private PaymentMethodFactory paymentMethodFactory;
 
     @Test
-    void shouldCreateNewmethod() {
+    void shouldCreateNewNPGMethod() {
 
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
@@ -54,7 +54,34 @@ class PaymentMethodFactoryTests {
                 paymentMethod.getPaymentMethodRanges(),
                 paymentMethod.getPaymentMethodTypeCode(),
                 paymentMethod.getPaymentMethodAsset(),
-                paymentMethod.getNpgPaymentMethod(),
+                paymentMethod.getClientIdEnum(),
+                paymentMethod.getPaymentMethodManagement()
+        ).block();
+
+        assertNotNull(paymentMethodProduct);
+    }
+
+    @Test
+    void shouldCreateNewRedirectMethod() {
+        PaymentMethod paymentMethod = TestUtil.getRedirectPaymentMethod();
+        PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
+
+        Mockito.when(
+                paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
+                        paymentMethod.getPaymentMethodName().value(),
+                        paymentMethod.getPaymentMethodTypeCode().value(),
+                        clientIdCheckout.getValue()
+                )
+        ).thenReturn(Mono.empty());
+
+        PaymentMethod paymentMethodProduct = paymentMethodFactory.newPaymentMethod(
+                paymentMethod.getPaymentMethodID(),
+                paymentMethod.getPaymentMethodName(),
+                paymentMethod.getPaymentMethodDescription(),
+                paymentMethod.getPaymentMethodStatus(),
+                paymentMethod.getPaymentMethodRanges(),
+                paymentMethod.getPaymentMethodTypeCode(),
+                paymentMethod.getPaymentMethodAsset(),
                 paymentMethod.getClientIdEnum(),
                 paymentMethod.getPaymentMethodManagement()
         ).block();
@@ -64,7 +91,7 @@ class PaymentMethodFactoryTests {
 
     @Test
     void shouldThrowDuplicatedMethodException() {
-        PaymentMethod paymentMethod = TestUtil.getPaymentMethod();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
@@ -101,7 +128,6 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getPaymentMethodRanges(),
                         paymentMethod.getPaymentMethodTypeCode(),
                         paymentMethod.getPaymentMethodAsset(),
-                        paymentMethod.getNpgPaymentMethod(),
                         paymentMethod.getClientIdEnum(),
                         paymentMethod.getPaymentMethodManagement()
                 ).block()
