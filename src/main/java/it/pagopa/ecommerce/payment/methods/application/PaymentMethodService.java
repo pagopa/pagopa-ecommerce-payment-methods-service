@@ -304,6 +304,10 @@ public class PaymentMethodService {
     public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
                                                                         String id
     ) {
+        log.info(
+                "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
+                id
+        );
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
@@ -329,6 +333,7 @@ public class PaymentMethodService {
                 )
                 .flatMap(data -> {
                     UUID correlationId = UUID.randomUUID();
+                    log.info("Generated correlationId for execute NPG build session: {}", correlationId);
                     NpgClient.PaymentMethod paymentMethod = data.getT2();
                     String orderId = data.getT1();
                     String notificationSessionToken = data.getT3();
@@ -359,6 +364,7 @@ public class PaymentMethodService {
                             null, // customerId
                             paymentMethod, // paymentMethod
                             npgDefaultApiKey // defaultApiKey
+
                     ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId, correlationId));
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
