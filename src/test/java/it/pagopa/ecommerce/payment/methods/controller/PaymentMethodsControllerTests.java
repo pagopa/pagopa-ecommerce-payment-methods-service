@@ -269,8 +269,9 @@ class PaymentMethodsControllerTests {
         String paymentMethodId = UUID.randomUUID().toString();
         PatchSessionRequestDto requestBody = TestUtil.patchSessionRequest();
         String newTransactionId = requestBody.getTransactionId();
-
-        NpgSessionDocument originalSession = TestUtil.npgSessionDocument("orderId", "sessionId", false, null);
+        String correlationId = UUID.randomUUID().toString();
+        NpgSessionDocument originalSession = TestUtil
+                .npgSessionDocument("orderId", correlationId, "sessionId", false, null);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
         Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
