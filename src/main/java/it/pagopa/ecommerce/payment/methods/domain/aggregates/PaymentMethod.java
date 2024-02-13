@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.payment.methods.domain.enumerations.RedirectPaymentMethodTypeCode;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
@@ -8,7 +9,10 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
@@ -27,6 +31,11 @@ public class PaymentMethod {
     private PaymentMethodStatus paymentMethodStatus;
 
     private PaymentMethodManagement paymentMethodManagement;
+
+    private static final Set<String> MANAGED_REDIRECT_PAYMENT_METHOD_TYPE_CODES = Arrays
+            .stream(RedirectPaymentMethodTypeCode.values())
+            .map(Enum::toString)
+            .collect(Collectors.toSet());
 
     /*
      * @formatter:off
@@ -48,12 +57,11 @@ public class PaymentMethod {
             PaymentMethodRequestDto.ClientIdEnum clientIdEnum,
             PaymentMethodManagement paymentMethodManagement
     ) {
-        if ((paymentMethodManagement.value().equals(PaymentMethodManagementTypeDto.REDIRECT)
-                || paymentMethodTypeCode.value().equals("REDIRECT"))
-                && !paymentMethodManagement.value().getValue().equals(paymentMethodTypeCode.value())) {
+        if (paymentMethodManagement.value().equals(PaymentMethodManagementTypeDto.REDIRECT)
+                && !MANAGED_REDIRECT_PAYMENT_METHOD_TYPE_CODES.contains(paymentMethodTypeCode.value())) {
             throw new IllegalArgumentException(
-                    "In case of REDIRECT method, type code and method management must match! Type code: %s, management: %s"
-                            .formatted(paymentMethodTypeCode.value(), paymentMethodManagement.value())
+                    "Payment method type code: [%s] not managed for payment method management type REDIRECT! Allowed type codes: %s"
+                            .formatted(paymentMethodTypeCode.value(), MANAGED_REDIRECT_PAYMENT_METHOD_TYPE_CODES)
             );
         }
 

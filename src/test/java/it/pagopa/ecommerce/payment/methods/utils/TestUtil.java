@@ -62,7 +62,7 @@ public class TestUtil {
                 new PaymentMethodName("TEST_NAME"),
                 new PaymentMethodDescription(TEST_DESC),
                 new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
-                new PaymentMethodType("REDIRECT"),
+                new PaymentMethodType("RBPR"),
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
                 getClientIdCheckout(),
