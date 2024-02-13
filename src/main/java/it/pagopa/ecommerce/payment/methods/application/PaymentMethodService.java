@@ -304,6 +304,10 @@ public class PaymentMethodService {
     public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
                                                                         String id
     ) {
+        log.info(
+                "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
+                id
+        );
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
@@ -328,13 +332,14 @@ public class PaymentMethodService {
                         )
                 )
                 .flatMap(data -> {
+                    UUID correlationId = UUID.randomUUID();
+                    log.info("Generated correlationId for execute NPG build session: {}", correlationId);
                     NpgClient.PaymentMethod paymentMethod = data.getT2();
                     String orderId = data.getT1();
                     String notificationSessionToken = data.getT3();
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
-                    UUID correlationId = UUID.randomUUID();
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
                     URI merchantUrl = returnUrlBasePath;
                     URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
@@ -359,14 +364,17 @@ public class PaymentMethodService {
                             null, // customerId
                             paymentMethod, // paymentMethod
                             npgDefaultApiKey // defaultApiKey
-                    ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId));
+
+                    ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId, correlationId));
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
                     String orderId = data.getT3();
+                    UUID correlationId = data.getT4();
                     npgSessionsTemplateWrapper
                             .save(
                                     new NpgSessionDocument(
                                             orderId,
+                                            correlationId.toString(),
                                             fields.getSessionId(),
                                             fields.getSecurityToken(),
                                             null,
@@ -378,8 +386,10 @@ public class PaymentMethodService {
                     FieldsDto fields = data.getT1();
                     SessionPaymentMethod paymentMethod = data.getT2();
                     String orderId = data.getT3();
+                    UUID correlationId = data.getT4();
                     return new CreateSessionResponseDto()
                             .orderId(orderId)
+                            .correlationId(correlationId)
                             .paymentMethodData(
                                     new CardFormFieldsDto()
                                             .paymentMethod(paymentMethod.value)
@@ -439,6 +449,7 @@ public class PaymentMethodService {
                                                         el -> npgSessionsTemplateWrapper.save(
                                                                 new NpgSessionDocument(
                                                                         sx.orderId(),
+                                                                        sx.correlationId(),
                                                                         sx.sessionId(),
                                                                         sx.securityToken(),
                                                                         new CardDataDocument(
@@ -529,6 +540,7 @@ public class PaymentMethodService {
                 .map(d -> {
                     NpgSessionDocument updatedDocument = new NpgSessionDocument(
                             d.orderId(),
+                            d.correlationId(),
                             d.sessionId(),
                             d.securityToken(),
                             d.cardData(),
