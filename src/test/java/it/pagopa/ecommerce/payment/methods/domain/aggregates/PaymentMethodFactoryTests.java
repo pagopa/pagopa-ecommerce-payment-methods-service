@@ -1,9 +1,12 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
+import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,10 +19,11 @@ import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -131,6 +135,30 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getClientIdEnum(),
                         paymentMethod.getPaymentMethodManagement()
                 ).block()
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionForUnhandledPaymentMethodTypeCodeCreatingRedirectPaymentMethod() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new PaymentMethod(
+                        new PaymentMethodID(UUID.randomUUID()),
+                        new PaymentMethodName("TEST_NAME"),
+                        new PaymentMethodDescription("payment method description"),
+                        new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                        new PaymentMethodType("unmanaged"),
+                        List.of(new PaymentMethodRange(0L, 100L)),
+                        new PaymentMethodAsset("asset"),
+                        PaymentMethodRequestDto.ClientIdEnum.CHECKOUT,
+                        new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT)
+                )
+        );
+
+        assertEquals(
+                "Payment method type code: [unmanaged] not managed for payment method management type REDIRECT! Allowed type codes: [RBPR, RBPB, RBPS, RBPP, RPIC]",
+                exception.getMessage()
         );
     }
 }
