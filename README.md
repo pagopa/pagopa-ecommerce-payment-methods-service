@@ -42,6 +42,9 @@ These are all environment variables needed by the application:
 | SESSION_URL_CANCEL_SUFFIX          | Suffix concatenated to the merchant url to enhance the cancelUrl field in the order build to NPG                                                           | string |         |
 | SESSION_URL_NOTIFICATION_URL       | Url used into npg order build request to enhance the notificationUrl field                                                                                 | string |         |
 
+(*): for Mongo connection string options
+see [docs](https://www.mongodb.com/docs/drivers/java/sync/v4.3/fundamentals/connection/connection-options/#connection-options)
+
 ## Run the application with `springboot-plugin`
 
 Create your environment:
