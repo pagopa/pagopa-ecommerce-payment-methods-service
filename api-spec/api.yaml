@@ -595,6 +595,9 @@ components:
         touchpoint:
           description: The touchpoint name
           type: string
+        pspBusinessName:
+          description: The psp business name
+          type: string
     TransferListItem:
       description: Transfert list item
       type: object

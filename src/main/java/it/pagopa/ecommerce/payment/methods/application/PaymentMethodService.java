@@ -605,6 +605,7 @@ public class PaymentMethodService {
                                                 .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
                                                 .taxPayerFee(t.getTaxPayerFee())
                                                 .touchpoint(t.getTouchpoint())
+                                                .pspBusinessName(t.getPspBusinessName())
                                 ).toList() : new ArrayList<>()
                 );
     }
