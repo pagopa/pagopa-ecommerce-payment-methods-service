@@ -207,6 +207,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         response.setMethodManagement(
                 paymentMethod.getPaymentMethodManagement().value()
         );
+        response.setBrandAssets(paymentMethod.getPaymentMethodBrandAsset().brandAssets().orElse(null));
         return response;
     }
 

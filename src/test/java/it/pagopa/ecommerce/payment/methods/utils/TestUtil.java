@@ -50,7 +50,7 @@ public class TestUtil {
                 new PaymentMethodAsset(TEST_ASSET),
                 getClientIdCheckout(),
                 new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
-                new PaymentMethodBrandAssets(Optional.of(new HashMap<>()))
+                new PaymentMethodBrandAssets(Optional.empty())
         );
     }
 
@@ -65,7 +65,7 @@ public class TestUtil {
                 new PaymentMethodAsset(TEST_ASSET),
                 getClientIdCheckout(),
                 new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT),
-                new PaymentMethodBrandAssets(Optional.of(new HashMap<>()))
+                new PaymentMethodBrandAssets(Optional.empty())
         );
     }
 

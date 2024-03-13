@@ -169,7 +169,7 @@ public class PaymentMethodService {
                                 new PaymentMethodManagement(
                                         PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
                                 ),
-                                new PaymentMethodBrandAssets(Optional.of(doc.getPaymentMethodsBrandAssets()))
+                                new PaymentMethodBrandAssets(Optional.ofNullable(doc.getPaymentMethodsBrandAssets()))
                         )
                 )
         );
@@ -639,7 +639,7 @@ public class PaymentMethodService {
                 new PaymentMethodManagement(
                         PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
                 ),
-                new PaymentMethodBrandAssets(Optional.of(doc.getPaymentMethodsBrandAssets()))
+                new PaymentMethodBrandAssets(Optional.ofNullable(doc.getPaymentMethodsBrandAssets()))
         );
     }
 }
