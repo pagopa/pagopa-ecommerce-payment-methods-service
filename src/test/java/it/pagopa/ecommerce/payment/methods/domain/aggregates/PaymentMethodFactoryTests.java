@@ -20,6 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,8 @@ class PaymentMethodFactoryTests {
                 paymentMethod.getPaymentMethodTypeCode(),
                 paymentMethod.getPaymentMethodAsset(),
                 paymentMethod.getClientIdEnum(),
-                paymentMethod.getPaymentMethodManagement()
+                paymentMethod.getPaymentMethodManagement(),
+                paymentMethod.getPaymentMethodBrandAsset()
         ).block();
 
         assertNotNull(paymentMethodProduct);
@@ -87,7 +89,8 @@ class PaymentMethodFactoryTests {
                 paymentMethod.getPaymentMethodTypeCode(),
                 paymentMethod.getPaymentMethodAsset(),
                 paymentMethod.getClientIdEnum(),
-                paymentMethod.getPaymentMethodManagement()
+                paymentMethod.getPaymentMethodManagement(),
+                paymentMethod.getPaymentMethodBrandAsset()
         ).block();
 
         assertNotNull(paymentMethodProduct);
@@ -117,7 +120,8 @@ class PaymentMethodFactoryTests {
                                         .collect(Collectors.toList()),
                                 paymentMethod.getPaymentMethodTypeCode().value(),
                                 clientIdCheckout.getValue(),
-                                paymentMethod.getPaymentMethodManagement().value().getValue()
+                                paymentMethod.getPaymentMethodManagement().value().getValue(),
+                                paymentMethod.getPaymentMethodBrandAsset().brandAssets().orElse(null)
                         )
                 )
         );
@@ -133,7 +137,8 @@ class PaymentMethodFactoryTests {
                         paymentMethod.getPaymentMethodTypeCode(),
                         paymentMethod.getPaymentMethodAsset(),
                         paymentMethod.getClientIdEnum(),
-                        paymentMethod.getPaymentMethodManagement()
+                        paymentMethod.getPaymentMethodManagement(),
+                        paymentMethod.getPaymentMethodBrandAsset()
                 ).block()
         );
     }
@@ -152,7 +157,8 @@ class PaymentMethodFactoryTests {
                         List.of(new PaymentMethodRange(0L, 100L)),
                         new PaymentMethodAsset("asset"),
                         PaymentMethodRequestDto.ClientIdEnum.CHECKOUT,
-                        new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT)
+                        new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT),
+                        new PaymentMethodBrandAssets(Optional.empty())
                 )
         );
 

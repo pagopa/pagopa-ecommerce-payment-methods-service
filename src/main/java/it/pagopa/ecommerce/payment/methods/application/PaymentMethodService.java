@@ -5,6 +5,7 @@ import it.pagopa.ecommerce.commons.domain.Claims;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
+import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -15,7 +16,6 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
-import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
@@ -108,14 +108,19 @@ public class PaymentMethodService {
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
-                                                   String paymentMethodName,
-                                                   String paymentMethodDescription,
-                                                   List<Pair<Long, Long>> ranges,
-                                                   String paymentMethodTypeCode,
-                                                   String paymentMethodAsset,
-                                                   PaymentMethodRequestDto.ClientIdEnum clientId,
-                                                   PaymentMethodManagementTypeDto methodAuthManagement
+                                                   PaymentMethodRequestDto paymentMethodRequestDto
+
     ) {
+        String paymentMethodName = paymentMethodRequestDto.getName();
+        String paymentMethodDescription = paymentMethodRequestDto.getDescription();
+        List<Pair<Long, Long>> ranges = paymentMethodRequestDto.getRanges().stream()
+                .map(r -> Pair.of(r.getMin(), r.getMax()))
+                .toList();
+        String paymentMethodTypeCode = paymentMethodRequestDto.getPaymentTypeCode();
+        String paymentMethodAsset = paymentMethodRequestDto.getAsset();
+        PaymentMethodRequestDto.ClientIdEnum clientId = paymentMethodRequestDto.getClientId();
+        PaymentMethodManagementTypeDto methodAuthManagement = paymentMethodRequestDto.getMethodManagement();
+        Map<String, String> brandAssets = paymentMethodRequestDto.getBrandAssets();
         log.info("[Payment Method Aggregate] Create new aggregate");
         Mono<PaymentMethod> paymentMethod = paymentMethodFactory.newPaymentMethod(
                 new PaymentMethodID(UUID.randomUUID()),
@@ -126,7 +131,8 @@ public class PaymentMethodService {
                 new PaymentMethodType(paymentMethodTypeCode),
                 new PaymentMethodAsset(paymentMethodAsset),
                 clientId,
-                new PaymentMethodManagement(methodAuthManagement)
+                new PaymentMethodManagement(methodAuthManagement),
+                new PaymentMethodBrandAssets(Optional.ofNullable(brandAssets))
         );
 
         log.info("[Payment Method Aggregate] Store new aggregate");
@@ -143,7 +149,8 @@ public class PaymentMethodService {
                                         .toList(),
                                 p.getPaymentMethodTypeCode().value(),
                                 p.getClientIdEnum().getValue(),
-                                p.getPaymentMethodManagement().value().getValue()
+                                p.getPaymentMethodManagement().value().getValue(),
+                                p.getPaymentMethodBrandAsset().brandAssets().orElse(null)
                         )
                 ).map(
                         doc -> new PaymentMethod(
@@ -161,7 +168,8 @@ public class PaymentMethodService {
                                 clientId,
                                 new PaymentMethodManagement(
                                         PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
-                                )
+                                ),
+                                new PaymentMethodBrandAssets(Optional.of(doc.getPaymentMethodsBrandAssets()))
                         )
                 )
         );
@@ -218,7 +226,8 @@ public class PaymentMethodService {
                                                 ).toList(),
                                                 p.getPaymentMethodTypeCode().value(),
                                                 p.getClientIdEnum().getValue(),
-                                                p.getPaymentMethodManagement().value().getValue()
+                                                p.getPaymentMethodManagement().value().getValue(),
+                                                p.getPaymentMethodBrandAsset().brandAssets().orElse(null)
                                         )
                                 )
                 )
@@ -606,7 +615,9 @@ public class PaymentMethodService {
                                                 .taxPayerFee(t.getTaxPayerFee())
                                                 .touchpoint(t.getTouchpoint())
                                 ).toList() : new ArrayList<>()
-                );
+                )
+                .asset(paymentMethodDocument.getPaymentMethodAsset())
+                .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
     }
 
     private PaymentMethod docToAggregate(PaymentMethodDocument doc) {
@@ -627,7 +638,8 @@ public class PaymentMethodService {
                 PaymentMethodRequestDto.ClientIdEnum.fromValue(doc.getClientId()),
                 new PaymentMethodManagement(
                         PaymentMethodManagementTypeDto.valueOf(doc.getMethodManagement())
-                )
+                ),
+                new PaymentMethodBrandAssets(Optional.of(doc.getPaymentMethodsBrandAssets()))
         );
     }
 }

@@ -30,7 +30,9 @@ public class PaymentMethod {
 
     private PaymentMethodStatus paymentMethodStatus;
 
-    private PaymentMethodManagement paymentMethodManagement;
+    private final PaymentMethodManagement paymentMethodManagement;
+
+    private final PaymentMethodBrandAssets paymentMethodBrandAsset;
 
     private static final Set<String> MANAGED_REDIRECT_PAYMENT_METHOD_TYPE_CODES = Arrays
             .stream(RedirectPaymentMethodTypeCode.values())
@@ -55,7 +57,8 @@ public class PaymentMethod {
             List<PaymentMethodRange> paymentMethodRanges,
             PaymentMethodAsset paymentMethodAsset,
             PaymentMethodRequestDto.ClientIdEnum clientIdEnum,
-            PaymentMethodManagement paymentMethodManagement
+            PaymentMethodManagement paymentMethodManagement,
+            PaymentMethodBrandAssets paymentMethodBrandAsset
     ) {
         if (paymentMethodManagement.value().equals(PaymentMethodManagementTypeDto.REDIRECT)
                 && !MANAGED_REDIRECT_PAYMENT_METHOD_TYPE_CODES.contains(paymentMethodTypeCode.value())) {
@@ -75,6 +78,7 @@ public class PaymentMethod {
         this.npgPaymentMethod = npgPaymentMethodFromName(paymentMethodName, paymentMethodManagement);
         this.clientIdEnum = clientIdEnum;
         this.paymentMethodManagement = paymentMethodManagement;
+        this.paymentMethodBrandAsset = paymentMethodBrandAsset;
     }
 
     @AggregateID

@@ -10,7 +10,6 @@ import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -156,17 +155,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                            ServerWebExchange exchange
     ) {
         return paymentMethodRequestDto.flatMap(
-                request -> paymentMethodService.createPaymentMethod(
-                        request.getName(),
-                        request.getDescription(),
-                        request.getRanges().stream()
-                                .map(r -> Pair.of(r.getMin(), r.getMax()))
-                                .toList(),
-                        request.getPaymentTypeCode(),
-                        request.getAsset(),
-                        request.getClientId(),
-                        request.getMethodManagement()
-                )
+                request -> paymentMethodService.createPaymentMethod(request)
                         .map(this::paymentMethodToResponse)
         );
     }

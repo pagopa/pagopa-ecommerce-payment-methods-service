@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.util.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -23,4 +24,5 @@ public class PaymentMethodDocument {
     private String paymentMethodTypeCode;
     private String clientId;
     private String methodManagement;
+    private Map<String, String> paymentMethodsBrandAssets;
 }

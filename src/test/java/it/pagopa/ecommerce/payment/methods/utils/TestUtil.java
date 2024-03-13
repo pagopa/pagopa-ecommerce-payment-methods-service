@@ -16,10 +16,7 @@ import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TestUtil {
@@ -52,7 +49,8 @@ public class TestUtil {
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
                 getClientIdCheckout(),
-                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE)
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
+                new PaymentMethodBrandAssets(Optional.of(new HashMap<>()))
         );
     }
 
@@ -66,7 +64,8 @@ public class TestUtil {
                 List.of(new PaymentMethodRange(0L, 100L)),
                 new PaymentMethodAsset(TEST_ASSET),
                 getClientIdCheckout(),
-                new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT)
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT),
+                new PaymentMethodBrandAssets(Optional.of(new HashMap<>()))
         );
     }
 
@@ -152,7 +151,8 @@ public class TestUtil {
                         .collect(Collectors.toList()),
                 paymentMethod.getPaymentMethodTypeCode().value(),
                 paymentMethod.getClientIdEnum().getValue(),
-                paymentMethod.getPaymentMethodManagement().value().getValue()
+                paymentMethod.getPaymentMethodManagement().value().getValue(),
+                paymentMethod.getPaymentMethodBrandAsset().brandAssets().orElse(null)
         );
     }
 

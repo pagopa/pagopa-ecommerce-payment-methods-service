@@ -414,6 +414,12 @@ components:
             $ref: "#/components/schemas/Range"
         methodManagement:
           $ref: "#/components/schemas/PaymentMethodManagementType"
+        brandAssets:
+          description: Brand assets map associated to the method
+          type: object
+          additionalProperties:
+            type: string
+
       required:
         - name
         - description
@@ -545,11 +551,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Bundle"
+        asset:
+          description: Payment method asset
+          type: string
+        brandAssets:
+          description: Brand assets map associated to the selected payment method
+          type: object
+          additionalProperties:
+            type: string
       required:
         - bundles
         - paymentMethodName
         - paymentMethodStatus
         - paymentMethodDescription
+        - asset
     Bundle:
       description: Bundle object
       type: object
