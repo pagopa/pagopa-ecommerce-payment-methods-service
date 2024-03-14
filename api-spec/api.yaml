@@ -561,8 +561,9 @@ components:
           description: Bundle description
           type: string
         bundleName:
-          description: Bundle name
+          description: DEPRECATED, use pspBusinessName instead
           type: string
+          deprecated: true
         idBrokerPsp:
           description: Bundle PSP broker id
           type: string
