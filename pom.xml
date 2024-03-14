@@ -177,7 +177,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-afm-calculator/main/openapi/openapi-node.json</inputSpec>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-afm-calculator/b7086dddcf633f30283fe567c51fa739a685fe37/openapi/openapi_v1.json</inputSpec>
 							<generatorName>java</generatorName>
 							<library>webclient</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
