@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>it.pagopa.ecommerce</groupId>
 	<artifactId>pagopa-ecommerce-payment-methods-service</artifactId>
-	<version>1.3.3</version>
+	<version>1.3.5</version>
 	<name>pagopa-ecommerce-payment-methods-service</name>
 	<description>payment methods micro service</description>
 	<properties>
@@ -177,7 +177,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-afm-calculator/main/openapi/openapi-node-v1.json</inputSpec>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-afm-calculator/4400e17f1b1fc46aba072da0d686239c565cba34/openapi/openapi-v1.json</inputSpec>
 							<generatorName>java</generatorName>
 							<library>webclient</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
