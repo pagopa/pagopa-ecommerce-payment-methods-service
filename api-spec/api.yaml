@@ -561,8 +561,9 @@ components:
           description: Bundle description
           type: string
         bundleName:
-          description: Bundle name
+          description: DEPRECATED, use pspBusinessName instead
           type: string
+          deprecated: true
         idBrokerPsp:
           description: Bundle PSP broker id
           type: string
@@ -594,6 +595,9 @@ components:
           format: int64
         touchpoint:
           description: The touchpoint name
+          type: string
+        pspBusinessName:
+          description: The psp business name
           type: string
     TransferListItem:
       description: Transfert list item
