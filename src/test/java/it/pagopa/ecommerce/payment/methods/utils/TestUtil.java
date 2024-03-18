@@ -227,6 +227,7 @@ public class TestUtil {
                                                 .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
                                                 .taxPayerFee(t.getTaxPayerFee())
                                                 .touchpoint(t.getTouchpoint())
+                                                .pspBusinessName(t.getPspBusinessName())
                                 ).collect(Collectors.toList()) : new ArrayList<>()
                 );
     }
