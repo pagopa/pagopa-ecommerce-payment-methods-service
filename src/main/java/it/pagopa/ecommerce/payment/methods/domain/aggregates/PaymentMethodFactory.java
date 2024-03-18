@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
-import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
@@ -37,7 +36,8 @@ public class PaymentMethodFactory {
                                                 PaymentMethodType paymentMethodTypeCode,
                                                 PaymentMethodAsset paymentMethodAsset,
                                                 PaymentMethodRequestDto.ClientIdEnum clientId,
-                                                PaymentMethodManagement paymentMethodManagement
+                                                PaymentMethodManagement paymentMethodManagement,
+                                                PaymentMethodBrandAssets paymentMethodBrandAsset
     ) {
 
         return paymentMethodRepository.findByPaymentMethodNameAndPaymentMethodTypeCodeAndClientId(
@@ -58,7 +58,8 @@ public class PaymentMethodFactory {
                             paymentMethodRanges,
                             paymentMethodAsset,
                             clientId,
-                            paymentMethodManagement
+                            paymentMethodManagement,
+                            paymentMethodBrandAsset
                     );
                 }
                 );
