@@ -76,6 +76,9 @@ microservice-chart:
     initialDelaySeconds: 80
     failureThreshold: 6
     periodSeconds: 10
+  deployment:
+    create: true
+    replicas: 1
   service:
     create: true
     type: ClusterIP
@@ -115,6 +118,12 @@ microservice-chart:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "70"
+  terminationGracePeriodSeconds: 30
+  strategy:
+    type: "RollingUpdate"
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   envConfig:
     MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
