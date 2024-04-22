@@ -19,6 +19,11 @@ RUN mkdir target/extracted && java -Djarmode=layertools -jar target/*.jar extrac
 
 FROM openjdk:17-slim
 
+USER root
+
+RUN apt-get update
+RUN apt-get install inetutils-traceroute -y
+
 RUN addgroup --system user && adduser --ingroup user --system user
 USER user:user
 
@@ -38,6 +43,5 @@ RUN true
 COPY --from=build --chown=user ${EXTRACTED}/application/ ./
 RUN true
 
-RUN apt-get install inetutils-traceroute
 
 ENTRYPOINT ["java","-javaagent:opentelemetry-javaagent.jar","org.springframework.boot.loader.JarLauncher"]
