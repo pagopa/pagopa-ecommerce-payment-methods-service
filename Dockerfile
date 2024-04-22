@@ -38,4 +38,6 @@ RUN true
 COPY --from=build --chown=user ${EXTRACTED}/application/ ./
 RUN true
 
+RUN apt-get install inetutils-traceroute
+
 ENTRYPOINT ["java","-javaagent:opentelemetry-javaagent.jar","org.springframework.boot.loader.JarLauncher"]
