@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller;
 
+import it.pagopa.ecommerce.commons.annotations.Warmup;
 import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
@@ -14,11 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -288,5 +291,17 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         .filter(header -> header.startsWith("Bearer "))
                         .map(header -> header.substring("Bearer ".length()))
         );
+    }
+
+    @Warmup
+    public void getPaymentMethodsWarmupMethod() {
+        WebClient
+                .create()
+                .get()
+                .uri("http://localhost:8080/payment-methods")
+                .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(30));
     }
 }
