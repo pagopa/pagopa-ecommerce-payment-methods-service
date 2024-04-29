@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -295,13 +296,29 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Warmup
     public void getPaymentMethodsWarmupMethod() {
-        WebClient
-                .create()
+        WebClient webClient = WebClient.create();
+        PaymentMethodsResponseDto paymentMethod = webClient
                 .get()
                 .uri("http://localhost:8080/payment-methods")
                 .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                 .retrieve()
-                .toBodilessEntity()
-                .block(Duration.ofSeconds(30));
+                .bodyToMono(PaymentMethodsResponseDto.class).block(Duration.ofSeconds(30));
+        if (paymentMethod != null && !paymentMethod.getPaymentMethods().isEmpty()) {
+            // create the request for the calculateFee api
+            CalculateFeeRequestDto request = new CalculateFeeRequestDto()
+                    .touchpoint("touchpoint1")
+                    .paymentAmount(1L)
+                    .primaryCreditorInstitution("test")
+                    .transferList(Collections.emptyList())
+                    .isAllCCP(false);
+            webClient
+                    .post()
+                    .uri("http://localhost:8080/payment-methods/{id}/fees", paymentMethod.getPaymentMethods().get(0).getId())
+                    .bodyValue(request)
+                    .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block(Duration.ofSeconds(30));
+        }
     }
 }
