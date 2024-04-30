@@ -2,6 +2,24 @@ microservice-chart:
   namespace: "ecommerce"
   nameOverride: ""
   fullnameOverride: ""
+  canaryDelivery:
+    create: true
+    ingress:
+      create: true
+      canary:
+        type: bluegreen
+    service:
+      create: true
+    deployment:
+      create: true
+      image:
+        repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
+        tag: "latest"
+        pullPolicy: Always
+      envConfig:
+        AFM_URI: "https://api.dev.platform.pagopa.it/afm/calculator-service/v1/fees"
+        ECS_SERVICE_NAME: pagopa-ecommerce-payment-method-service-blue
+        SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "1.6.3"
@@ -121,10 +139,6 @@ microservice-chart:
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   nodeSelector: {}
   tolerations: []
-  canaryDelivery:
-    deployment:
-      image:
-        tag: ""
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
