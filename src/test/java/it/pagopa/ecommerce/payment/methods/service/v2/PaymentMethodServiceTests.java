@@ -48,7 +48,7 @@ class PaymentMethodServiceTests {
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -71,7 +71,7 @@ class PaymentMethodServiceTests {
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
 
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -90,7 +90,7 @@ class PaymentMethodServiceTests {
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
 
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -111,7 +111,7 @@ class PaymentMethodServiceTests {
         gecResponse.setBundleOptions(invalidTransferDto);
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         StepVerifier.create(

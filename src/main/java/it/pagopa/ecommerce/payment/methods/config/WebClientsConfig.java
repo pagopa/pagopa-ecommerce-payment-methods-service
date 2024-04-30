@@ -51,4 +51,37 @@ public class WebClientsConfig implements WebFluxConfigurer {
 
         return new CalculatorApi(new ApiClient(webClient));
     }
+
+    // TODO: replace with v2 CalculatorApi
+    @Bean(name = "afmWebClientV2")
+    public CalculatorApi afmWebClientV2(
+                                        @Value("${afm.v2.uri}") String afmWebClientUri,
+                                        @Value(
+                                            "${afm.readTimeout}"
+                                        ) int afmWebClientReadTimeout,
+                                        @Value(
+                                            "${afm.connectionTimeout}"
+                                        ) int afmWebClientConnectionTimeout
+    ) {
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, afmWebClientConnectionTimeout)
+                .doOnConnected(
+                        connection -> connection.addHandlerLast(
+                                new ReadTimeoutHandler(
+                                        afmWebClientReadTimeout,
+                                        TimeUnit.MILLISECONDS
+                                )
+                        )
+                );
+
+        WebClient webClient = ApiClient.buildWebClientBuilder().exchangeStrategies(
+                ExchangeStrategies.builder()
+                        .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(maxMemorySize))
+                        .build()
+        ).clientConnector(
+                new ReactorClientHttpConnector(httpClient)
+        ).baseUrl(afmWebClientUri).build();
+
+        return new CalculatorApi(new ApiClient(webClient));
+    }
 }

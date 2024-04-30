@@ -24,6 +24,7 @@ public class AfmClient {
     @Autowired
     public AfmClient(
             @Qualifier("afmWebClient") CalculatorApi afmClient,
+            @Qualifier("afmWebClientV2") CalculatorApi afmWebClientV2,
             @Value("${afm.client.key}") String afmKey
     ) {
         this.calculatorApi = afmClient;
@@ -77,4 +78,51 @@ public class AfmClient {
                 );
     }
 
+    // TODO: replace with v2
+    public Mono<BundleOptionDto> getFeesMulti(
+                                              PaymentOptionDto paymentOptionDto,
+                                              Integer maxOccurrences,
+                                              boolean allCCP
+    ) {
+        return calculatorApi
+                .getApiClient()
+                .getWebClient()
+                .post()
+                .uri(
+                        uriBuilder -> uriBuilder
+                                .queryParam("allCcp", allCCP)
+                                .queryParam("maxOccurrences", maxOccurrences)
+                                .build()
+                )
+                .header("ocp-apim-subscription-key", afmKey)
+                .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
+                .retrieve()
+                .onStatus(
+                        HttpStatus::isError,
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(
+                                        errorResponseBody -> Mono.error(
+                                                new AfmResponseException(
+                                                        clientResponse.statusCode(),
+                                                        errorResponseBody
+                                                )
+                                        )
+                                )
+                )
+                .bodyToMono(BundleOptionDto.class)
+                .doOnError(
+                        ResponseStatusException.class,
+                        error -> log.error(
+                                "ResponseStatus Error : {}",
+                                error
+                        )
+                )
+                .doOnError(
+                        Exception.class,
+                        (Exception error) -> log.error(
+                                "Generic Error : {}",
+                                error
+                        )
+                );
+    }
 }

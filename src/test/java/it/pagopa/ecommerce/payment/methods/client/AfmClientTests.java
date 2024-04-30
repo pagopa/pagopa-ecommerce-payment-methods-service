@@ -40,15 +40,20 @@ public class AfmClientTests {
 
     @Mock
     private WebClient.ResponseSpec responseSpec;
+
     @Mock
     @Qualifier("afmWebClient")
     private CalculatorApi calculatorApi;
+
+    @Mock
+    @Qualifier("afmWebClientV2")
+    private CalculatorApi calculatorApiV2;
 
     private AfmClient afmClient;
 
     @BeforeEach
     public void init() {
-        afmClient = new AfmClient(calculatorApi, "xxx");
+        afmClient = new AfmClient(calculatorApi, calculatorApiV2, "xxx");
     }
 
     @Test

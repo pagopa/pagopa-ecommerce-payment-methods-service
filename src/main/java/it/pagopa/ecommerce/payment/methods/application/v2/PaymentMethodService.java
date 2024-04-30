@@ -49,7 +49,7 @@ public class PaymentMethodService {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .flatMap(
-                        paymentMethod -> afmClient.getFees(
+                        paymentMethod -> afmClient.getFeesMulti(
                                 createGecFeeRequest(paymentMethod, feeRequestDto),
                                 maxOccurrences,
                                 feeRequestDto.getIsAllCCP()
