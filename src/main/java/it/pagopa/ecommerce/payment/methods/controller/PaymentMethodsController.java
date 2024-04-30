@@ -302,7 +302,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .uri("http://localhost:8080/payment-methods")
                 .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                 .retrieve()
-                .bodyToMono(PaymentMethodsResponseDto.class).block(Duration.ofSeconds(30));
+                .bodyToMono(PaymentMethodsResponseDto.class)
+                .block(Duration.ofSeconds(30));
         if (paymentMethod != null && !paymentMethod.getPaymentMethods().isEmpty()) {
             CalculateFeeRequestDto request = new CalculateFeeRequestDto()
                     .touchpoint("touchpoint1")
@@ -323,7 +324,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     .uri("http://localhost:8080/payment-methods/{id}/sessions", paymentMethod.getPaymentMethods().get(0).getId())
                     .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                     .retrieve()
-                    .toBodilessEntity().doOnError(resp -> log.info("message: {}", resp.getMessage()))
+                    .toBodilessEntity()
                     .block(Duration.ofSeconds(30));
         }
     }
