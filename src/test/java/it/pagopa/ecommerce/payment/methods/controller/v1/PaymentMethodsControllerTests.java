@@ -1,16 +1,40 @@
-package it.pagopa.ecommerce.payment.methods.controller;
+package it.pagopa.ecommerce.payment.methods.controller.v1;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
-import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
+import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.exception.*;
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
+import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
+import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
+import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
+import it.pagopa.ecommerce.payment.methods.exception.UniqueIdGenerationException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
-import it.pagopa.ecommerce.payment.methods.server.model.*;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PatchSessionRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodsResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
+import it.pagopa.ecommerce.payment.methods.server.model.SessionGetTransactionIdResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.SessionPaymentMethodResponseDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,13 +50,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)

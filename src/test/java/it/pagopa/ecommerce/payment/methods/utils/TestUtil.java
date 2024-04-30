@@ -11,7 +11,9 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.CardDataDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
+import java.util.stream.LongStream;
 import org.springframework.data.util.Pair;
 
 import java.math.BigInteger;
@@ -361,5 +363,59 @@ public class TestUtil {
 
     public static PaymentMethodRequestDto.ClientIdEnum getClientIdIO() {
         return PaymentMethodRequestDto.ClientIdEnum.IO;
+    }
+
+    public static class V2 {
+        public static it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto getMultiNoticeFeesRequest() {
+            final var notices = LongStream.of(10L, 20L)
+                    .mapToObj(
+                            amount -> new PaymentNoticeDto()
+                                    .paymentAmount(amount)
+                                    .primaryCreditorInstitution("CF")
+                                    .transferList(
+                                            List.of(
+                                                    new it.pagopa.ecommerce.payment.methods.v2.server.model.TransferListItemDto()
+                                                            .transferCategory("category")
+                                                            .creditorInstitution("creditorInstitution")
+                                                            .digitalStamp(true)
+                                            )
+                                    )
+                    ).toList();
+            return new it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto()
+                    .bin("BIN_TEST")
+                    .touchpoint("CHECKOUT")
+                    .addIdPspListItem("string")
+                    .idPspList(new ArrayList<>(List.of("first", "second")))
+                    .isAllCCP(false)
+                    .paymentNotices(notices);
+        }
+
+        public static it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto getCalculateFeeResponseFromClientResponse(
+                                                                                                                                            it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto gecResponse
+        ) {
+            return new it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto()
+                    .belowThreshold(gecResponse.getBelowThreshold())
+                    .bundles(
+                            gecResponse.getBundleOptions() != null ? gecResponse.getBundleOptions()
+                                    .stream()
+                                    .map(
+                                            t -> new it.pagopa.ecommerce.payment.methods.v2.server.model.BundleDto()
+                                                    .abi(t.getAbi())
+                                                    .bundleDescription(t.getBundleDescription())
+                                                    .bundleName(t.getBundleName())
+                                                    .idBrokerPsp(t.getIdBrokerPsp())
+                                                    .idBundle(t.getIdBundle())
+                                                    .idChannel(t.getIdChannel())
+                                                    .idCiBundle(t.getIdCiBundle())
+                                                    .idPsp(t.getIdPsp())
+                                                    .onUs(t.getOnUs())
+                                                    .paymentMethod(t.getPaymentMethod())
+                                                    .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
+                                                    .taxPayerFee(t.getTaxPayerFee())
+                                                    .touchpoint(t.getTouchpoint())
+                                                    .pspBusinessName(t.getPspBusinessName())
+                                    ).collect(Collectors.toList()) : new ArrayList<>()
+                    );
+        }
     }
 }

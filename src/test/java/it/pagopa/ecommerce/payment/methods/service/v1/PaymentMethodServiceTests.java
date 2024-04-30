@@ -1,4 +1,4 @@
-package it.pagopa.ecommerce.payment.methods.service;
+package it.pagopa.ecommerce.payment.methods.service.v1;
 
 import io.vavr.control.Either;
 import it.pagopa.ecommerce.commons.client.NpgClient;
@@ -9,7 +9,7 @@ import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
-import it.pagopa.ecommerce.payment.methods.application.PaymentMethodService;
+import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SecretsConfigurations;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
