@@ -313,7 +313,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     .isAllCCP(false);
             webClient
                     .post()
-                    .uri("http://localhost:8080/payment-methods/{id}/fees", paymentMethod.getPaymentMethods().get(0).getId())
+                    .uri(
+                            "http://localhost:8080/payment-methods/{id}/fees",
+                            paymentMethod.getPaymentMethods().get(0).getId()
+                    )
                     .bodyValue(request)
                     .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                     .retrieve()
@@ -321,7 +324,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     .block(Duration.ofSeconds(30));
             webClient
                     .post()
-                    .uri("http://localhost:8080/payment-methods/{id}/sessions", paymentMethod.getPaymentMethods().get(0).getId())
+                    .uri(
+                            "http://localhost:8080/payment-methods/{id}/sessions",
+                            paymentMethod.getPaymentMethods().get(0).getId()
+                    )
                     .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                     .retrieve()
                     .toBodilessEntity()
