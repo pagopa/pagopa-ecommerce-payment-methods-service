@@ -304,11 +304,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .retrieve()
                 .bodyToMono(PaymentMethodsResponseDto.class).block(Duration.ofSeconds(30));
         if (paymentMethod != null && !paymentMethod.getPaymentMethods().isEmpty()) {
-            // create the request for the calculateFee api
             CalculateFeeRequestDto request = new CalculateFeeRequestDto()
                     .touchpoint("touchpoint1")
                     .paymentAmount(1L)
-                    .primaryCreditorInstitution("test")
+                    .primaryCreditorInstitution("77777777777")
                     .transferList(Collections.emptyList())
                     .isAllCCP(false);
             webClient
