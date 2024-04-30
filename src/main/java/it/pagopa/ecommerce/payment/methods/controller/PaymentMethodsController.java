@@ -318,6 +318,13 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     .retrieve()
                     .toBodilessEntity()
                     .block(Duration.ofSeconds(30));
+            webClient
+                    .post()
+                    .uri("http://localhost:8080/payment-methods/{id}/sessions", paymentMethod.getPaymentMethods().get(0).getId())
+                    .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                    .retrieve()
+                    .toBodilessEntity().doOnError(resp -> log.info("message: {}", resp.getMessage()))
+                    .block(Duration.ofSeconds(30));
         }
     }
 }
