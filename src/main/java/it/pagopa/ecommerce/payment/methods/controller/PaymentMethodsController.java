@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -295,7 +296,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     }
 
     @Warmup
-    public void getPaymentMethodsWarmupMethod() {
+    public void getAllPaymentMethodsWarmupMethod() {
         WebClient webClient = WebClient.create();
         PaymentMethodsResponseDto paymentMethod = webClient
                 .get()
@@ -304,34 +305,42 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .retrieve()
                 .bodyToMono(PaymentMethodsResponseDto.class)
                 .block(Duration.ofSeconds(30));
-        if (paymentMethod != null && !paymentMethod.getPaymentMethods().isEmpty()) {
-            CalculateFeeRequestDto request = new CalculateFeeRequestDto()
-                    .touchpoint("touchpoint1")
-                    .paymentAmount(1L)
-                    .primaryCreditorInstitution("77777777777")
-                    .transferList(Collections.emptyList())
-                    .isAllCCP(false);
-            webClient
-                    .post()
-                    .uri(
-                            "http://localhost:8080/payment-methods/{id}/fees",
-                            paymentMethod.getPaymentMethods().get(0).getId()
-                    )
-                    .bodyValue(request)
-                    .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block(Duration.ofSeconds(30));
-            webClient
-                    .post()
-                    .uri(
-                            "http://localhost:8080/payment-methods/{id}/sessions",
-                            paymentMethod.getPaymentMethods().get(0).getId()
-                    )
-                    .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block(Duration.ofSeconds(30));
-        }
+    }
+
+    @Warmup
+    public void calculateFeesWarmupMethod() {
+        CalculateFeeRequestDto request = new CalculateFeeRequestDto()
+                .touchpoint("touchpoint1")
+                .paymentAmount(1L)
+                .primaryCreditorInstitution("77777777777")
+                .transferList(Collections.emptyList())
+                .isAllCCP(false);
+        WebClient
+                .create()
+                .post()
+                .uri(
+                        "http://localhost:8080/payment-methods/{id}/fees",
+                        UUID.randomUUID().toString()
+                )
+                .bodyValue(request)
+                .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(30));
+    }
+
+    @Warmup
+    public void createSessionWarmupMethod() {
+        WebClient
+                .create()
+                .post()
+                .uri(
+                        "http://localhost:8080/payment-methods/{id}/sessions",
+                        UUID.randomUUID().toString()
+                )
+                .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(30));
     }
 }
