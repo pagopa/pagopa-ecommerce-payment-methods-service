@@ -35,6 +35,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     @Autowired
     private PaymentMethodService paymentMethodService;
 
+    private static final String X_CLIENT_ID = "X-Client-ID";
+
     @ExceptionHandler(
         {
                 PaymentMethodAlreadyInUseException.class,
@@ -297,11 +299,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Warmup
     public void getAllPaymentMethodsWarmupMethod() {
-        WebClient webClient = WebClient.create();
-        PaymentMethodsResponseDto paymentMethod = webClient
+        WebClient
+                .create()
                 .get()
                 .uri("http://localhost:8080/payment-methods")
-                .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                 .retrieve()
                 .bodyToMono(PaymentMethodsResponseDto.class)
                 .block(Duration.ofSeconds(30));
@@ -323,7 +325,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         UUID.randomUUID().toString()
                 )
                 .bodyValue(request)
-                .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));
@@ -338,7 +340,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         "http://localhost:8080/payment-methods/{id}/sessions",
                         UUID.randomUUID().toString()
                 )
-                .header("X-Client-Id", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));
