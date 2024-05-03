@@ -8,7 +8,7 @@
             <serviceEnvironment>${ECS_SERVICE_ENVIRONMENT:-undefined}</serviceEnvironment>
         </encoder>
     </appender>
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="ECS_JSON_CONSOLE"/>
     </root>
 </configuration>
