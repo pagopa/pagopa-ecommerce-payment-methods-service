@@ -126,6 +126,7 @@ microservice-chart:
     SESSION_URL_NOTIFICATION_URL: "https://api.dev.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
     NPG_SESSIONS_TTL: "600"
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
+    SERVICE_LOGGING_LEVEL: "info"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
