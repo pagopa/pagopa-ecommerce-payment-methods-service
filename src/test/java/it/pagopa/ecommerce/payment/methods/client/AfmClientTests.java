@@ -47,7 +47,7 @@ public class AfmClientTests {
 
     @Mock
     @Qualifier("afmWebClientV2")
-    private CalculatorApi calculatorApiV2;
+    private it.pagopa.generated.ecommerce.gec.v2.api.CalculatorApi calculatorApiV2;
 
     private AfmClient afmClient;
 

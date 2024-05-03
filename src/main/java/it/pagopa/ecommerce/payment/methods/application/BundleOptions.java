@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class BundleOptions {
 
@@ -13,31 +15,34 @@ public final class BundleOptions {
     }
 
     public static BundleOptionDto removeDuplicatePsp(
-                                                     BundleOptionDto optionDto
+        BundleOptionDto optionDto
     ) {
-        optionDto.setBundleOptions(removeDuplicatePsp(optionDto.getBundleOptions()));
+        optionDto.setBundleOptions(
+            Optional.ofNullable(optionDto.getBundleOptions())
+                .map(transfers -> transfers.stream().filter(distinctBy(TransferDto::getIdPsp))
+                    .toList())
+                .orElse(List.of())
+        );
         return optionDto;
     }
 
-    private static List<TransferDto> removeDuplicatePsp(
-                                                        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
+    public static it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto removeDuplicatePspV2(
+        it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto optionDto
     ) {
-        Set<String> idPsps = new HashSet<>();
-        return Optional.ofNullable(transfers)
+        optionDto.setBundleOptions(
+            Optional.ofNullable(optionDto.getBundleOptions())
                 .map(
-                        transferDtos -> transferDtos.stream()
-                                .filter(t -> {
-                                    if (idPsps.contains(t.getIdPsp())) {
-                                        return false;
-                                    } else {
-                                        idPsps.add(t.getIdPsp());
-                                        return true;
-                                    }
-                                })
-                                .toList()
+                    transfers -> transfers.stream().filter(
+                        distinctBy(it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto::getIdPsp)
+                    ).toList()
                 )
-                .orElse(List.of());
-
+                .orElse(List.of())
+        );
+        return optionDto;
     }
 
+    public static <T> Predicate<T> distinctBy(Function<? super T, ?> f) {
+        final Set<Object> objects = new HashSet<>();
+        return t -> objects.add(f.apply(t));
+    }
 }

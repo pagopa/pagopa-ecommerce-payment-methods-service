@@ -12,16 +12,18 @@ import it.pagopa.ecommerce.payment.methods.v2.server.model.BundleDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentMethodStatusDto;
-import it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto;
-import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
-import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
+import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
+import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
+import it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto;
+import it.pagopa.generated.ecommerce.gec.v2.dto.TransferListItemDto;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-// TODO: use GEC multi fee
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
 @Slf4j
@@ -49,13 +51,13 @@ public class PaymentMethodService {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .flatMap(
-                        paymentMethod -> afmClient.getFeesMulti(
+                        paymentMethod -> afmClient.getFeesForNotices(
                                 createGecFeeRequest(paymentMethod, feeRequestDto),
                                 maxOccurrences,
                                 feeRequestDto.getIsAllCCP()
                         ).map(bundle -> Tuple.of(paymentMethod, bundle))
                 )
-                .map(bundleAndPaymentMethod -> bundleAndPaymentMethod.map2(BundleOptions::removeDuplicatePsp))
+                .map(bundleAndPaymentMethod -> bundleAndPaymentMethod.map2(BundleOptions::removeDuplicatePspV2))
                 .map(
                         bundleAndPaymentMethod -> bundleOptionToResponse(
                                 bundleAndPaymentMethod._2(),
@@ -67,22 +69,42 @@ public class PaymentMethodService {
                         Mono.error(
                                 new NoBundleFoundException(
                                         paymentMethodId,
-                                        0, // TODO: replace with total amount of fee request
+                                        feeRequestDto.getPaymentNotices().stream()
+                                                .map(PaymentNoticeDto::getPaymentAmount).reduce(Long::sum).orElse(0L),
                                         feeRequestDto.getTouchpoint()
                                 )
                         )
                 );
     }
 
-    private PaymentOptionDto createGecFeeRequest(
-                                                 PaymentMethodDocument paymentMethod,
-                                                 CalculateFeeRequestDto feeRequestDto
+    private PaymentOptionMultiDto createGecFeeRequest(
+                                                      PaymentMethodDocument paymentMethod,
+                                                      CalculateFeeRequestDto feeRequestDto
     ) {
-        // TODO: remove me and create a GEC request with multiple payment notices
-        final var paymentNotice = feeRequestDto.getPaymentNotices().get(0);
-        return new PaymentOptionDto()
+        final var paymentNotices = feeRequestDto.getPaymentNotices().stream()
+                .map(
+                        it -> new PaymentNoticeItemDto()
+                                .paymentAmount(it.getPaymentAmount())
+                                .primaryCreditorInstitution(it.getPrimaryCreditorInstitution())
+                                .transferList(
+                                        it.getTransferList()
+                                                .stream()
+                                                .map(
+                                                        t -> new TransferListItemDto()
+                                                                .creditorInstitution(
+                                                                        t.getCreditorInstitution()
+                                                                )
+                                                                .digitalStamp(t.getDigitalStamp())
+                                                                .transferCategory(
+                                                                        t.getTransferCategory()
+                                                                )
+                                                ).toList()
+                                )
+                )
+                .toList();
+
+        return new PaymentOptionMultiDto()
                 .bin(feeRequestDto.getBin())
-                .paymentAmount(paymentNotice.getPaymentAmount())
                 .idPspList(
                         Optional.ofNullable(feeRequestDto.getIdPspList()).orElseGet(
                                 ArrayList::new
@@ -92,60 +114,43 @@ public class PaymentMethodService {
                                 .toList()
                 )
                 .paymentMethod(paymentMethod.getPaymentMethodTypeCode())
-                .primaryCreditorInstitution(paymentNotice.getPrimaryCreditorInstitution())
                 .touchpoint(feeRequestDto.getTouchpoint())
-                .transferList(
-                        paymentNotice.getTransferList()
-                                .stream()
-                                .map(
-                                        t -> new TransferListItemDto()
-                                                .creditorInstitution(
-                                                        t.getCreditorInstitution()
-                                                )
-                                                .digitalStamp(t.getDigitalStamp())
-                                                .transferCategory(
-                                                        t.getTransferCategory()
-                                                )
-                                )
-                                .toList()
-                );
+                .paymentNotice(paymentNotices);
     }
 
     private CalculateFeeResponseDto bundleOptionToResponse(
-                                                           it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle,
+                                                           it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto bundle,
                                                            PaymentMethodDocument paymentMethodDocument
     ) {
+        final var bundles = Optional.ofNullable(bundle.getBundleOptions())
+                .orElse(List.of())
+                .stream()
+                .map(
+                        t -> new BundleDto()
+                                .abi(t.getAbi())
+                                .bundleDescription(t.getBundleDescription())
+                                .bundleName(t.getBundleName())
+                                .idBrokerPsp(t.getIdBrokerPsp())
+                                .idBundle(t.getIdBundle())
+                                .idChannel(t.getIdChannel())
+                                .idPsp(t.getIdPsp())
+                                .onUs(t.getOnUs())
+                                .paymentMethod(
+                                        // A null value is considered as "any" in the AFM domain
+                                        Optional.ofNullable(t.getPaymentMethod())
+                                                .orElse(paymentMethodDocument.getPaymentMethodTypeCode())
+                                )
+                                .taxPayerFee(t.getTaxPayerFee())
+                                .touchpoint(t.getTouchpoint())
+                                .pspBusinessName(t.getPspBusinessName())
+                ).toList();
+
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
                 .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
                 .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
-                .bundles(
-                        bundle.getBundleOptions() != null ? bundle.getBundleOptions()
-                                .stream()
-                                .map(
-                                        t -> new BundleDto()
-                                                .abi(t.getAbi())
-                                                .bundleDescription(t.getBundleDescription())
-                                                .bundleName(t.getBundleName())
-                                                .idBrokerPsp(t.getIdBrokerPsp())
-                                                .idBundle(t.getIdBundle())
-                                                .idChannel(t.getIdChannel())
-                                                .idCiBundle(t.getIdCiBundle())
-                                                .idPsp(t.getIdPsp())
-                                                .onUs(t.getOnUs())
-                                                .paymentMethod(
-                                                        // A null value is considered as "any" in the AFM domain
-                                                        t.getPaymentMethod() == null
-                                                                ? paymentMethodDocument.getPaymentMethodTypeCode()
-                                                                : t.getPaymentMethod()
-                                                )
-                                                .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
-                                                .taxPayerFee(t.getTaxPayerFee())
-                                                .touchpoint(t.getTouchpoint())
-                                                .pspBusinessName(t.getPspBusinessName())
-                                ).toList() : new ArrayList<>()
-                )
+                .bundles(bundles)
                 .asset(paymentMethodDocument.getPaymentMethodAsset())
                 .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
     }

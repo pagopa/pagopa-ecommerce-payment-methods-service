@@ -13,11 +13,9 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepositor
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentMethodManagementTypeDto;
-import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
-import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
+import it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -43,12 +41,12 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrieveFeeForMultiplePaymentNotice() {
-        String paymentMethodId = UUID.randomUUID().toString();
-        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
+        final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -63,15 +61,15 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrieveFeeForMultiplePaymentNoticeWithoutPspList() {
-        String paymentMethodId = UUID.randomUUID().toString();
-        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
         calculateFeeRequestDto.setIdPspList(null);
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+        final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
 
-        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -81,16 +79,16 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrieveFeeForMultiplePaymentNoticeWithPspWithNullPaymentType() {
-        String paymentMethodId = UUID.randomUUID().toString();
-        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
         calculateFeeRequestDto.setIdPspList(null);
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionWithAnyValueDtoClientResponse();
+        final var gecResponse = TestUtil.V2.getBundleOptionWithAnyValueDtoClientResponse();
         String paymentTypeCode = "CP";
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
 
-        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -105,13 +103,13 @@ class PaymentMethodServiceTests {
     @ParameterizedTest
     @MethodSource("gecInvalidTransferDtoSource")
     void shouldReturnNoBundleFoundExceptionForNoBundleReturnedByGec(List<TransferDto> invalidTransferDto) {
-        String paymentMethodId = UUID.randomUUID().toString();
-        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
+        final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
         gecResponse.setBundleOptions(invalidTransferDto);
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-        Mockito.when(afmClient.getFeesMulti(any(), any(), Mockito.anyBoolean()))
+        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         StepVerifier.create(

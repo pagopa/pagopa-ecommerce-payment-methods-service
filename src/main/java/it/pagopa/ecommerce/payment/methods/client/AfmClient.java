@@ -4,6 +4,7 @@ import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.generated.ecommerce.gec.v1.api.CalculatorApi;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PaymentOptionDto;
+import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,16 +19,18 @@ import reactor.core.publisher.Mono;
 public class AfmClient {
 
     private final CalculatorApi calculatorApi;
+    private final it.pagopa.generated.ecommerce.gec.v2.api.CalculatorApi calculatorApiV2;
 
     private final String afmKey;
 
     @Autowired
     public AfmClient(
             @Qualifier("afmWebClient") CalculatorApi afmClient,
-            @Qualifier("afmWebClientV2") CalculatorApi afmWebClientV2,
+            @Qualifier("afmWebClientV2") it.pagopa.generated.ecommerce.gec.v2.api.CalculatorApi afmWebClientV2,
             @Value("${afm.client.key}") String afmKey
     ) {
         this.calculatorApi = afmClient;
+        this.calculatorApiV2 = afmWebClientV2;
         this.afmKey = afmKey;
     }
 
@@ -78,13 +81,12 @@ public class AfmClient {
                 );
     }
 
-    // TODO: replace with v2
-    public Mono<BundleOptionDto> getFeesMulti(
-                                              PaymentOptionDto paymentOptionDto,
-                                              Integer maxOccurrences,
-                                              boolean allCCP
+    public Mono<it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto> getFeesForNotices(
+                                                                                            PaymentOptionMultiDto paymentOptionDto,
+                                                                                            Integer maxOccurrences,
+                                                                                            boolean allCCP
     ) {
-        return calculatorApi
+        return calculatorApiV2
                 .getApiClient()
                 .getWebClient()
                 .post()
@@ -95,7 +97,7 @@ public class AfmClient {
                                 .build()
                 )
                 .header("ocp-apim-subscription-key", afmKey)
-                .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
+                .body(Mono.just(paymentOptionDto), PaymentOptionMultiDto.class)
                 .retrieve()
                 .onStatus(
                         HttpStatus::isError,
@@ -109,18 +111,18 @@ public class AfmClient {
                                         )
                                 )
                 )
-                .bodyToMono(BundleOptionDto.class)
+                .bodyToMono(it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto.class)
                 .doOnError(
                         ResponseStatusException.class,
                         error -> log.error(
-                                "ResponseStatus Error : {}",
+                                String.format("ResponseStatus Error. Status: [%s]", error.getStatus()),
                                 error
                         )
                 )
                 .doOnError(
                         Exception.class,
                         (Exception error) -> log.error(
-                                "Generic Error : {}",
+                                "Generic Error",
                                 error
                         )
                 );

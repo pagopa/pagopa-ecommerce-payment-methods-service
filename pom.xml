@@ -218,6 +218,28 @@
 							<modelNameSuffix>dto</modelNameSuffix>
 						</configuration>
 					</execution>
+					<execution>
+						<id>gec-api-v2</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-infra/b1230524eeb726f1b98768745de1cd1974c9ac7f/src/domains/afm-app/api/calculator-service/v2/_openapi.json.tpl</inputSpec>
+							<generatorName>java</generatorName>
+							<library>webclient</library>
+							<generateApiDocumentation>false</generateApiDocumentation>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<configOptions>
+								<swaggerAnnotations>false</swaggerAnnotations>
+								<openApiNullable>false</openApiNullable>
+							</configOptions>
+							<modelPackage>it.pagopa.generated.ecommerce.gec.v2.dto</modelPackage>
+							<apiPackage>it.pagopa.generated.ecommerce.gec.v2.api</apiPackage>
+							<modelNameSuffix>dto</modelNameSuffix>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
