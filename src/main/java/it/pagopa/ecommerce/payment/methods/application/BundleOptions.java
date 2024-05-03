@@ -15,28 +15,30 @@ public final class BundleOptions {
     }
 
     public static BundleOptionDto removeDuplicatePsp(
-        BundleOptionDto optionDto
+                                                     BundleOptionDto optionDto
     ) {
         optionDto.setBundleOptions(
-            Optional.ofNullable(optionDto.getBundleOptions())
-                .map(transfers -> transfers.stream().filter(distinctBy(TransferDto::getIdPsp))
-                    .toList())
-                .orElse(List.of())
+                Optional.ofNullable(optionDto.getBundleOptions())
+                        .map(
+                                transfers -> transfers.stream().filter(distinctBy(TransferDto::getIdPsp))
+                                        .toList()
+                        )
+                        .orElse(List.of())
         );
         return optionDto;
     }
 
     public static it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto removeDuplicatePspV2(
-        it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto optionDto
+                                                                                                it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto optionDto
     ) {
         optionDto.setBundleOptions(
-            Optional.ofNullable(optionDto.getBundleOptions())
-                .map(
-                    transfers -> transfers.stream().filter(
-                        distinctBy(it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto::getIdPsp)
-                    ).toList()
-                )
-                .orElse(List.of())
+                Optional.ofNullable(optionDto.getBundleOptions())
+                        .map(
+                                transfers -> transfers.stream().filter(
+                                        distinctBy(it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto::getIdPsp)
+                                ).toList()
+                        )
+                        .orElse(List.of())
         );
         return optionDto;
     }
