@@ -450,7 +450,7 @@ public class PaymentMethodService {
                                     } else {
                                         log.info("Cache miss for orderId: {}", orderId);
                                         response = npgClient.getCardData(
-                                                UUID.randomUUID(),
+                                                UUID.fromString(sx.correlationId()),
                                                 sx.sessionId(),
                                                 npgDefaultApiKey
                                         )
