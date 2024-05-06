@@ -34,11 +34,6 @@ public class AfmClient {
         this.calculatorApi = afmClient;
         this.calculatorApiV2 = afmWebClientV2;
         this.afmKey = afmKey;
-
-        this.calculatorApiV2.getApiClient().addDefaultHeader(
-                AfmClient.HEADER_APIM_KEY,
-                afmKey
-        );
     }
 
     public Mono<BundleOptionDto> getFees(
