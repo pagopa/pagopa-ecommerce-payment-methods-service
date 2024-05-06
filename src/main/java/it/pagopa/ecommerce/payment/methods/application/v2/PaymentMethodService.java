@@ -47,7 +47,12 @@ public class PaymentMethodService {
                                                     String paymentMethodId,
                                                     Integer maxOccurrences
     ) {
-        log.info("[Payment Method] Retrieve bundles list");
+        log.info(
+                "[Payment Method] Retrieve bundles list for payment method [{}], allCcp [{}] and payment notice amounts [{}]",
+                paymentMethodId,
+                feeRequestDto.getIsAllCCP(),
+                feeRequestDto.getPaymentNotices().stream().map(PaymentNoticeDto::getPaymentAmount).toList()
+        );
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .flatMap(
@@ -74,6 +79,11 @@ public class PaymentMethodService {
                                         feeRequestDto.getTouchpoint()
                                 )
                         )
+                )
+                .doOnError(
+                        NoBundleFoundException.class,
+                        error -> log
+                                .error(String.format("No bundle found for payment method [%s]", paymentMethodId), error)
                 );
     }
 

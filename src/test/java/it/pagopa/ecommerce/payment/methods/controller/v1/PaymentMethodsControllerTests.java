@@ -58,6 +58,7 @@ class PaymentMethodsControllerTests {
 
     @InjectMocks
     private PaymentMethodsController paymentMethodsController = new PaymentMethodsController();
+
     @Autowired
     private WebTestClient webClient;
 

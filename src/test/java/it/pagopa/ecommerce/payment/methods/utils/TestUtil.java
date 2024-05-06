@@ -13,6 +13,7 @@ import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
+import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import java.util.stream.LongStream;
 import org.springframework.data.util.Pair;
 
@@ -462,6 +463,36 @@ public class TestUtil {
                     .bundleOptions(
                             transferList
                     );
+        }
+
+        public static it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto getPaymentMultiNoticeOptionRequestClient() {
+            return new it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto()
+                    .paymentNotice(
+                            List.of(
+                                    new PaymentNoticeItemDto()
+                                            .paymentAmount(BigInteger.TEN.longValue())
+                                            .primaryCreditorInstitution("creditorInstitution")
+                                            .transferList(
+                                                    List.of(
+                                                            new it.pagopa.generated.ecommerce.gec.v2.dto.TransferListItemDto()
+                                                                    .transferCategory("category")
+                                                                    .creditorInstitution("creditorInstitution")
+                                                                    .digitalStamp(true)
+                                                    )
+                                            )
+                            )
+                    )
+                    .paymentMethod("paymentMethodID")
+                    .bin("BIN_TEST")
+                    .idPspList(
+                            List.of(
+                                    new it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto()
+                                            .idPsp("firstPspId"),
+                                    new it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto()
+                                            .idPsp("secondPspId")
+                            )
+                    )
+                    .touchpoint("CHECKOUT");
         }
     }
 }
