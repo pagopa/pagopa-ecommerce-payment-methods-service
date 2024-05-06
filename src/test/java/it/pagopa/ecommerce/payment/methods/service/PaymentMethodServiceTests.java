@@ -471,7 +471,8 @@ class PaymentMethodServiceTests {
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).save(any());
-        Mockito.verify(npgClient, Mockito.times(1)).getCardData(any(), any(), any());
+        Mockito.verify(npgClient, Mockito.times(1))
+                .getCardData(eq(UUID.fromString(correlationId)), eq(sessionId), any());
     }
 
     @Test
