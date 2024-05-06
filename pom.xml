@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>it.pagopa.ecommerce</groupId>
 	<artifactId>pagopa-ecommerce-payment-methods-service</artifactId>
-	<version>1.7.0</version>
+	<version>1.7.1</version>
 	<name>pagopa-ecommerce-payment-methods-service</name>
 	<description>payment methods micro service</description>
 	<properties>
