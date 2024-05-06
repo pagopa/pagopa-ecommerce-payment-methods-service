@@ -17,8 +17,13 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebClientsConfig implements WebFluxConfigurer {
-    @Value("${afm.client.maxInMemory}")
-    private int maxMemorySize;
+    private final int maxMemorySize;
+
+    public WebClientsConfig(
+            @Value("${afm.client.maxInMemory}") int maxMemorySize
+    ) {
+        this.maxMemorySize = maxMemorySize;
+    }
 
     @Bean(name = "afmWebClient")
     public CalculatorApi afmWebClient(

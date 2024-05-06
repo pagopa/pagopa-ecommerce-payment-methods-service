@@ -48,9 +48,10 @@ public class PaymentMethodService {
                                                     Integer maxOccurrences
     ) {
         log.info(
-                "[Payment Method] Retrieve bundles list for payment method [{}], allCcp [{}] and payment notice amounts [{}]",
+                "[Payment Method] Retrieve bundles list for payment method: [{}], allCcp: [{}], isMulti: [{}] and payment notice amounts: {}",
                 paymentMethodId,
                 feeRequestDto.getIsAllCCP(),
+                feeRequestDto.getPaymentNotices().size() > 1,
                 feeRequestDto.getPaymentNotices().stream().map(PaymentNoticeDto::getPaymentAmount).toList()
         );
         return paymentMethodRepository.findById(paymentMethodId)

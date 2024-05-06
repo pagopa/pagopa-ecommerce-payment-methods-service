@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
 public class AfmClient {
+
+    public static final String HEADER_APIM_KEY = "ocp-apim-subscription-key";
 
     private final CalculatorApi calculatorApi;
     private final it.pagopa.generated.ecommerce.gec.v2.api.CalculatorApi calculatorApiV2;
@@ -32,6 +34,11 @@ public class AfmClient {
         this.calculatorApi = afmClient;
         this.calculatorApiV2 = afmWebClientV2;
         this.afmKey = afmKey;
+
+        this.calculatorApiV2.getApiClient().addDefaultHeader(
+                AfmClient.HEADER_APIM_KEY,
+                afmKey
+        );
     }
 
     public Mono<BundleOptionDto> getFees(
@@ -39,6 +46,7 @@ public class AfmClient {
                                          Integer maxOccurrences,
                                          boolean allCCP
     ) {
+
         return calculatorApi
                 .getApiClient()
                 .getWebClient()
@@ -49,12 +57,13 @@ public class AfmClient {
                                 .queryParam("maxOccurrences", maxOccurrences)
                                 .build()
                 )
-                .header("ocp-apim-subscription-key", afmKey)
+                .header(HEADER_APIM_KEY, afmKey)
                 .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
                 .retrieve()
                 .onStatus(
                         HttpStatus::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
+                                .defaultIfEmpty("Failure response without body")
                                 .flatMap(
                                         errorResponseBody -> Mono.error(
                                                 new AfmResponseException(
@@ -66,9 +75,20 @@ public class AfmClient {
                 )
                 .bodyToMono(BundleOptionDto.class)
                 .doOnError(
-                        ResponseStatusException.class,
+                        AfmResponseException.class,
                         error -> log.error(
-                                "ResponseStatus Error : {}",
+                                String.format(
+                                        "Response error with status: [%s], message: [%s]",
+                                        error.status,
+                                        error.reason
+                                ),
+                                error
+                        )
+                )
+                .doOnError(
+                        WebClientException.class,
+                        error -> log.error(
+                                String.format("Client error: [%s]", error.getMessage()),
                                 error
                         )
                 )
@@ -96,12 +116,13 @@ public class AfmClient {
                                 .queryParam("maxOccurrences", maxOccurrences)
                                 .build()
                 )
-                .header("ocp-apim-subscription-key", afmKey)
+                .header(HEADER_APIM_KEY, afmKey)
                 .body(Mono.just(paymentOptionDto), PaymentOptionMultiDto.class)
                 .retrieve()
                 .onStatus(
                         HttpStatus::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
+                                .defaultIfEmpty("Failure response without body")
                                 .flatMap(
                                         errorResponseBody -> Mono.error(
                                                 new AfmResponseException(
@@ -113,9 +134,20 @@ public class AfmClient {
                 )
                 .bodyToMono(it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto.class)
                 .doOnError(
-                        ResponseStatusException.class,
+                        AfmResponseException.class,
                         error -> log.error(
-                                String.format("ResponseStatus Error. Status: [%s]", error.getStatus()),
+                                String.format(
+                                        "Response error with status: [%s], message: [%s]",
+                                        error.status,
+                                        error.reason
+                                ),
+                                error
+                        )
+                )
+                .doOnError(
+                        WebClientException.class,
+                        error -> log.error(
+                                String.format("Client error: [%s]", error.getMessage()),
                                 error
                         )
                 )
