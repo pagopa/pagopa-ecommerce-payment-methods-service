@@ -40,7 +40,8 @@ public class NpgWebClientsConfig implements WebFluxConfigurer {
                                         TimeUnit.MILLISECONDS
                                 )
                         )
-                );
+                )
+                .resolver(nameResolverSpec -> nameResolverSpec.ndots(1));
 
         DefaultUriBuilderFactory defaultUriBuilderFactory = new DefaultUriBuilderFactory();
         defaultUriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
