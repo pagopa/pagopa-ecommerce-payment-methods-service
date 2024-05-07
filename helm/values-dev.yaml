@@ -18,6 +18,7 @@ microservice-chart:
         pullPolicy: Always
       envConfig:
         AFM_URI: "https://api.dev.platform.pagopa.it/afm/calculator-service/v1/fees"
+        AFM_URI_V2: "https://api.dev.platform.pagopa.it/afm/calculator-service/v2/fees"
         ECS_SERVICE_NAME: pagopa-ecommerce-payment-method-service-blue
         SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
   image:
