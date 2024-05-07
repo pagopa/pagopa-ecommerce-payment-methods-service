@@ -23,10 +23,9 @@ microservice-chart:
         SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
       envSecret:
         AFM_KEY: afm-api-key-blue
-
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.7.1"
+    tag: "1.8.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
