@@ -18,6 +18,7 @@
 		<spotless.version>2.28.0</spotless.version>
 		<ecs-logging-version>1.5.0</ecs-logging-version>
 		<pagopa-ecommerce-commons.version>1.14.0</pagopa-ecommerce-commons.version>
+		<mock-web-server.version>4.12.0</mock-web-server.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -123,6 +124,19 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		<!-- Square Mock Web Server -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${mock-web-server.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>mockwebserver</artifactId>
+			<version>${mock-web-server.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -152,7 +166,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/api-spec/api.yaml</inputSpec>
+							<inputSpec>${project.basedir}/api-spec/v1/api.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<library>spring-boot</library>
 							<modelNameSuffix>Dto</modelNameSuffix>
@@ -163,6 +177,31 @@
 								<modelPackage>it.pagopa.ecommerce.payment.methods.server.model</modelPackage>
 								<apiPackage>it.pagopa.ecommerce.payment.methods.server.api</apiPackage>
 								<configPackage>it.pagopa.ecommerce.payment.methods.server.config</configPackage>
+								<interfaceOnly>true</interfaceOnly>
+								<hideGenerationTimestamp>true</hideGenerationTimestamp>
+								<skipDefaultInterface>true</skipDefaultInterface>
+								<useSwaggerUI>false</useSwaggerUI>
+								<reactive>true</reactive>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>payment-method-api-v2</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/api-spec/v2/api.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<library>spring-boot</library>
+							<modelNameSuffix>Dto</modelNameSuffix>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<configOptions>
+								<basePackage>it.pagopa.ecommerce.payment.methods.v2.server</basePackage>
+								<modelPackage>it.pagopa.ecommerce.payment.methods.v2.server.model</modelPackage>
+								<apiPackage>it.pagopa.ecommerce.payment.methods.v2.server.api</apiPackage>
+								<configPackage>it.pagopa.ecommerce.payment.methods.v2.server.config</configPackage>
 								<interfaceOnly>true</interfaceOnly>
 								<hideGenerationTimestamp>true</hideGenerationTimestamp>
 								<skipDefaultInterface>true</skipDefaultInterface>
@@ -190,6 +229,28 @@
 							</configOptions>
 							<modelPackage>it.pagopa.generated.ecommerce.gec.v1.dto</modelPackage>
 							<apiPackage>it.pagopa.generated.ecommerce.gec.v1.api</apiPackage>
+							<modelNameSuffix>dto</modelNameSuffix>
+						</configuration>
+					</execution>
+					<execution>
+						<id>gec-api-v2</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-infra/b1230524eeb726f1b98768745de1cd1974c9ac7f/src/domains/afm-app/api/calculator-service/v2/_openapi.json.tpl</inputSpec>
+							<generatorName>java</generatorName>
+							<library>webclient</library>
+							<generateApiDocumentation>false</generateApiDocumentation>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<configOptions>
+								<swaggerAnnotations>false</swaggerAnnotations>
+								<openApiNullable>false</openApiNullable>
+							</configOptions>
+							<modelPackage>it.pagopa.generated.ecommerce.gec.v2.dto</modelPackage>
+							<apiPackage>it.pagopa.generated.ecommerce.gec.v2.api</apiPackage>
 							<modelNameSuffix>dto</modelNameSuffix>
 						</configuration>
 					</execution>

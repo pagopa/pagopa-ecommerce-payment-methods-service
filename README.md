@@ -27,6 +27,7 @@ These are all environment variables needed by the application:
 | REDIS_PASSWORD                     | Password used for connecting to Redis instance                                                                                                             | string |         |
 | REDIS_PORT                         | Port used for connecting to Redis instance                                                                                                                 | string |         |
 | AFM_URI                            | Host used for call AFM for retrieve fields                                                                                                                 | string |         |
+| AFM_URI_V2                         | Host used for call AFM for calculate fees for Cart                                                                                                         | string |         |
 | AFM_KEY                            | AFM api key                                                                                                                                                | string |         |
 | AFM_READ_TIMEOUT                   | Timeout for establishing connections towards AFM                                                                                                           | string |         |
 | AFM_CONNECTION_TIMEOUT             | AFM connection timeout for http call                                                                                                                       | string |         |

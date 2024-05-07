@@ -17,8 +17,13 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebClientsConfig implements WebFluxConfigurer {
-    @Value("${afm.client.maxInMemory}")
-    private int maxMemorySize;
+    private final int maxMemorySize;
+
+    public WebClientsConfig(
+            @Value("${afm.client.maxInMemory}") int maxMemorySize
+    ) {
+        this.maxMemorySize = maxMemorySize;
+    }
 
     @Bean(name = "afmWebClient")
     public CalculatorApi afmWebClient(
@@ -30,25 +35,60 @@ public class WebClientsConfig implements WebFluxConfigurer {
                                           "${afm.connectionTimeout}"
                                       ) int afmWebClientConnectionTimeout
     ) {
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, afmWebClientConnectionTimeout)
-                .doOnConnected(
-                        connection -> connection.addHandlerLast(
-                                new ReadTimeoutHandler(
-                                        afmWebClientReadTimeout,
-                                        TimeUnit.MILLISECONDS
-                                )
-                        )
-                );
+        final var webClient = createWebClient(
+                afmWebClientUri,
+                createClientWithTimeouts(afmWebClientReadTimeout, afmWebClientConnectionTimeout)
+        );
+        return new CalculatorApi(new ApiClient(webClient));
+    }
 
-        WebClient webClient = ApiClient.buildWebClientBuilder().exchangeStrategies(
+    @Bean(name = "afmWebClientV2")
+    public it.pagopa.generated.ecommerce.gec.v2.api.CalculatorApi afmWebClientV2(
+                                                                                 @Value(
+                                                                                     "${afm.uri.v2}"
+                                                                                 ) String afmWebClientUri,
+                                                                                 @Value(
+                                                                                     "${afm.readTimeout}"
+                                                                                 ) int afmWebClientReadTimeout,
+                                                                                 @Value(
+                                                                                     "${afm.connectionTimeout}"
+                                                                                 ) int afmWebClientConnectionTimeout
+    ) {
+        final var webClient = createWebClient(
+                afmWebClientUri,
+                createClientWithTimeouts(afmWebClientReadTimeout, afmWebClientConnectionTimeout)
+        );
+        return new it.pagopa.generated.ecommerce.gec.v2.api.CalculatorApi(
+                new it.pagopa.generated.ecommerce.gec.v2.ApiClient(webClient)
+        );
+    }
+
+    private WebClient createWebClient(
+                                      String uri,
+                                      HttpClient httpClient
+    ) {
+        return ApiClient.buildWebClientBuilder().exchangeStrategies(
                 ExchangeStrategies.builder()
                         .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(maxMemorySize))
                         .build()
         ).clientConnector(
                 new ReactorClientHttpConnector(httpClient)
-        ).baseUrl(afmWebClientUri).build();
+        ).baseUrl(uri).build();
+    }
 
-        return new CalculatorApi(new ApiClient(webClient));
+    private HttpClient createClientWithTimeouts(
+                                                int readTimeout,
+                                                int connectionTimeout
+    ) {
+        return HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
+                .doOnConnected(
+                        connection -> connection.addHandlerLast(
+                                new ReadTimeoutHandler(
+                                        readTimeout,
+                                        TimeUnit.MILLISECONDS
+                                )
+                        )
+                );
     }
 }

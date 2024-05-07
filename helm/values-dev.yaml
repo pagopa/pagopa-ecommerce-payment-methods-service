@@ -18,8 +18,12 @@ microservice-chart:
         pullPolicy: Always
       envConfig:
         AFM_URI: "https://api.dev.platform.pagopa.it/afm/calculator-service/v1/fees"
+        AFM_URI_V2: "https://api.dev.platform.pagopa.it/afm/calculator-service/v2/fees"
         ECS_SERVICE_NAME: pagopa-ecommerce-payment-method-service-blue
         SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
+      envSecret:
+        AFM_KEY: afm-api-key-blue
+
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "1.7.1"
@@ -108,6 +112,7 @@ microservice-chart:
     REDIS_PORT: "6380"
     REDIS_SSL_ENABLED: "true"
     AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
+    AFM_URI_V2: "https://api.uat.platform.pagopa.it/afm/calculator-service/v2/fees"
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"

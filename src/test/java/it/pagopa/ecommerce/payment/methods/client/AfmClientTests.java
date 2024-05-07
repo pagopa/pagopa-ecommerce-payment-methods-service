@@ -1,127 +1,194 @@
 package it.pagopa.ecommerce.payment.methods.client;
 
+import static it.pagopa.ecommerce.payment.methods.client.AfmClient.HEADER_APIM_KEY;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import it.pagopa.ecommerce.payment.methods.config.WebClientsConfig;
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
-import it.pagopa.generated.ecommerce.gec.v1.ApiClient;
-import it.pagopa.generated.ecommerce.gec.v1.api.CalculatorApi;
-import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Stream;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.reactivestreams.Publisher;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 public class AfmClientTests {
-    @Mock
-    private ApiClient apiClient;
-    @Mock
-    private WebClient webClient;
+    private static MockWebServer mockWebServer;
 
-    @Mock
-    private WebClient.RequestBodySpec requestBodySpec;
-    @Mock
-    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
-
-    @Mock
-    private WebClient.RequestHeadersSpec requestHeadersSpec;
-
-    @Mock
-    private WebClient.ResponseSpec responseSpec;
-    @Mock
-    @Qualifier("afmWebClient")
-    private CalculatorApi calculatorApi;
+    private final WebClientsConfig clientsConfig = new WebClientsConfig(16777216);
 
     private AfmClient afmClient;
 
     @BeforeEach
     public void init() {
-        afmClient = new AfmClient(calculatorApi, "xxx");
+        final var calculatorApi = clientsConfig
+                .afmWebClient("http://localhost:9001/v1/fees", 5000, 5000);
+        final var calculatorApiV2 = clientsConfig
+                .afmWebClientV2("http://localhost:9001/v2/fees", 5000, 5000);
+        afmClient = new AfmClient(calculatorApi, calculatorApiV2, "xxx");
     }
 
-    @Test
-    void shouldRetrieveFeeFromGECAllCCPFalse() {
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
-        Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
-        Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
-        Mockito.when(webClient.post()).thenReturn(requestBodyUriSpec);
-        Mockito.when(requestBodyUriSpec.uri(any(Function.class))).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
-        Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.just(gecResponse));
+    @AfterAll
+    public static void tearDown() throws IOException {
+        mockWebServer.close();
+    }
+
+    @BeforeAll
+    public static void tearUp() throws IOException {
+        mockWebServer = new MockWebServer();
+        mockWebServer.start(9001);
+        System.out.println("Start mock server");
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            booleans = {
+                    false,
+                    true
+            }
+    )
+    void shouldRetrieveFeeFromGEC(Boolean allCcp)
+            throws JsonProcessingException, InterruptedException {
+        final var gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+        mockWebServer.enqueue(
+                new MockResponse()
+                        .setResponseCode(200)
+                        .setHeader("Content-Type", "application/json")
+                        .setBody(new ObjectMapper().writeValueAsString(gecResponse))
+        );
 
         StepVerifier
-                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, false))
+                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, allCcp))
                 .expectNext(gecResponse)
                 .verifyComplete();
+
+        assertThat(mockWebServer.takeRequest().getHeader(HEADER_APIM_KEY)).isNotNull();
     }
 
-    @Test
-    void shouldRetrieveFeeFromGECAllCCPTrue() {
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
-        Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
-        Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
-        Mockito.when(webClient.post()).thenReturn(requestBodyUriSpec);
-        Mockito.when(requestBodyUriSpec.uri(any(Function.class))).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
-        Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.just(gecResponse));
-
-        StepVerifier
-                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, true))
-                .expectNext(gecResponse)
-                .verifyComplete();
-    }
-
-    @Test
-    void shouldReturnResponseStatusException() {
-        Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
-        Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
-        Mockito.when(webClient.post()).thenReturn(requestBodyUriSpec);
-        Mockito.when(requestBodyUriSpec.uri(any(Function.class))).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
-        Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class))
-                .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)));
+    @ParameterizedTest
+    @MethodSource("it.pagopa.ecommerce.payment.methods.client.AfmClientTests#negativeStatusCode")
+    void shouldReturnResponseStatusException(HttpStatus httpStatus) throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(httpStatus.value()).setBody("{\"error\": \"wrong\"}"));
 
         StepVerifier
                 .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, false))
-                .expectError(ResponseStatusException.class);
+                .expectError(AfmResponseException.class)
+                .verify();
+
+        assertThat(mockWebServer.takeRequest().getHeader(HEADER_APIM_KEY)).isNotNull();
     }
 
-    @Test
-    void shouldReturnException() {
-        Mockito.when(calculatorApi.getApiClient()).thenReturn(apiClient);
-        Mockito.when(apiClient.getWebClient()).thenReturn(webClient);
-        Mockito.when(webClient.post()).thenReturn(requestBodyUriSpec);
-        Mockito.when(requestBodyUriSpec.uri(any(Function.class))).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.header(any(), any())).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.body(any(Publisher.class), any(Class.class))).thenReturn(requestHeadersSpec);
-        Mockito.when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        Mockito.when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(BundleOptionDto.class)).thenReturn(Mono.error(new Exception()));
+    @ParameterizedTest
+    @MethodSource("it.pagopa.ecommerce.payment.methods.client.AfmClientTests#negativeStatusCode")
+    void shouldReturnAfmResponseExceptionWithNegativeStatusCodeAndEmptyBody(HttpStatus errorCode)
+            throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(errorCode.value()));
 
         StepVerifier
-                .create(afmClient.getFees(TestUtil.getPaymentOptionRequestClient(), 10, false))
-                .expectError(Exception.class);
+                .create(
+                        afmClient.getFees(
+                                TestUtil.getPaymentOptionRequestClient(),
+                                10,
+                                false
+                        )
+                )
+                .expectError(AfmResponseException.class)
+                .verify();
+
+        assertThat(mockWebServer.takeRequest().getHeader(HEADER_APIM_KEY)).isNotNull();
     }
 
+    @Nested
+    class V2 {
+
+        @ParameterizedTest
+        @ValueSource(
+                booleans = {
+                        false,
+                        true
+                }
+        )
+        void shouldRetrieveFeeFromGEC(Boolean allCcp)
+                throws JsonProcessingException, InterruptedException {
+            final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
+            mockWebServer.enqueue(
+                    new MockResponse()
+                            .setResponseCode(200)
+                            .setHeader("Content-Type", "application/json")
+                            .setBody(new ObjectMapper().writeValueAsString(gecResponse))
+            );
+
+            StepVerifier
+                    .create(
+                            afmClient.getFeesForNotices(
+                                    TestUtil.V2.getPaymentMultiNoticeOptionRequestClient(),
+                                    10,
+                                    allCcp
+                            )
+                    )
+                    .expectNext(gecResponse)
+                    .verifyComplete();
+
+            assertThat(mockWebServer.takeRequest().getHeader(HEADER_APIM_KEY)).isNotNull();
+        }
+
+        @ParameterizedTest
+        @MethodSource("it.pagopa.ecommerce.payment.methods.client.AfmClientTests#negativeStatusCode")
+        void shouldReturnAfmResponseException(HttpStatus errorCode) throws InterruptedException {
+            mockWebServer
+                    .enqueue(new MockResponse().setResponseCode(errorCode.value()).setBody("{\"error\": \"wrong\"}"));
+
+            StepVerifier
+                    .create(
+                            afmClient.getFeesForNotices(
+                                    TestUtil.V2.getPaymentMultiNoticeOptionRequestClient(),
+                                    10,
+                                    false
+                            )
+                    )
+                    .expectError(AfmResponseException.class)
+                    .verify();
+            assertThat(mockWebServer.takeRequest().getHeader("ocp-apim-subscription-key")).isNotNull();
+        }
+
+        @ParameterizedTest
+        @MethodSource("it.pagopa.ecommerce.payment.methods.client.AfmClientTests#negativeStatusCode")
+        void shouldReturnAfmResponseExceptionWithNegativeStatusCodeAndEmptyBody(HttpStatus errorCode)
+                throws InterruptedException {
+            mockWebServer.enqueue(new MockResponse().setResponseCode(errorCode.value()));
+
+            StepVerifier
+                    .create(
+                            afmClient.getFeesForNotices(
+                                    TestUtil.V2.getPaymentMultiNoticeOptionRequestClient(),
+                                    10,
+                                    false
+                            )
+                    )
+                    .expectError(AfmResponseException.class)
+                    .verify();
+
+            assertThat(mockWebServer.takeRequest().getHeader(HEADER_APIM_KEY)).isNotNull();
+        }
+    }
+
+    public static Stream<Arguments> negativeStatusCode() {
+        return Arrays.stream(HttpStatus.values()).filter(HttpStatus::isError)
+                .map(Arguments::of);
+    }
 }
