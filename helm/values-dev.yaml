@@ -22,7 +22,7 @@ microservice-chart:
         SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.6.4"
+    tag: "1.7.1"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -127,6 +127,7 @@ microservice-chart:
     NPG_SESSIONS_TTL: "600"
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
     SERVICE_LOGGING_LEVEL: "info"
+    ROOT_LOGGING_LEVEL: "info"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
