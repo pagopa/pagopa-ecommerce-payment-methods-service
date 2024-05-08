@@ -1,4 +1,4 @@
-package it.pagopa.ecommerce.payment.methods.application;
+package it.pagopa.ecommerce.payment.methods.application.v1;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.Claims;
@@ -6,18 +6,54 @@ import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
+import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
-import it.pagopa.ecommerce.payment.methods.exception.*;
-import it.pagopa.ecommerce.payment.methods.infrastructure.*;
-import it.pagopa.ecommerce.payment.methods.server.model.*;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodBrandAssets;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodManagement;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
+import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
+import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
+import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
+import it.pagopa.ecommerce.payment.methods.infrastructure.CardDataDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.BundleDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CardFormFieldsDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.FieldDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PatchSessionRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
+import it.pagopa.ecommerce.payment.methods.server.model.SessionPaymentMethodResponseDto;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,15 +64,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
-import javax.crypto.SecretKey;
-import java.net.URI;
-import java.util.*;
-import java.util.stream.Collectors;
-
-@Service
+@Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
 @Slf4j
 public class PaymentMethodService {
+
+    protected static final String QUALIFIER_NAME = "paymentMethodService";
 
     public enum SessionPaymentMethod {
         CARDS("CARDS");
@@ -288,12 +321,7 @@ public class PaymentMethodService {
                                 )
 
                         ).flatMap(tuple -> afmClient.getFees(tuple.getT1(), maxOccurrences, tuple.getT2()))
-                                .map(bo -> {
-                                    bo.setBundleOptions(
-                                            removeDuplicatePsp(bo.getBundleOptions())
-                                    );
-                                    return bo;
-                                })
+                                .map(BundleOptions::removeDuplicatePsp)
                                 .map(bo -> bundleOptionToResponse(bo, pm))
                                 .filter(response -> !response.getBundles().isEmpty())
                                 .switchIfEmpty(
@@ -559,27 +587,6 @@ public class PaymentMethodService {
 
                     return updatedDocument;
                 });
-    }
-
-    private List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> removeDuplicatePsp(
-                                                                                          List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transfers
-    ) {
-        Set<String> idPsps = new HashSet<>();
-        return Optional.ofNullable(transfers)
-                .map(
-                        transferDtos -> transferDtos.stream()
-                                .filter(t -> {
-                                    if (idPsps.contains(t.getIdPsp())) {
-                                        return false;
-                                    } else {
-                                        idPsps.add(t.getIdPsp());
-                                        return true;
-                                    }
-                                })
-                                .toList()
-                )
-                .orElse(List.of());
-
     }
 
     private CalculateFeeResponseDto bundleOptionToResponse(
