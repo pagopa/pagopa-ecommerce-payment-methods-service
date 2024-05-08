@@ -1,9 +1,11 @@
 package it.pagopa.ecommerce.payment.methods.controller.v2;
 
+import it.pagopa.ecommerce.commons.annotations.Warmup;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.api.V2Api;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
@@ -13,8 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 @RestController("paymentMethodsControllerV2")
 @Slf4j
@@ -72,6 +81,29 @@ public class PaymentMethodsController implements V2Api {
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
+    }
+
+    @Warmup
+    public void calculateFeesWarmupMethod() {
+        CalculateFeeRequestDto request = new CalculateFeeRequestDto()
+                .bin("BIN_TEST")
+                .touchpoint("CHECKOUT")
+                .addIdPspListItem("string")
+                .idPspList(new ArrayList<>(List.of("first", "second")))
+                .isAllCCP(false)
+                .paymentNotices(Collections.emptyList());
+        WebClient
+                .create()
+                .post()
+                .uri(
+                        "http://localhost:8080/v2/payment-methods/{id}/fees",
+                        UUID.randomUUID().toString()
+                )
+                .bodyValue(request)
+                .header("X-Client-ID", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(30));
     }
 
 }
