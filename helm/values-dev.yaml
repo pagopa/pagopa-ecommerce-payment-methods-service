@@ -121,7 +121,7 @@ microservice-chart:
     OTEL_TRACES_SAMPLER: "always_on"
     ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
     ECS_SERVICE_ENVIRONMENT: dev
-    NPG_URI: "https://stg-ta.nexigroup.com/api/phoenix-0.0"
+    NPG_URI: "https://api.dev.platform.pagopa.it/ecommerce/mock/npg/v1"
     NPG_READ_TIMEOUT: "10000"
     NPG_CONNECTION_TIMEOUT: "10000"
     SESSION_URL_BASEPATH: "https://dev.checkout.pagopa.it"
