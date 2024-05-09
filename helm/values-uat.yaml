@@ -165,7 +165,7 @@ microservice-chart:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
     REDIS_HOST: redis-ecommerce-hostname
-    AFM_KEY: afm-api-key
+    AFM_KEY: ecommerce-load-test-subscription-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-api-key
     NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
