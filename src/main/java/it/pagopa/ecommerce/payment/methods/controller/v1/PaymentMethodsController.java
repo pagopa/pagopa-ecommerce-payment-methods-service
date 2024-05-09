@@ -11,6 +11,7 @@ import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +37,9 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     private PaymentMethodService paymentMethodService;
 
     private static final String X_CLIENT_ID = "X-Client-ID";
+
+    @Value("${warmup.payment.method.id}")
+    String warmupPaymentMethodID;
 
     @ExceptionHandler(
         {
@@ -338,7 +342,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .post()
                 .uri(
                         "http://localhost:8080/payment-methods/{id}/sessions",
-                        UUID.randomUUID().toString()
+                        warmupPaymentMethodID
                 )
                 .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
                 .retrieve()

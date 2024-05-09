@@ -10,7 +10,10 @@ import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.api.V2Api;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.TransferListItemDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,16 +23,15 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 @RestController("paymentMethodsControllerV2")
 @Slf4j
 public class PaymentMethodsController implements V2Api {
 
     private final PaymentMethodService paymentMethodService;
+
+    @Value("${warmup.payment.method.id}")
+    String warmupPaymentMethodID;
 
     public PaymentMethodsController(PaymentMethodService paymentMethodService) {
         this.paymentMethodService = paymentMethodService;
@@ -86,18 +88,25 @@ public class PaymentMethodsController implements V2Api {
     @Warmup
     public void calculateFeesWarmupMethod() {
         CalculateFeeRequestDto request = new CalculateFeeRequestDto()
-                .bin("BIN_TEST")
                 .touchpoint("CHECKOUT")
-                .addIdPspListItem("string")
-                .idPspList(new ArrayList<>(List.of("first", "second")))
                 .isAllCCP(false)
-                .paymentNotices(Collections.emptyList());
+                .addPaymentNoticesItem(
+                        new PaymentNoticeDto()
+                                .paymentAmount(100L)
+                                .primaryCreditorInstitution("77777777777")
+                                .addTransferListItem(
+                                        new TransferListItemDto()
+                                                .digitalStamp(false)
+                                                .creditorInstitution("77777777777")
+                                )
+
+                );
         WebClient
                 .create()
                 .post()
                 .uri(
                         "http://localhost:8080/v2/payment-methods/{id}/fees",
-                        UUID.randomUUID().toString()
+                        warmupPaymentMethodID
                 )
                 .bodyValue(request)
                 .header("X-Client-ID", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
