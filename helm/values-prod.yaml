@@ -162,6 +162,7 @@ microservice-chart:
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
     SERVICE_LOGGING_LEVEL: "info"
     ROOT_LOGGING_LEVEL: "info"
+    WARMUP_PAYMENT_METHOD_ID: "83b5e0c7-2d35-44f4-9e48-a168b84433a1"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
