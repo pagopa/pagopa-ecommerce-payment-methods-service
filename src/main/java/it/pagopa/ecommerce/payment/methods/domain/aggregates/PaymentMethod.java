@@ -96,7 +96,8 @@ public class PaymentMethod {
                                                                     PaymentMethodManagement methodAuthManagement
     ) {
         return switch (methodAuthManagement.value()) {
-            case ONBOARDABLE, NOT_ONBOARDABLE -> NpgClient.PaymentMethod.fromServiceName(paymentMethodName.value());
+            case ONBOARDABLE, NOT_ONBOARDABLE, ONBOARDABLE_ONLY, ONBORDABLE_WITH_PAYMENT -> NpgClient.PaymentMethod
+                    .fromServiceName(paymentMethodName.value());
             case REDIRECT -> null;
         };
     }
