@@ -60,7 +60,7 @@ microservice-chart:
       NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.8.0"
+    tag: "1.9.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -161,6 +161,7 @@ microservice-chart:
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
     SERVICE_LOGGING_LEVEL: "info"
     ROOT_LOGGING_LEVEL: "info"
+    WARMUP_PAYMENT_METHOD_ID: "378d0b4f-8b69-46b0-8215-07785fe1aad4"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key

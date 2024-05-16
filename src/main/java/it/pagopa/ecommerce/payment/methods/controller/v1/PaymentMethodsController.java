@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller.v1;
 
+import it.pagopa.ecommerce.commons.annotations.Warmup;
 import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
@@ -10,17 +11,22 @@ import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,6 +35,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
 
     @Autowired
     private PaymentMethodService paymentMethodService;
+
+    private static final String X_CLIENT_ID = "X-Client-ID";
+
+    @Value("${warmup.payment.method.id}")
+    String warmupPaymentMethodID;
 
     @ExceptionHandler(
         {
@@ -288,5 +299,54 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         .filter(header -> header.startsWith("Bearer "))
                         .map(header -> header.substring("Bearer ".length()))
         );
+    }
+
+    @Warmup
+    public void getAllPaymentMethodsWarmupMethod() {
+        WebClient
+                .create()
+                .get()
+                .uri("http://localhost:8080/payment-methods")
+                .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .retrieve()
+                .bodyToMono(PaymentMethodsResponseDto.class)
+                .block(Duration.ofSeconds(30));
+    }
+
+    @Warmup
+    public void calculateFeesWarmupMethod() {
+        CalculateFeeRequestDto request = new CalculateFeeRequestDto()
+                .touchpoint("touchpoint1")
+                .paymentAmount(1L)
+                .primaryCreditorInstitution("77777777777")
+                .transferList(Collections.emptyList())
+                .isAllCCP(false);
+        WebClient
+                .create()
+                .post()
+                .uri(
+                        "http://localhost:8080/payment-methods/{id}/fees",
+                        UUID.randomUUID().toString()
+                )
+                .bodyValue(request)
+                .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(30));
+    }
+
+    @Warmup
+    public void createSessionWarmupMethod() {
+        WebClient
+                .create()
+                .post()
+                .uri(
+                        "http://localhost:8080/payment-methods/{id}/sessions",
+                        warmupPaymentMethodID
+                )
+                .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(30));
     }
 }
