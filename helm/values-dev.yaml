@@ -22,6 +22,10 @@ microservice-chart:
         ECS_SERVICE_NAME: pagopa-ecommerce-payment-method-service-blue
         SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
         SESSION_URL_NOTIFICATION_URL: "https://api.dev.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}&deployment=blue"
+        NPG_SO_KEEPALIVE: "true"
+        NPG_TCP_KEEPIDLE: "300"
+        NPG_TCP_KEEPINTVL: "60"
+        NPG_TCP_KEEPCNT: "8"
       envSecret:
         AFM_KEY: afm-api-key-blue
   image:
