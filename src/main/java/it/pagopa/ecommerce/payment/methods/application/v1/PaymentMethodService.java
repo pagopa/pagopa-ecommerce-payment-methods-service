@@ -221,12 +221,21 @@ public class PaymentMethodService {
                                             range -> range.getFirst().longValue() <= amount
                                                     && range.getSecond().longValue() >= amount
                                     )
-                    ).map(this::docToAggregate)
-                    .sort((o1, o2) -> {
-                        if (o1.getPaymentMethodTypeCode().value().equals("CP")) return -1;
-                        if (o2.getPaymentMethodTypeCode().value().equals("CP")) return 1;
-                        else return o1.getPaymentMethodDescription().value().compareTo(o2.getPaymentMethodDescription().toString());
-                    });
+                    ).sort(
+                            (
+                             o1,
+                             o2
+                            ) -> {
+                                if (o1.getPaymentMethodTypeCode().equals("CP"))
+                                    return -1;
+                                if (o2.getPaymentMethodTypeCode().equals("CP"))
+                                    return 1;
+                                else
+                                    return o1.getPaymentMethodDescription().compareTo(o2.getPaymentMethodDescription());
+                            }
+                    )
+                    .map(this::docToAggregate);
+
         }
     }
 
