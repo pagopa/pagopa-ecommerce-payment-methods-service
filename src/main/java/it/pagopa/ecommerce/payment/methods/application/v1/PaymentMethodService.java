@@ -221,18 +221,6 @@ public class PaymentMethodService {
                                             range -> range.getFirst().longValue() <= amount
                                                     && range.getSecond().longValue() >= amount
                                     )
-                    ).sort(
-                            (
-                             o1,
-                             o2
-                            ) -> {
-                                if (o1.getPaymentMethodTypeCode().equals("CP"))
-                                    return -1;
-                                if (o2.getPaymentMethodTypeCode().equals("CP"))
-                                    return 1;
-                                else
-                                    return o1.getPaymentMethodDescription().compareTo(o2.getPaymentMethodDescription());
-                            }
                     )
                     .map(this::docToAggregate);
 
