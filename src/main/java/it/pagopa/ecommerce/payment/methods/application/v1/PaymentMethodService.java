@@ -47,11 +47,7 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -225,7 +221,12 @@ public class PaymentMethodService {
                                             range -> range.getFirst().longValue() <= amount
                                                     && range.getSecond().longValue() >= amount
                                     )
-                    ).map(this::docToAggregate);
+                    ).map(this::docToAggregate)
+                    .sort((o1, o2) -> {
+                        if (o1.getPaymentMethodTypeCode().value().equals("CP")) return -1;
+                        if (o2.getPaymentMethodTypeCode().value().equals("CP")) return 1;
+                        else return o1.getPaymentMethodDescription().value().compareTo(o2.getPaymentMethodDescription().toString());
+                    });
         }
     }
 
