@@ -218,16 +218,16 @@ public class PaymentMethodService {
                         )
         ).sort(
                 (
-                 o1,
-                 o2
+                 paymentMethodDocument1,
+                 paymentMethodDocument2
                 ) -> {
-                    if (o1.getPaymentMethodTypeCode().equals("CP"))
+                    if (paymentMethodDocument1.getPaymentMethodTypeCode().equals("CP"))
                         return -1;
-                    if (o2.getPaymentMethodTypeCode().equals("CP"))
+                    if (paymentMethodDocument2.getPaymentMethodTypeCode().equals("CP"))
                         return 1;
                     else
-                        return o1.getPaymentMethodDescription()
-                                .compareTo(o2.getPaymentMethodDescription());
+                        return paymentMethodDocument1.getPaymentMethodDescription()
+                                .compareTo(paymentMethodDocument2.getPaymentMethodDescription());
                 }
         ).map(this::docToAggregate);
     }
