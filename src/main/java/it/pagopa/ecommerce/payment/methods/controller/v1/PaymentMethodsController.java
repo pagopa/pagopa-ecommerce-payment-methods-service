@@ -140,20 +140,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                 ServerWebExchange exchange
     ) {
         return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null, xClientId)
-                .sort(
-                        (
-                         o1,
-                         o2
-                        ) -> {
-                            if (o1.getPaymentMethodTypeCode().value().equals("CP"))
-                                return -1;
-                            if (o2.getPaymentMethodTypeCode().value().equals("CP"))
-                                return 1;
-                            else
-                                return o1.getPaymentMethodDescription().value()
-                                        .compareTo(o2.getPaymentMethodDescription().value());
-                        }
-                )
                 .map(PaymentMethodsController::paymentMethodToDto)
                 .collectList()
                 .map(

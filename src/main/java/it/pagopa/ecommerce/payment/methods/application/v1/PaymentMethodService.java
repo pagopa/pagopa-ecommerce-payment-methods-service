@@ -210,21 +210,26 @@ public class PaymentMethodService {
     ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
-        if (amount == null) {
-            return paymentMethodRepository.findByClientId(clientId).map(this::docToAggregate);
-        } else {
-            return paymentMethodRepository
-                    .findByClientId(clientId)
-                    .filter(
-                            doc -> doc.getPaymentMethodRanges().stream()
-                                    .anyMatch(
-                                            range -> range.getFirst().longValue() <= amount
-                                                    && range.getSecond().longValue() >= amount
-                                    )
-                    )
-                    .map(this::docToAggregate);
-
-        }
+        return paymentMethodRepository.findByClientId(clientId).filter(
+                doc -> amount == null || doc.getPaymentMethodRanges().stream()
+                        .anyMatch(
+                                range -> range.getFirst().longValue() <= amount
+                                        && range.getSecond().longValue() >= amount
+                        )
+        ).sort(
+                (
+                 o1,
+                 o2
+                ) -> {
+                    if (o1.getPaymentMethodTypeCode().equals("CP"))
+                        return -1;
+                    if (o2.getPaymentMethodTypeCode().equals("CP"))
+                        return 1;
+                    else
+                        return o1.getPaymentMethodDescription()
+                                .compareTo(o2.getPaymentMethodDescription());
+                }
+        ).map(this::docToAggregate);
     }
 
     public Mono<PaymentMethod> updatePaymentMethodStatus(

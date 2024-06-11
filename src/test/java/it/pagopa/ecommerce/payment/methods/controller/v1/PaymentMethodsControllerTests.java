@@ -183,65 +183,6 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldGetAllMethodsSorted() {
-        int maxIndex = new Random().nextInt(5, 10);
-        int testAmount = Long.valueOf(TestUtil.getTestAmount()).intValue();
-        PaymentMethodRequestDto.ClientIdEnum clientIdEnumCheckout = TestUtil.getClientIdCheckout();
-        List<PaymentMethod> paymentMethodList = TestUtil.getAllPaymentMethod(maxIndex, clientIdEnumCheckout);
-
-        Mockito.when(paymentMethodService.retrievePaymentMethods(testAmount, clientIdEnumCheckout.getValue()))
-                .thenReturn(Flux.fromIterable(paymentMethodList));
-
-        List<PaymentMethodsResponseDto> paymentMethodsResponseDtoList = webClient
-                .get()
-                .uri(
-                        uriBuilder -> uriBuilder
-                                .path("/payment-methods")
-                                .queryParam("amount", testAmount)
-                                .build()
-                )
-                .header("x-client-id", clientIdEnumCheckout.toString())
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(PaymentMethodsResponseDto.class)
-                .hasSize(1)
-                .returnResult().getResponseBody();
-        List<PaymentMethodResponseDto> responseList = paymentMethodsResponseDtoList.get(0).getPaymentMethods();
-        assertEquals(maxIndex, responseList.size());
-        assertEquals(TestUtil.CP_TYPE_CODE, responseList.get(0).getPaymentTypeCode());
-        for (int i = 1; i < maxIndex; i++) {
-            assertTrue(responseList.get(i).getDescription().endsWith("_" + i));
-        }
-        List<PaymentMethodResponseDto> resultList = responseList;
-        List<PaymentMethod> sortedList = new ArrayList<>(paymentMethodList);
-        sortedList.sort(
-                (
-                 s1,
-                 s2
-                ) -> {
-                    if (s1.getPaymentMethodTypeCode().value().equals("CP"))
-                        return -1;
-                    if (s2.getPaymentMethodTypeCode().value().equals("CP"))
-                        return 1;
-                    else
-                        return s1.getPaymentMethodDescription().value()
-                                .compareTo(s2.getPaymentMethodDescription().value());
-                }
-        );
-
-        for (int i = 0; i < maxIndex; i++) {
-            assertTrue(responseList.get(i).getId().equals(resultList.get(i).getId()));
-            assertTrue(responseList.get(i).getMethodManagement().equals(resultList.get(i).getMethodManagement()));
-            assertTrue(responseList.get(i).getDescription().equals(resultList.get(i).getDescription()));
-            assertTrue(responseList.get(i).getPaymentTypeCode().equals(resultList.get(i).getPaymentTypeCode()));
-            assertTrue(responseList.get(i).getAsset().equals(resultList.get(i).getAsset()));
-            assertTrue(responseList.get(i).getName().equals(resultList.get(i).getName()));
-            assertTrue(responseList.get(i).getRanges().equals(resultList.get(i).getRanges()));
-        }
-    }
-
-    @Test
     void shouldPatchPaymentMethod() {
         UUID TEST_CAT = UUID.randomUUID();
 
