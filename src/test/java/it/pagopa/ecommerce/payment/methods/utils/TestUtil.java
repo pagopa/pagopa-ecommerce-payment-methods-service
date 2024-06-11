@@ -24,10 +24,13 @@ import java.util.stream.Collectors;
 
 public class TestUtil {
 
+    static final UUID CP_UUID_ID = UUID.randomUUID();
     static final String TEST_NAME = NpgClient.PaymentMethod.CARDS.serviceName;
     static final String TEST_DESC = "test";
+    public static final String TEST_DESC_FIRST = "AAA_FIRST_DESCRIPTION";
     static final PaymentMethodStatusDto TEST_STATUS = PaymentMethodStatusDto.ENABLED;
     static final String TEST_TYPE_CODE = "test";
+    public static final String CP_TYPE_CODE = "CP";
 
     static final String TEST_LANG = "IT";
     static final Long TEST_AMOUNT = 1L;
@@ -68,6 +71,80 @@ public class TestUtil {
                 new PaymentMethodAsset(TEST_ASSET),
                 getClientIdCheckout(),
                 new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT),
+                new PaymentMethodBrandAssets(Optional.empty())
+        );
+    }
+
+    public static List<PaymentMethod> getAllPaymentMethod(
+                                                          int maxIndex,
+                                                          PaymentMethodRequestDto.ClientIdEnum clientIdEnum,
+                                                          boolean addOutOfRange
+    ) {
+        List<PaymentMethod> toSort = new ArrayList();
+        for (int i = maxIndex - 2; i > 0; i--) {
+            toSort.add(
+                    new PaymentMethod(
+                            new PaymentMethodID(UUID.randomUUID()),
+                            new PaymentMethodName(TEST_NAME),
+                            new PaymentMethodDescription(TEST_DESC + "_" + i),
+                            new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                            new PaymentMethodType(TEST_TYPE_CODE + "_" + i),
+                            List.of(new PaymentMethodRange(0L, 100L)),
+                            new PaymentMethodAsset(TEST_ASSET + "_" + i),
+                            clientIdEnum,
+                            new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
+                            new PaymentMethodBrandAssets(Optional.empty())
+                    )
+            );
+        }
+        toSort.add(
+                new PaymentMethod(
+                        new PaymentMethodID(UUID.randomUUID()),
+                        new PaymentMethodName(TEST_NAME),
+                        new PaymentMethodDescription(TEST_DESC_FIRST),
+                        new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                        new PaymentMethodType(TEST_TYPE_CODE),
+                        List.of(new PaymentMethodRange(0L, 100L)),
+                        new PaymentMethodAsset(TEST_ASSET),
+                        clientIdEnum,
+                        new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
+                        new PaymentMethodBrandAssets(Optional.empty())
+                )
+        );
+        if (addOutOfRange) {
+            toSort.add(
+                    new PaymentMethod(
+                            new PaymentMethodID(UUID.randomUUID()),
+                            new PaymentMethodName(TEST_NAME),
+                            new PaymentMethodDescription(TEST_DESC),
+                            new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                            new PaymentMethodType(TEST_TYPE_CODE),
+                            List.of(new PaymentMethodRange(Long.MAX_VALUE - 1, Long.MAX_VALUE)),
+                            new PaymentMethodAsset(TEST_ASSET),
+                            clientIdEnum,
+                            new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
+                            new PaymentMethodBrandAssets(Optional.empty())
+                    )
+            );
+        }
+        toSort.add(
+                toSort.size() - 2,
+                getCPPaymentMethod(clientIdEnum)
+        );
+        return toSort;
+    }
+
+    public static PaymentMethod getCPPaymentMethod(PaymentMethodRequestDto.ClientIdEnum clientIdEnum) {
+        return new PaymentMethod(
+                new PaymentMethodID(CP_UUID_ID),
+                new PaymentMethodName(TEST_NAME),
+                new PaymentMethodDescription(TEST_DESC),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType(CP_TYPE_CODE),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset(TEST_ASSET),
+                clientIdEnum,
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
                 new PaymentMethodBrandAssets(Optional.empty())
         );
     }

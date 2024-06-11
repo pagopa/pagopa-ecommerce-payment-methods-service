@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.controller.v1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -33,8 +34,9 @@ import it.pagopa.ecommerce.payment.methods.server.model.SessionGetTransactionIdR
 import it.pagopa.ecommerce.payment.methods.server.model.SessionPaymentMethodResponseDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
