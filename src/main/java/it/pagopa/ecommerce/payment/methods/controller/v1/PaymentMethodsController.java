@@ -59,6 +59,8 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
         String notFoundTitle = "Not found";
 
+        log.error("Got exception", exception);
+
         if (exception instanceof PaymentMethodAlreadyInUseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(400).title("Bad request").detail("Payment method already in use"),
