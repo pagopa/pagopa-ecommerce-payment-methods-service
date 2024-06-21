@@ -59,6 +59,8 @@ public class PaymentMethodsController implements V2Api {
     public ResponseEntity<ProblemJsonDto> errorHandler(RuntimeException exception) {
         String notFoundTitle = "Not found";
 
+        log.error("Got exception", exception);
+
         if (exception instanceof PaymentMethodNotFoundException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(404).title(notFoundTitle).detail("Payment method not found"),
