@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.commons.client.NpgClient;
@@ -29,10 +30,27 @@ public class NpgWebClientsConfig implements WebFluxConfigurer {
                                            ) int npgWebClientReadTimeout,
                                            @Value(
                                                "${npg.connectionTimeout}"
-                                           ) int npgWebClientConnectionTimeout
+                                           ) int npgWebClientConnectionTimeout,
+                                           @Value(
+                                               "${npg.keepalive.enabled}"
+                                           ) boolean keepAliveEnabled,
+                                           @Value(
+                                               "${npg.keepalive.idle}"
+                                           ) int keepAliveIdle,
+                                           @Value(
+                                               "${npg.keepalive.intvl}"
+                                           ) int keepAliveIntvl,
+                                           @Value(
+                                               "${npg.keepalive.cnt}"
+                                           ) int keepAliveCnt
+
     ) {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, npgWebClientConnectionTimeout)
+                .option(ChannelOption.SO_KEEPALIVE, keepAliveEnabled)
+                .option(EpollChannelOption.TCP_KEEPIDLE, keepAliveIdle)
+                .option(EpollChannelOption.TCP_KEEPINTVL, keepAliveIntvl)
+                .option(EpollChannelOption.TCP_KEEPCNT, keepAliveCnt)
                 .doOnConnected(
                         connection -> connection.addHandlerLast(
                                 new ReadTimeoutHandler(

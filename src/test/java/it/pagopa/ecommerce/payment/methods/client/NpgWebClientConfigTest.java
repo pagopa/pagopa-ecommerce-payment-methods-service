@@ -22,7 +22,7 @@ class NpgWebClientConfigTest {
     @Test
     void testNpgWebClientConfigApi() {
         NpgWebClientsConfig config = new NpgWebClientsConfig();
-        PaymentServicesApi api = config.npgWebClient("localhost/test", 10000, 10000);
+        PaymentServicesApi api = config.npgWebClient("localhost/test", 10000, 10000, false, 300, 60, 8);
         Assert.assertNotNull(api);
         Assert.assertEquals(ApiClient.class, api.getApiClient().getClass());
     }
@@ -30,7 +30,7 @@ class NpgWebClientConfigTest {
     @Test
     void testNpgWebClientConfigNpgClient() {
         NpgWebClientsConfig config = new NpgWebClientsConfig();
-        PaymentServicesApi api = config.npgWebClient("localhost/test", 10000, 10000);
+        PaymentServicesApi api = config.npgWebClient("localhost/test", 10000, 10000, false, 300, 60, 8);
         NpgClient npgClient = config.npgClient(api, tracer, objectMapper);
         Assert.assertNotNull(npgClient);
         Assert.assertEquals(NpgClient.class, npgClient.getClass());
