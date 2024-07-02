@@ -26,7 +26,7 @@ microservice-chart:
         AFM_KEY: afm-api-key-blue
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.9.3"
+    tag: "1.9.5"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -127,7 +127,7 @@ microservice-chart:
     NPG_CONNECTION_TIMEOUT: "10000"
     SESSION_URL_BASEPATH: "https://dev.checkout.pagopa.it"
     SESSION_URL_OUTCOME_SUFFIX: "/esito"
-    SESSION_URL_CANCEL_SUFFIX: "/cancel"
+    SESSION_URL_CANCEL_SUFFIX: "/esito"
     SESSION_URL_NOTIFICATION_URL: "https://api.dev.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
     NPG_SESSIONS_TTL: "600"
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"

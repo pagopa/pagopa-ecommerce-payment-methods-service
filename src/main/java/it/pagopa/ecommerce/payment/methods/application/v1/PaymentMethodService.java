@@ -47,11 +47,7 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -214,19 +210,26 @@ public class PaymentMethodService {
     ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
-        if (amount == null) {
-            return paymentMethodRepository.findByClientId(clientId).map(this::docToAggregate);
-        } else {
-            return paymentMethodRepository
-                    .findByClientId(clientId)
-                    .filter(
-                            doc -> doc.getPaymentMethodRanges().stream()
-                                    .anyMatch(
-                                            range -> range.getFirst().longValue() <= amount
-                                                    && range.getSecond().longValue() >= amount
-                                    )
-                    ).map(this::docToAggregate);
-        }
+        return paymentMethodRepository.findByClientId(clientId).filter(
+                doc -> amount == null || doc.getPaymentMethodRanges().stream()
+                        .anyMatch(
+                                range -> range.getFirst().longValue() <= amount
+                                        && range.getSecond().longValue() >= amount
+                        )
+        ).sort(
+                (
+                 paymentMethodDocument1,
+                 paymentMethodDocument2
+                ) -> {
+                    if (paymentMethodDocument1.getPaymentMethodTypeCode().equals("CP"))
+                        return -1;
+                    if (paymentMethodDocument2.getPaymentMethodTypeCode().equals("CP"))
+                        return 1;
+                    else
+                        return paymentMethodDocument1.getPaymentMethodDescription()
+                                .compareTo(paymentMethodDocument2.getPaymentMethodDescription());
+                }
+        ).map(this::docToAggregate);
     }
 
     public Mono<PaymentMethod> updatePaymentMethodStatus(
