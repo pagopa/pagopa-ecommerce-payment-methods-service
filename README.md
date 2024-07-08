@@ -43,6 +43,10 @@ These are all environment variables needed by the application:
 | SESSION_URL_OUTCOME_SUFFIX         | Suffix concatenated to the merchant url to enhance the resultUrl field in the order build to NPG                                                           | string |         |
 | SESSION_URL_CANCEL_SUFFIX          | Suffix concatenated to the merchant url to enhance the cancelUrl field in the order build to NPG                                                           | string |         |
 | SESSION_URL_NOTIFICATION_URL       | Url used into npg order build request to enhance the notificationUrl field                                                                                 | string |         |
+| NPG_SO_KEEPALIVE                   | Whether tcp keepalive is enabled for payment gateway connections                                                                                           | string |         |
+| NPG_TCP_KEEPIDLE                   | Configures the idle time after tcp starts sending keepalive probes                                                                                         | string |         |
+| NPG_TCP_KEEPINTVL                  | Configures the time between individual keepalive probes                                                                                                    | string |         |
+| NPG_TCP_KEEPCNT                    | Configures the maximum number of TCP keepalive probes                                                                                                      | string |         |
 
 (*): for Mongo connection string options
 see [docs](https://www.mongodb.com/docs/drivers/java/sync/v4.3/fundamentals/connection/connection-options/#connection-options)
