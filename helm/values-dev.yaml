@@ -26,7 +26,7 @@ microservice-chart:
         AFM_KEY: afm-api-key-blue
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.9.5"
+    tag: "1.9.6"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -134,6 +134,10 @@ microservice-chart:
     SERVICE_LOGGING_LEVEL: "info"
     ROOT_LOGGING_LEVEL: "info"
     WARMUP_PAYMENT_METHOD_ID: "e7058cac-5e1a-4002-8994-5bab31e9f385"
+    NPG_SO_KEEPALIVE: "true"
+    NPG_TCP_KEEPIDLE: "5"
+    NPG_TCP_KEEPINTVL: "2"
+    NPG_TCP_KEEPCNT: "10"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
