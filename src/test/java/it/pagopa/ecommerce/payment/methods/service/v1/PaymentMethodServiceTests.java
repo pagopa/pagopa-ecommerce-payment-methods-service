@@ -666,7 +666,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldReturnErrorOnSessionAlreadyAssociatedToTransactionId() {
+    void shouldReturnOkOnSessionAlreadyAssociatedToTransactionId() {
         String sessionId = "sessionId";
         String orderId = "orderId";
         String correlationId = UUID.randomUUID().toString();
@@ -677,14 +677,14 @@ class PaymentMethodServiceTests {
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
         NpgSessionDocument npgSessionDocument = TestUtil
-                .npgSessionDocument(orderId, correlationId, sessionId, true, "OTHER_TRANSACTION_ID");
+                .npgSessionDocument(orderId, correlationId, sessionId, true, transactionId);
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Optional.of(npgSessionDocument));
 
         StepVerifier.create(paymentMethodService.updateSession(paymentMethodId, orderId, patchSessionRequestDto))
-                .expectError(SessionAlreadyAssociatedToTransaction.class)
-                .verify();
+                .expectNext(npgSessionDocument)
+                .verifyComplete();
     }
 
     @Test

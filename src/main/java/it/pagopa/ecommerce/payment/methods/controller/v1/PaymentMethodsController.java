@@ -50,7 +50,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 AfmResponseException.class,
                 InvalidSessionException.class,
                 MismatchedSecurityTokenException.class,
-                SessionAlreadyAssociatedToTransaction.class,
                 NoBundleFoundException.class,
                 JWTTokenGenerationException.class,
                 NpgResponseException.class
@@ -98,8 +97,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session"),
                     HttpStatus.CONFLICT
             );
-        } else if (exception instanceof SessionAlreadyAssociatedToTransaction) {
-            return ResponseEntity.noContent().build();
         } else if (exception instanceof NpgResponseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(502).title("Bad Gateway")

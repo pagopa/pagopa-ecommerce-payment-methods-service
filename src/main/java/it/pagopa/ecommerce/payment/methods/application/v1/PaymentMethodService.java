@@ -538,31 +538,23 @@ public class PaymentMethodService {
                 .map(ignore -> npgSessionsTemplateWrapper.findById(orderId))
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
-                .flatMap(document -> {
-                    if (document.transactionId() != null) {
-                        return Mono.error(
-                                new SessionAlreadyAssociatedToTransaction(
-                                        orderId,
-                                        document.transactionId(),
-                                        updateData.getTransactionId()
-                                )
-                        );
-                    } else {
-                        return Mono.just(document);
-                    }
-                })
                 .map(d -> {
-                    NpgSessionDocument updatedDocument = new NpgSessionDocument(
-                            d.orderId(),
-                            d.correlationId(),
-                            d.sessionId(),
-                            d.securityToken(),
-                            d.cardData(),
-                            updateData.getTransactionId()
-                    );
-                    npgSessionsTemplateWrapper.save(updatedDocument);
+                    // Transaction already associated to session
+                    if (d.transactionId() != null) {
+                        return d;
+                    } else {
+                        NpgSessionDocument updatedDocument = new NpgSessionDocument(
+                                d.orderId(),
+                                d.correlationId(),
+                                d.sessionId(),
+                                d.securityToken(),
+                                d.cardData(),
+                                updateData.getTransactionId()
+                        );
+                        npgSessionsTemplateWrapper.save(updatedDocument);
 
-                    return updatedDocument;
+                        return updatedDocument;
+                    }
                 });
     }
 

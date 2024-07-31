@@ -18,7 +18,6 @@ import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
 import it.pagopa.ecommerce.payment.methods.exception.UniqueIdGenerationException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
@@ -313,6 +312,34 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
+    void shouldReturnResponseWithSuccessfulUpdateOnRetry() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        PatchSessionRequestDto requestBody = TestUtil.patchSessionRequest();
+        String newTransactionId = requestBody.getTransactionId();
+        String correlationId = UUID.randomUUID().toString();
+        NpgSessionDocument originalSession = TestUtil
+                .npgSessionDocument("orderId", correlationId, "sessionId", false, newTransactionId);
+        NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
+
+        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
+                .thenReturn(Mono.just(updatedDocument));
+
+        webClient
+                .patch()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
+                                .build(paymentMethodId, originalSession.orderId())
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isNoContent()
+                .expectBody()
+                .isEmpty();
+    }
+
+    @Test
     void shouldPostCreateSession() {
         String paymentMethodId = UUID.randomUUID().toString();
         CreateSessionResponseDto responseDto = TestUtil.createSessionResponseDto(paymentMethodId);
@@ -496,20 +523,6 @@ class PaymentMethodsControllerTests {
                 .isNotFound()
                 .expectBody(ProblemJsonDto.class)
                 .isEqualTo(expected);
-    }
-
-    @Test
-    void shouldReturnOkOnSessionAlreadyAssociatedError() {
-        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
-                .errorHandler(
-                        new SessionAlreadyAssociatedToTransaction(
-                                "sessionId",
-                                "oldTransactionId",
-                                "requestedTransactionId"
-                        )
-                );
-
-        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
     }
 
     @Test
