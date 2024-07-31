@@ -99,11 +99,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                     HttpStatus.CONFLICT
             );
         } else if (exception instanceof SessionAlreadyAssociatedToTransaction) {
-            return new ResponseEntity<>(
-                    new ProblemJsonDto().status(409).title("Session already associated to transaction")
-                            .detail(exception.getMessage()),
-                    HttpStatus.CONFLICT
-            );
+            return ResponseEntity.noContent().build();
         } else if (exception instanceof NpgResponseException) {
             return new ResponseEntity<>(
                     new ProblemJsonDto().status(502).title("Bad Gateway")

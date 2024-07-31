@@ -499,7 +499,7 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
-    void shouldReturnErrorOnSessionAlreadyAssociatedError() {
+    void shouldReturnOkOnSessionAlreadyAssociatedError() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
                 .errorHandler(
                         new SessionAlreadyAssociatedToTransaction(
@@ -509,7 +509,7 @@ class PaymentMethodsControllerTests {
                         )
                 );
 
-        assertEquals(HttpStatus.CONFLICT, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
     }
 
     @Test
