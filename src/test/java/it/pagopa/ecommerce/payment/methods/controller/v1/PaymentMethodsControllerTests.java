@@ -11,14 +11,7 @@ import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
-import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
-import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
-import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.UniqueIdGenerationException;
+import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
@@ -340,6 +333,39 @@ class PaymentMethodsControllerTests {
     }
 
     @Test
+    void shouldReturnError409OnOrderIdAndTransactionIdMismatch() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        PatchSessionRequestDto requestBody = TestUtil.patchSessionRequest();
+        String correlationId = UUID.randomUUID().toString();
+        NpgSessionDocument originalSession = TestUtil
+                .npgSessionDocument("orderId", correlationId, "sessionId", false, "ANOTHER_TRANSACTION_ID");
+
+        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
+                .thenReturn(
+                        Mono.error(
+                                new SessionAlreadyAssociatedToTransaction(
+                                        originalSession.orderId(),
+                                        originalSession.transactionId(),
+                                        requestBody.getTransactionId()
+                                )
+                        )
+                );
+
+        webClient
+                .patch()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
+                                .build(paymentMethodId, originalSession.orderId())
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT)
+                .expectBody(ProblemJsonDto.class);
+    }
+
+    @Test
     void shouldPostCreateSession() {
         String paymentMethodId = UUID.randomUUID().toString();
         CreateSessionResponseDto responseDto = TestUtil.createSessionResponseDto(paymentMethodId);
@@ -433,6 +459,20 @@ class PaymentMethodsControllerTests {
                 .errorHandler(new AfmResponseException(HttpStatus.NOT_FOUND, "reason test"));
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals("reason test", responseEntity.getBody().getDetail());
+    }
+
+    @Test
+    void shouldReturnErrorOnSessionAlreadyAssociatedError() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(
+                        new SessionAlreadyAssociatedToTransaction(
+                                "sessionId",
+                                "oldTransactionId",
+                                "requestedTransactionId"
+                        )
+                );
+
+        assertEquals(HttpStatus.CONFLICT, responseEntity.getStatusCode());
     }
 
     @Test

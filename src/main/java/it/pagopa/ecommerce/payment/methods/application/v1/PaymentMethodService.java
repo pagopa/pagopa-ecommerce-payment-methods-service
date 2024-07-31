@@ -538,8 +538,24 @@ public class PaymentMethodService {
                 .map(ignore -> npgSessionsTemplateWrapper.findById(orderId))
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
+                .flatMap(document -> {
+                    // Session associated to the order is associated to a different transaction id,
+                    // not permitted
+                    if (document.transactionId() != null
+                            && !document.transactionId().equals(updateData.getTransactionId())) {
+                        return Mono.error(
+                                new SessionAlreadyAssociatedToTransaction(
+                                        orderId,
+                                        document.transactionId(),
+                                        updateData.getTransactionId()
+                                )
+                        );
+                    } else {
+                        return Mono.just(document);
+                    }
+                })
                 .map(d -> {
-                    // Transaction already associated to session
+                    // Transaction already associated to session, retry case
                     if (d.transactionId() != null) {
                         return d;
                     } else {
