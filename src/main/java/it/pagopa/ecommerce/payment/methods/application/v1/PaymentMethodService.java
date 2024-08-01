@@ -543,6 +543,11 @@ public class PaymentMethodService {
                     // not permitted
                     if (document.transactionId() != null
                             && !document.transactionId().equals(updateData.getTransactionId())) {
+                        log.error(
+                                "Session's transaction id ({}) differs from requested transaction id ({})",
+                                document.transactionId(),
+                                updateData.getTransactionId()
+                        );
                         return Mono.error(
                                 new SessionAlreadyAssociatedToTransaction(
                                         orderId,
