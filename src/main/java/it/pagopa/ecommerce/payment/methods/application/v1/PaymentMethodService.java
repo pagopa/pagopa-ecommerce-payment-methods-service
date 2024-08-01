@@ -539,7 +539,15 @@ public class PaymentMethodService {
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
-                    if (document.transactionId() != null) {
+                    // Session associated to the order is associated to a different transaction id,
+                    // not permitted
+                    if (document.transactionId() != null
+                            && !document.transactionId().equals(updateData.getTransactionId())) {
+                        log.error(
+                                "Session's transaction id ({}) differs from requested transaction id ({})",
+                                document.transactionId(),
+                                updateData.getTransactionId()
+                        );
                         return Mono.error(
                                 new SessionAlreadyAssociatedToTransaction(
                                         orderId,
@@ -552,17 +560,22 @@ public class PaymentMethodService {
                     }
                 })
                 .map(d -> {
-                    NpgSessionDocument updatedDocument = new NpgSessionDocument(
-                            d.orderId(),
-                            d.correlationId(),
-                            d.sessionId(),
-                            d.securityToken(),
-                            d.cardData(),
-                            updateData.getTransactionId()
-                    );
-                    npgSessionsTemplateWrapper.save(updatedDocument);
+                    // Transaction already associated to session, retry case
+                    if (d.transactionId() != null) {
+                        return d;
+                    } else {
+                        NpgSessionDocument updatedDocument = new NpgSessionDocument(
+                                d.orderId(),
+                                d.correlationId(),
+                                d.sessionId(),
+                                d.securityToken(),
+                                d.cardData(),
+                                updateData.getTransactionId()
+                        );
+                        npgSessionsTemplateWrapper.save(updatedDocument);
 
-                    return updatedDocument;
+                        return updatedDocument;
+                    }
                 });
     }
 
