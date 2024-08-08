@@ -89,6 +89,6 @@ public class WebClientsConfig implements WebFluxConfigurer {
                                         TimeUnit.MILLISECONDS
                                 )
                         )
-                );
+                ).resolver(nameResolverSpec -> nameResolverSpec.ndots(1));
     }
 }

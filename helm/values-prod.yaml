@@ -46,11 +46,15 @@ microservice-chart:
       NPG_CONNECTION_TIMEOUT: "10000"
       SESSION_URL_BASEPATH: "https://checkout.pagopa.it"
       SESSION_URL_OUTCOME_SUFFIX: "/esito"
-      SESSION_URL_CANCEL_SUFFIX: "/cancel"
+      SESSION_URL_CANCEL_SUFFIX: "/esito"
       SESSION_URL_NOTIFICATION_URL: "https://api.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
-      NPG_SESSIONS_TTL: "600"
+      NPG_SESSIONS_TTL: "900"
       NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
       WARMUP_PAYMENT_METHOD_ID: "83b5e0c7-2d35-44f4-9e48-a168b84433a1"
+      NPG_SO_KEEPALIVE: "true"
+      NPG_TCP_KEEPIDLE: "30"
+      NPG_TCP_KEEPINTVL: "10"
+      NPG_TCP_KEEPCNT: "5"
     envSecret:
       MONGO_PASSWORD: mongo-ecommerce-password
       REDIS_PASSWORD: redis-ecommerce-access-key
@@ -61,7 +65,7 @@ microservice-chart:
       NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
   image:
     repository: pagopapcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.9.0"
+    tag: "1.10.2"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -79,7 +83,7 @@ microservice-chart:
     periodSeconds: 10
   deployment:
     create: true
-    replicas: 3
+    replicas: 5
   service:
     create: true
     type: ClusterIP
@@ -109,7 +113,7 @@ microservice-chart:
       cpu: "300m"
   autoscaling:
     enable: true
-    minReplica: 3
+    minReplica: 5
     maxReplica: 10
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
@@ -156,12 +160,17 @@ microservice-chart:
     NPG_CONNECTION_TIMEOUT: "10000"
     SESSION_URL_BASEPATH: "https://checkout.pagopa.it"
     SESSION_URL_OUTCOME_SUFFIX: "/esito"
-    SESSION_URL_CANCEL_SUFFIX: "/cancel"
+    SESSION_URL_CANCEL_SUFFIX: "/esito"
     SESSION_URL_NOTIFICATION_URL: "https://api.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
-    NPG_SESSIONS_TTL: "600"
+    NPG_SESSIONS_TTL: "900"
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
     SERVICE_LOGGING_LEVEL: "info"
     ROOT_LOGGING_LEVEL: "info"
+    WARMUP_PAYMENT_METHOD_ID: "83b5e0c7-2d35-44f4-9e48-a168b84433a1"
+    NPG_SO_KEEPALIVE: "true"
+    NPG_TCP_KEEPIDLE: "30"
+    NPG_TCP_KEEPINTVL: "10"
+    NPG_TCP_KEEPCNT: "5"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key

@@ -11,49 +11,14 @@ import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodAsset;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodBrandAssets;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodDescription;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodID;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodManagement;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodRange;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodStatus;
-import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodType;
-import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
-import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
-import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
-import it.pagopa.ecommerce.payment.methods.infrastructure.CardDataDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.BundleDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CardFormFieldsDto;
-import it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto;
-import it.pagopa.ecommerce.payment.methods.server.model.FieldDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PatchSessionRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
-import it.pagopa.ecommerce.payment.methods.server.model.SessionPaymentMethodResponseDto;
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
+import it.pagopa.ecommerce.payment.methods.exception.*;
+import it.pagopa.ecommerce.payment.methods.infrastructure.*;
+import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,6 +28,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
+
+import javax.crypto.SecretKey;
+import java.net.URI;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
@@ -214,19 +184,26 @@ public class PaymentMethodService {
     ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
-        if (amount == null) {
-            return paymentMethodRepository.findByClientId(clientId).map(this::docToAggregate);
-        } else {
-            return paymentMethodRepository
-                    .findByClientId(clientId)
-                    .filter(
-                            doc -> doc.getPaymentMethodRanges().stream()
-                                    .anyMatch(
-                                            range -> range.getFirst().longValue() <= amount
-                                                    && range.getSecond().longValue() >= amount
-                                    )
-                    ).map(this::docToAggregate);
-        }
+        return paymentMethodRepository.findByClientId(clientId).filter(
+                doc -> amount == null || doc.getPaymentMethodRanges().stream()
+                        .anyMatch(
+                                range -> range.getFirst().longValue() <= amount
+                                        && range.getSecond().longValue() >= amount
+                        )
+        ).sort(
+                (
+                 paymentMethodDocument1,
+                 paymentMethodDocument2
+                ) -> {
+                    if (paymentMethodDocument1.getPaymentMethodTypeCode().equals("CP"))
+                        return -1;
+                    if (paymentMethodDocument2.getPaymentMethodTypeCode().equals("CP"))
+                        return 1;
+                    else
+                        return paymentMethodDocument1.getPaymentMethodDescription()
+                                .compareTo(paymentMethodDocument2.getPaymentMethodDescription());
+                }
+        ).map(this::docToAggregate);
     }
 
     public Mono<PaymentMethod> updatePaymentMethodStatus(
@@ -356,7 +333,7 @@ public class PaymentMethodService {
                         orderIdAndPaymentMethod -> jwtTokenUtils.generateToken(
                                 npgJwtSigningKey,
                                 npgNotificationTokenValidityTime,
-                                new Claims(null, orderIdAndPaymentMethod.getT1(), id)
+                                new Claims(null, orderIdAndPaymentMethod.getT1(), id, null)
                         ).fold(
                                 Mono::error,
                                 token -> Mono.just(
@@ -562,7 +539,15 @@ public class PaymentMethodService {
                 .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
-                    if (document.transactionId() != null) {
+                    // Session associated to the order is associated to a different transaction id,
+                    // not permitted
+                    if (document.transactionId() != null
+                            && !document.transactionId().equals(updateData.getTransactionId())) {
+                        log.error(
+                                "Session's transaction id ({}) differs from requested transaction id ({})",
+                                document.transactionId(),
+                                updateData.getTransactionId()
+                        );
                         return Mono.error(
                                 new SessionAlreadyAssociatedToTransaction(
                                         orderId,
@@ -575,17 +560,22 @@ public class PaymentMethodService {
                     }
                 })
                 .map(d -> {
-                    NpgSessionDocument updatedDocument = new NpgSessionDocument(
-                            d.orderId(),
-                            d.correlationId(),
-                            d.sessionId(),
-                            d.securityToken(),
-                            d.cardData(),
-                            updateData.getTransactionId()
-                    );
-                    npgSessionsTemplateWrapper.save(updatedDocument);
+                    // Transaction already associated to session, retry case
+                    if (d.transactionId() != null) {
+                        return d;
+                    } else {
+                        NpgSessionDocument updatedDocument = new NpgSessionDocument(
+                                d.orderId(),
+                                d.correlationId(),
+                                d.sessionId(),
+                                d.securityToken(),
+                                d.cardData(),
+                                updateData.getTransactionId()
+                        );
+                        npgSessionsTemplateWrapper.save(updatedDocument);
 
-                    return updatedDocument;
+                        return updatedDocument;
+                    }
                 });
     }
 

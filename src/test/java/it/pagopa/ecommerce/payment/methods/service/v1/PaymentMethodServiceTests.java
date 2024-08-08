@@ -43,13 +43,11 @@ import reactor.test.StepVerifier;
 
 import javax.crypto.SecretKey;
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 
@@ -194,6 +192,62 @@ class PaymentMethodServiceTests {
                 .collectList().block();
 
         assertEquals(1, paymentmethodCreated.size());
+    }
+
+    @Test
+    void shouldRetrieveSortedPaymentMethodsWithAmount() {
+        Integer maxSize = new Random().nextInt(5, 10);
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumCheckout = TestUtil.getClientIdCheckout();
+        List<PaymentMethod> paymentMethodList = TestUtil.getAllPaymentMethod(maxSize, clientIdEnumCheckout, true);
+        assertEquals(maxSize + 1, paymentMethodList.size());
+        List<PaymentMethodDocument> paymentMethodDocumentList = paymentMethodList.stream()
+                .map(pm -> TestUtil.getTestPaymentDoc(pm)).collect(Collectors.toList());
+
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
+                .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
+
+        List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
+                .retrievePaymentMethods(50, clientIdEnumCheckout.getValue())
+                .collectList().block();
+
+        assertEquals(maxSize, paymentMethodRetrieved.size());
+        assertEquals(TestUtil.CP_TYPE_CODE, paymentMethodRetrieved.get(0).getPaymentMethodTypeCode().value());
+        assertEquals(TestUtil.TEST_DESC_FIRST, paymentMethodRetrieved.get(1).getPaymentMethodDescription().value());
+        for (int i = 2; i < maxSize - 1; i++) {
+            assertTrue(paymentMethodRetrieved.get(i).getPaymentMethodDescription().value().endsWith("_" + (i - 1)));
+            String currentDescription = paymentMethodRetrieved.get(i).getPaymentMethodDescription().value();
+            String previousDescription = paymentMethodRetrieved.get(i - 1).getPaymentMethodDescription().value();
+            assertTrue(currentDescription.compareTo(previousDescription) >= 0);
+        }
+
+    }
+
+    @Test
+    void shouldRetrieveSortedPaymentMethodsWithoutAmount() {
+        Integer maxSize = new Random().nextInt(5, 10);
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumCheckout = TestUtil.getClientIdCheckout();
+        List<PaymentMethod> paymentMethodList = TestUtil.getAllPaymentMethod(maxSize, clientIdEnumCheckout, false);
+        assertEquals(maxSize, paymentMethodList.size());
+        List<PaymentMethodDocument> paymentMethodDocumentList = paymentMethodList.stream()
+                .map(pm -> TestUtil.getTestPaymentDoc(pm)).collect(Collectors.toList());
+
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
+                .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
+
+        List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
+                .retrievePaymentMethods(null, clientIdEnumCheckout.getValue())
+                .collectList().block();
+
+        assertEquals(maxSize, paymentMethodRetrieved.size());
+        assertEquals(TestUtil.CP_TYPE_CODE, paymentMethodRetrieved.get(0).getPaymentMethodTypeCode().value());
+        assertEquals(TestUtil.TEST_DESC_FIRST, paymentMethodRetrieved.get(1).getPaymentMethodDescription().value());
+        for (int i = 2; i < maxSize - 1; i++) {
+            assertTrue(paymentMethodRetrieved.get(i).getPaymentMethodDescription().value().endsWith("_" + (i - 1)));
+            String currentDescription = paymentMethodRetrieved.get(i).getPaymentMethodDescription().value();
+            String previousDescription = paymentMethodRetrieved.get(i - 1).getPaymentMethodDescription().value();
+            assertTrue(currentDescription.compareTo(previousDescription) >= 0);
+        }
+
     }
 
     @Test
@@ -612,7 +666,7 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldReturnErrorOnSessionAlreadyAssociatedToTransactionId() {
+    void shouldReturnOkOnSessionAlreadyAssociatedToTransactionId() {
         String sessionId = "sessionId";
         String orderId = "orderId";
         String correlationId = UUID.randomUUID().toString();
@@ -623,7 +677,29 @@ class PaymentMethodServiceTests {
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
         NpgSessionDocument npgSessionDocument = TestUtil
-                .npgSessionDocument(orderId, correlationId, sessionId, true, "OTHER_TRANSACTION_ID");
+                .npgSessionDocument(orderId, correlationId, sessionId, true, transactionId);
+
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Optional.of(npgSessionDocument));
+
+        StepVerifier.create(paymentMethodService.updateSession(paymentMethodId, orderId, patchSessionRequestDto))
+                .expectNext(npgSessionDocument)
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorOnSessionAlreadyAssociatedToDifferentTransactionId() {
+        String sessionId = "sessionId";
+        String orderId = "orderId";
+        String correlationId = UUID.randomUUID().toString();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
+        String transactionId = "transactionId";
+
+        PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
+        NpgSessionDocument npgSessionDocument = TestUtil
+                .npgSessionDocument(orderId, correlationId, sessionId, true, "ANOTHER_TRANSACTION_ID");
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Optional.of(npgSessionDocument));
