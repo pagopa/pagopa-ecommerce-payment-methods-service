@@ -39,7 +39,12 @@ paths:
           required: false
           schema:
             type: integer
-        - $ref: '#/components/parameters/LangHeader'
+        - in: header
+          name: lang
+          required: false
+          description: language selection
+          schema:
+            $ref: '#/components/schemas/Lang'
       requestBody:
         $ref: "#/components/requestBodies/PostPaymentMethodPSP"
       responses:
@@ -68,15 +73,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
 components:
-  parameters:
-    LangHeader:
-      name: lang
-      in: header
-      description: Language preference
-      required: false
-      schema:
-        type: string
   schemas:
+    Lang:
+      description: header lang identifier
+      type: string
     PaymentNotice:
       description: Payment notice data
       type: object
