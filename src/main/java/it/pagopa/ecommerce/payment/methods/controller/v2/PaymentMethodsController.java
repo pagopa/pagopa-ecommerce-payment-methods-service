@@ -40,7 +40,7 @@ public class PaymentMethodsController implements V2Api {
             String lang,
             ServerWebExchange exchange
     ) {
-        return paymentMethodService.createSessionForPaymentMethod(id).map(ResponseEntity::ok);
+        return Mono.just(null);
     }
 
     @Override
