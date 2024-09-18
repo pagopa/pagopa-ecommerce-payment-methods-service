@@ -8,10 +8,7 @@ import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundExcept
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.api.V2Api;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.TransferListItemDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
