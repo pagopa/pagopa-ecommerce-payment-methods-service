@@ -35,6 +35,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: lang
+          required: false
+          description: language selection
+          schema:
+            $ref: '#/components/schemas/Lang'
       responses:
         200:
           description: Payment form data successfully created

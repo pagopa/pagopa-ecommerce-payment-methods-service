@@ -50,6 +50,7 @@ public class PaymentMethodsController implements V2Api {
                                                                        String id,
                                                                        Mono<CalculateFeeRequestDto> calculateFeeRequestDto,
                                                                        Integer maxOccurrences,
+                                                                       String lang,
                                                                        ServerWebExchange exchange
     ) {
         return calculateFeeRequestDto
