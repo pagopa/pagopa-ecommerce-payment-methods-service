@@ -43,9 +43,9 @@ public class PaymentMethodService {
     }
 
     public Mono<CalculateFeeResponseDto> computeFee(
-            CalculateFeeRequestDto feeRequestDto,
-            String paymentMethodId,
-            Integer maxOccurrences
+                                                    CalculateFeeRequestDto feeRequestDto,
+                                                    String paymentMethodId,
+                                                    Integer maxOccurrences
     ) {
         log.info(
                 "[Payment Method] Retrieve bundles list for payment method: [{}], allCcp: [{}], isMulti: [{}] and payment notice amounts: {}",
@@ -89,8 +89,8 @@ public class PaymentMethodService {
     }
 
     private PaymentOptionMultiDto createGecFeeRequest(
-            PaymentMethodDocument paymentMethod,
-            CalculateFeeRequestDto feeRequestDto
+                                                      PaymentMethodDocument paymentMethod,
+                                                      CalculateFeeRequestDto feeRequestDto
     ) {
         final var paymentNotices = feeRequestDto.getPaymentNotices().stream()
                 .map(
@@ -118,8 +118,8 @@ public class PaymentMethodService {
                 .bin(feeRequestDto.getBin())
                 .idPspList(
                         Optional.ofNullable(feeRequestDto.getIdPspList()).orElseGet(
-                                        ArrayList::new
-                                )
+                                ArrayList::new
+                        )
                                 .stream()
                                 .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
                                 .toList()
@@ -130,8 +130,8 @@ public class PaymentMethodService {
     }
 
     private CalculateFeeResponseDto bundleOptionToResponse(
-            it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto bundle,
-            PaymentMethodDocument paymentMethodDocument
+                                                           it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto bundle,
+                                                           PaymentMethodDocument paymentMethodDocument
     ) {
         final var bundles = Optional.ofNullable(bundle.getBundleOptions())
                 .orElse(List.of())

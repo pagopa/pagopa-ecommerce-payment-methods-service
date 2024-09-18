@@ -113,9 +113,9 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(gecResponse));
 
         StepVerifier.create(
-                        paymentMethodService
-                                .computeFee(calculateFeeRequestDto, paymentMethodId, null)
-                )
+                paymentMethodService
+                        .computeFee(calculateFeeRequestDto, paymentMethodId, null)
+        )
                 .expectError(NoBundleFoundException.class)
                 .verify();
     }
