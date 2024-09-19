@@ -22,6 +22,9 @@ import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDt
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentMethodStatusDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.CreateSessionResponseDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.CardFormFieldsDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.FieldDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto;
