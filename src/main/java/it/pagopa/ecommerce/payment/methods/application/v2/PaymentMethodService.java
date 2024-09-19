@@ -58,10 +58,10 @@ public class PaymentMethodService {
             this.value = value;
         }
 
-        public static it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod fromValue(
-                                                                                                                             String value
+        public static SessionPaymentMethod fromValue(
+                                                     String value
         ) {
-            for (it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod method : it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod
+            for (SessionPaymentMethod method : SessionPaymentMethod
                     .values()) {
                 if (method.value.equals(value)) {
                     return method;
@@ -160,7 +160,7 @@ public class PaymentMethodService {
                     NpgClient.PaymentMethod paymentMethod = data.getT2();
                     String orderId = data.getT1();
                     String notificationSessionToken = data.getT3();
-                    it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod sessionPaymentMethod = it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod
+                    SessionPaymentMethod sessionPaymentMethod = PaymentMethodService.SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
@@ -209,7 +209,7 @@ public class PaymentMethodService {
                     return data;
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
-                    it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod paymentMethod = data
+                    SessionPaymentMethod paymentMethod = data
                             .getT2();
                     String orderId = data.getT3();
                     UUID correlationId = data.getT4();
