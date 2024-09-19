@@ -35,15 +35,6 @@ public class PaymentMethodsController implements V2Api {
     }
 
     @Override
-    public Mono<ResponseEntity<CreateSessionResponseDto>> createSession(
-                                                                        String id,
-                                                                        String lang,
-                                                                        ServerWebExchange exchange
-    ) {
-        return paymentMethodService.createSessionForPaymentMethod(id, lang).map(ResponseEntity::ok);
-    }
-
-    @Override
     public Mono<ResponseEntity<CalculateFeeResponseDto>> calculateFees(
                                                                        String id,
                                                                        Mono<CalculateFeeRequestDto> calculateFeeRequestDto,

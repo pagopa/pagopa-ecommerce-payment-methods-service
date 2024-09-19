@@ -420,7 +420,7 @@ class PaymentMethodServiceTests {
         Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
                 .thenReturn(Either.left(new JWTTokenGenerationException()));
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
                 .expectError(JWTTokenGenerationException.class)
                 .verify();
     }
@@ -464,7 +464,7 @@ class PaymentMethodServiceTests {
                                     )
                     );
 
-            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
                     .expectNext(expected)
                     .verifyComplete();
         }

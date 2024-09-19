@@ -17,49 +17,6 @@ externalDocs:
 servers:
   - url: https://api.platform.pagopa.it/payment-methods
 paths:
-  /v2/payment-methods/{id}/sessions:
-    post:
-      tags:
-        - payment-methods
-      operationId: createSession
-      summary: Create frontend field data paired with a payment gateway session
-      description: |-
-        This endpoint returns an object containing data on how a frontend can build a form
-        to allow direct exchanging of payment information to the payment gateway without eCommerce
-        having to store PCI data (or other sensitive data tied to the payment method).
-        The returned data is tied to a session on the payment gateway identified by the field `sessionId`.
-      parameters:
-        - name: id
-          in: path
-          description: Payment Method id
-          required: true
-          schema:
-            type: string
-        - in: header
-          name: lang
-          required: false
-          description: language selection
-          schema:
-            $ref: '#/components/schemas/Lang'
-      responses:
-        200:
-          description: Payment form data successfully created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateSessionResponse'
-        404:
-          description: Payment method not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
-        502:
-          description: Payment gateway did return error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemJson'
   /v2/payment-methods/{id}/fees:
     post:
       tags:
