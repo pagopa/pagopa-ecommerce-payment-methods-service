@@ -1,5 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.service.v1;
 
+import io.vavr.control.Either;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.Claims;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
@@ -39,16 +40,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import io.vavr.control.Either;
 
 import javax.crypto.SecretKey;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -103,26 +104,26 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
-                paymentMethodFactory.newPaymentMethod(
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any()
+                        paymentMethodFactory.newPaymentMethod(
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any(),
+                                any()
+                        )
                 )
-        )
                 .thenReturn(Mono.just(paymentMethod));
 
         Mockito.when(
-                paymentMethodRepository.save(
-                        paymentMethodDocument
+                        paymentMethodRepository.save(
+                                paymentMethodDocument
+                        )
                 )
-        )
                 .thenReturn(Mono.just(paymentMethodDocument));
         PaymentMethodRequestDto paymentMethodRequestDto = new PaymentMethodRequestDto()
                 .name(paymentMethod.getPaymentMethodName().value())
@@ -262,10 +263,10 @@ class PaymentMethodServiceTests {
                 );
 
         Mockito.when(
-                paymentMethodRepository.save(
-                        paymentMethodDocument
+                        paymentMethodRepository.save(
+                                paymentMethodDocument
+                        )
                 )
-        )
                 .thenReturn(Mono.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodPatched = paymentMethodService
@@ -291,11 +292,11 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
-                paymentMethodRepository.findByPaymentMethodIDAndClientId(
-                        paymentMethod.getPaymentMethodID().value().toString(),
-                        clientIdIO.getValue()
+                        paymentMethodRepository.findByPaymentMethodIDAndClientId(
+                                paymentMethod.getPaymentMethodID().value().toString(),
+                                clientIdIO.getValue()
+                        )
                 )
-        )
                 .thenReturn(Mono.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodCreated = paymentMethodService
@@ -420,7 +421,7 @@ class PaymentMethodServiceTests {
         Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
                 .thenReturn(Either.left(new JWTTokenGenerationException()));
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
                 .expectError(JWTTokenGenerationException.class)
                 .verify();
     }
@@ -454,17 +455,17 @@ class PaymentMethodServiceTests {
                                     .paymentMethod(PaymentMethodService.SessionPaymentMethod.CARDS.value)
                                     .form(
                                             npgResponse.getFields().stream().map(
-                                                    field -> new FieldDto()
-                                                            .id(field.getId())
-                                                            .type(field.getType())
-                                                            .propertyClass(field.getPropertyClass())
-                                                            .src(URI.create(field.getSrc()))
-                                            )
+                                                            field -> new FieldDto()
+                                                                    .id(field.getId())
+                                                                    .type(field.getType())
+                                                                    .propertyClass(field.getPropertyClass())
+                                                                    .src(URI.create(field.getSrc()))
+                                                    )
                                                     .collect(Collectors.toList())
                                     )
                     );
 
-            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
                     .expectNext(expected)
                     .verifyComplete();
         }
@@ -777,9 +778,9 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(gecResponse));
 
         StepVerifier.create(
-                paymentMethodService
-                        .computeFee(calculateFeeRequestDto, paymentMethodId, null)
-        )
+                        paymentMethodService
+                                .computeFee(calculateFeeRequestDto, paymentMethodId, null)
+                )
                 .expectError(NoBundleFoundException.class)
                 .verify();
     }
