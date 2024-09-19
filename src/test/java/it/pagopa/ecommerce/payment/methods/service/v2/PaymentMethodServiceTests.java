@@ -5,11 +5,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.domain.Claims;
+import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SecretsConfigurations;
+import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
@@ -25,6 +29,7 @@ import it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -98,6 +103,72 @@ class PaymentMethodServiceTests {
                 PAYMENT_METHOD_TEST.getPaymentMethodDescription(),
                 serviceResponse.getPaymentMethodDescription()
         );
+    }
+
+    @Test
+    void shouldCreateSessionWithJwtException() {
+        val language = "it";
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+        String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+
+        Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
+                .thenReturn(Either.left(new JWTTokenGenerationException()));
+
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, language))
+                .expectError(JWTTokenGenerationException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldCreateSessionForValidPaymentMethod() {
+        val language = "it";
+        UUID correlationId = UUID.randomUUID();
+        try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
+            uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
+            PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+            PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+            String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+            FieldsDto npgResponse = TestUtil.npgResponse();
+            String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+            Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+            Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                    .thenReturn(Mono.just(paymentMethodDocument));
+            Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
+                    .thenReturn(Either.right("sessionToken"));
+            Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenReturn(
+                            Mono.just(npgResponse)
+                    );
+            Mockito.doNothing().when(npgSessionsTemplateWrapper).save(any());
+
+            it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto expected = new it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto()
+                    .orderId(orderId)
+                    .correlationId(correlationId)
+                    .paymentMethodData(
+                            new it.pagopa.ecommerce.payment.methods.server.model.CardFormFieldsDto()
+                                    .paymentMethod(
+                                            it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod.CARDS.value
+                                    )
+                                    .form(
+                                            npgResponse.getFields().stream().map(
+                                                    field -> new it.pagopa.ecommerce.payment.methods.server.model.FieldDto()
+                                                            .id(field.getId())
+                                                            .type(field.getType())
+                                                            .propertyClass(field.getPropertyClass())
+                                                            .src(URI.create(field.getSrc()))
+                                            )
+                                                    .collect(Collectors.toList())
+                                    )
+                    );
+
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, language))
+                    .expectNext(expected)
+                    .verifyComplete();
+        }
     }
 
     @Test
