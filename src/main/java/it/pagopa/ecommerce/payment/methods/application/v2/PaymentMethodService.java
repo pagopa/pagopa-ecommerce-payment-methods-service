@@ -3,7 +3,7 @@ package it.pagopa.ecommerce.payment.methods.application.v2;
 import io.vavr.Tuple;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.Claims;
-import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
+import it.pagopa.ecommerce.commons.generated.npg.v2.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
@@ -58,10 +58,10 @@ public class PaymentMethodService {
             this.value = value;
         }
 
-        public static it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod fromValue(
+        public static it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod fromValue(
                                                                                                                              String value
         ) {
-            for (it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod method : it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod
+            for (it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod method : it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod
                     .values()) {
                 if (method.value.equals(value)) {
                     return method;
@@ -160,7 +160,7 @@ public class PaymentMethodService {
                     NpgClient.PaymentMethod paymentMethod = data.getT2();
                     String orderId = data.getT1();
                     String notificationSessionToken = data.getT3();
-                    it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod sessionPaymentMethod = it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod
+                    it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod sessionPaymentMethod = it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
                     URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
@@ -209,7 +209,7 @@ public class PaymentMethodService {
                     return data;
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
-                    it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod paymentMethod = data
+                    it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod paymentMethod = data
                             .getT2();
                     String orderId = data.getT3();
                     UUID correlationId = data.getT4();
