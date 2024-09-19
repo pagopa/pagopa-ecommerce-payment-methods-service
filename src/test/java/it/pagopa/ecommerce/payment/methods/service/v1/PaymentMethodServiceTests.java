@@ -104,26 +104,26 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
-                        paymentMethodFactory.newPaymentMethod(
-                                any(),
-                                any(),
-                                any(),
-                                any(),
-                                any(),
-                                any(),
-                                any(),
-                                any(),
-                                any(),
-                                any()
-                        )
+                paymentMethodFactory.newPaymentMethod(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()
                 )
+        )
                 .thenReturn(Mono.just(paymentMethod));
 
         Mockito.when(
-                        paymentMethodRepository.save(
-                                paymentMethodDocument
-                        )
+                paymentMethodRepository.save(
+                        paymentMethodDocument
                 )
+        )
                 .thenReturn(Mono.just(paymentMethodDocument));
         PaymentMethodRequestDto paymentMethodRequestDto = new PaymentMethodRequestDto()
                 .name(paymentMethod.getPaymentMethodName().value())
@@ -263,10 +263,10 @@ class PaymentMethodServiceTests {
                 );
 
         Mockito.when(
-                        paymentMethodRepository.save(
-                                paymentMethodDocument
-                        )
+                paymentMethodRepository.save(
+                        paymentMethodDocument
                 )
+        )
                 .thenReturn(Mono.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodPatched = paymentMethodService
@@ -292,11 +292,11 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         Mockito.when(
-                        paymentMethodRepository.findByPaymentMethodIDAndClientId(
-                                paymentMethod.getPaymentMethodID().value().toString(),
-                                clientIdIO.getValue()
-                        )
+                paymentMethodRepository.findByPaymentMethodIDAndClientId(
+                        paymentMethod.getPaymentMethodID().value().toString(),
+                        clientIdIO.getValue()
                 )
+        )
                 .thenReturn(Mono.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodCreated = paymentMethodService
@@ -455,12 +455,12 @@ class PaymentMethodServiceTests {
                                     .paymentMethod(PaymentMethodService.SessionPaymentMethod.CARDS.value)
                                     .form(
                                             npgResponse.getFields().stream().map(
-                                                            field -> new FieldDto()
-                                                                    .id(field.getId())
-                                                                    .type(field.getType())
-                                                                    .propertyClass(field.getPropertyClass())
-                                                                    .src(URI.create(field.getSrc()))
-                                                    )
+                                                    field -> new FieldDto()
+                                                            .id(field.getId())
+                                                            .type(field.getType())
+                                                            .propertyClass(field.getPropertyClass())
+                                                            .src(URI.create(field.getSrc()))
+                                            )
                                                     .collect(Collectors.toList())
                                     )
                     );
@@ -778,9 +778,9 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(gecResponse));
 
         StepVerifier.create(
-                        paymentMethodService
-                                .computeFee(calculateFeeRequestDto, paymentMethodId, null)
-                )
+                paymentMethodService
+                        .computeFee(calculateFeeRequestDto, paymentMethodId, null)
+        )
                 .expectError(NoBundleFoundException.class)
                 .verify();
     }
