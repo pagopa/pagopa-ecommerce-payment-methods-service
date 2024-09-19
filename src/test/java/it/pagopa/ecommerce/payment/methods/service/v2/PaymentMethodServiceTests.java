@@ -107,7 +107,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldCreateSessionWithJwtException() {
-        val language = "it";
+        String language = "it";
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
@@ -125,7 +125,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldCreateSessionForValidPaymentMethod() {
-        val language = "it";
+        String language = "it";
         UUID correlationId = UUID.randomUUID();
         try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
