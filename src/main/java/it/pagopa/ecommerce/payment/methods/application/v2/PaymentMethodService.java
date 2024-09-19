@@ -1,10 +1,19 @@
 package it.pagopa.ecommerce.payment.methods.application.v2;
 
 import io.vavr.Tuple;
+import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.domain.Claims;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
+import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
+import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
+import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
@@ -17,12 +26,20 @@ import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.TransferListItemDto;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.net.URI;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
+
+import javax.crypto.SecretKey;
 
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
@@ -31,15 +48,165 @@ public class PaymentMethodService {
 
     protected static final String QUALIFIER_NAME = "paymentMethodServiceV2";
 
-    private final PaymentMethodRepository paymentMethodRepository;
     private final AfmClient afmClient;
 
+    private final NpgClient npgClient;
+
+    private final PaymentMethodRepository paymentMethodRepository;
+
+    private final PaymentMethodFactory paymentMethodFactory;
+
+    private final SessionUrlConfig sessionUrlConfig;
+
+    private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
+
+    private final String npgDefaultApiKey;
+
+    private final UniqueIdUtils uniqueIdUtils;
+
+    private final SecretKey npgJwtSigningKey;
+
+    private final int npgNotificationTokenValidityTime;
+
+    private final JwtTokenUtils jwtTokenUtils;
+
+    @Autowired
     public PaymentMethodService(
+            AfmClient afmClient,
             PaymentMethodRepository paymentMethodRepository,
-            AfmClient afmClient
+            PaymentMethodFactory paymentMethodFactory,
+            NpgClient npgClient,
+            SessionUrlConfig sessionUrlConfig,
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
+            @Value("${npg.client.apiKey}") String npgDefaultApiKey,
+            UniqueIdUtils uniqueIdUtils,
+            SecretKey npgJwtSigningKey,
+            @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
+            JwtTokenUtils jwtTokenUtils
     ) {
-        this.paymentMethodRepository = paymentMethodRepository;
         this.afmClient = afmClient;
+        this.npgClient = npgClient;
+        this.paymentMethodFactory = paymentMethodFactory;
+        this.paymentMethodRepository = paymentMethodRepository;
+        this.sessionUrlConfig = sessionUrlConfig;
+        this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
+        this.npgDefaultApiKey = npgDefaultApiKey;
+        this.uniqueIdUtils = uniqueIdUtils;
+        this.npgJwtSigningKey = npgJwtSigningKey;
+        this.npgNotificationTokenValidityTime = npgNotificationTokenValidityTime;
+        this.jwtTokenUtils = jwtTokenUtils;
+    }
+
+    public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
+                                                                        String id,
+                                                                        String language
+    ) {
+        log.info(
+                "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
+                id
+        );
+        return paymentMethodRepository.findById(id)
+                .map(PaymentMethodDocument::getPaymentMethodName)
+                .map(NpgClient.PaymentMethod::fromServiceName)
+                .flatMap(
+                        paymentMethod -> uniqueIdUtils.generateUniqueId()
+                                .map(orderId -> Tuples.of(orderId, paymentMethod))
+                )
+                .flatMap(
+                        orderIdAndPaymentMethod -> jwtTokenUtils.generateToken(
+                                npgJwtSigningKey,
+                                npgNotificationTokenValidityTime,
+                                new Claims(null, orderIdAndPaymentMethod.getT1(), id, null)
+                        ).fold(
+                                Mono::error,
+                                token -> Mono.just(
+                                        Tuples.of(
+                                                orderIdAndPaymentMethod.getT1(),
+                                                orderIdAndPaymentMethod.getT2(),
+                                                token
+                                        )
+                                )
+                        )
+                )
+                .flatMap(data -> {
+                    UUID correlationId = UUID.randomUUID();
+                    log.info("Generated correlationId for execute NPG build session: {}", correlationId);
+                    NpgClient.PaymentMethod paymentMethod = data.getT2();
+                    String orderId = data.getT1();
+                    String notificationSessionToken = data.getT3();
+                    it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod sessionPaymentMethod = it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod
+                            .fromValue(paymentMethod.serviceName);
+                    URI returnUrlBasePath = sessionUrlConfig.basePath();
+                    URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
+                    URI merchantUrl = returnUrlBasePath;
+                    URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
+                    URI notificationUrl = UriComponentsBuilder
+                            .fromHttpUrl(sessionUrlConfig.notificationUrl())
+                            .build(
+                                    Map.of(
+                                            "orderId",
+                                            orderId,
+                                            "sessionToken",
+                                            notificationSessionToken
+                                    )
+                            );
+
+                    return npgClient.buildForm(
+                            correlationId, // correlationId
+                            merchantUrl, // merchantUrl
+                            resultUrl, // resultUrl
+                            notificationUrl, // notificationUrl
+                            cancelUrl, // cancelUrl
+                            orderId, // orderId
+                            null, // customerId
+                            paymentMethod, // paymentMethod
+                            npgDefaultApiKey, // defaultApiKey
+                            null,
+                            language
+
+                    ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId, correlationId));
+                }).map(data -> {
+                    FieldsDto fields = data.getT1();
+                    String orderId = data.getT3();
+                    UUID correlationId = data.getT4();
+                    npgSessionsTemplateWrapper
+                            .save(
+                                    new NpgSessionDocument(
+                                            orderId,
+                                            correlationId.toString(),
+                                            fields.getSessionId(),
+                                            fields.getSecurityToken(),
+                                            null,
+                                            null
+                                    )
+                            );
+                    return data;
+                }).map(data -> {
+                    FieldsDto fields = data.getT1();
+                    it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod paymentMethod = data
+                            .getT2();
+                    String orderId = data.getT3();
+                    UUID correlationId = data.getT4();
+                    return new CreateSessionResponseDto()
+                            .orderId(orderId)
+                            .correlationId(correlationId)
+                            .paymentMethodData(
+                                    new CardFormFieldsDto()
+                                            .paymentMethod(paymentMethod.value)
+                                            .form(
+                                                    fields.getFields()
+                                                            .stream()
+                                                            .map(
+                                                                    field -> new FieldDto()
+                                                                            .id(field.getId())
+                                                                            .type(field.getType())
+                                                                            .propertyClass(field.getPropertyClass())
+                                                                            .src(URI.create(field.getSrc()))
+                                                            )
+                                                            .collect(Collectors.toList())
+                                            )
+                            );
+                });
     }
 
     public Mono<CalculateFeeResponseDto> computeFee(
