@@ -52,6 +52,9 @@ import io.vavr.control.Either;
 
 import javax.crypto.SecretKey;
 
+@SpringBootTest
+@TestPropertySource(locations = "classpath:application.test.properties")
+@ExtendWith(MockitoExtension.class)
 class PaymentMethodServiceTests {
 
     private static final String STRONG_KEY = "ODMzNUZBNTZENDg3NTYyREUyNDhGNDdCRUZDNzI3NDMzMzQwNTFEREZGQ0MyQzA5Mjc1RjY2NTQ1NDk5MDMxNzU5NDc0NUVFMTdDMDhGNzk4Q0Q3RENFMEJBODE1NURDREExNEY2Mzk4QzFEMTU0NTExNjUyMEExMzMwMTdDMDk";
