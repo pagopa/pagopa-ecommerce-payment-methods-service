@@ -156,17 +156,17 @@ class PaymentMethodServiceTests {
                     );
             Mockito.doNothing().when(npgSessionsTemplateWrapper).save(any());
 
-            it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto expected = new it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto()
+            it.pagopa.ecommerce.payment.methods.v2.server.model.CreateSessionResponseDto expected = new it.pagopa.ecommerce.payment.methods.v2.server.model.CreateSessionResponseDto()
                     .orderId(orderId)
                     .correlationId(correlationId)
                     .paymentMethodData(
-                            new it.pagopa.ecommerce.payment.methods.server.model.CardFormFieldsDto()
+                            new it.pagopa.ecommerce.payment.methods.v2.server.model.CardFormFieldsDto()
                                     .paymentMethod(
                                             it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod.CARDS.value
                                     )
                                     .form(
                                             npgResponse.getFields().stream().map(
-                                                    field -> new it.pagopa.ecommerce.payment.methods.server.model.FieldDto()
+                                                    field -> new it.pagopa.ecommerce.payment.methods.v2.server.model.FieldDto()
                                                             .id(field.getId())
                                                             .type(field.getType())
                                                             .propertyClass(field.getPropertyClass())
