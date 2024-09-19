@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.service.v2;
 
-
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.Claims;
 import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
@@ -48,7 +47,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import io.vavr.control.Either;
-
 
 import javax.crypto.SecretKey;
 
