@@ -49,6 +49,29 @@ import javax.crypto.SecretKey;
 @Slf4j
 public class PaymentMethodService {
 
+    public enum SessionPaymentMethod {
+        CARDS("CARDS");
+
+        public final String value;
+
+        SessionPaymentMethod(String value) {
+            this.value = value;
+        }
+
+        public static it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod fromValue(
+                                                                                                                             String value
+        ) {
+            for (it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod method : it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService.SessionPaymentMethod
+                    .values()) {
+                if (method.value.equals(value)) {
+                    return method;
+                }
+            }
+
+            throw new IllegalArgumentException("Invalid session payment method: '%s'".formatted(value));
+        }
+    }
+
     protected static final String QUALIFIER_NAME = "paymentMethodServiceV2";
 
     private final AfmClient afmClient;

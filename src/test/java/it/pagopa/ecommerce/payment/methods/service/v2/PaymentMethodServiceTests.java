@@ -135,6 +135,56 @@ class PaymentMethodServiceTests {
     }
 
     @Test
+    void shouldCreateSessionForValidPaymentMethod() {
+        String language = "it";
+        UUID correlationId = UUID.randomUUID();
+        try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
+            uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
+            PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+            PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+            String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+            FieldsDto npgResponse = TestUtil.npgResponse();
+            String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+            Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+            Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                    .thenReturn(Mono.just(paymentMethodDocument));
+            Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
+                    .thenReturn(Either.right("sessionToken"));
+            Mockito.when(
+                    npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            )
+                    .thenReturn(
+                            Mono.just(npgResponse)
+                    );
+            Mockito.doNothing().when(npgSessionsTemplateWrapper).save(any());
+
+            it.pagopa.ecommerce.payment.methods.v2.server.model.CreateSessionResponseDto expected = new it.pagopa.ecommerce.payment.methods.v2.server.model.CreateSessionResponseDto()
+                    .orderId(orderId)
+                    .correlationId(correlationId)
+                    .paymentMethodData(
+                            new it.pagopa.ecommerce.payment.methods.v2.server.model.CardFormFieldsDto()
+                                    .paymentMethod(
+                                            it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService.SessionPaymentMethod.CARDS.value
+                                    )
+                                    .form(
+                                            npgResponse.getFields().stream().map(
+                                                    field -> new it.pagopa.ecommerce.payment.methods.v2.server.model.FieldDto()
+                                                            .id(field.getId())
+                                                            .type(field.getType())
+                                                            .propertyClass(field.getPropertyClass())
+                                                            .src(URI.create(field.getSrc()))
+                                            )
+                                                    .collect(Collectors.toList())
+                                    )
+                    );
+
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, language))
+                    .expectNext(expected)
+                    .verifyComplete();
+        }
+    }
+
+    @Test
     void shouldRetrieveFeeForMultiplePaymentNoticeWithoutPspList() {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
