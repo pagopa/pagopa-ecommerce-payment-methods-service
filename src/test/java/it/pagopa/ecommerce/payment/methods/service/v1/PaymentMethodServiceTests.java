@@ -441,7 +441,9 @@ class PaymentMethodServiceTests {
                     .thenReturn(Mono.just(paymentMethodDocument));
             Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
                     .thenReturn(Either.right("sessionToken"));
-            Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+            Mockito.when(
+                    npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            )
                     .thenReturn(
                             Mono.just(npgResponse)
                     );
