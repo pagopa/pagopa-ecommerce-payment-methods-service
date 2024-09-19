@@ -1,135 +1,131 @@
-package it.pagopa.ecommerce.payment.methods.service.v2;
+package it.pagopa.ecommerce.payment.methods.controller.v2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 
-import it.pagopa.ecommerce.commons.client.NpgClient;
+import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
-import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
-import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentMethodManagementTypeDto;
-import it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.springframework.data.util.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-class PaymentMethodServiceTests {
+@ExtendWith(SpringExtension.class)
+@WebFluxTest(it.pagopa.ecommerce.payment.methods.controller.v2.PaymentMethodsController.class)
+@TestPropertySource(locations = "classpath:application.test.properties")
+class PaymentMethodsControllerTests {
 
-    private final AfmClient afmClient = mock(AfmClient.class);
+    @MockBean
+    private PaymentMethodService paymentMethodService;
 
-    private final PaymentMethodRepository paymentMethodRepository = mock(PaymentMethodRepository.class);
+    @InjectMocks
+    private PaymentMethodsController paymentMethodsController;
 
-    private final PaymentMethodService paymentMethodService = new PaymentMethodService(
-            paymentMethodRepository,
-            afmClient
-    );
+    @Autowired
+    private WebTestClient webClient;
+
+    @MockBean
+    private Tracer tracer;
 
     @Test
-    void shouldRetrieveFeeForMultiplePaymentNotice() {
-        final var paymentMethodId = UUID.randomUUID().toString();
-        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
-        final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
-                .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
-                .thenReturn(Mono.just(gecResponse));
+    void shouldGetFees() {
+        final String paymentMethodId = UUID.randomUUID().toString();
+        final CalculateFeeRequestDto requestBody = TestUtil.V2.getMultiNoticeFeesRequest();
+        final CalculateFeeResponseDto serviceResponse = TestUtil.V2
+                .getCalculateFeeResponseFromClientResponse(TestUtil.getBundleOptionDtoClientResponse());
+        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+                .thenReturn(Mono.just(serviceResponse));
 
-        CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
-        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
-        assertEquals(PAYMENT_METHOD_TEST.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
-        assertEquals(
-                PAYMENT_METHOD_TEST.getPaymentMethodDescription(),
-                serviceResponse.getPaymentMethodDescription()
+        webClient
+                .post()
+                .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(CalculateFeeResponseDto.class)
+                .isEqualTo(serviceResponse);
+    }
+
+    @Test
+    void shouldReturn400WithEmptyPaymentNotices() {
+        final String paymentMethodId = UUID.randomUUID().toString();
+        final CalculateFeeRequestDto requestBody = TestUtil.V2.getMultiNoticeFeesRequest().paymentNotices(
+                List.of()
         );
+
+        webClient
+                .post()
+                .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
     }
 
     @Test
-    void shouldRetrieveFeeForMultiplePaymentNoticeWithoutPspList() {
-        final var paymentMethodId = UUID.randomUUID().toString();
-        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
-        calculateFeeRequestDto.setIdPspList(null);
-        final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
-
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
-                .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
-                .thenReturn(Mono.just(gecResponse));
-
-        CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
-        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+    void shouldReturn404ForNoBundleReturned() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto requestBody = TestUtil.V2.getMultiNoticeFeesRequest();
+        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+                .thenReturn(Mono.error(new NoBundleFoundException("paymentMethodId", 100, "CHECKOUT")));
+        ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail(
+                "No bundle found for payment method with id: [paymentMethodId] and transaction amount: [100] for touch point: [CHECKOUT]"
+        );
+        webClient
+                .post()
+                .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(ProblemJsonDto.class)
+                .isEqualTo(expected);
     }
 
     @Test
-    void shouldRetrieveFeeForMultiplePaymentNoticeWithPspWithNullPaymentType() {
-        final var paymentMethodId = UUID.randomUUID().toString();
-        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
-        calculateFeeRequestDto.setIdPspList(null);
-        final var gecResponse = TestUtil.V2.getBundleOptionWithAnyValueDtoClientResponse();
-        String paymentTypeCode = "CP";
-
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
-                .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
-                .thenReturn(Mono.just(gecResponse));
-
-        CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
-        assertEquals(paymentTypeCode, serviceResponse.getBundles().get(0).getPaymentMethod());
+    void shouldReturnResponseEntityWithNotFound() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new PaymentMethodNotFoundException("paymentMethodId"));
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("Payment method not found", responseEntity.getBody().getDetail());
     }
 
-    public static Stream<Arguments> gecInvalidTransferDtoSource() {
-        return Stream.of(Arguments.of(List.<TransferDto>of()), Arguments.of((List<TransferDto>) null));
+    @Test
+    void shouldReturnResponseEntityWithGenericError() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new RuntimeException());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Internal server error", responseEntity.getBody().getTitle());
     }
 
-    @ParameterizedTest
-    @MethodSource("gecInvalidTransferDtoSource")
-    void shouldReturnNoBundleFoundExceptionForNoBundleReturnedByGec(List<TransferDto> invalidTransferDto) {
-        final var paymentMethodId = UUID.randomUUID().toString();
-        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
-        final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
-        gecResponse.setBundleOptions(invalidTransferDto);
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
-                .thenReturn(Mono.just(PAYMENT_METHOD_TEST));
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
-                .thenReturn(Mono.just(gecResponse));
-
-        StepVerifier.create(
-                paymentMethodService
-                        .computeFee(calculateFeeRequestDto, paymentMethodId, null)
-        )
-                .expectError(NoBundleFoundException.class)
-                .verify();
+    @Test
+    void shouldReturnResponseEntityWithAfmError() {
+        ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
+                .errorHandler(new AfmResponseException(HttpStatus.NOT_FOUND, "reason test"));
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals("reason test", responseEntity.getBody().getDetail());
     }
-
-    private final PaymentMethodDocument PAYMENT_METHOD_TEST = new PaymentMethodDocument(
-            UUID.randomUUID().toString(),
-            NpgClient.PaymentMethod.CARDS.serviceName,
-            "Description",
-            PaymentMethodStatusEnum.ENABLED.getCode(),
-            "asset",
-            List.of(Pair.of(0L, 100L)),
-            "CP",
-            PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
-            PaymentMethodManagementTypeDto.ONBOARDABLE.getValue(),
-            null
-    );
 }
