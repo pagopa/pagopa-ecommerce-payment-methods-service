@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.service.v1;
 
-import io.vavr.control.Either;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.Claims;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
@@ -40,6 +39,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
+import io.vavr.control.Either;
 
 import javax.crypto.SecretKey;
 import java.net.URI;
@@ -47,9 +50,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
