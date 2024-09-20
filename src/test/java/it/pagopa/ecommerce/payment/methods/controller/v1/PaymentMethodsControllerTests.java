@@ -369,7 +369,7 @@ class PaymentMethodsControllerTests {
     void shouldPostCreateSession() {
         String paymentMethodId = UUID.randomUUID().toString();
         CreateSessionResponseDto responseDto = TestUtil.createSessionResponseDto(paymentMethodId);
-        Mockito.when(paymentMethodService.createSessionForPaymentMethod(any()))
+        Mockito.when(paymentMethodService.createSessionForPaymentMethod(any(), any()))
                 .thenReturn(Mono.just(responseDto));
         webClient
                 .post()
@@ -616,7 +616,7 @@ class PaymentMethodsControllerTests {
     void shouldReturnBadGatewayForNpgException() {
         String paymentMethodId = UUID.randomUUID().toString();
 
-        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
                 .thenReturn(
                         Mono.error(
                                 new NpgResponseException(
@@ -644,7 +644,7 @@ class PaymentMethodsControllerTests {
     void shouldReturnBadRequestForIllegalArgumentException() {
         String paymentMethodId = UUID.randomUUID().toString();
 
-        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
                 .thenReturn(
                         Mono.error(
                                 new IllegalArgumentException(

@@ -421,7 +421,7 @@ class PaymentMethodServiceTests {
         Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
                 .thenReturn(Either.left(new JWTTokenGenerationException()));
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
                 .expectError(JWTTokenGenerationException.class)
                 .verify();
     }
@@ -441,7 +441,9 @@ class PaymentMethodServiceTests {
                     .thenReturn(Mono.just(paymentMethodDocument));
             Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
                     .thenReturn(Either.right("sessionToken"));
-            Mockito.when(npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+            Mockito.when(
+                    npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            )
                     .thenReturn(
                             Mono.just(npgResponse)
                     );
@@ -465,7 +467,7 @@ class PaymentMethodServiceTests {
                                     )
                     );
 
-            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId))
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
                     .expectNext(expected)
                     .verifyComplete();
         }

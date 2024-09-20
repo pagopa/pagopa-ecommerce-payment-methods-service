@@ -244,7 +244,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                         String lang,
                                                                         ServerWebExchange exchange
     ) {
-        return paymentMethodService.createSessionForPaymentMethod(id).map(ResponseEntity::ok);
+        return paymentMethodService.createSessionForPaymentMethod(id, lang).map(ResponseEntity::ok);
     }
 
     @Override
