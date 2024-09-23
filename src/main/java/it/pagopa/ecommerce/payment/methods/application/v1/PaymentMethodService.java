@@ -379,8 +379,8 @@ public class PaymentMethodService {
                             null, // customerId
                             paymentMethod, // paymentMethod
                             npgDefaultApiKey, // defaultApiKey
-                            null, //contractId
-                            language //language
+                            null, // contractId
+                            language // language
 
                     ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId, correlationId));
                 }).map(data -> {
