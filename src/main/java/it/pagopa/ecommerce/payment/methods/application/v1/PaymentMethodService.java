@@ -316,7 +316,8 @@ public class PaymentMethodService {
     }
 
     public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
-                                                                        String id
+                                                                        String id,
+                                                                        String language
     ) {
         log.info(
                 "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
@@ -377,7 +378,9 @@ public class PaymentMethodService {
                             orderId, // orderId
                             null, // customerId
                             paymentMethod, // paymentMethod
-                            npgDefaultApiKey // defaultApiKey
+                            npgDefaultApiKey, // defaultApiKey
+                            null, // contractId
+                            language // language
 
                     ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId, correlationId));
                 }).map(data -> {
