@@ -16,8 +16,8 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class MDCFilter implements WebFilter {
-    public static final String CONTEXT_KEY = "contextKey";
     public static final String TRANSACTION_ID = "transactionId";
+    public static final String TRANSACTION_ID_NOT_FOUND = "{transactionId-not-found}";
     public static final String HEADER_TRANSACTION_ID = "x-transaction-id";
 
     @Override
@@ -28,10 +28,9 @@ public class MDCFilter implements WebFilter {
         final HttpHeaders headers = exchange.getRequest().getHeaders();
         final String transactionId = Optional.ofNullable(headers.get(HEADER_TRANSACTION_ID)).orElse(new ArrayList<>())
                 .stream()
-                .findFirst().orElse("{transactionId-not-found}");
+                .findFirst().orElse(TRANSACTION_ID_NOT_FOUND);
 
         return chain.filter(exchange)
-                .contextWrite(Context.of(CONTEXT_KEY, UUID.randomUUID().toString()))
                 .contextWrite(Context.of(TRANSACTION_ID, transactionId));
     }
 }

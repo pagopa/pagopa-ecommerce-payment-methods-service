@@ -5,9 +5,7 @@ import org.slf4j.MDC;
 import reactor.core.CoreSubscriber;
 import reactor.util.context.Context;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +39,7 @@ class MDCContextLifter<T> implements CoreSubscriber<T> {
     @Override
     public void onComplete() {
         coreSubscriber.onComplete();
+        MDC.clear();
     }
 
     @Override
@@ -56,17 +55,13 @@ class MDCContextLifter<T> implements CoreSubscriber<T> {
      */
     public void copyToMdc(Context context) {
         if (!context.isEmpty()) {
-            Map<String, String> mdcContext = Optional.ofNullable(MDC.getCopyOfContextMap()).orElseGet(HashMap::new);
-            Map<String, String> reactorContext = context.stream()
-                    .collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue().toString()));
-
-            if (reactorContext.getOrDefault("contextKey", "").equals(mdcContext.getOrDefault("contextKey", ""))) {
-                reactorContext.putAll(mdcContext);
-                MDC.setContextMap(reactorContext);
-            } else {
-                mdcContext.putAll(reactorContext);
-                MDC.setContextMap(mdcContext);
-            }
+            Map<String, String> mdcContextMap = Optional.ofNullable(MDC.getCopyOfContextMap()).orElseGet(HashMap::new);
+            // get only transactionId from reactorContext
+            mdcContextMap.put(
+                    MDCFilter.TRANSACTION_ID,
+                    context.getOrDefault(MDCFilter.TRANSACTION_ID, MDCFilter.TRANSACTION_ID_NOT_FOUND)
+            );
+            MDC.setContextMap(mdcContextMap);
         } else {
             MDC.clear();
         }
