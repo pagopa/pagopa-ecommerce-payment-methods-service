@@ -5,8 +5,9 @@ import org.slf4j.MDC;
 import reactor.core.CoreSubscriber;
 import reactor.util.context.Context;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Helper that copies the state of Reactor [Context] to MDC on the #onNext
