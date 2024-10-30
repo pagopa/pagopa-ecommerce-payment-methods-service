@@ -154,6 +154,25 @@ public class PaymentMethodService {
                                 .taxPayerFee(t.getTaxPayerFee())
                                 .touchpoint(t.getTouchpoint())
                                 .pspBusinessName(t.getPspBusinessName())
+                ).sorted(
+                        (
+                         bundle1,
+                         bundle2
+                        ) -> {
+                            if (bundle1.getOnUs()) {
+                                if (bundle2.getOnUs()) {
+                                    return Long.valueOf(bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee()).intValue();
+                                } else {
+                                    return -1;
+                                }
+                            } else {
+                                if (!bundle2.getOnUs()) {
+                                    return Long.valueOf(bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee()).intValue();
+                                } else {
+                                    return 1;
+                                }
+                            }
+                        }
                 ).toList();
 
         return new CalculateFeeResponseDto()
