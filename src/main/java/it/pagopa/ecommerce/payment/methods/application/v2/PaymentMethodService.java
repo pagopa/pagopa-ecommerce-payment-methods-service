@@ -159,15 +159,15 @@ public class PaymentMethodService {
                          bundle1,
                          bundle2
                         ) -> {
-                            if (bundle1.getOnUs()) {
-                                if (bundle2.getOnUs()) {
-                                    return Long.valueOf(bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee()).intValue();
+                            if (Boolean.TRUE.equals(bundle1.getOnUs())) {
+                                if (Boolean.TRUE.equals(bundle2.getOnUs())) {
+                                    return (int) (bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee());
                                 } else {
                                     return -1;
                                 }
                             } else {
-                                if (!bundle2.getOnUs()) {
-                                    return Long.valueOf(bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee()).intValue();
+                                if (Boolean.FALSE.equals(bundle2.getOnUs())) {
+                                    return (int) (bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee());
                                 } else {
                                     return 1;
                                 }
