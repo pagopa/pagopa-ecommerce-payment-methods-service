@@ -158,7 +158,8 @@ class PaymentMethodServiceTests {
 
         boolean samePositionForAllelements = true;
         for (int i = 0; i < serviceIdPspNotOnUsList.size(); i++) {
-            samePositionForAllelements &= serviceIdPspNotOnUsList.get(i).getIdPsp().equals(gecIdPspNotOnUsList.get(i).getIdPsp());
+            samePositionForAllelements &= serviceIdPspNotOnUsList.get(i).getIdPsp()
+                    .equals(gecIdPspNotOnUsList.get(i).getIdPsp());
         }
         assertFalse(samePositionForAllelements);
     }

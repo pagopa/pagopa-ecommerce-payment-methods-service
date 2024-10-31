@@ -817,8 +817,8 @@ class PaymentMethodServiceTests {
         assertTrue(
                 serviceResponse.getBundles().stream().max(
                         (
-                                b1,
-                                b2
+                         b1,
+                         b2
                         ) -> (int) (b1.getTaxPayerFee() - b2.getTaxPayerFee())
                 ).get().getTaxPayerFee().equals(
                         serviceResponse.getBundles().get(gecResponse.getBundleOptions().size() - 1).getTaxPayerFee()
@@ -827,8 +827,8 @@ class PaymentMethodServiceTests {
         assertTrue(
                 serviceResponse.getBundles().stream().min(
                         (
-                                b1,
-                                b2
+                         b1,
+                         b2
                         ) -> (int) (b1.getTaxPayerFee() - b2.getTaxPayerFee())
                 ).get().getTaxPayerFee().equals(serviceResponse.getBundles().get(0).getTaxPayerFee())
         );
@@ -894,14 +894,18 @@ class PaymentMethodServiceTests {
         assertFalse(serviceResponse.getBundles().get(4).getOnUs());
         assertFalse(serviceResponse.getBundles().get(5).getOnUs());
 
-        List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> serviceIdPspOnUsList = serviceResponse.getBundles().stream().filter(it.pagopa.ecommerce.payment.methods.server.model.BundleDto::getOnUs)
+        List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> serviceIdPspOnUsList = serviceResponse
+                .getBundles().stream().filter(it.pagopa.ecommerce.payment.methods.server.model.BundleDto::getOnUs)
                 .toList();
-        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> gecIdPspOnUsList = gecResponse.getBundleOptions().stream().filter(it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getOnUs)
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> gecIdPspOnUsList = gecResponse.getBundleOptions()
+                .stream().filter(it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getOnUs)
                 .toList();
 
-        List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> serviceIdPspNotOnUsList = serviceResponse.getBundles().stream()
+        List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> serviceIdPspNotOnUsList = serviceResponse
+                .getBundles().stream()
                 .filter(bundleDto -> !bundleDto.getOnUs()).toList();
-        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> gecIdPspNotOnUsList = gecResponse.getBundleOptions().stream()
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> gecIdPspNotOnUsList = gecResponse.getBundleOptions()
+                .stream()
                 .filter(transferDto -> Boolean.FALSE.equals(transferDto.getOnUs())).toList();
 
         for (int i = 0; i < serviceIdPspOnUsList.size(); i++) {
@@ -910,7 +914,8 @@ class PaymentMethodServiceTests {
 
         boolean samePositionForAllelements = true;
         for (int i = 0; i < serviceIdPspNotOnUsList.size(); i++) {
-            samePositionForAllelements &= serviceIdPspNotOnUsList.get(i).getIdPsp().equals(gecIdPspNotOnUsList.get(i).getIdPsp());
+            samePositionForAllelements &= serviceIdPspNotOnUsList.get(i).getIdPsp()
+                    .equals(gecIdPspNotOnUsList.get(i).getIdPsp());
         }
         assertFalse(samePositionForAllelements);
     }

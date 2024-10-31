@@ -191,41 +191,28 @@ public class PaymentMethodService {
         return orderedBundles.stream().toList();
     }
 
-/*
-    private List<BundleDto> sortAndShuffleBundleListWithMoreThanOneOnUs(List<BundleDto> bundles) {
-        Map<Long, List<BundleDto>> bundleMapOnUs = new TreeMap<>();
-        Map<Long, List<BundleDto>> bundleMapNotOnUs = new TreeMap<>();
-        bundles
-                .stream()
-                .filter(BundleDto::getOnUs)
-                .forEach(bundle -> {
-                    Long fees = bundle.getTaxPayerFee();
-                    List<BundleDto> bundlesPerFee = bundleMapOnUs.getOrDefault(fees, new ArrayList<>());
-                    bundlesPerFee.add(bundle);
-                    bundleMapOnUs.put(fees, bundlesPerFee);
-                });
-        bundles
-                .stream()
-                .filter(Predicate.not(BundleDto::getOnUs))
-                .forEach(bundle -> {
-                    Long fees = bundle.getTaxPayerFee();
-                    List<BundleDto> bundlesPerFee = bundleMapNotOnUs.getOrDefault(fees, new ArrayList<>());
-                    bundlesPerFee.add(bundle);
-                    bundleMapNotOnUs.put(fees, bundlesPerFee);
-                });
-        Deque<BundleDto> orderedBundlesOnUs = new LinkedList<>();
-        bundleMapOnUs.values().forEach(bundlesPerFee -> {
-            Collections.shuffle(bundlesPerFee);
-            orderedBundlesOnUs.addAll(bundlesPerFee);
-        });
-        Deque<BundleDto> orderedBundlesNotOnUs = new LinkedList<>();
-        bundleMapNotOnUs.values().forEach(bundlesPerFee -> {
-            Collections.shuffle(bundlesPerFee);
-            orderedBundlesNotOnUs.addAll(bundlesPerFee);
-        });
-        List<BundleDto> resultList = orderedBundlesOnUs.stream().toList();
-        resultList.addAll(orderedBundlesNotOnUs.stream().toList());
-        return resultList;
-    }
- */
+    /*
+     * private List<BundleDto>
+     * sortAndShuffleBundleListWithMoreThanOneOnUs(List<BundleDto> bundles) {
+     * Map<Long, List<BundleDto>> bundleMapOnUs = new TreeMap<>(); Map<Long,
+     * List<BundleDto>> bundleMapNotOnUs = new TreeMap<>(); bundles .stream()
+     * .filter(BundleDto::getOnUs) .forEach(bundle -> { Long fees =
+     * bundle.getTaxPayerFee(); List<BundleDto> bundlesPerFee =
+     * bundleMapOnUs.getOrDefault(fees, new ArrayList<>());
+     * bundlesPerFee.add(bundle); bundleMapOnUs.put(fees, bundlesPerFee); });
+     * bundles .stream() .filter(Predicate.not(BundleDto::getOnUs)) .forEach(bundle
+     * -> { Long fees = bundle.getTaxPayerFee(); List<BundleDto> bundlesPerFee =
+     * bundleMapNotOnUs.getOrDefault(fees, new ArrayList<>());
+     * bundlesPerFee.add(bundle); bundleMapNotOnUs.put(fees, bundlesPerFee); });
+     * Deque<BundleDto> orderedBundlesOnUs = new LinkedList<>();
+     * bundleMapOnUs.values().forEach(bundlesPerFee -> {
+     * Collections.shuffle(bundlesPerFee); orderedBundlesOnUs.addAll(bundlesPerFee);
+     * }); Deque<BundleDto> orderedBundlesNotOnUs = new LinkedList<>();
+     * bundleMapNotOnUs.values().forEach(bundlesPerFee -> {
+     * Collections.shuffle(bundlesPerFee);
+     * orderedBundlesNotOnUs.addAll(bundlesPerFee); }); List<BundleDto> resultList =
+     * orderedBundlesOnUs.stream().toList();
+     * resultList.addAll(orderedBundlesNotOnUs.stream().toList()); return
+     * resultList; }
+     */
 }
