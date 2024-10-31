@@ -443,6 +443,190 @@ public class TestUtil {
         return PaymentMethodRequestDto.ClientIdEnum.IO;
     }
 
+    public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionDtoClientResponseWithUnsortedTransferListAllNotOnUs() {
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transferList = new ArrayList<>();
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestNotOnUs_1")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest1")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestOnUse")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest2")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TEN.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestNotOnUs_2")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest3")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.ONE.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+
+        return new it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto()
+                .belowThreshold(true)
+                .bundleOptions(
+                        transferList
+                );
+    }
+
+    public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionDtoClientResponseWithUnsortedTransferListOnlyOneOnUs() {
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transferList = new ArrayList<>();
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestNotOnUs_1")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest1")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestNotOnUs_2")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest2")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestOnUs")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest3")
+                        .onUs(true)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TEN.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        return new it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto()
+                .belowThreshold(true)
+                .bundleOptions(
+                        transferList
+                );
+    }
+
+    public static it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto getBundleOptionDtoClientResponseWithUnsortedTransferMixedWithSameFees() {
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> transferList = new ArrayList<>();
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestOnUs_1")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest1")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestOnUs_2")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest2")
+                        .onUs(true)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestOnUs_2")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest3")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestNotOnUs_2")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest4")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestNotOnUs_2")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest5")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        transferList.add(
+                new it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto().abi("abiTestNotOnUs_2")
+                        .bundleDescription("descriptionTest")
+                        .bundleName("bundleNameTest")
+                        .idBrokerPsp("idBrokerPspTest")
+                        .idBundle("idBundleTest")
+                        .idChannel("idChannelTest")
+                        .idPsp("idPspTest6")
+                        .onUs(false)
+                        .paymentMethod("idPaymentMethodTest")
+                        .taxPayerFee(BigInteger.TWO.longValue())
+                        .touchpoint("CHECKOUT")
+        );
+        return new it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto()
+                .belowThreshold(true)
+                .bundleOptions(
+                        transferList
+                );
+    }
+
     public static class V2 {
         public static it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto getMultiNoticeFeesRequest() {
             final var notices = LongStream.of(10L, 20L)
@@ -627,129 +811,6 @@ public class TestUtil {
                     );
         }
 
-        public static it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto getBundleOptionDtoClientResponseWithUnsortedTransferListTwoOnUs() {
-            List<it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto> transferList = new ArrayList<>();
-            transferList.add(
-                    new it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto().abi("abiTestOnUs_1")
-                            .bundleDescription("descriptionTest")
-                            .bundleName("bundleNameTest")
-                            .idBrokerPsp("idBrokerPspTest")
-                            .idBundle("idBundleTest")
-                            .idChannel("idChannelTest")
-                            .idPsp("idPspTest1")
-                            .onUs(true)
-                            .paymentMethod("idPaymentMethodTest")
-                            .actualPayerFee(BigInteger.TWO.longValue())
-                            .taxPayerFee(BigInteger.TWO.longValue())
-                            .touchpoint("CHECKOUT")
-                            .fees(List.of())
-            );
-            transferList.add(
-                    new it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto().abi("abiTestOnUs_2")
-                            .bundleDescription("descriptionTest")
-                            .bundleName("bundleNameTest")
-                            .idBrokerPsp("idBrokerPspTest")
-                            .idBundle("idBundleTest")
-                            .idChannel("idChannelTest")
-                            .idPsp("idPspTest2")
-                            .onUs(true)
-                            .paymentMethod("idPaymentMethodTest")
-                            .actualPayerFee(BigInteger.ONE.longValue())
-                            .taxPayerFee(BigInteger.ONE.longValue())
-                            .touchpoint("CHECKOUT")
-                            .fees(List.of())
-            );
-            transferList.add(
-                    new it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto().abi("abiTestNotOnUs_2")
-                            .bundleDescription("descriptionTest")
-                            .bundleName("bundleNameTest")
-                            .idBrokerPsp("idBrokerPspTest")
-                            .idBundle("idBundleTest")
-                            .idChannel("idChannelTest")
-                            .idPsp("idPspTest3")
-                            .onUs(false)
-                            .paymentMethod("idPaymentMethodTest")
-                            .actualPayerFee(BigInteger.TEN.longValue())
-                            .taxPayerFee(BigInteger.TEN.longValue())
-                            .touchpoint("CHECKOUT")
-                            .fees(List.of())
-            );
-            transferList.add(
-                    new it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto().abi("abiTestNotOnUs_2")
-                            .bundleDescription("descriptionTest")
-                            .bundleName("bundleNameTest")
-                            .idBrokerPsp("idBrokerPspTest")
-                            .idBundle("idBundleTest")
-                            .idChannel("idChannelTest")
-                            .idPsp("idPspTest4")
-                            .onUs(false)
-                            .paymentMethod("idPaymentMethodTest")
-                            .actualPayerFee(BigInteger.ZERO.longValue())
-                            .taxPayerFee(BigInteger.ZERO.longValue())
-                            .touchpoint("CHECKOUT")
-                            .fees(List.of())
-            );
-            return new it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto()
-                    .belowThreshold(true)
-                    .bundleOptions(
-                            transferList
-                    );
-        }
-
-        public static it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto getBundleOptionDtoClientResponseWithUnsortedTransferListAllOnUs() {
-            List<it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto> transferList = new ArrayList<>();
-            transferList.add(
-                    new it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto().abi("abiTestOnUs_1")
-                            .bundleDescription("descriptionTest")
-                            .bundleName("bundleNameTest")
-                            .idBrokerPsp("idBrokerPspTest")
-                            .idBundle("idBundleTest")
-                            .idChannel("idChannelTest")
-                            .idPsp("idPspTest1")
-                            .onUs(true)
-                            .paymentMethod("idPaymentMethodTest")
-                            .actualPayerFee(BigInteger.TWO.longValue())
-                            .taxPayerFee(BigInteger.TWO.longValue())
-                            .touchpoint("CHECKOUT")
-                            .fees(List.of())
-            );
-            transferList.add(
-                    new it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto().abi("abiTestOnUs_2")
-                            .bundleDescription("descriptionTest")
-                            .bundleName("bundleNameTest")
-                            .idBrokerPsp("idBrokerPspTest")
-                            .idBundle("idBundleTest")
-                            .idChannel("idChannelTest")
-                            .idPsp("idPspTest2")
-                            .onUs(true)
-                            .paymentMethod("idPaymentMethodTest")
-                            .actualPayerFee(BigInteger.TEN.longValue())
-                            .taxPayerFee(BigInteger.TEN.longValue())
-                            .touchpoint("CHECKOUT")
-                            .fees(List.of())
-            );
-            transferList.add(
-                    new it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto().abi("abiTestOnUs_3")
-                            .bundleDescription("descriptionTest")
-                            .bundleName("bundleNameTest")
-                            .idBrokerPsp("idBrokerPspTest")
-                            .idBundle("idBundleTest")
-                            .idChannel("idChannelTest")
-                            .idPsp("idPspTest3")
-                            .onUs(true)
-                            .paymentMethod("idPaymentMethodTest")
-                            .actualPayerFee(BigInteger.TWO.longValue())
-                            .taxPayerFee(BigInteger.TWO.longValue())
-                            .touchpoint("CHECKOUT")
-                            .fees(List.of())
-            );
-            return new it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto()
-                    .belowThreshold(true)
-                    .bundleOptions(
-                            transferList
-                    );
-        }
-
         public static it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto getBundleOptionDtoClientResponseWithUnsortedTransferMixedWithSameFees() {
             List<it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto> transferList = new ArrayList<>();
             transferList.add(
@@ -805,7 +866,7 @@ public class TestUtil {
                             .idBundle("idBundleTest")
                             .idChannel("idChannelTest")
                             .idPsp("idPspTest4")
-                            .onUs(true)
+                            .onUs(false)
                             .paymentMethod("idPaymentMethodTest")
                             .actualPayerFee(BigInteger.TWO.longValue())
                             .taxPayerFee(BigInteger.TWO.longValue())
@@ -835,7 +896,7 @@ public class TestUtil {
                             .idBundle("idBundleTest")
                             .idChannel("idChannelTest")
                             .idPsp("idPspTest6")
-                            .onUs(true)
+                            .onUs(false)
                             .paymentMethod("idPaymentMethodTest")
                             .actualPayerFee(BigInteger.TWO.longValue())
                             .taxPayerFee(BigInteger.TWO.longValue())

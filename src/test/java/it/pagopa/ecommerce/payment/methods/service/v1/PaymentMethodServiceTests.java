@@ -47,6 +47,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
@@ -785,6 +786,133 @@ class PaymentMethodServiceTests {
         )
                 .expectError(NoBundleFoundException.class)
                 .verify();
+    }
+
+    @Test
+    void shouldReturnsSortedFeeListWithoutOnUs() {
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferListAllNotOnUs();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+                .thenReturn(Mono.just(gecResponse));
+
+        it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
+        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals(
+                paymentMethodDocument.getPaymentMethodDescription(),
+                serviceResponse.getPaymentMethodDescription()
+        );
+        for (int i = 0; i < gecResponse.getBundleOptions().size() - 2; i++) {
+            assertTrue(
+                    serviceResponse.getBundles().get(i).getTaxPayerFee().intValue() < serviceResponse.getBundles()
+                            .get(i + 1).getTaxPayerFee().intValue()
+            );
+        }
+        assertTrue(
+                serviceResponse.getBundles().stream().max(
+                        (
+                                b1,
+                                b2
+                        ) -> (int) (b1.getTaxPayerFee() - b2.getTaxPayerFee())
+                ).get().getTaxPayerFee().equals(
+                        serviceResponse.getBundles().get(gecResponse.getBundleOptions().size() - 1).getTaxPayerFee()
+                )
+        );
+        assertTrue(
+                serviceResponse.getBundles().stream().min(
+                        (
+                                b1,
+                                b2
+                        ) -> (int) (b1.getTaxPayerFee() - b2.getTaxPayerFee())
+                ).get().getTaxPayerFee().equals(serviceResponse.getBundles().get(0).getTaxPayerFee())
+        );
+    }
+
+    @Test
+    void shouldReturnsSortedFeeListPlacingUniqueOnUsInFirstPosition() {
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferListOnlyOneOnUs();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+                .thenReturn(Mono.just(gecResponse));
+
+        it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
+        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals(
+                paymentMethodDocument.getPaymentMethodDescription(),
+                serviceResponse.getPaymentMethodDescription()
+        );
+        assertTrue(serviceResponse.getBundles().get(0).getOnUs());
+        assertFalse(
+                serviceResponse.getBundles().get(0).getTaxPayerFee().intValue() < serviceResponse.getBundles().get(1)
+                        .getTaxPayerFee().intValue()
+        );
+        for (int i = 1; i < gecResponse.getBundleOptions().size() - 2; i++) {
+            assertTrue(
+                    serviceResponse.getBundles().get(i).getTaxPayerFee().intValue() < serviceResponse.getBundles()
+                            .get(i + 1).getTaxPayerFee().intValue()
+            );
+        }
+    }
+
+    @Test
+    void shouldReturnsFeeListMaintainingSortingForOnUsAndNotOnUsBundles() {
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferMixedWithSameFees();
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                .thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+                .thenReturn(Mono.just(gecResponse));
+
+        it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
+        assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
+        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals(
+                paymentMethodDocument.getPaymentMethodDescription(),
+                serviceResponse.getPaymentMethodDescription()
+        );
+        assertTrue(serviceResponse.getBundles().get(0).getOnUs());
+        assertFalse(serviceResponse.getBundles().get(1).getOnUs());
+        assertFalse(serviceResponse.getBundles().get(2).getOnUs());
+        assertFalse(serviceResponse.getBundles().get(3).getOnUs());
+        assertFalse(serviceResponse.getBundles().get(4).getOnUs());
+        assertFalse(serviceResponse.getBundles().get(5).getOnUs());
+
+        List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> serviceIdPspOnUsList = serviceResponse.getBundles().stream().filter(it.pagopa.ecommerce.payment.methods.server.model.BundleDto::getOnUs)
+                .toList();
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> gecIdPspOnUsList = gecResponse.getBundleOptions().stream().filter(it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto::getOnUs)
+                .toList();
+
+        List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> serviceIdPspNotOnUsList = serviceResponse.getBundles().stream()
+                .filter(bundleDto -> !bundleDto.getOnUs()).toList();
+        List<it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto> gecIdPspNotOnUsList = gecResponse.getBundleOptions().stream()
+                .filter(transferDto -> Boolean.FALSE.equals(transferDto.getOnUs())).toList();
+
+        for (int i = 0; i < serviceIdPspOnUsList.size(); i++) {
+            assertTrue(serviceIdPspOnUsList.get(i).getIdPsp().equals(gecIdPspOnUsList.get(i).getIdPsp()));
+        }
+
+        boolean samePositionForAllelements = true;
+        for (int i = 0; i < serviceIdPspNotOnUsList.size(); i++) {
+            samePositionForAllelements &= serviceIdPspNotOnUsList.get(i).getIdPsp().equals(gecIdPspNotOnUsList.get(i).getIdPsp());
+        }
+        assertFalse(samePositionForAllelements);
     }
 
 }

@@ -17,9 +17,10 @@ import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.TransferListItemDto;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
+import java.util.function.Predicate;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -154,25 +155,6 @@ public class PaymentMethodService {
                                 .taxPayerFee(t.getTaxPayerFee())
                                 .touchpoint(t.getTouchpoint())
                                 .pspBusinessName(t.getPspBusinessName())
-                ).sorted(
-                        (
-                         bundle1,
-                         bundle2
-                        ) -> {
-                            if (Boolean.TRUE.equals(bundle1.getOnUs())) {
-                                if (Boolean.TRUE.equals(bundle2.getOnUs())) {
-                                    return (int) (bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee());
-                                } else {
-                                    return -1;
-                                }
-                            } else {
-                                if (Boolean.FALSE.equals(bundle2.getOnUs())) {
-                                    return (int) (bundle1.getTaxPayerFee() - bundle2.getTaxPayerFee());
-                                } else {
-                                    return 1;
-                                }
-                            }
-                        }
                 ).toList();
 
         return new CalculateFeeResponseDto()
@@ -180,8 +162,70 @@ public class PaymentMethodService {
                 .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
                 .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
-                .bundles(bundles)
+                .bundles(sortAndShuffleBundleList(bundles))
                 .asset(paymentMethodDocument.getPaymentMethodAsset())
                 .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
     }
+
+    private List<BundleDto> sortAndShuffleBundleList(List<BundleDto> bundles) {
+        Map<Long, List<BundleDto>> bundleMap = new TreeMap<>();
+        Optional<BundleDto> onUsBundle = bundles
+                .stream()
+                .filter(BundleDto::getOnUs)
+                .findFirst();
+        bundles
+                .stream()
+                .filter(Predicate.not(BundleDto::getOnUs))
+                .forEach(bundle -> {
+                    Long fees = bundle.getTaxPayerFee();
+                    List<BundleDto> bundlesPerFee = bundleMap.getOrDefault(fees, new ArrayList<>());
+                    bundlesPerFee.add(bundle);
+                    bundleMap.put(fees, bundlesPerFee);
+                });
+        Deque<BundleDto> orderedBundles = new LinkedList<>();
+        bundleMap.values().forEach(bundlesPerFee -> {
+            Collections.shuffle(bundlesPerFee);
+            orderedBundles.addAll(bundlesPerFee);
+        });
+        onUsBundle.ifPresent(orderedBundles::addFirst);
+        return orderedBundles.stream().toList();
+    }
+
+/*
+    private List<BundleDto> sortAndShuffleBundleListWithMoreThanOneOnUs(List<BundleDto> bundles) {
+        Map<Long, List<BundleDto>> bundleMapOnUs = new TreeMap<>();
+        Map<Long, List<BundleDto>> bundleMapNotOnUs = new TreeMap<>();
+        bundles
+                .stream()
+                .filter(BundleDto::getOnUs)
+                .forEach(bundle -> {
+                    Long fees = bundle.getTaxPayerFee();
+                    List<BundleDto> bundlesPerFee = bundleMapOnUs.getOrDefault(fees, new ArrayList<>());
+                    bundlesPerFee.add(bundle);
+                    bundleMapOnUs.put(fees, bundlesPerFee);
+                });
+        bundles
+                .stream()
+                .filter(Predicate.not(BundleDto::getOnUs))
+                .forEach(bundle -> {
+                    Long fees = bundle.getTaxPayerFee();
+                    List<BundleDto> bundlesPerFee = bundleMapNotOnUs.getOrDefault(fees, new ArrayList<>());
+                    bundlesPerFee.add(bundle);
+                    bundleMapNotOnUs.put(fees, bundlesPerFee);
+                });
+        Deque<BundleDto> orderedBundlesOnUs = new LinkedList<>();
+        bundleMapOnUs.values().forEach(bundlesPerFee -> {
+            Collections.shuffle(bundlesPerFee);
+            orderedBundlesOnUs.addAll(bundlesPerFee);
+        });
+        Deque<BundleDto> orderedBundlesNotOnUs = new LinkedList<>();
+        bundleMapNotOnUs.values().forEach(bundlesPerFee -> {
+            Collections.shuffle(bundlesPerFee);
+            orderedBundlesNotOnUs.addAll(bundlesPerFee);
+        });
+        List<BundleDto> resultList = orderedBundlesOnUs.stream().toList();
+        resultList.addAll(orderedBundlesNotOnUs.stream().toList());
+        return resultList;
+    }
+ */
 }
