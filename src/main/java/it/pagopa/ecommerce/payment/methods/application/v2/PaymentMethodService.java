@@ -17,9 +17,10 @@ import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.TransferListItemDto;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
+import java.util.function.Predicate;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -161,8 +162,32 @@ public class PaymentMethodService {
                 .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
                 .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
-                .bundles(bundles)
+                .bundles(sortAndShuffleBundleList(bundles))
                 .asset(paymentMethodDocument.getPaymentMethodAsset())
                 .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
+    }
+
+    private List<BundleDto> sortAndShuffleBundleList(List<BundleDto> bundles) {
+        Map<Long, List<BundleDto>> bundleMap = new TreeMap<>();
+        Optional<BundleDto> onUsBundle = bundles
+                .stream()
+                .filter(BundleDto::getOnUs)
+                .findFirst();
+        bundles
+                .stream()
+                .filter(Predicate.not(BundleDto::getOnUs))
+                .forEach(bundle -> {
+                    Long fees = bundle.getTaxPayerFee();
+                    List<BundleDto> bundlesPerFee = bundleMap.getOrDefault(fees, new ArrayList<>());
+                    bundlesPerFee.add(bundle);
+                    bundleMap.put(fees, bundlesPerFee);
+                });
+        Deque<BundleDto> orderedBundles = new LinkedList<>();
+        bundleMap.values().forEach(bundlesPerFee -> {
+            Collections.shuffle(bundlesPerFee);
+            orderedBundles.addAll(bundlesPerFee);
+        });
+        onUsBundle.ifPresent(orderedBundles::addFirst);
+        return orderedBundles.stream().toList();
     }
 }

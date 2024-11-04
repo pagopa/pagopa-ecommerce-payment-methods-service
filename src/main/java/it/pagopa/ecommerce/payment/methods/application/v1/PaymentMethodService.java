@@ -32,6 +32,7 @@ import reactor.util.function.Tuples;
 import javax.crypto.SecretKey;
 import java.net.URI;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service(PaymentMethodService.QUALIFIER_NAME)
@@ -592,30 +593,33 @@ public class PaymentMethodService {
                 .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
                 .bundles(
-                        bundle.getBundleOptions() != null ? bundle.getBundleOptions()
-                                .stream()
-                                .map(
-                                        t -> new BundleDto()
-                                                .abi(t.getAbi())
-                                                .bundleDescription(t.getBundleDescription())
-                                                .bundleName(t.getBundleName())
-                                                .idBrokerPsp(t.getIdBrokerPsp())
-                                                .idBundle(t.getIdBundle())
-                                                .idChannel(t.getIdChannel())
-                                                .idCiBundle(t.getIdCiBundle())
-                                                .idPsp(t.getIdPsp())
-                                                .onUs(t.getOnUs())
-                                                .paymentMethod(
-                                                        // A null value is considered as "any" in the AFM domain
-                                                        t.getPaymentMethod() == null
-                                                                ? paymentMethodDocument.getPaymentMethodTypeCode()
-                                                                : t.getPaymentMethod()
-                                                )
-                                                .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
-                                                .taxPayerFee(t.getTaxPayerFee())
-                                                .touchpoint(t.getTouchpoint())
-                                                .pspBusinessName(t.getPspBusinessName())
-                                ).toList() : new ArrayList<>()
+                        sortAndShuffleBundleList(
+                                bundle.getBundleOptions() != null ? bundle.getBundleOptions()
+                                        .stream()
+                                        .map(
+                                                t -> new BundleDto()
+                                                        .abi(t.getAbi())
+                                                        .bundleDescription(t.getBundleDescription())
+                                                        .bundleName(t.getBundleName())
+                                                        .idBrokerPsp(t.getIdBrokerPsp())
+                                                        .idBundle(t.getIdBundle())
+                                                        .idChannel(t.getIdChannel())
+                                                        .idCiBundle(t.getIdCiBundle())
+                                                        .idPsp(t.getIdPsp())
+                                                        .onUs(t.getOnUs())
+                                                        .paymentMethod(
+                                                                // A null value is considered as "any" in the AFM domain
+                                                                t.getPaymentMethod() == null
+                                                                        ? paymentMethodDocument
+                                                                                .getPaymentMethodTypeCode()
+                                                                        : t.getPaymentMethod()
+                                                        )
+                                                        .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
+                                                        .taxPayerFee(t.getTaxPayerFee())
+                                                        .touchpoint(t.getTouchpoint())
+                                                        .pspBusinessName(t.getPspBusinessName())
+                                        ).toList() : new ArrayList<>()
+                        )
                 )
                 .asset(paymentMethodDocument.getPaymentMethodAsset())
                 .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
@@ -642,5 +646,32 @@ public class PaymentMethodService {
                 ),
                 new PaymentMethodBrandAssets(Optional.ofNullable(doc.getPaymentMethodsBrandAssets()))
         );
+    }
+
+    private List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> sortAndShuffleBundleList(
+                                                                                                      List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> bundles
+    ) {
+        Map<Long, List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto>> bundleMap = new TreeMap<>();
+        Optional<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> onUsBundle = bundles
+                .stream()
+                .filter(it.pagopa.ecommerce.payment.methods.server.model.BundleDto::getOnUs)
+                .findFirst();
+        bundles
+                .stream()
+                .filter(Predicate.not(it.pagopa.ecommerce.payment.methods.server.model.BundleDto::getOnUs))
+                .forEach(bundle -> {
+                    Long fees = bundle.getTaxPayerFee();
+                    List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> bundlesPerFee = bundleMap
+                            .getOrDefault(fees, new ArrayList<>());
+                    bundlesPerFee.add(bundle);
+                    bundleMap.put(fees, bundlesPerFee);
+                });
+        Deque<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> orderedBundles = new LinkedList<>();
+        bundleMap.values().forEach(bundlesPerFee -> {
+            Collections.shuffle(bundlesPerFee);
+            orderedBundles.addAll(bundlesPerFee);
+        });
+        onUsBundle.ifPresent(orderedBundles::addFirst);
+        return orderedBundles.stream().toList();
     }
 }
