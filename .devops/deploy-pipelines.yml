@@ -243,7 +243,7 @@ stages:
           - checkout: pagopaCheckoutTests
           - template: azure-templates/api-tests.yml
             parameters:
-              COLLECTION_TEST_FILE: "api-tests/checkout-tests/pgs/checkout-for-ecommerce-api.tests.json"
+              COLLECTION_TEST_FILE: "api-tests/checkout-tests/npg/checkout-for-ecommerce-api.tests.json"
               ENV_FILE: "api-tests/uat.payment-methods.blue.envs.json"
               TEST_FILE_PREFIX: "uat-blue"
 
@@ -374,7 +374,7 @@ stages:
           - checkout: pagopaCheckoutTests
           - template: azure-templates/api-tests.yml
             parameters:
-              COLLECTION_TEST_FILE: "api-tests/checkout-tests/pgs/checkout-for-ecommerce-api.tests.json"
+              COLLECTION_TEST_FILE: "api-tests/checkout-tests/npg/checkout-for-ecommerce-api.tests.json"
               ENV_FILE: "api-tests/uat.envs.json"
               TEST_FILE_PREFIX: "uat-green"
 
