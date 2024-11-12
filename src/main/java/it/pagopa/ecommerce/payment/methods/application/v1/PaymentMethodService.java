@@ -31,6 +31,7 @@ import reactor.util.function.Tuples;
 
 import javax.crypto.SecretKey;
 import java.net.URI;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -356,9 +357,12 @@ public class PaymentMethodService {
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
-                    URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
-                    URI merchantUrl = returnUrlBasePath;
-                    URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
+                    URI resultUrl = UriComponentsBuilder
+                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix()))
+                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
+                    URI cancelUrl = UriComponentsBuilder
+                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix()))
+                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
                     URI notificationUrl = UriComponentsBuilder
                             .fromHttpUrl(sessionUrlConfig.notificationUrl())
                             .build(
@@ -372,7 +376,7 @@ public class PaymentMethodService {
 
                     return npgClient.buildForm(
                             correlationId, // correlationId
-                            merchantUrl, // merchantUrl
+                            returnUrlBasePath, // merchantUrl
                             resultUrl, // resultUrl
                             notificationUrl, // notificationUrl
                             cancelUrl, // cancelUrl
