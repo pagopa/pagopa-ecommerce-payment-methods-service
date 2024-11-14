@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,6 +52,7 @@ import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -471,6 +473,27 @@ class PaymentMethodServiceTests {
             StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
                     .expectNext(expected)
                     .verifyComplete();
+
+            // Check url contain random t queryparams
+            ArgumentCaptor<URI> resultUrlCaptor = ArgumentCaptor.forClass(URI.class);
+            ArgumentCaptor<URI> cancelUrl = ArgumentCaptor.forClass(URI.class);
+            Mockito.verify(npgClient, times(1)).buildForm(
+                    any(),
+                    any(),
+                    resultUrlCaptor.capture(),
+                    any(),
+                    cancelUrl.capture(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+            );
+            assertTrue(
+                    () -> TestUtil.urlContainsRandomTQueryParam(resultUrlCaptor.getValue())
+                            && TestUtil.urlContainsRandomTQueryParam(cancelUrl.getValue())
+            );
         }
     }
 
