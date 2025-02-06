@@ -65,7 +65,7 @@ microservice-chart:
       NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
   image:
     repository: pagopapcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.14.0"
+    tag: "1.15.2"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -127,7 +127,7 @@ microservice-chart:
   strategy:
     type: "RollingUpdate"
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 2
       maxUnavailable: 0
   envConfig:
     MONGO_HOST: pagopa-p-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com

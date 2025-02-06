@@ -627,6 +627,29 @@ public class TestUtil {
                 );
     }
 
+    public static boolean urlContainsRandomTQueryParam(URI uri) {
+        Map<String, String> paramsMap = getParametersAsMap(uri.getQuery());
+        return paramsMap.containsKey("t");
+    }
+
+    public static Map<String, String> getParametersAsMap(
+                                                         String query
+    ) {
+        return Optional.ofNullable(query)
+                .filter(q -> !q.isEmpty())
+                .map(
+                        q -> Arrays.stream(q.split("&"))
+                                .map(param -> param.split("="))
+                                .collect(
+                                        Collectors.toMap(
+                                                pair -> pair[0],
+                                                pair -> pair.length > 1 ? pair[1] : ""
+                                        )
+                                )
+                )
+                .orElse(Map.of());
+    }
+
     public static class V2 {
         public static it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto getMultiNoticeFeesRequest() {
             final var notices = LongStream.of(10L, 20L)
