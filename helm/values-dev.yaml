@@ -5,25 +5,23 @@ microservice-chart:
   canaryDelivery:
     create: true
     ingress:
-      create: true
-      canary:
-        type: bluegreen
-    service:
-      create: true
-    deployment:
-      create: true
-      image:
-        repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-        tag: "latest"
-        pullPolicy: Always
-      envConfig:
-        AFM_URI: "https://api.dev.platform.pagopa.it/afm/calculator-service/v1/fees"
-        AFM_URI_V2: "https://api.dev.platform.pagopa.it/afm/calculator-service/v2/fees"
-        ECS_SERVICE_NAME: pagopa-ecommerce-payment-method-service-blue
-        SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
-        SESSION_URL_NOTIFICATION_URL: "https://api.dev.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}&deployment=blue"
-      envSecret:
-        AFM_KEY: afm-api-key-blue
+      bluegreen: true
+      #set canary deployment with traffic balancing see https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#canary for more info
+      header: true
+      headerName: deployment
+      headerValue: blue
+      weightPercent: 10
+    image:
+      repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
+      tag: "latest"
+    envConfig:
+      AFM_URI: "https://api.dev.platform.pagopa.it/afm/calculator-service/v1/fees"
+      AFM_URI_V2: "https://api.dev.platform.pagopa.it/afm/calculator-service/v2/fees"
+      ECS_SERVICE_NAME: pagopa-ecommerce-payment-method-service-blue
+      SESSION_URL_BASEPATH: "https://pagopa-d-checkout-cdn-endpoint.azureedge.net"
+      SESSION_URL_NOTIFICATION_URL: "https://api.dev.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}&deployment=blue"
+    envSecret:
+      AFM_KEY: afm-api-key-blue
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "1.15.2"
@@ -57,8 +55,8 @@ microservice-chart:
     servicePort: 8080
   serviceAccount:
     create: false
-    annotations: {}
-    name: ""
+    annotations: { }
+    name: "ecommerce-workload-identity"
   podAnnotations: {}
   podSecurityContext:
     seccompProfile:
@@ -160,3 +158,5 @@ microservice-chart:
                 operator: In
                 values:
                   - user
+  azure:
+    workloadIdentityClientId: 1be61b58-24e2-49c8-b401-89ebd004bf2e
