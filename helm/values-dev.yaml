@@ -24,7 +24,7 @@ microservice-chart:
       AFM_KEY: afm-api-key-blue
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.15.2"
+    tag: "1.16.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -55,7 +55,7 @@ microservice-chart:
     servicePort: 8080
   serviceAccount:
     create: false
-    annotations: { }
+    annotations: {}
     name: "ecommerce-workload-identity"
   podAnnotations: {}
   podSecurityContext:
