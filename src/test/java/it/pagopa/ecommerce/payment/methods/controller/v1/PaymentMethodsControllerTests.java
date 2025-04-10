@@ -4,7 +4,6 @@ import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
-import it.pagopa.ecommerce.commons.v1.TransactionTestUtils;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
@@ -485,7 +484,7 @@ class PaymentMethodsControllerTests {
         String paymentMethodId = UUID.randomUUID().toString();
         String orderId = "orderId";
         String securityToken = "securityToken";
-        TransactionId transactionId = new TransactionId(TransactionTestUtils.TRANSACTION_ID);
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
         Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
                 .thenReturn(Mono.just(transactionId));

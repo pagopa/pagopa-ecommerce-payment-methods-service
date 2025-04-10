@@ -2,7 +2,6 @@ package it.pagopa.ecommerce.payment.methods.controller.v2;
 
 import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.commons.domain.TransactionId;
-import it.pagopa.ecommerce.commons.v1.TransactionTestUtils;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
@@ -144,7 +143,7 @@ class PaymentMethodsControllerTests {
         String paymentMethodId = UUID.randomUUID().toString();
         String orderId = "orderId";
         String securityToken = "securityToken";
-        TransactionId transactionId = new TransactionId(TransactionTestUtils.TRANSACTION_ID);
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
         Mockito.when(paymentMethodsControllerV1.getTransactionIdAssociatedToNpgSession(any(), any(), any()))
                 .thenReturn(Mono.just(transactionId));
