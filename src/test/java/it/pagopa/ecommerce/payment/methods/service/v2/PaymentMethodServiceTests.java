@@ -1,27 +1,18 @@
 package it.pagopa.ecommerce.payment.methods.service.v2;
 
-import static com.mongodb.assertions.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.BundleDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentMethodManagementTypeDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,6 +21,16 @@ import org.mockito.Mockito;
 import org.springframework.data.util.Pair;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static com.mongodb.assertions.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 class PaymentMethodServiceTests {
 

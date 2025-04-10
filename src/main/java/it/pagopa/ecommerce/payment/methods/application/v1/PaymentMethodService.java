@@ -501,10 +501,10 @@ public class PaymentMethodService {
                 );
     }
 
-    public Mono<String> isSessionValid(
-                                       String paymentMethodId,
-                                       String orderId,
-                                       String securityToken
+    public Mono<TransactionId> isSessionValid(
+                                              String paymentMethodId,
+                                              String orderId,
+                                              String securityToken
     ) {
         return paymentMethodRepository
                 .findById(paymentMethodId)
@@ -532,8 +532,7 @@ public class PaymentMethodService {
                     }
                 })
                 .mapNotNull(NpgSessionDocument::transactionId)
-                .map(TransactionId::new)
-                .map(TransactionId::base64);
+                .map(TransactionId::new);
     }
 
     public Mono<NpgSessionDocument> updateSession(

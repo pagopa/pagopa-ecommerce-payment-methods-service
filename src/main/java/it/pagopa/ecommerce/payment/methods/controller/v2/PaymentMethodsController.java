@@ -8,10 +8,7 @@ import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundExcept
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.api.V2Api;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.TransferListItemDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,11 +27,17 @@ public class PaymentMethodsController implements V2Api {
 
     private final PaymentMethodService paymentMethodService;
 
+    private final it.pagopa.ecommerce.payment.methods.controller.v1.PaymentMethodsController paymentMethodsControllerV1;
+
     @Value("${warmup.payment.method.id}")
     String warmupPaymentMethodID;
 
-    public PaymentMethodsController(PaymentMethodService paymentMethodService) {
+    public PaymentMethodsController(
+            PaymentMethodService paymentMethodService,
+            it.pagopa.ecommerce.payment.methods.controller.v1.PaymentMethodsController paymentMethodsControllerV1
+    ) {
         this.paymentMethodService = paymentMethodService;
+        this.paymentMethodsControllerV1 = paymentMethodsControllerV1;
     }
 
     @Override
@@ -46,6 +49,22 @@ public class PaymentMethodsController implements V2Api {
     ) {
         return calculateFeeRequestDto
                 .flatMap(feeRequestDto -> paymentMethodService.computeFee(feeRequestDto, id, maxOccurrences))
+                .map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<SessionGetTransactionIdResponseDto>> getTransactionIdForSession(
+                                                                                               String id,
+                                                                                               String orderId,
+                                                                                               ServerWebExchange exchange
+    ) {
+        return paymentMethodsControllerV1
+                .getTransactionIdAssociatedToNpgSession(id, orderId, exchange)
+                .map(
+                        transactionId -> new SessionGetTransactionIdResponseDto()
+                                .transactionId(transactionId.value())
+                                .base64EncodedTransactionId(transactionId.base64())
+                )
                 .map(ResponseEntity::ok);
     }
 

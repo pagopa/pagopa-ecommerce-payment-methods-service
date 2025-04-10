@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.controller.v1;
 
 import it.pagopa.ecommerce.commons.annotations.Warmup;
+import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
@@ -264,6 +265,16 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                                String orderId,
                                                                                                ServerWebExchange exchange
     ) {
+        return getTransactionIdAssociatedToNpgSession(id, orderId, exchange)
+                .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId.base64()))
+                .map(ResponseEntity::ok);
+    }
+
+    public Mono<TransactionId> getTransactionIdAssociatedToNpgSession(
+                                                                      String id,
+                                                                      String orderId,
+                                                                      ServerWebExchange exchange
+    ) {
         return getAuthenticationToken(exchange)
                 .doOnNext(
                         req -> log.info(
@@ -272,9 +283,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 orderId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
-                .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId))
-                .map(ResponseEntity::ok);
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken));
     }
 
     @Override
