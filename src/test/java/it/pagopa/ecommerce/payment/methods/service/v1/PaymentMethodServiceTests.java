@@ -44,12 +44,16 @@ import reactor.test.StepVerifier;
 
 import javax.crypto.SecretKey;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.mongodb.assertions.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -591,7 +595,6 @@ class PaymentMethodServiceTests {
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, transactionId.value());
-        String encodedTransactionId = transactionId.base64();
 
         Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                 .thenReturn(Mono.just(TestUtil.getTestPaymentDoc(paymentMethod)));
@@ -605,7 +608,7 @@ class PaymentMethodServiceTests {
                                 npgSessionDocument.securityToken()
                         )
                 )
-                .expectNext(encodedTransactionId)
+                .expectNext(transactionId)
                 .verifyComplete();
     }
 

@@ -1,9 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.controller.v2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-
 import io.opentelemetry.api.trace.Tracer;
+import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
@@ -12,8 +10,7 @@ import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
-import java.util.List;
-import java.util.UUID;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.SessionGetTransactionIdResponseDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +25,14 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(it.pagopa.ecommerce.payment.methods.controller.v2.PaymentMethodsController.class)
@@ -128,4 +133,35 @@ class PaymentMethodsControllerTests {
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals("reason test", responseEntity.getBody().getDetail());
     }
+
+    @Test
+    void shouldReturnTransactionIdForValidSession() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String orderId = "orderId";
+        String securityToken = "securityToken";
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
+
+        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any()))
+                .thenReturn(Mono.just(transactionId));
+
+        SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
+                .base64EncodedTransactionId(transactionId.base64())
+                .transactionId(transactionId.value());
+        webClient
+                .get()
+                .uri(
+                        builder -> builder
+                                .path("/v2/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
+                )
+                .headers(h -> h.setBearerAuth(securityToken))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(SessionGetTransactionIdResponseDto.class)
+                .isEqualTo(expected);
+        verify(paymentMethodService, times(1))
+                .isSessionValid(paymentMethodId, orderId, securityToken);
+    }
+
 }

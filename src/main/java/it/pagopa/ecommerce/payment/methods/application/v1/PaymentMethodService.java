@@ -2,17 +2,20 @@ package it.pagopa.ecommerce.payment.methods.application.v1;
 
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.Claims;
-import it.pagopa.ecommerce.commons.domain.TransactionId;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
 import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
+import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommon;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
-import it.pagopa.ecommerce.payment.methods.exception.*;
+import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
@@ -39,7 +42,7 @@ import java.util.stream.Collectors;
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
 @Slf4j
-public class PaymentMethodService {
+public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     protected static final String QUALIFIER_NAME = "paymentMethodService";
 
@@ -99,6 +102,7 @@ public class PaymentMethodService {
             @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
             JwtTokenUtils jwtTokenUtils
     ) {
+        super(paymentMethodRepository, npgSessionsTemplateWrapper);
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
@@ -499,41 +503,6 @@ public class PaymentMethodService {
                                 Mono.error(new OrderIdNotFoundException(orderId))
                         )
                 );
-    }
-
-    public Mono<String> isSessionValid(
-                                       String paymentMethodId,
-                                       String orderId,
-                                       String securityToken
-    ) {
-        return paymentMethodRepository
-                .findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
-                .map(
-                        ignore -> npgSessionsTemplateWrapper.findById(orderId)
-                )
-                .doOnNext(doc -> log.info("Found session for order id {}: {}", orderId, doc.isPresent()))
-                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new OrderIdNotFoundException(orderId))))
-                .flatMap(doc -> {
-                    String transactionId = doc.transactionId();
-                    if (transactionId == null) {
-                        return Mono.error(new InvalidSessionException(orderId));
-                    } else {
-                        return Mono.just(doc);
-                    }
-                })
-                .flatMap(doc -> {
-                    if (!doc.securityToken().equals(securityToken)) {
-                        log.warn("Invalid security token for requested order id {}", orderId);
-                        return Mono.error(new MismatchedSecurityTokenException(orderId, doc.transactionId()));
-                    } else {
-                        return Mono.just(doc);
-                    }
-                })
-                .mapNotNull(NpgSessionDocument::transactionId)
-                .map(TransactionId::new)
-                .map(TransactionId::base64);
     }
 
     public Mono<NpgSessionDocument> updateSession(

@@ -66,6 +66,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
+  /v2/payment-methods/{id}/sessions/{orderId}/transactionId:
+    get:
+      tags:
+        - payment-methods
+      operationId: getTransactionIdForSession
+      summary: Get eCommerce transaction id for the given NPG session
+      description: API to get a transaction id from a NPG session
+      parameters:
+        - name: id
+          in: path
+          description: Payment Method ID
+          required: true
+          schema:
+            type: string
+        - name: orderId
+          in: path
+          description: Order id related to NPG session
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionGetTransactionIdResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '409':
+          description: Invalid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
 components:
   schemas:
     PaymentNotice:
@@ -229,17 +276,19 @@ components:
         - ENABLED
         - DISABLED
         - INCOMING
-    PaymentMethodManagementType:
-      type: string
-      description: |
-        describes how to manage the payment method authorization flow in wallet and eCommerce domain
-        REDIRECT if it must be managed with a redirect flow, 
-        ONBOARDABLE if it must be managed with NPG and it is possible to save the payment method in the wallet, 
-        NOT_ONBOARDABLE if it must be managed with NPG but the method cannot be saved
-      enum:
-        - REDIRECT
-        - ONBOARDABLE
-        - NOT_ONBOARDABLE
+    SessionGetTransactionIdResponse:
+      type: object
+      description: Transaction id for session successful response
+      properties:
+        transactionId:
+          type: string
+          description: Transaction id associated to this NPG session
+        base64EncodedTransactionId:
+          type: string
+          description: Transaction id associated to this NPG session in base64 encoding
+      required:
+        - transactionId
+        - base64EncodedTransactionId
   requestBodies:
     PostPaymentMethodPSP:
       required: true
