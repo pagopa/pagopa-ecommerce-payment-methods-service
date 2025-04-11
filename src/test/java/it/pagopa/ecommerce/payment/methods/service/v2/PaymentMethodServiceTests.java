@@ -4,6 +4,7 @@ import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
@@ -37,10 +38,12 @@ class PaymentMethodServiceTests {
     private final AfmClient afmClient = mock(AfmClient.class);
 
     private final PaymentMethodRepository paymentMethodRepository = mock(PaymentMethodRepository.class);
+    private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper = mock(NpgSessionsTemplateWrapper.class);
 
     private final PaymentMethodService paymentMethodService = new PaymentMethodService(
             paymentMethodRepository,
-            afmClient
+            afmClient,
+            npgSessionsTemplateWrapper
     );
 
     @Test

@@ -31,7 +31,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -42,9 +41,6 @@ class PaymentMethodsControllerTests {
 
     @MockBean
     private PaymentMethodService paymentMethodService;
-
-    @MockBean
-    private it.pagopa.ecommerce.payment.methods.controller.v1.PaymentMethodsController paymentMethodsControllerV1;
 
     @InjectMocks
     private PaymentMethodsController paymentMethodsController;
@@ -145,7 +141,7 @@ class PaymentMethodsControllerTests {
         String securityToken = "securityToken";
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
-        Mockito.when(paymentMethodsControllerV1.getTransactionIdAssociatedToNpgSession(any(), any(), any()))
+        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any()))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -164,8 +160,8 @@ class PaymentMethodsControllerTests {
                 .isOk()
                 .expectBody(SessionGetTransactionIdResponseDto.class)
                 .isEqualTo(expected);
-        verify(paymentMethodsControllerV1, times(1))
-                .getTransactionIdAssociatedToNpgSession(eq(paymentMethodId), eq(orderId), any());
+        verify(paymentMethodService, times(1))
+                .isSessionValid(paymentMethodId, orderId, securityToken);
     }
 
 }

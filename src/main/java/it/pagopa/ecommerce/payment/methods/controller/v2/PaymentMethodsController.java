@@ -20,6 +20,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
 
 @RestController("paymentMethodsControllerV2")
 @Slf4j
@@ -27,17 +29,13 @@ public class PaymentMethodsController implements V2Api {
 
     private final PaymentMethodService paymentMethodService;
 
-    private final it.pagopa.ecommerce.payment.methods.controller.v1.PaymentMethodsController paymentMethodsControllerV1;
-
     @Value("${warmup.payment.method.id}")
     String warmupPaymentMethodID;
 
     public PaymentMethodsController(
-            PaymentMethodService paymentMethodService,
-            it.pagopa.ecommerce.payment.methods.controller.v1.PaymentMethodsController paymentMethodsControllerV1
+            PaymentMethodService paymentMethodService
     ) {
         this.paymentMethodService = paymentMethodService;
-        this.paymentMethodsControllerV1 = paymentMethodsControllerV1;
     }
 
     @Override
@@ -58,8 +56,15 @@ public class PaymentMethodsController implements V2Api {
                                                                                                String orderId,
                                                                                                ServerWebExchange exchange
     ) {
-        return paymentMethodsControllerV1
-                .getTransactionIdAssociatedToNpgSession(id, orderId, exchange)
+        return getAuthenticationToken(exchange)
+                .doOnNext(
+                        req -> log.info(
+                                "Requesting session validation for paymentMethodId={}, orderId={}",
+                                id,
+                                orderId
+                        )
+                )
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
                 .map(
                         transactionId -> new SessionGetTransactionIdResponseDto()
                                 .transactionId(transactionId.value())
@@ -134,6 +139,21 @@ public class PaymentMethodsController implements V2Api {
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));
+    }
+
+    private Mono<String> getAuthenticationToken(ServerWebExchange exchange) {
+        return Mono.justOrEmpty(
+                Optional.ofNullable(
+                        exchange.getRequest()
+                                .getHeaders()
+                                .get("Authorization")
+                )
+                        .orElse(List.of())
+                        .stream()
+                        .findFirst()
+                        .filter(header -> header.startsWith("Bearer "))
+                        .map(header -> header.substring("Bearer ".length()))
+        );
     }
 
 }
