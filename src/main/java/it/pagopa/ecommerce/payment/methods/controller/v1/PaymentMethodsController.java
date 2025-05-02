@@ -24,10 +24,10 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static it.pagopa.ecommerce.payment.methods.utils.HttpUtils.getAuthenticationToken;
 
 @RestController
 @Slf4j
@@ -273,7 +273,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         )
                 )
                 .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
-                .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId))
+                .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId.base64()))
                 .map(ResponseEntity::ok);
     }
 
@@ -287,21 +287,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
         return patchSessionRequestDto
                 .flatMap(updateData -> paymentMethodService.updateSession(id, orderId, updateData))
                 .map(ignored -> ResponseEntity.noContent().build());
-    }
-
-    private Mono<String> getAuthenticationToken(ServerWebExchange exchange) {
-        return Mono.justOrEmpty(
-                Optional.ofNullable(
-                        exchange.getRequest()
-                                .getHeaders()
-                                .get("Authorization")
-                )
-                        .orElse(List.of())
-                        .stream()
-                        .findFirst()
-                        .filter(header -> header.startsWith("Bearer "))
-                        .map(header -> header.substring("Bearer ".length()))
-        );
     }
 
     @Warmup

@@ -8,10 +8,7 @@ import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundExcept
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.api.V2Api;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.TransferListItemDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +21,8 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+import static it.pagopa.ecommerce.payment.methods.utils.HttpUtils.getAuthenticationToken;
+
 @RestController("paymentMethodsControllerV2")
 @Slf4j
 public class PaymentMethodsController implements V2Api {
@@ -33,7 +32,9 @@ public class PaymentMethodsController implements V2Api {
     @Value("${warmup.payment.method.id}")
     String warmupPaymentMethodID;
 
-    public PaymentMethodsController(PaymentMethodService paymentMethodService) {
+    public PaymentMethodsController(
+            PaymentMethodService paymentMethodService
+    ) {
         this.paymentMethodService = paymentMethodService;
     }
 
@@ -46,6 +47,29 @@ public class PaymentMethodsController implements V2Api {
     ) {
         return calculateFeeRequestDto
                 .flatMap(feeRequestDto -> paymentMethodService.computeFee(feeRequestDto, id, maxOccurrences))
+                .map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<SessionGetTransactionIdResponseDto>> getTransactionIdForSession(
+                                                                                               String id,
+                                                                                               String orderId,
+                                                                                               ServerWebExchange exchange
+    ) {
+        return getAuthenticationToken(exchange)
+                .doOnNext(
+                        req -> log.info(
+                                "Requesting session validation for paymentMethodId={}, orderId={}",
+                                id,
+                                orderId
+                        )
+                )
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
+                .map(
+                        transactionId -> new SessionGetTransactionIdResponseDto()
+                                .transactionId(transactionId.value())
+                                .base64EncodedTransactionId(transactionId.base64())
+                )
                 .map(ResponseEntity::ok);
     }
 
