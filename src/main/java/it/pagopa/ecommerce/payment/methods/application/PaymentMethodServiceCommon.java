@@ -1,6 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
-import it.pagopa.ecommerce.commons.domain.TransactionId;
+import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;

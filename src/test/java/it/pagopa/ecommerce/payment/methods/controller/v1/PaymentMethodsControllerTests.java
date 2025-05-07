@@ -1,7 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.controller.v1;
 
 import io.opentelemetry.api.trace.Tracer;
-import it.pagopa.ecommerce.commons.domain.TransactionId;
+import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
 import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;

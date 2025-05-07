@@ -1,7 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.controller.v2;
 
 import io.opentelemetry.api.trace.Tracer;
-import it.pagopa.ecommerce.commons.domain.TransactionId;
+import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
 import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
