@@ -24,7 +24,7 @@ microservice-chart:
       AFM_KEY: afm-api-key-blue
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.17.0"
+    tag: "1.18.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
