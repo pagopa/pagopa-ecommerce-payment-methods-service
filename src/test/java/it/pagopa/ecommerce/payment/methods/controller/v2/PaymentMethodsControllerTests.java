@@ -6,6 +6,10 @@ import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PspRepository;
+import it.pagopa.ecommerce.payment.methods.infrastructure.rule.FilterRuleEngine;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
@@ -18,6 +22,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,7 +46,22 @@ import static org.mockito.Mockito.verify;
 class PaymentMethodsControllerTests {
 
     @MockBean
+    private PspRepository pspRepository;
+
+    @MockBean
+    private FilterRuleEngine filterRuleEngine; // se serve
+
+    @MockBean
     private PaymentMethodService paymentMethodService;
+
+    @MockBean
+    private PaymentMethodRepository paymentMethodRepository;
+
+    @MockBean
+    private RedisConnectionFactory redisConnectionFactory;
+
+    @MockBean
+    private NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
 
     @InjectMocks
     private PaymentMethodsController paymentMethodsController;
@@ -162,6 +183,12 @@ class PaymentMethodsControllerTests {
                 .isEqualTo(expected);
         verify(paymentMethodService, times(1))
                 .isSessionValid(paymentMethodId, orderId, securityToken);
+    }
+
+    @Test
+    void contextLoads() {
+        // semplice test per vedere se webClient viene iniettato
+        assertNotNull(webClient);
     }
 
 }
