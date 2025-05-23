@@ -3,7 +3,7 @@ package it.pagopa.ecommerce.payment.methods.domain.valueobjects;
 import lombok.EqualsAndHashCode;
 import org.springframework.lang.NonNull;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Objects;
 

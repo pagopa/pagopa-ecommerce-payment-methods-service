@@ -25,16 +25,19 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
@@ -55,13 +58,15 @@ import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
+//@SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 class PaymentMethodServiceTests {
+    @Mock
+    private JwtTokenUtils jwtTokenUtils;
+
     private static final String STRONG_KEY = "ODMzNUZBNTZENDg3NTYyREUyNDhGNDdCRUZDNzI3NDMzMzQwNTFEREZGQ0MyQzA5Mjc1RjY2NTQ1NDk5MDMxNzU5NDc0NUVFMTdDMDhGNzk4Q0Q3RENFMEJBODE1NURDREExNEY2Mzk4QzFEMTU0NTExNjUyMEExMzMwMTdDMDk";
 
     private final AfmClient afmClient = mock(AfmClient.class);
@@ -87,20 +92,31 @@ class PaymentMethodServiceTests {
 
     private final SecretKey jwtSecretKey = new SecretsConfigurations().npgJwtSigningKey(STRONG_KEY);
 
-    private final JwtTokenUtils jwtTokenUtils = mock(JwtTokenUtils.class);
-    private final PaymentMethodService paymentMethodService = new PaymentMethodService(
-            afmClient,
-            paymentMethodRepository,
-            paymentMethodFactory,
-            npgClient,
-            sessionUrlConfig,
-            npgSessionsTemplateWrapper,
-            npgDefaultApiKey,
-            uniqueIdUtils,
-            jwtSecretKey,
-            900,
-            jwtTokenUtils
-    );
+    // private final JwtTokenUtils jwtTokenUtils = mock(JwtTokenUtils.class);
+    private PaymentMethodService paymentMethodService;/*
+                                                       * = new PaymentMethodService( afmClient, paymentMethodRepository,
+                                                       * paymentMethodFactory, npgClient, sessionUrlConfig,
+                                                       * npgSessionsTemplateWrapper, npgDefaultApiKey, uniqueIdUtils,
+                                                       * jwtSecretKey, 900, jwtTokenUtils );
+                                                       */
+
+    @BeforeEach
+    void setup() {
+        // inizializza manualmente tutti i mock necessari
+        paymentMethodService = new PaymentMethodService(
+                afmClient,
+                paymentMethodRepository,
+                paymentMethodFactory,
+                npgClient,
+                sessionUrlConfig,
+                npgSessionsTemplateWrapper,
+                npgDefaultApiKey,
+                uniqueIdUtils,
+                jwtSecretKey,
+                900,
+                jwtTokenUtils // <-- questo ora NON è null
+        );
+    }
 
     @Test
     void shouldCreatePaymentMethod() {
@@ -435,6 +451,8 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldCreateSessionForValidPaymentMethod() {
+        when(jwtTokenUtils.generateToken(any(), anyInt(), any())).thenReturn(Either.right("token"));
+
         UUID correlationId = UUID.randomUUID();
         try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
