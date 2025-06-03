@@ -83,8 +83,6 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     private final UniqueIdUtils uniqueIdUtils;
 
-    private final SecretKey npgJwtSigningKey;
-
     private final int npgNotificationTokenValidityTime;
 
     private final JwtTokenIssuerClient jwtTokenIssuerClient;
@@ -99,7 +97,6 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
             @Value("${npg.client.apiKey}") String npgDefaultApiKey,
             UniqueIdUtils uniqueIdUtils,
-            SecretKey npgJwtSigningKey,
             @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
             JwtTokenIssuerClient jwtTokenIssuerClient
     ) {
@@ -112,7 +109,6 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
         this.npgDefaultApiKey = npgDefaultApiKey;
         this.uniqueIdUtils = uniqueIdUtils;
-        this.npgJwtSigningKey = npgJwtSigningKey;
         this.npgNotificationTokenValidityTime = npgNotificationTokenValidityTime;
         this.jwtTokenIssuerClient = jwtTokenIssuerClient;
     }

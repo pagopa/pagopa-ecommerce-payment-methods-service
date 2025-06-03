@@ -81,8 +81,6 @@ class PaymentMethodServiceTests {
 
     private final UniqueIdUtils uniqueIdUtils = mock(UniqueIdUtils.class);
 
-    private final SecretKey jwtSecretKey = new SecretsConfigurations().npgJwtSigningKey(STRONG_KEY);
-
     private final JwtTokenIssuerClient jwtTokenIssuerClient = mock(JwtTokenIssuerClient.class);
     private final PaymentMethodService paymentMethodService = new PaymentMethodService(
             afmClient,
@@ -93,7 +91,6 @@ class PaymentMethodServiceTests {
             npgSessionsTemplateWrapper,
             npgDefaultApiKey,
             uniqueIdUtils,
-            jwtSecretKey,
             900,
             jwtTokenIssuerClient
     );
