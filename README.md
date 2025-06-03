@@ -47,6 +47,9 @@ These are all environment variables needed by the application:
 | NPG_TCP_KEEPIDLE                   | Configures the idle time after tcp starts sending keepalive probes, in seconds                                                                             | string |         |
 | NPG_TCP_KEEPINTVL                  | Configures the time between individual keepalive probes, in seconds                                                                                        | string |         |
 | NPG_TCP_KEEPCNT                    | Configures the maximum number of TCP keepalive probes                                                                                                      | string |         |
+| JWT_ISSUER_URI                     | JWT Issuer URI                                                                                                                                             | string |         |
+| JWT_ISSUER_READ_TIMEOUT            | Timeout for requests towards JWT Issuer                                                                                                                    | string |         |
+| JWT_ISSUER_CONNECTION_TIMEOUT      | Timeout for establishing connections towards JWT Issuer                                                                                                    | string |         |
 
 (*): for Mongo connection string options
 see [docs](https://www.mongodb.com/docs/drivers/java/sync/v4.3/fundamentals/connection/connection-options/#connection-options)

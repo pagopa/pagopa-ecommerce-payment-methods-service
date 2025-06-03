@@ -1,13 +1,11 @@
 package it.pagopa.ecommerce.payment.methods.service.v1;
 
-import io.vavr.control.Either;
+import it.pagopa.ecommerce.commons.client.JwtIssuerClient;
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.commons.domain.v2.Claims;
 import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
-import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
+import it.pagopa.ecommerce.commons.generated.jwtissuer.v1.dto.CreateTokenResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
-import it.pagopa.ecommerce.commons.utils.v2.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
@@ -36,6 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
@@ -44,10 +43,7 @@ import reactor.test.StepVerifier;
 
 import javax.crypto.SecretKey;
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -87,7 +83,7 @@ class PaymentMethodServiceTests {
 
     private final SecretKey jwtSecretKey = new SecretsConfigurations().npgJwtSigningKey(STRONG_KEY);
 
-    private final JwtTokenUtils jwtTokenUtils = mock(JwtTokenUtils.class);
+    private final JwtIssuerClient jwtIssuerClient = mock(JwtIssuerClient.class);
     private final PaymentMethodService paymentMethodService = new PaymentMethodService(
             afmClient,
             paymentMethodRepository,
@@ -99,7 +95,7 @@ class PaymentMethodServiceTests {
             uniqueIdUtils,
             jwtSecretKey,
             900,
-            jwtTokenUtils
+            jwtIssuerClient
     );
 
     @Test
@@ -425,11 +421,11 @@ class PaymentMethodServiceTests {
 
         Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
-        Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
-                .thenReturn(Either.left(new JWTTokenGenerationException()));
+        Mockito.when(jwtIssuerClient.createJWTToken(any(), anyInt(), any()))
+                .thenThrow(new JwtIssuerResponseException(HttpStatus.BAD_GATEWAY, "error jwtIssuwe"));
 
         StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
-                .expectError(JWTTokenGenerationException.class)
+                .expectError(JwtIssuerResponseException.class)
                 .verify();
     }
 
@@ -446,8 +442,8 @@ class PaymentMethodServiceTests {
             Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
             Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                     .thenReturn(Mono.just(paymentMethodDocument));
-            Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
-                    .thenReturn(Either.right("sessionToken"));
+            Mockito.when(jwtIssuerClient.createJWTToken(any(), anyInt(), any()))
+                    .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
             Mockito.when(
                     npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
             )

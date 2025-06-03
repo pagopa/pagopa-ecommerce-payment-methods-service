@@ -1,9 +1,9 @@
 package it.pagopa.ecommerce.payment.methods.application.v1;
 
+import it.pagopa.ecommerce.commons.client.JwtIssuerClient;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.v2.Claims;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
-import it.pagopa.ecommerce.commons.utils.v2.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommon;
@@ -86,7 +86,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     private final int npgNotificationTokenValidityTime;
 
-    private final JwtTokenUtils jwtTokenUtils;
+    private final JwtIssuerClient jwtIssuerClient;
 
     @Autowired
     public PaymentMethodService(
@@ -100,7 +100,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
             UniqueIdUtils uniqueIdUtils,
             SecretKey npgJwtSigningKey,
             @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
-            JwtTokenUtils jwtTokenUtils
+            JwtIssuerClient jwtIssuerClient
     ) {
         super(paymentMethodRepository, npgSessionsTemplateWrapper);
         this.afmClient = afmClient;
@@ -113,7 +113,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         this.uniqueIdUtils = uniqueIdUtils;
         this.npgJwtSigningKey = npgJwtSigningKey;
         this.npgNotificationTokenValidityTime = npgNotificationTokenValidityTime;
-        this.jwtTokenUtils = jwtTokenUtils;
+        this.jwtIssuerClient = jwtIssuerClient;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -337,17 +337,21 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                 .map(orderId -> Tuples.of(orderId, paymentMethod))
                 )
                 .flatMap(
-                        orderIdAndPaymentMethod -> jwtTokenUtils.generateToken(
-                                npgJwtSigningKey,
+                        orderIdAndPaymentMethod -> jwtIssuerClient.createJWTToken(
+                                JwtIssuerClient.ECOMMERCE_AUDIENCE,
                                 npgNotificationTokenValidityTime,
-                                new Claims(null, orderIdAndPaymentMethod.getT1(), id, null)
-                        ).fold(
-                                Mono::error,
+                                Map.of(
+                                        JwtIssuerClient.ORDER_ID_CLAIM,
+                                        orderIdAndPaymentMethod.getT1(),
+                                        JwtIssuerClient.PAYMENT_METHOD_ID_CLAIM,
+                                        id
+                                )
+                        ).flatMap(
                                 token -> Mono.just(
                                         Tuples.of(
                                                 orderIdAndPaymentMethod.getT1(),
                                                 orderIdAndPaymentMethod.getT2(),
-                                                token
+                                                token.getToken()
                                         )
                                 )
                         )

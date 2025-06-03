@@ -136,6 +136,9 @@ microservice-chart:
     NPG_TCP_KEEPIDLE: "5"
     NPG_TCP_KEEPINTVL: "2"
     NPG_TCP_KEEPCNT: "10"
+    JWT_ISSUER_URI: "https://weudev.ecommerce.internal.dev.platform.pagopa.it/pagopa-jwt-issuer-service"
+    JWT_ISSUER_READ_TIMEOUT: "10000"
+    JWT_ISSUER_CONNECTION_TIMEOUT: "10000"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
