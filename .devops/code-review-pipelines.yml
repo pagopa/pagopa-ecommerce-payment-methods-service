@@ -89,7 +89,7 @@ stages:
               echo "##[debug] Change placeholder for ecommerce-payment-method-service set branch: $(BRANCH_NAME)"
               sed -i "s/^ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=.*$/ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=$(BRANCH_NAME)/" .env
             displayName: 'Change payment-method branch name ecommerce-local .env'
-          - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
+          - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock mongo redis -d
             displayName: 'Run app with docker-compose'
           - script: |
               timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8083/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
