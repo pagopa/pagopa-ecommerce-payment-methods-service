@@ -2,6 +2,7 @@ package it.pagopa.ecommerce.payment.methods.controller.v1;
 
 import io.opentelemetry.api.trace.Tracer;
 import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
+import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -421,7 +422,7 @@ class PaymentMethodsControllerTests {
     @Test
     void shouldReturnResponseEntityWithJwtGenerationError() {
         ResponseEntity<ProblemJsonDto> responseEntity = paymentMethodsController
-                .errorHandler(new JwtIssuerResponseException(HttpStatus.BAD_GATEWAY, "errror jwt issuer"));
+                .errorHandler(new JWTTokenGenerationException());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals("Internal server error", responseEntity.getBody().getTitle());
     }
