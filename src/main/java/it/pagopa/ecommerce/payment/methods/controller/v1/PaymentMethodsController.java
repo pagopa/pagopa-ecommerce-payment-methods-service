@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller.v1;
 
 import it.pagopa.ecommerce.commons.annotations.Warmup;
-import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -52,7 +51,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 MismatchedSecurityTokenException.class,
                 SessionAlreadyAssociatedToTransaction.class,
                 NoBundleFoundException.class,
-                JWTTokenGenerationException.class,
+                JwtIssuerResponseException.class,
                 NpgResponseException.class
         }
     )

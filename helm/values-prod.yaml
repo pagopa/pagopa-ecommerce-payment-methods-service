@@ -126,6 +126,9 @@ microservice-chart:
     NPG_TCP_KEEPIDLE: "30"
     NPG_TCP_KEEPINTVL: "10"
     NPG_TCP_KEEPCNT: "5"
+    JWT_ISSUER_URI: "https://weuprod.ecommerce.internal.platform.pagopa.it/pagopa-jwt-issuer-service"
+    JWT_ISSUER_READ_TIMEOUT: "10000"
+    JWT_ISSUER_CONNECTION_TIMEOUT: "10000"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
@@ -133,7 +136,6 @@ microservice-chart:
     AFM_KEY: afm-api-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-api-key
-    NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
   keyvault:
     name: "pagopa-p-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
