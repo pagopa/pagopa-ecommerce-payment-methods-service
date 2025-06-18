@@ -1,17 +1,14 @@
 package it.pagopa.ecommerce.payment.methods.service.v1;
 
-import io.vavr.control.Either;
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.commons.domain.v2.Claims;
 import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
-import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
+import it.pagopa.ecommerce.commons.generated.jwtissuer.v1.dto.CreateTokenResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
-import it.pagopa.ecommerce.commons.utils.v2.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
-import it.pagopa.ecommerce.payment.methods.config.SecretsConfigurations;
+import it.pagopa.ecommerce.payment.methods.client.JwtTokenIssuerClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
@@ -25,32 +22,26 @@ import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import javax.crypto.SecretKey;
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,17 +49,13 @@ import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
-//@SpringBootTest
+@SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 class PaymentMethodServiceTests {
-    @Mock
-    private JwtTokenUtils jwtTokenUtils;
-
-    private static final String STRONG_KEY = "ODMzNUZBNTZENDg3NTYyREUyNDhGNDdCRUZDNzI3NDMzMzQwNTFEREZGQ0MyQzA5Mjc1RjY2NTQ1NDk5MDMxNzU5NDc0NUVFMTdDMDhGNzk4Q0Q3RENFMEJBODE1NURDREExNEY2Mzk4QzFEMTU0NTExNjUyMEExMzMwMTdDMDk";
-
     private final AfmClient afmClient = mock(AfmClient.class);
 
     private final NpgClient npgClient = mock(NpgClient.class);
@@ -90,33 +77,19 @@ class PaymentMethodServiceTests {
 
     private final UniqueIdUtils uniqueIdUtils = mock(UniqueIdUtils.class);
 
-    private final SecretKey jwtSecretKey = new SecretsConfigurations().npgJwtSigningKey(STRONG_KEY);
-
-    // private final JwtTokenUtils jwtTokenUtils = mock(JwtTokenUtils.class);
-    private PaymentMethodService paymentMethodService;/*
-                                                       * = new PaymentMethodService( afmClient, paymentMethodRepository,
-                                                       * paymentMethodFactory, npgClient, sessionUrlConfig,
-                                                       * npgSessionsTemplateWrapper, npgDefaultApiKey, uniqueIdUtils,
-                                                       * jwtSecretKey, 900, jwtTokenUtils );
-                                                       */
-
-    @BeforeEach
-    void setup() {
-        // inizializza manualmente tutti i mock necessari
-        paymentMethodService = new PaymentMethodService(
-                afmClient,
-                paymentMethodRepository,
-                paymentMethodFactory,
-                npgClient,
-                sessionUrlConfig,
-                npgSessionsTemplateWrapper,
-                npgDefaultApiKey,
-                uniqueIdUtils,
-                jwtSecretKey,
-                900,
-                jwtTokenUtils // <-- questo ora NON è null
-        );
-    }
+    private final JwtTokenIssuerClient jwtTokenIssuerClient = mock(JwtTokenIssuerClient.class);
+    private final PaymentMethodService paymentMethodService = new PaymentMethodService(
+            afmClient,
+            paymentMethodRepository,
+            paymentMethodFactory,
+            npgClient,
+            sessionUrlConfig,
+            npgSessionsTemplateWrapper,
+            npgDefaultApiKey,
+            uniqueIdUtils,
+            900,
+            jwtTokenIssuerClient
+    );
 
     @Test
     void shouldCreatePaymentMethod() {
@@ -441,18 +414,16 @@ class PaymentMethodServiceTests {
 
         Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
         Mockito.when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Mono.just(paymentMethodDocument));
-        Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
-                .thenReturn(Either.left(new JWTTokenGenerationException()));
+        Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+                .thenThrow(new JwtIssuerResponseException(HttpStatus.BAD_GATEWAY, "error jwtIssuwe"));
 
         StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
-                .expectError(JWTTokenGenerationException.class)
+                .expectError(JwtIssuerResponseException.class)
                 .verify();
     }
 
     @Test
     void shouldCreateSessionForValidPaymentMethod() {
-        when(jwtTokenUtils.generateToken(any(), anyInt(), any())).thenReturn(Either.right("token"));
-
         UUID correlationId = UUID.randomUUID();
         try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
@@ -464,8 +435,8 @@ class PaymentMethodServiceTests {
             Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
             Mockito.when(paymentMethodRepository.findById(paymentMethodId))
                     .thenReturn(Mono.just(paymentMethodDocument));
-            Mockito.when(jwtTokenUtils.generateToken(any(), anyInt(), any(Claims.class)))
-                    .thenReturn(Either.right("sessionToken"));
+            Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+                    .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
             Mockito.when(
                     npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
             )
