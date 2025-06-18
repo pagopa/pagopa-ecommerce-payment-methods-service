@@ -8,10 +8,6 @@ import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PaymentMethodName;
 import it.pagopa.ecommerce.payment.methods.exception.*;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PspRepository;
-import it.pagopa.ecommerce.payment.methods.infrastructure.rule.FilterRuleEngine;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
@@ -22,7 +18,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,21 +50,6 @@ class PaymentMethodsControllerTests {
 
     @MockBean
     private Tracer tracer;
-
-    @MockBean
-    private PspRepository pspRepository;
-
-    @MockBean
-    private FilterRuleEngine filterRuleEngine;
-
-    @MockBean
-    private PaymentMethodRepository paymentMethodRepository;
-
-    @MockBean
-    private RedisConnectionFactory redisConnectionFactory;
-
-    @MockBean
-    private NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
 
     @Test
     void shouldCreateNewMethodForCheckout() {

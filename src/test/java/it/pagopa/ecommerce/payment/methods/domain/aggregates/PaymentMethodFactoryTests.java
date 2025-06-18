@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.domain.aggregates;
 
-import it.pagopa.ecommerce.commons.utils.v2.JwtTokenUtils;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodAlreadyInUseException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
@@ -16,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Mono;
@@ -32,9 +30,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 class PaymentMethodFactoryTests {
-
-    @MockBean
-    private JwtTokenUtils jwtTokenUtils;
 
     @Mock
     private PaymentMethodRepository paymentMethodRepository;

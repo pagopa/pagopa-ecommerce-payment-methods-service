@@ -1,6 +1,5 @@
 package it.pagopa.ecommerce.payment.methods.infrastructure.rule;
 
-import it.pagopa.ecommerce.commons.utils.v2.JwtTokenUtils;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.PspStatus;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PspDocumentKey;
@@ -14,7 +13,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Flux;
 
@@ -24,9 +22,6 @@ import java.math.BigInteger;
 @TestPropertySource(locations = "classpath:application.test.properties")
 @ExtendWith(MockitoExtension.class)
 class FilterRuleEngineTests {
-
-    @MockBean
-    private JwtTokenUtils jwtTokenUtils;
 
     private final double NOT_NULL_AMOUNT = 100;
     private final String NOT_NULL_LANGUAGE = "IT";
