@@ -428,7 +428,7 @@ stages:
             continueOnError: false
             inputs:
               kubernetesServiceEndpoint: $(PROD_KUBERNETES_SERVICE_CONN)
-              namespace: checkout
+              namespace: ecommerce
               command: uninstall
               arguments: $(K8S_IMAGE_REPOSITORY_NAME)-blue
 
@@ -467,7 +467,7 @@ stages:
               kubernetesServiceEndpoint: $(PROD_KUBERNETES_SERVICE_CONN)
               command: 'login'
           - script: |
-              kubectl annotate -n checkout ingress/pagopa-checkout-auth-service-blue nginx.ingress.kubernetes.io/canary-weight=10 --overwrite
+              kubectl annotate -n ecommerce ingress/pagopaecommercepaymentmethodsservice-microservice-blue-chart nginx.ingress.kubernetes.io/canary-weight=10 --overwrite
             displayName: Execute kubectl annotate to set traffic weight to 10 percent
 
   - stage: "ApproveCanaryTrafficWeight50Percent"
@@ -505,7 +505,7 @@ stages:
               kubernetesServiceEndpoint: $(PROD_KUBERNETES_SERVICE_CONN)
               command: 'login'
           - script: |
-              kubectl annotate -n checkout ingress/pagopa-checkout-auth-service-blue nginx.ingress.kubernetes.io/canary-weight=50 --overwrite
+              kubectl annotate -n ecommerce ingress/pagopaecommercepaymentmethodsservice-microservice-blue-chart nginx.ingress.kubernetes.io/canary-weight=50 --overwrite
             displayName: Execute kubectl annotate to set traffic weight to 50 percent
 
   - stage: "ApproveCanaryTrafficWeight90Percent"
@@ -543,7 +543,7 @@ stages:
               kubernetesServiceEndpoint: $(PROD_KUBERNETES_SERVICE_CONN)
               command: 'login'
           - script: |
-              kubectl annotate -n checkout ingress/pagopa-checkout-auth-service-blue nginx.ingress.kubernetes.io/canary-weight=90 --overwrite
+              kubectl annotate -n ecommerce ingress/pagopaecommercepaymentmethodsservice-microservice-blue-chart nginx.ingress.kubernetes.io/canary-weight=90 --overwrite
             displayName: Execute kubectl annotate to set traffic weight to 90 percent
 
   - stage: "ApproveCanaryTrafficWeight0Percent"
@@ -581,7 +581,7 @@ stages:
               kubernetesServiceEndpoint: $(PROD_KUBERNETES_SERVICE_CONN)
               command: 'login'
           - script: |
-              kubectl annotate -n checkout ingress/pagopa-checkout-auth-service-blue nginx.ingress.kubernetes.io/canary-weight=0 --overwrite
+              kubectl annotate -n ecommerce ingress/pagopaecommercepaymentmethodsservice-microservice-blue-chart nginx.ingress.kubernetes.io/canary-weight=0 --overwrite
             displayName: Remove canary traffic
 
 
