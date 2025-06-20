@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
@@ -56,13 +57,13 @@ public class AfmClient {
                 .body(Mono.just(paymentOptionDto), PaymentOptionDto.class)
                 .retrieve()
                 .onStatus(
-                        HttpStatus::isError,
+                        HttpStatusCode::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .defaultIfEmpty("Failure response without body")
                                 .flatMap(
                                         errorResponseBody -> Mono.error(
                                                 new AfmResponseException(
-                                                        clientResponse.statusCode(),
+                                                        HttpStatus.resolve(clientResponse.statusCode().value()),
                                                         errorResponseBody
                                                 )
                                         )
@@ -115,13 +116,13 @@ public class AfmClient {
                 .body(Mono.just(paymentOptionDto), PaymentOptionMultiDto.class)
                 .retrieve()
                 .onStatus(
-                        HttpStatus::isError,
+                        HttpStatusCode::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .defaultIfEmpty("Failure response without body")
                                 .flatMap(
                                         errorResponseBody -> Mono.error(
                                                 new AfmResponseException(
-                                                        clientResponse.statusCode(),
+                                                        HttpStatus.resolve(clientResponse.statusCode().value()),
                                                         errorResponseBody
                                                 )
                                         )
