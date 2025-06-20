@@ -370,7 +370,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                             .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix()))
                             .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
                     URI notificationUrl = UriComponentsBuilder
-                            .fromHttpUrl(sessionUrlConfig.notificationUrl())
+                            .fromUriString(sessionUrlConfig.notificationUrl())
                             .build(
                                     Map.of(
                                             "orderId",
