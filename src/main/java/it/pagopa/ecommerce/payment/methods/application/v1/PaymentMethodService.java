@@ -118,7 +118,6 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     ) {
         String paymentMethodName = paymentMethodRequestDto.getName();
         String paymentMethodDescription = paymentMethodRequestDto.getDescription();
-        PaymentMethodStatusDto statusDto = paymentMethodRequestDto.getStatus();
         List<Pair<Long, Long>> ranges = paymentMethodRequestDto.getRanges().stream()
                 .map(r -> Pair.of(r.getMin(), r.getMax()))
                 .toList();
@@ -132,7 +131,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 new PaymentMethodID(UUID.randomUUID()),
                 new PaymentMethodName(paymentMethodName),
                 new PaymentMethodDescription(paymentMethodDescription),
-                new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(statusDto.getValue())),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode),
                 new PaymentMethodAsset(paymentMethodAsset),
