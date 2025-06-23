@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk as build
+FROM openjdk:21-jdk as build
 WORKDIR /workspace/app
 
 RUN microdnf install git
@@ -17,7 +17,7 @@ COPY eclipse-style.xml eclipse-style.xml
 RUN ./mvnw install -DskipTests # --offline (remove the comment when ecommerce-commons will be integrated as he will download the dependencies of the spotless plugin)
 RUN mkdir target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
 
-FROM openjdk:17-slim
+FROM openjdk:21-slim
 
 RUN addgroup --system user && adduser --ingroup user --system user
 USER user:user
@@ -27,7 +27,7 @@ WORKDIR /app/
 ARG EXTRACTED=/workspace/app/target/extracted
 
 # OTEL apm agent
-ADD --chown=user https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.25.1/opentelemetry-javaagent.jar .
+ADD --chown=user https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.10.0/opentelemetry-javaagent.jar .
 
 COPY --from=build --chown=user ${EXTRACTED}/dependencies/ ./
 RUN true
