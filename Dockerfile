@@ -1,7 +1,7 @@
 FROM amazoncorretto:21-alpine@sha256:6a98c4402708fe8d16e946b4b5bac396379ec5104c1661e2a27b2b45cf9e2d16 AS build
 WORKDIR /workspace/app
 
-RUN microdnf install git
+RUN apk add --no-cache git
 
 COPY mvnw .
 COPY .mvn .mvn
@@ -14,7 +14,7 @@ RUN ./mvnw dependency:go-offline
 COPY src src
 COPY api-spec api-spec
 COPY eclipse-style.xml eclipse-style.xml
-RUN ./mvnw install -DskipTests # --offline (remove the comment when ecommerce-commons will be integrated as he will download the dependencies of the spotless plugin)
+RUN ./mvnw install -DskipTests
 RUN mkdir target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
 
 FROM amazoncorretto:21-alpine@sha256:6a98c4402708fe8d16e946b4b5bac396379ec5104c1661e2a27b2b45cf9e2d16
