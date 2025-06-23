@@ -9,5 +9,6 @@ public enum RedirectPaymentMethodTypeCode {
     RBPP,
     RPIC,
     RBPS,
-    RICO
+    RICO,
+    KLAR
 }
