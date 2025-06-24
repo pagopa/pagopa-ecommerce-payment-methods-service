@@ -26,7 +26,7 @@ WORKDIR /app/
 
 ARG EXTRACTED=/workspace/app/target/extracted
 
-# OTEL apm agent
+# ELK apm agent
 ADD --chown=user https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.10.0/opentelemetry-javaagent.jar .
 
 COPY --from=build --chown=user ${EXTRACTED}/dependencies/ ./
