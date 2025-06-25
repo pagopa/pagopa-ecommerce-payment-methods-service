@@ -285,7 +285,6 @@ class PaymentMethodsControllerTests {
 
         webClient
                 .patch().uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
-                .header("x-api-key", "invalid-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(patchRequest)
                 .exchange()
