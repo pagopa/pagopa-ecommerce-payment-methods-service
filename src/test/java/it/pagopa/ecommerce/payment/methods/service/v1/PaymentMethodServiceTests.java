@@ -132,6 +132,109 @@ class PaymentMethodServiceTests {
                 .asset(paymentMethod.getPaymentMethodAsset().value())
                 .clientId(paymentMethod.getClientIdEnum())
                 .methodManagement(paymentMethod.getPaymentMethodManagement().value())
+                .status(PaymentMethodStatusDto.ENABLED)
+                .brandAssets(paymentMethod.getPaymentMethodBrandAsset().brandAssets().orElse(null));
+        PaymentMethod paymentMethodResponse = paymentMethodService.createPaymentMethod(
+                paymentMethodRequestDto
+        ).block();
+
+        assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
+    }
+
+    @Test
+    void shouldCreateDisabledPaymentMethod() {
+        Hooks.onOperatorDebug();
+
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        paymentMethod.setPaymentMethodStatus(PaymentMethodStatusEnum.DISABLED);
+
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+
+        Mockito.when(
+                paymentMethodFactory.newPaymentMethod(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()
+                )
+        )
+                .thenReturn(Mono.just(paymentMethod));
+
+        Mockito.when(
+                paymentMethodRepository.save(
+                        paymentMethodDocument
+                )
+        )
+                .thenReturn(Mono.just(paymentMethodDocument));
+        PaymentMethodRequestDto paymentMethodRequestDto = new PaymentMethodRequestDto()
+                .name(paymentMethod.getPaymentMethodName().value())
+                .description(paymentMethod.getPaymentMethodName().value())
+                .ranges(
+                        paymentMethod.getPaymentMethodRanges().stream()
+                                .map(p -> new RangeDto().max(p.max()).min(p.min())).toList()
+                )
+                .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
+                .asset(paymentMethod.getPaymentMethodAsset().value())
+                .clientId(paymentMethod.getClientIdEnum())
+                .methodManagement(paymentMethod.getPaymentMethodManagement().value())
+                .status(PaymentMethodStatusDto.DISABLED)
+                .brandAssets(paymentMethod.getPaymentMethodBrandAsset().brandAssets().orElse(null));
+        PaymentMethod paymentMethodResponse = paymentMethodService.createPaymentMethod(
+                paymentMethodRequestDto
+        ).block();
+
+        assertEquals(paymentMethodResponse.getPaymentMethodID(), paymentMethod.paymentMethodID());
+    }
+
+    @Test
+    void shouldCreateIncomingPaymentMethod() {
+        Hooks.onOperatorDebug();
+
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        paymentMethod.setPaymentMethodStatus(PaymentMethodStatusEnum.INCOMING);
+
+        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+
+        Mockito.when(
+                paymentMethodFactory.newPaymentMethod(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()
+                )
+        )
+                .thenReturn(Mono.just(paymentMethod));
+
+        Mockito.when(
+                paymentMethodRepository.save(
+                        paymentMethodDocument
+                )
+        )
+                .thenReturn(Mono.just(paymentMethodDocument));
+        PaymentMethodRequestDto paymentMethodRequestDto = new PaymentMethodRequestDto()
+                .name(paymentMethod.getPaymentMethodName().value())
+                .description(paymentMethod.getPaymentMethodName().value())
+                .ranges(
+                        paymentMethod.getPaymentMethodRanges().stream()
+                                .map(p -> new RangeDto().max(p.max()).min(p.min())).toList()
+                )
+                .paymentTypeCode(paymentMethod.getPaymentMethodTypeCode().value())
+                .asset(paymentMethod.getPaymentMethodAsset().value())
+                .clientId(paymentMethod.getClientIdEnum())
+                .methodManagement(paymentMethod.getPaymentMethodManagement().value())
+                .status(PaymentMethodStatusDto.INCOMING)
                 .brandAssets(paymentMethod.getPaymentMethodBrandAsset().brandAssets().orElse(null));
         PaymentMethod paymentMethodResponse = paymentMethodService.createPaymentMethod(
                 paymentMethodRequestDto
