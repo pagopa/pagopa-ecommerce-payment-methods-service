@@ -94,6 +94,8 @@ stages:
           - script: |
               timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8083/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
             displayName: 'Health check'
+          - script: yarn cache clean
+            displayName: 'Clear yarn cache'
           - script: yarn global add newman
             displayName: 'newman installation'
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
