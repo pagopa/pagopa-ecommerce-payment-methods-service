@@ -36,9 +36,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     private PaymentMethodService paymentMethodService;
 
     private static final String X_CLIENT_ID = "X-Client-ID";
+    private static final String X_API_KEY = "x-api-key";
 
     @Value("${warmup.payment.method.id}")
     String warmupPaymentMethodID;
+    @Value("${security.apiKey.primary}")
+    String primaryApiKey;
 
     @ExceptionHandler(
         {
@@ -295,6 +298,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .get()
                 .uri("http://localhost:8080/payment-methods")
                 .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_API_KEY, primaryApiKey)
                 .retrieve()
                 .bodyToMono(PaymentMethodsResponseDto.class)
                 .block(Duration.ofSeconds(30));
@@ -317,6 +321,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 )
                 .bodyValue(request)
                 .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_API_KEY, primaryApiKey)
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));
@@ -332,6 +337,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         warmupPaymentMethodID
                 )
                 .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_API_KEY, primaryApiKey)
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));

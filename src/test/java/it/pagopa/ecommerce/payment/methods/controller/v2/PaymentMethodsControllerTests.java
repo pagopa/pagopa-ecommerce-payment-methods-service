@@ -63,6 +63,7 @@ class PaymentMethodsControllerTests {
         webClient
                 .post()
                 .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -70,6 +71,37 @@ class PaymentMethodsControllerTests {
                 .isOk()
                 .expectBody(CalculateFeeResponseDto.class)
                 .isEqualTo(serviceResponse);
+    }
+
+    @Test
+    void shouldReturn401ForGetFeesWithInvalidApiKey() {
+        final String paymentMethodId = UUID.randomUUID().toString();
+        final CalculateFeeRequestDto requestBody = TestUtil.V2.getMultiNoticeFeesRequest();
+
+        webClient
+                .post()
+                .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .header("x-api-key", "the-not-valid-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForGetFeesWithMissingApiKey() {
+        final String paymentMethodId = UUID.randomUUID().toString();
+        final CalculateFeeRequestDto requestBody = TestUtil.V2.getMultiNoticeFeesRequest();
+
+        webClient
+                .post()
+                .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -82,6 +114,7 @@ class PaymentMethodsControllerTests {
         webClient
                 .post()
                 .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -101,6 +134,7 @@ class PaymentMethodsControllerTests {
         webClient
                 .post()
                 .uri("/v2/payment-methods/" + paymentMethodId + "/fees")
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -154,6 +188,7 @@ class PaymentMethodsControllerTests {
                                 .path("/v2/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
                                 .build(paymentMethodId, orderId)
                 )
+                .header("x-api-key", "primary-key")
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
                 .expectStatus()

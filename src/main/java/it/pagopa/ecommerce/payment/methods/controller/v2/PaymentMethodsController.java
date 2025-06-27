@@ -28,9 +28,12 @@ import static it.pagopa.ecommerce.payment.methods.utils.HttpUtils.getAuthenticat
 public class PaymentMethodsController implements V2Api {
 
     private final PaymentMethodService paymentMethodService;
+    private static final String X_API_KEY = "x-api-key";
 
     @Value("${warmup.payment.method.id}")
     String warmupPaymentMethodID;
+    @Value("${security.apiKey.primary}")
+    String primaryApiKey;
 
     public PaymentMethodsController(
             PaymentMethodService paymentMethodService
@@ -136,6 +139,7 @@ public class PaymentMethodsController implements V2Api {
                 )
                 .bodyValue(request)
                 .header("X-Client-ID", PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_API_KEY, primaryApiKey)
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));
