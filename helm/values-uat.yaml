@@ -136,6 +136,7 @@ microservice-chart:
     AFM_KEY: afm-api-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-api-key
+    JWT_ISSUER_API_KEY: ecommerce-jwt-issuer-service-active-api-key
   keyvault:
     name: "pagopa-u-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
