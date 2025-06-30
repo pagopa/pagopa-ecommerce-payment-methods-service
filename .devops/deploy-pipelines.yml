@@ -83,7 +83,7 @@ stages:
     dependsOn: Build_release_candidate
     condition:
       and(
-      succeeded(),
+      succeeded()
       )
     variables:
       green_app_version: $[ stageDependencies.Build_release_candidate.build.outputs['chart_current_version.appVersion'] ]
