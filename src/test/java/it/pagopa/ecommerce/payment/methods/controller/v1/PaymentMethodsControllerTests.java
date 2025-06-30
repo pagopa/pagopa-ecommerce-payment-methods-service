@@ -67,6 +67,7 @@ class PaymentMethodsControllerTests {
 
         webClient
                 .post().uri("/payment-methods")
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentMethodRequestDto)
                 .exchange()
@@ -74,6 +75,33 @@ class PaymentMethodsControllerTests {
                 .isOk()
                 .expectBody(PaymentMethodResponseDto.class)
                 .isEqualTo(methodResponse);
+    }
+
+    @Test
+    void shouldReturn401ForNewMethodWithInvalidApiKey() {
+        PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequestForCheckout();
+
+        webClient
+                .post().uri("/payment-methods")
+                .header("x-api-key", "not-valid-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentMethodRequestDto)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForNewMethodWithMissingApiKey() {
+        PaymentMethodRequestDto paymentMethodRequestDto = TestUtil.getPaymentMethodRequestForCheckout();
+
+        webClient
+                .post().uri("/payment-methods")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentMethodRequestDto)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -93,6 +121,7 @@ class PaymentMethodsControllerTests {
 
         webClient
                 .post().uri("/payment-methods")
+                .header("x-api-key", "secondary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentMethodRequestDto)
                 .exchange()
@@ -125,12 +154,46 @@ class PaymentMethodsControllerTests {
                                 .build()
                 )
                 .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBodyList(PaymentMethodsResponseDto.class)
                 .hasSize(1)
                 .contains(expectedResult);
+    }
+
+    @Test
+    void shouldReturn401ForGetAllMethodsWithInvalidApiKey() {
+        webClient
+                .get()
+                .uri(
+                        uriBuilder -> uriBuilder
+                                .path("/payment-methods")
+                                .queryParam("amount", TestUtil.getTestAmount())
+                                .build()
+                )
+                .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .header("x-api-key", "not-valid-key")
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForGetAllMethodsWithMissingApiKey() {
+        webClient
+                .get()
+                .uri(
+                        uriBuilder -> uriBuilder
+                                .path("/payment-methods")
+                                .queryParam("amount", TestUtil.getTestAmount())
+                                .build()
+                )
+                .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -155,6 +218,7 @@ class PaymentMethodsControllerTests {
                                 .build()
                 )
                 .header("x-client-id", TestUtil.getClientIdIO().toString())
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -183,6 +247,7 @@ class PaymentMethodsControllerTests {
 
         webClient
                 .patch().uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(patchRequest)
                 .exchange()
@@ -190,6 +255,41 @@ class PaymentMethodsControllerTests {
                 .isOk()
                 .expectBody(PaymentMethodResponseDto.class)
                 .isEqualTo(expectedResult);
+    }
+
+    @Test
+    void shouldReturn401ForPatchPaymentMethodWithInvalidApiKey() {
+
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+
+        PaymentMethodRequestDto patchRequest = new PaymentMethodRequestDto()
+                .status(PaymentMethodStatusDto.ENABLED);
+
+        webClient
+                .patch().uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .header("x-api-key", "invalid-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(patchRequest)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForPatchPaymentMethodWithMissingApiKey() {
+
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+
+        PaymentMethodRequestDto patchRequest = new PaymentMethodRequestDto()
+                .status(PaymentMethodStatusDto.ENABLED);
+
+        webClient
+                .patch().uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(patchRequest)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -210,12 +310,40 @@ class PaymentMethodsControllerTests {
                 .get()
                 .uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
                 .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBodyList(PaymentMethodResponseDto.class)
                 .hasSize(1)
                 .contains(expectedResult);
+    }
+
+    @Test
+    void shouldReturn401ForGetAMethodWithInvalidApiKey() {
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+
+        webClient
+                .get()
+                .uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .header("x-api-key", "birra-key")
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForGetAMethodWithMissingApiKey() {
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+
+        webClient
+                .get()
+                .uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
+                .header("x-client-id", TestUtil.getClientIdCheckout().toString())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -236,6 +364,7 @@ class PaymentMethodsControllerTests {
                 .get()
                 .uri("/payment-methods/" + paymentMethod.getPaymentMethodID().value())
                 .header("x-client-id", TestUtil.getClientIdIO().toString())
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -256,6 +385,7 @@ class PaymentMethodsControllerTests {
         webClient
                 .post()
                 .uri("/payment-methods/" + paymentMethodId + "/fees")
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -263,6 +393,37 @@ class PaymentMethodsControllerTests {
                 .isOk()
                 .expectBody(CalculateFeeResponseDto.class)
                 .isEqualTo(serviceResponse);
+    }
+
+    @Test
+    void shouldReturn401ForGetFeesWithInvalidApiKey() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto requestBody = TestUtil.getCalculateFeeRequest();
+
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/fees")
+                .header("x-api-key", "invalid-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForGetFeesWithMissingApiKey() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto requestBody = TestUtil.getCalculateFeeRequest();
+
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/fees")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -284,6 +445,7 @@ class PaymentMethodsControllerTests {
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
                                 .build(paymentMethodId, originalSession.orderId())
                 )
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -291,6 +453,49 @@ class PaymentMethodsControllerTests {
                 .isNoContent()
                 .expectBody()
                 .isEmpty();
+    }
+
+    @Test
+    void shouldReturn401ForSessionUpdateWithInvalidKey() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        PatchSessionRequestDto requestBody = TestUtil.patchSessionRequest();
+        String correlationId = UUID.randomUUID().toString();
+        NpgSessionDocument originalSession = TestUtil
+                .npgSessionDocument("orderId", correlationId, "sessionId", false, null);
+
+        webClient
+                .patch()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
+                                .build(paymentMethodId, originalSession.orderId())
+                )
+                .header("x-api-key", "invalid-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForSessionUpdateWithMissingKey() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        PatchSessionRequestDto requestBody = TestUtil.patchSessionRequest();
+        String correlationId = UUID.randomUUID().toString();
+        NpgSessionDocument originalSession = TestUtil
+                .npgSessionDocument("orderId", correlationId, "sessionId", false, null);
+
+        webClient
+                .patch()
+                .uri(
+                        builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
+                                .build(paymentMethodId, originalSession.orderId())
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -312,6 +517,7 @@ class PaymentMethodsControllerTests {
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
                                 .build(paymentMethodId, originalSession.orderId())
                 )
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -346,6 +552,7 @@ class PaymentMethodsControllerTests {
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{sessionId}")
                                 .build(paymentMethodId, originalSession.orderId())
                 )
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -363,6 +570,7 @@ class PaymentMethodsControllerTests {
         webClient
                 .post()
                 .uri("/payment-methods/" + paymentMethodId + "/sessions")
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("")
                 .exchange()
@@ -370,6 +578,35 @@ class PaymentMethodsControllerTests {
                 .isOk()
                 .expectBody(CreateSessionResponseDto.class)
                 .isEqualTo(responseDto);
+    }
+
+    @Test
+    void shouldReturn401ForCreateSessionWithInvalidKey() {
+        String paymentMethodId = UUID.randomUUID().toString();
+
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/sessions")
+                .header("x-api-key", "invalid-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("")
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForCreateSessionWithMissingKey() {
+        String paymentMethodId = UUID.randomUUID().toString();
+
+        webClient
+                .post()
+                .uri("/payment-methods/" + paymentMethodId + "/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("")
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -386,11 +623,39 @@ class PaymentMethodsControllerTests {
         webClient
                 .get()
                 .uri("/payment-methods/" + paymentMethodId + "/sessions/" + orderId)
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(SessionPaymentMethodResponseDto.class)
                 .isEqualTo(response);
+    }
+
+    @Test
+    void shouldReturn401ForGetCardDataFromSessionIdWithInvalidApiKey() {
+        String paymentMethodId = "paymentMethodId";
+        String orderId = "orderId";
+
+        webClient
+                .get()
+                .uri("/payment-methods/" + paymentMethodId + "/sessions/" + orderId)
+                .header("x-api-key", "invalid-key")
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
+    }
+
+    @Test
+    void shouldReturn401ForGetCardDataFromSessionIdWithMissingApiKey() {
+        String paymentMethodId = "paymentMethodId";
+        String orderId = "orderId";
+
+        webClient
+                .get()
+                .uri("/payment-methods/" + paymentMethodId + "/sessions/" + orderId)
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -496,6 +761,7 @@ class PaymentMethodsControllerTests {
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
                                 .build(paymentMethodId, orderId)
                 )
+                .header("x-api-key", "primary-key")
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
                 .expectStatus()
@@ -521,6 +787,7 @@ class PaymentMethodsControllerTests {
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
                                 .build(paymentMethodId, orderId)
                 )
+                .header("x-api-key", "primary-key")
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
                 .expectStatus()
@@ -547,6 +814,7 @@ class PaymentMethodsControllerTests {
                                 .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -573,6 +841,7 @@ class PaymentMethodsControllerTests {
                                 .build(paymentMethodId, orderId)
                 )
                 .headers(h -> h.setBearerAuth(securityToken))
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isNotFound()
@@ -592,6 +861,7 @@ class PaymentMethodsControllerTests {
         webClient
                 .post()
                 .uri("/payment-methods/" + paymentMethodId + "/fees")
+                .header("x-api-key", "primary-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .exchange()
@@ -622,6 +892,7 @@ class PaymentMethodsControllerTests {
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions")
                                 .build(paymentMethodId)
                 )
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.BAD_GATEWAY)
@@ -648,6 +919,7 @@ class PaymentMethodsControllerTests {
                         builder -> builder.path("/payment-methods/{paymentMethodId}/sessions")
                                 .build(paymentMethodId)
                 )
+                .header("x-api-key", "primary-key")
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.BAD_REQUEST)
