@@ -84,7 +84,6 @@ stages:
     condition:
       and(
       succeeded(),
-      eq(${{parameters.UAT_SKIP_BLUE_DEPLOYMENT}}, False)
       )
     variables:
       green_app_version: $[ stageDependencies.Build_release_candidate.build.outputs['chart_current_version.appVersion'] ]
