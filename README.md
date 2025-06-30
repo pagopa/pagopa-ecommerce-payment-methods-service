@@ -51,7 +51,9 @@ These are all environment variables needed by the application:
 | JWT_ISSUER_READ_TIMEOUT            | Timeout for requests towards JWT Issuer                                                                                                                    | string |         |
 | JWT_ISSUER_CONNECTION_TIMEOUT      | Timeout for establishing connections towards JWT Issuer                                                                                                    | string |         |
 | JWT_ISSUER_API_KEY                 | Jwt issuer service API key                                                                                                                                 | string |         |
-
+| SECURITY_API_KEY_PRIMARY           | Primary API Key used to secure payment-requests service's APIs                                                                                             | string |         |
+| SECURITY_API_KEY_SECONDARY         | Secondary API Key used to secure payment-requests service's APIs                                                                                           | string |         |
+| SECURITY_API_KEYS_SECURED_PATHS    | Comma-separated list of secured API paths                                                                                                                  | string |         |
 (*): for Mongo connection string options
 see [docs](https://www.mongodb.com/docs/drivers/java/sync/v4.3/fundamentals/connection/connection-options/#connection-options)
 

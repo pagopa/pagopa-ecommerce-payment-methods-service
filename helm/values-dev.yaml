@@ -139,6 +139,7 @@ microservice-chart:
     JWT_ISSUER_URI: "https://weudev.ecommerce.internal.dev.platform.pagopa.it/pagopa-jwt-issuer-service"
     JWT_ISSUER_READ_TIMEOUT: "10000"
     JWT_ISSUER_CONNECTION_TIMEOUT: "10000"
+    SECURITY_API_KEY_SECURED_PATHS: "/payment-methods,/v2/payment-methods"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
@@ -147,6 +148,8 @@ microservice-chart:
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-api-key
     JWT_ISSUER_API_KEY: ecommerce-jwt-issuer-service-active-api-key
+    SECURITY_API_KEY_PRIMARY: ecommerce-payment-methods-primary-api-key
+    SECURITY_API_KEY_SECONDARY: ecommerce-payment-methods-secondary-api-key
   keyvault:
     name: "pagopa-d-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
