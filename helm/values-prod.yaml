@@ -20,7 +20,7 @@ microservice-chart:
     envSecret: {}
   image:
     repository: pagopapcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "2.1.0"
+    tag: "2.1.1"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -65,7 +65,7 @@ microservice-chart:
       cpu: "200m"
     limits:
       memory: "512Mi"
-      cpu: "300m"
+      cpu: "600m"
   autoscaling:
     enable: true
     minReplica: 5
