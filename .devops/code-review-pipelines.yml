@@ -92,8 +92,23 @@ stages:
           - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
             displayName: 'Run app with docker-compose'
           - script: |
-              timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8083/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
-            displayName: 'Health check'
+              echo "Waiting for services to be ready..."
+
+              # Wait for container to be running
+              timeout 60 bash -c 'while [ $(docker compose ps pagopa-ecommerce-payment-methods-service --format json | jq -r ".,[object Object],State") != "running" ]; do 
+                echo "Container not running yet, waiting..."
+                sleep 5
+              done'
+
+              # Wait for health endpoint to be ready
+              timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w '\''%{http_code}'\'' http://localhost:8083/actuator/health/liveness)" != "200" ]]; do 
+                echo "Health check failed, retrying in 5 seconds..."
+                docker compose logs pagopa-ecommerce-payment-methods-service --tail 10
+                sleep 5
+              done' || (echo "Health check failed after timeout" && docker compose logs pagopa-ecommerce-payment-methods-service && exit 1)
+
+              echo "Service UP"
+            displayName: 'Health check with detailed logging'
           - script: yarn global add newman
             displayName: 'newman installation'
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
