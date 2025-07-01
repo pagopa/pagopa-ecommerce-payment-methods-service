@@ -102,7 +102,7 @@ stages:
                   break
                 else
                   echo "Container not ready yet, waiting... (attempt $i/12)"
-                  sleep 5
+                  sleep 4
                 fi
                 if [ $i -eq 12 ]; then
                   echo "Container failed to start properly"
