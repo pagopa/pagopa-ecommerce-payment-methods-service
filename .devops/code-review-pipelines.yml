@@ -94,20 +94,41 @@ stages:
           - script: |
               echo "Waiting for services to be ready..."
 
-              # Wait for container to be running
-              timeout 60 bash -c 'while [ $(docker compose ps pagopa-ecommerce-payment-methods-service --format json | jq -r ".,[object Object],State") != "running" ]; do 
-                echo "Container not running yet, waiting..."
-                sleep 5
-              done'
+              # Wait for container to be running (simplified approach)
+              echo "Checking container status..."
+              for i in {1..12}; do
+                if docker compose ps pagopa-ecommerce-payment-methods-service | grep -q "Up"; then
+                  echo "Container is running"
+                  break
+                else
+                  echo "Container not ready yet, waiting... (attempt $i/12)"
+                  sleep 5
+                fi
+                if [ $i -eq 12 ]; then
+                  echo "Container failed to start properly"
+                  docker compose ps
+                  docker compose logs pagopa-ecommerce-payment-methods-service
+                  exit 1
+                fi
+              done
 
               # Wait for health endpoint to be ready
+              echo "Starting health check..."
               timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w '\''%{http_code}'\'' http://localhost:8083/actuator/health/liveness)" != "200" ]]; do 
                 echo "Health check failed, retrying in 5 seconds..."
-                docker compose logs pagopa-ecommerce-payment-methods-service --tail 10
                 sleep 5
-              done' || (echo "Health check failed after timeout" && docker compose logs pagopa-ecommerce-payment-methods-service && exit 1)
+              done' || {
+                echo "Health check failed after timeout"
+                echo "=== Final Container Status ==="
+                docker compose ps
+                echo "=== Service Logs ==="
+                docker compose logs pagopa-ecommerce-payment-methods-service --tail 50
+                echo "=== Port Check ==="
+                netstat -tlnp | grep :8083 || echo "Port 8083 not listening"
+                exit 1
+              }
 
-              echo "Service UP"
+              echo "UP"
             displayName: 'Health check with detailed logging'
           - script: yarn global add newman
             displayName: 'newman installation'
