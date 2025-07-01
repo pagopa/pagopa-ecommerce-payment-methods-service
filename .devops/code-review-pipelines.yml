@@ -87,7 +87,8 @@ stages:
           - checkout: pagopaEcommerceLocal
           - script: |
               echo "##[debug] Change placeholder for ecommerce-payment-method-service set branch: $(BRANCH_NAME)"
-              sed -i "s/^ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=.*$/ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=$(BRANCH_NAME)/" .env
+              # sed -i "s/^ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=.*$/ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=$(BRANCH_NAME)/" .env
+              cat .env
             displayName: 'Change payment-method branch name ecommerce-local .env'
           - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
             displayName: 'Run app with docker-compose'
