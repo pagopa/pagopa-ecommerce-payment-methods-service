@@ -92,8 +92,44 @@ stages:
           - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
             displayName: 'Run app with docker-compose'
           - script: |
-              timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8083/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
-            displayName: 'Health check'
+              echo "Waiting for services to be ready..."
+
+              # Wait for container to be running (simplified approach)
+              echo "Checking container status..."
+              for i in {1..12}; do
+                if docker compose ps pagopa-ecommerce-payment-methods-service | grep -q "Up"; then
+                  echo "Container is running"
+                  break
+                else
+                  echo "Container not ready yet, waiting... (attempt $i/12)"
+                  sleep 5
+                fi
+                if [ $i -eq 12 ]; then
+                  echo "Container failed to start properly"
+                  docker compose ps
+                  docker compose logs pagopa-ecommerce-payment-methods-service
+                  exit 1
+                fi
+              done
+
+              # Wait for health endpoint to be ready
+              echo "Starting health check..."
+              timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w '\''%{http_code}'\'' http://localhost:8083/actuator/health/liveness)" != "200" ]]; do 
+                echo "Health check failed, retrying in 5 seconds..."
+                sleep 5
+              done' || {
+                echo "Health check failed after timeout"
+                echo "=== Final Container Status ==="
+                docker compose ps
+                echo "=== Service Logs ==="
+                docker compose logs pagopa-ecommerce-payment-methods-service --tail 50
+                echo "=== Port Check ==="
+                netstat -tlnp | grep :8083 || echo "Port 8083 not listening"
+                exit 1
+              }
+
+              echo "UP"
+            displayName: 'Health check with detailed logging'
           - script: yarn global add newman
             displayName: 'newman installation'
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
