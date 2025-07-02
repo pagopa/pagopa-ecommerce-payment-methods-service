@@ -17,7 +17,12 @@ microservice-chart:
     envConfig:
       OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service-blue,deployment.environment=uat"
       ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
-    envSecret: {}
+      NPG_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/npg/v1"
+      AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
+      AFM_URI_V2: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v2/fees"
+
+    envSecret:
+      AFM_KEY: ecommerce-load-test-subscription-key
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
     tag: "2.1.1"
@@ -82,8 +87,8 @@ microservice-chart:
   strategy:
     type: "RollingUpdate"
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: "100%"
+      maxUnavailable: "100%"
   envConfig:
     MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
     MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
