@@ -147,6 +147,7 @@ microservice-chart:
     AFM_KEY: afm-api-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-api-key
+    JWT_ISSUER_API_KEY: ecommerce-jwt-issuer-service-active-api-key
     SECURITY_API_KEY_PRIMARY: ecommerce-payment-methods-primary-api-key
     SECURITY_API_KEY_SECONDARY: ecommerce-payment-methods-secondary-api-key
   keyvault:
