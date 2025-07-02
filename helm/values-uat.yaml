@@ -4,6 +4,10 @@ microservice-chart:
   fullnameOverride: "soak-pagopa-ecommerce-payment-methods-service"
   canaryDelivery:
     create: false
+    autoscaling:
+      enable: true
+      minReplica: 3
+      maxReplica: 10
     ingress:
       bluegreen: false
       #set canary deployment with traffic balancing see https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#canary for more info
@@ -14,6 +18,14 @@ microservice-chart:
     image:
       repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
       tag: "latest"
+    deployment:
+      create: true
+      replicas: 3
+    strategy:
+      type: "RollingUpdate"
+      rollingUpdate:
+        maxSurge: "100%"
+        maxUnavailable: "100%"
     envConfig:
       OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service-blue,deployment.environment=uat"
       ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
