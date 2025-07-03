@@ -20,7 +20,7 @@ microservice-chart:
       NPG_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/npg/v1"
       AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
       AFM_URI_V2: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v2/fees"
-
+      SECURITY_API_KEY_SECURED_PATHS: ""
     envSecret:
       AFM_KEY: ecommerce-load-test-subscription-key
   image:
