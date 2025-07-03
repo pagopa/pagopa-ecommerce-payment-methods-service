@@ -7,7 +7,7 @@ microservice-chart:
     ingress:
       bluegreen: false
       #set canary deployment with traffic balancing see https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#canary for more info
-      header: true
+      header: false
       headerName: deployment
       headerValue: blue
       weightPercent: 0
@@ -104,19 +104,14 @@ microservice-chart:
     MONGO_HEARTBEAT_FREQUENCY_MS: "5000"
     REDIS_PORT: "6380"
     REDIS_SSL_ENABLED: "true"
-    AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
-    AFM_URI_V2: "https://api.uat.platform.pagopa.it/afm/calculator-service/v2/fees"
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
-    OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service,deployment.environment=uat"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
     OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
-    ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service
     ECS_SERVICE_ENVIRONMENT: uat
-    NPG_URI: "https://stg-ta.nexigroup.com/api/phoenix-0.0"
     NPG_READ_TIMEOUT: "10000"
     NPG_CONNECTION_TIMEOUT: "10000"
     SESSION_URL_BASEPATH: "https://uat.checkout.pagopa.it"
@@ -135,7 +130,12 @@ microservice-chart:
     JWT_ISSUER_URI: "https://weuuat.ecommerce.internal.uat.platform.pagopa.it/pagopa-jwt-issuer-service"
     JWT_ISSUER_READ_TIMEOUT: "10000"
     JWT_ISSUER_CONNECTION_TIMEOUT: "10000"
-    SECURITY_API_KEY_SECURED_PATHS: "/payment-methods,/v2/payment-methods"
+    OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service-blue,deployment.environment=uat"
+    ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
+    NPG_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/npg/v1"
+    AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
+    AFM_URI_V2: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v2/fees"
+    SECURITY_API_KEY_SECURED_PATHS: ""
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
