@@ -25,7 +25,7 @@ microservice-chart:
       AFM_KEY: ecommerce-load-test-subscription-key
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "2.2.0"
+    tag: "3.0.1"
     pullPolicy: Always
   livenessProbe:
     httpGet:
