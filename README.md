@@ -53,6 +53,7 @@ These are all environment variables needed by the application:
 | SECURITY_API_KEY_PRIMARY           | Primary API Key used to secure payment-requests service's APIs                                                                                             | string |         |
 | SECURITY_API_KEY_SECONDARY         | Secondary API Key used to secure payment-requests service's APIs                                                                                           | string |         |
 | SECURITY_API_KEYS_SECURED_PATHS    | Comma-separated list of secured API paths                                                                                                                  | string |         |
+| GITHUB_TOKEN                       | GitHub Personal Access Token with packages:read permission for accessing pagopa-ecommerce-commons from GitHub Packages                                  | string |         |
 (*): for Mongo connection string options
 see [docs](https://www.mongodb.com/docs/drivers/java/sync/v4.3/fundamentals/connection/connection-options/#connection-options)
 
@@ -64,31 +65,37 @@ Create your environment:
 export $(grep -v '^#' .env.local | xargs)
 ```
 
+Set up GitHub authentication for packages:
+
+```sh
+export GITHUB_TOKEN=your_github_token_with_packages_read_permission
+```
+
 Then from current project directory run :
 
 ```sh
-mvn validate # --> used to perform ecommerce-commons library checkout from git repo and install throught maven plugin
 mvn spring-boot:run
 ```
 
-For testing purpose the commons reference can be change from a specific release to a branch by changing the following
-configurations tags:
+**Note:** The application now uses pagopa-ecommerce-commons library directly from GitHub Packages. Make sure your GitHub token has `packages:read` permission for the `pagopa/pagopa-ecommerce-commons` repository.
 
-FROM:
+## Run locally with Docker
 
+### Prerequisites
+Set up GitHub authentication for packages:
 ```sh
-<scmVersionType>tag</scmVersionType>
-<scmVersion>${pagopa-ecommerce-commons.version}</scmVersion>
+export GITHUB_TOKEN=your_github_token_with_packages_read_permission
 ```
 
-TO:
-
+### Build Docker Image
 ```sh
-<scmVersionType>branch</scmVersionType>
-<scmVersion>name-of-a-specific-branch-to-link</scmVersion>
+docker build --secret id=GITHUB_TOKEN,env=GITHUB_TOKEN -t pagopa-ecommerce-payment-methods-service .
 ```
 
-updating also the commons library version to the one of the specific branch
+### Run Container
+```sh
+docker run -p 8080:8080 pagopa-ecommerce-payment-methods-service
+```
 
 ## Code formatting
 
