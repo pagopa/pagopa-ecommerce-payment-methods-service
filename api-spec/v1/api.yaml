@@ -16,6 +16,8 @@ externalDocs:
   description: Design review
 servers:
   - url: https://api.platform.pagopa.it/payment-methods
+security:
+  - ApiKeyAuth: []
 paths:
   /payment-methods:
     post:
@@ -361,6 +363,7 @@ paths:
             type: string
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       responses:
         '200':
           description: Session found
@@ -799,3 +802,8 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+

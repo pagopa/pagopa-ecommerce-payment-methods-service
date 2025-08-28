@@ -2,32 +2,30 @@ package it.pagopa.ecommerce.payment.methods.application.v2;
 
 import io.vavr.Tuple;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
+import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommon;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.BundleDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeRequestDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentMethodStatusDto;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.PaymentNoticeDto;
+import it.pagopa.ecommerce.payment.methods.v2.server.model.*;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.TransferListItemDto;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.*;
+import java.util.function.Predicate;
+
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
 @Slf4j
-public class PaymentMethodService {
+public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     protected static final String QUALIFIER_NAME = "paymentMethodServiceV2";
 
@@ -36,8 +34,10 @@ public class PaymentMethodService {
 
     public PaymentMethodService(
             PaymentMethodRepository paymentMethodRepository,
-            AfmClient afmClient
+            AfmClient afmClient,
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
     ) {
+        super(paymentMethodRepository, npgSessionsTemplateWrapper);
         this.paymentMethodRepository = paymentMethodRepository;
         this.afmClient = afmClient;
     }
@@ -161,8 +161,32 @@ public class PaymentMethodService {
                 .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
                 .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
-                .bundles(bundles)
+                .bundles(sortAndShuffleBundleList(bundles))
                 .asset(paymentMethodDocument.getPaymentMethodAsset())
                 .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
+    }
+
+    private List<BundleDto> sortAndShuffleBundleList(List<BundleDto> bundles) {
+        Map<Long, List<BundleDto>> bundleMap = new TreeMap<>();
+        Optional<BundleDto> onUsBundle = bundles
+                .stream()
+                .filter(BundleDto::getOnUs)
+                .findFirst();
+        bundles
+                .stream()
+                .filter(Predicate.not(BundleDto::getOnUs))
+                .forEach(bundle -> {
+                    Long fees = bundle.getTaxPayerFee();
+                    List<BundleDto> bundlesPerFee = bundleMap.getOrDefault(fees, new ArrayList<>());
+                    bundlesPerFee.add(bundle);
+                    bundleMap.put(fees, bundlesPerFee);
+                });
+        Deque<BundleDto> orderedBundles = new LinkedList<>();
+        bundleMap.values().forEach(bundlesPerFee -> {
+            Collections.shuffle(bundlesPerFee);
+            orderedBundles.addAll(bundlesPerFee);
+        });
+        onUsBundle.ifPresent(orderedBundles::addFirst);
+        return orderedBundles.stream().toList();
     }
 }

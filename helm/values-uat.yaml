@@ -5,66 +5,22 @@ microservice-chart:
   canaryDelivery:
     create: false
     ingress:
-      create: true
-      canary:
-        type: bluegreen
-    service:
-      create: true
-    deployment:
-      create: true
-      image:
-        repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-        tag: "latest"
-        pullPolicy: Always
+      bluegreen: false
+      #set canary deployment with traffic balancing see https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#canary for more info
+      header: true
+      headerName: deployment
+      headerValue: blue
+      weightPercent: 10
+    image:
+      repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
+      tag: "latest"
     envConfig:
-      MONGO_HOST: pagopa-u-weu-ecommerce-cosmos-account.mongo.cosmos.azure.com
-      MONGO_USERNAME: pagopa-u-weu-ecommerce-cosmos-account
-      MONGO_PORT: "10255"
-      MONGO_SSL_ENABLED: "true"
-      MONGO_MIN_POOL_SIZE: "0"
-      MONGO_MAX_POOL_SIZE: "50"
-      MONGO_MAX_IDLE_TIMEOUT_MS: "600000"
-      MONGO_CONNECTION_TIMEOUT_MS: "2000"
-      MONGO_SOCKET_TIMEOUT_MS: "10000"
-      MONGO_SERVER_SELECTION_TIMEOUT_MS: "2000"
-      MONGO_WAITING_QUEUE_MS: "2000"
-      MONGO_HEARTBEAT_FREQUENCY_MS: "5000"
-      REDIS_PORT: "6380"
-      REDIS_SSL_ENABLED: "true"
-      AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
-      AFM_READ_TIMEOUT: "10000"
-      AFM_CONNECTION_TIMEOUT: "10000"
-      SPRING_MAX_IN_MEM_SIZE: "16777216"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service-blue,deployment.environment=uat"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
-      OTEL_LOGS_EXPORTER: none
-      OTEL_TRACES_SAMPLER: "always_on"
       ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
-      ECS_SERVICE_ENVIRONMENT: uat
-      NPG_URI: "https://stg-ta.nexigroup.com/api/phoenix-0.0"
-      NPG_READ_TIMEOUT: "10000"
-      NPG_CONNECTION_TIMEOUT: "10000"
-      SESSION_URL_BASEPATH: "https://uat.checkout.pagopa.it"
-      SESSION_URL_OUTCOME_SUFFIX: "/esito"
-      SESSION_URL_CANCEL_SUFFIX: "/esito"
-      SESSION_URL_NOTIFICATION_URL: "https://api.uat.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
-      NPG_SESSIONS_TTL: "900"
-      NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
-      NPG_SO_KEEPALIVE: "true"
-      NPG_TCP_KEEPIDLE: "5"
-      NPG_TCP_KEEPINTVL: "2"
-      NPG_TCP_KEEPCNT: "10"
-    envSecret:
-      MONGO_PASSWORD: mongo-ecommerce-password
-      REDIS_PASSWORD: redis-ecommerce-access-key
-      REDIS_HOST: redis-ecommerce-hostname
-      AFM_KEY: afm-api-key
-      OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
-      NPG_API_KEY: npg-api-key
-      NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
+    envSecret: {}
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "1.12.0"
+    tag: "3.0.1"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -93,7 +49,7 @@ microservice-chart:
   serviceAccount:
     create: false
     annotations: {}
-    name: ""
+    name: "ecommerce-workload-identity"
   podAnnotations: {}
   podSecurityContext:
     seccompProfile:
@@ -150,6 +106,7 @@ microservice-chart:
     SPRING_MAX_IN_MEM_SIZE: "16777216"
     OTEL_RESOURCE_ATTRIBUTES: "service.name=pagopa-ecommerce-payment-methods-service-blue,deployment.environment=uat"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
     ECS_SERVICE_NAME: pagopa-ecommerce-payment-methods-service-blue
@@ -170,6 +127,10 @@ microservice-chart:
     NPG_TCP_KEEPIDLE: "5"
     NPG_TCP_KEEPINTVL: "2"
     NPG_TCP_KEEPCNT: "10"
+    JWT_ISSUER_URI: "https://weuuat.ecommerce.internal.uat.platform.pagopa.it/pagopa-jwt-issuer-service"
+    JWT_ISSUER_READ_TIMEOUT: "10000"
+    JWT_ISSUER_CONNECTION_TIMEOUT: "10000"
+    SECURITY_API_KEY_SECURED_PATHS: "/payment-methods,/v2/payment-methods"
   envSecret:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
@@ -177,7 +138,9 @@ microservice-chart:
     AFM_KEY: ecommerce-load-test-subscription-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-api-key
-    NPG_NOTIFICATION_JWT_SECRET: npg-notification-signing-key
+    JWT_ISSUER_API_KEY: ecommerce-jwt-issuer-service-active-api-key
+    SECURITY_API_KEY_PRIMARY: ecommerce-payment-methods-primary-api-key
+    SECURITY_API_KEY_SECONDARY: ecommerce-payment-methods-secondary-api-key
   keyvault:
     name: "pagopa-u-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
@@ -192,3 +155,5 @@ microservice-chart:
                 operator: In
                 values:
                   - user
+  azure:
+    workloadIdentityClientId: 449c5b65-f368-487a-881a-b03676420c53

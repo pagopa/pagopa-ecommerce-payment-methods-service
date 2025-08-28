@@ -1,18 +1,22 @@
 package it.pagopa.ecommerce.payment.methods.application.v1;
 
+import it.pagopa.ecommerce.commons.client.JwtIssuerClient;
 import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.commons.domain.Claims;
-import it.pagopa.ecommerce.commons.domain.TransactionId;
+import it.pagopa.ecommerce.commons.generated.jwtissuer.v1.dto.CreateTokenRequestDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
-import it.pagopa.ecommerce.commons.utils.JwtTokenUtils;
 import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
+import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommon;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.client.JwtTokenIssuerClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
-import it.pagopa.ecommerce.payment.methods.exception.*;
+import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
@@ -29,15 +33,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
-import javax.crypto.SecretKey;
 import java.net.URI;
+import java.time.Instant;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
 @Slf4j
-public class PaymentMethodService {
+public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     protected static final String QUALIFIER_NAME = "paymentMethodService";
 
@@ -77,11 +82,9 @@ public class PaymentMethodService {
 
     private final UniqueIdUtils uniqueIdUtils;
 
-    private final SecretKey npgJwtSigningKey;
-
     private final int npgNotificationTokenValidityTime;
 
-    private final JwtTokenUtils jwtTokenUtils;
+    private final JwtTokenIssuerClient jwtTokenIssuerClient;
 
     @Autowired
     public PaymentMethodService(
@@ -93,10 +96,10 @@ public class PaymentMethodService {
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
             @Value("${npg.client.apiKey}") String npgDefaultApiKey,
             UniqueIdUtils uniqueIdUtils,
-            SecretKey npgJwtSigningKey,
             @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
-            JwtTokenUtils jwtTokenUtils
+            JwtTokenIssuerClient jwtTokenIssuerClient
     ) {
+        super(paymentMethodRepository, npgSessionsTemplateWrapper);
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
@@ -105,9 +108,8 @@ public class PaymentMethodService {
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
         this.npgDefaultApiKey = npgDefaultApiKey;
         this.uniqueIdUtils = uniqueIdUtils;
-        this.npgJwtSigningKey = npgJwtSigningKey;
         this.npgNotificationTokenValidityTime = npgNotificationTokenValidityTime;
-        this.jwtTokenUtils = jwtTokenUtils;
+        this.jwtTokenIssuerClient = jwtTokenIssuerClient;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -116,6 +118,7 @@ public class PaymentMethodService {
     ) {
         String paymentMethodName = paymentMethodRequestDto.getName();
         String paymentMethodDescription = paymentMethodRequestDto.getDescription();
+        PaymentMethodStatusDto statusDto = paymentMethodRequestDto.getStatus();
         List<Pair<Long, Long>> ranges = paymentMethodRequestDto.getRanges().stream()
                 .map(r -> Pair.of(r.getMin(), r.getMax()))
                 .toList();
@@ -129,7 +132,7 @@ public class PaymentMethodService {
                 new PaymentMethodID(UUID.randomUUID()),
                 new PaymentMethodName(paymentMethodName),
                 new PaymentMethodDescription(paymentMethodDescription),
-                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.valueOf(statusDto.getValue())),
                 ranges.stream().map(pair -> new PaymentMethodRange(pair.getFirst(), pair.getSecond())).toList(),
                 new PaymentMethodType(paymentMethodTypeCode),
                 new PaymentMethodAsset(paymentMethodAsset),
@@ -331,17 +334,23 @@ public class PaymentMethodService {
                                 .map(orderId -> Tuples.of(orderId, paymentMethod))
                 )
                 .flatMap(
-                        orderIdAndPaymentMethod -> jwtTokenUtils.generateToken(
-                                npgJwtSigningKey,
-                                npgNotificationTokenValidityTime,
-                                new Claims(null, orderIdAndPaymentMethod.getT1(), id, null)
-                        ).fold(
-                                Mono::error,
+                        orderIdAndPaymentMethod -> jwtTokenIssuerClient.createJWTToken(
+                                new CreateTokenRequestDto().privateClaims(
+                                        Map.of(
+                                                JwtIssuerClient.ORDER_ID_CLAIM,
+                                                orderIdAndPaymentMethod.getT1(),
+                                                JwtIssuerClient.PAYMENT_METHOD_ID_CLAIM,
+                                                id
+                                        )
+                                ).audience(
+                                        JwtIssuerClient.NPG_AUDIENCE
+                                ).duration(npgNotificationTokenValidityTime)
+                        ).flatMap(
                                 token -> Mono.just(
                                         Tuples.of(
                                                 orderIdAndPaymentMethod.getT1(),
                                                 orderIdAndPaymentMethod.getT2(),
-                                                token
+                                                token.getToken()
                                         )
                                 )
                         )
@@ -355,11 +364,14 @@ public class PaymentMethodService {
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
-                    URI resultUrl = returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix());
-                    URI merchantUrl = returnUrlBasePath;
-                    URI cancelUrl = returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix());
+                    URI resultUrl = UriComponentsBuilder
+                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix()))
+                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
+                    URI cancelUrl = UriComponentsBuilder
+                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix()))
+                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
                     URI notificationUrl = UriComponentsBuilder
-                            .fromHttpUrl(sessionUrlConfig.notificationUrl())
+                            .fromUriString(sessionUrlConfig.notificationUrl())
                             .build(
                                     Map.of(
                                             "orderId",
@@ -371,7 +383,7 @@ public class PaymentMethodService {
 
                     return npgClient.buildForm(
                             correlationId, // correlationId
-                            merchantUrl, // merchantUrl
+                            returnUrlBasePath, // merchantUrl
                             resultUrl, // resultUrl
                             notificationUrl, // notificationUrl
                             cancelUrl, // cancelUrl
@@ -496,41 +508,6 @@ public class PaymentMethodService {
                 );
     }
 
-    public Mono<String> isSessionValid(
-                                       String paymentMethodId,
-                                       String orderId,
-                                       String securityToken
-    ) {
-        return paymentMethodRepository
-                .findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
-                .map(
-                        ignore -> npgSessionsTemplateWrapper.findById(orderId)
-                )
-                .doOnNext(doc -> log.info("Found session for order id {}: {}", orderId, doc.isPresent()))
-                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new OrderIdNotFoundException(orderId))))
-                .flatMap(doc -> {
-                    String transactionId = doc.transactionId();
-                    if (transactionId == null) {
-                        return Mono.error(new InvalidSessionException(orderId));
-                    } else {
-                        return Mono.just(doc);
-                    }
-                })
-                .flatMap(doc -> {
-                    if (!doc.securityToken().equals(securityToken)) {
-                        log.warn("Invalid security token for requested order id {}", orderId);
-                        return Mono.error(new MismatchedSecurityTokenException(orderId, doc.transactionId()));
-                    } else {
-                        return Mono.just(doc);
-                    }
-                })
-                .mapNotNull(NpgSessionDocument::transactionId)
-                .map(TransactionId::new)
-                .map(TransactionId::base64);
-    }
-
     public Mono<NpgSessionDocument> updateSession(
                                                   String paymentMethodId,
                                                   String orderId,
@@ -592,30 +569,33 @@ public class PaymentMethodService {
                 .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
                 .bundles(
-                        bundle.getBundleOptions() != null ? bundle.getBundleOptions()
-                                .stream()
-                                .map(
-                                        t -> new BundleDto()
-                                                .abi(t.getAbi())
-                                                .bundleDescription(t.getBundleDescription())
-                                                .bundleName(t.getBundleName())
-                                                .idBrokerPsp(t.getIdBrokerPsp())
-                                                .idBundle(t.getIdBundle())
-                                                .idChannel(t.getIdChannel())
-                                                .idCiBundle(t.getIdCiBundle())
-                                                .idPsp(t.getIdPsp())
-                                                .onUs(t.getOnUs())
-                                                .paymentMethod(
-                                                        // A null value is considered as "any" in the AFM domain
-                                                        t.getPaymentMethod() == null
-                                                                ? paymentMethodDocument.getPaymentMethodTypeCode()
-                                                                : t.getPaymentMethod()
-                                                )
-                                                .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
-                                                .taxPayerFee(t.getTaxPayerFee())
-                                                .touchpoint(t.getTouchpoint())
-                                                .pspBusinessName(t.getPspBusinessName())
-                                ).toList() : new ArrayList<>()
+                        sortAndShuffleBundleList(
+                                bundle.getBundleOptions() != null ? bundle.getBundleOptions()
+                                        .stream()
+                                        .map(
+                                                t -> new BundleDto()
+                                                        .abi(t.getAbi())
+                                                        .bundleDescription(t.getBundleDescription())
+                                                        .bundleName(t.getBundleName())
+                                                        .idBrokerPsp(t.getIdBrokerPsp())
+                                                        .idBundle(t.getIdBundle())
+                                                        .idChannel(t.getIdChannel())
+                                                        .idCiBundle(t.getIdCiBundle())
+                                                        .idPsp(t.getIdPsp())
+                                                        .onUs(t.getOnUs())
+                                                        .paymentMethod(
+                                                                // A null value is considered as "any" in the AFM domain
+                                                                t.getPaymentMethod() == null
+                                                                        ? paymentMethodDocument
+                                                                                .getPaymentMethodTypeCode()
+                                                                        : t.getPaymentMethod()
+                                                        )
+                                                        .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
+                                                        .taxPayerFee(t.getTaxPayerFee())
+                                                        .touchpoint(t.getTouchpoint())
+                                                        .pspBusinessName(t.getPspBusinessName())
+                                        ).toList() : new ArrayList<>()
+                        )
                 )
                 .asset(paymentMethodDocument.getPaymentMethodAsset())
                 .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
@@ -642,5 +622,32 @@ public class PaymentMethodService {
                 ),
                 new PaymentMethodBrandAssets(Optional.ofNullable(doc.getPaymentMethodsBrandAssets()))
         );
+    }
+
+    private List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> sortAndShuffleBundleList(
+                                                                                                      List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> bundles
+    ) {
+        Map<Long, List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto>> bundleMap = new TreeMap<>();
+        Optional<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> onUsBundle = bundles
+                .stream()
+                .filter(it.pagopa.ecommerce.payment.methods.server.model.BundleDto::getOnUs)
+                .findFirst();
+        bundles
+                .stream()
+                .filter(Predicate.not(it.pagopa.ecommerce.payment.methods.server.model.BundleDto::getOnUs))
+                .forEach(bundle -> {
+                    Long fees = bundle.getTaxPayerFee();
+                    List<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> bundlesPerFee = bundleMap
+                            .getOrDefault(fees, new ArrayList<>());
+                    bundlesPerFee.add(bundle);
+                    bundleMap.put(fees, bundlesPerFee);
+                });
+        Deque<it.pagopa.ecommerce.payment.methods.server.model.BundleDto> orderedBundles = new LinkedList<>();
+        bundleMap.values().forEach(bundlesPerFee -> {
+            Collections.shuffle(bundlesPerFee);
+            orderedBundles.addAll(bundlesPerFee);
+        });
+        onUsBundle.ifPresent(orderedBundles::addFirst);
+        return orderedBundles.stream().toList();
     }
 }

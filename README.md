@@ -37,7 +37,6 @@ These are all environment variables needed by the application:
 | NPG_API_KEY                        | NPG api key                                                                                                                                                | string |         |
 | NPG_SESSIONS_TTL                   | NPG TTL in second for npg session object                                                                                                                   | number |         |
 | NPG_NOTIFICATION_JWT_VALIDITY_TIME | Validity time in second used for generate token jwt used into notification url                                                                             | number |         |
-| NPG_NOTIFICATION_JWT_SECRET        | Secret for generate jwt used into notification url                                                                                                         | string |         |
 | WARMUP_PAYMENT_METHOD_ID           | Payment method ID used for warm-up call                                                                                                                    | string |         |
 | SESSION_URL_BASEPATH               | Url used into npg order build request to enhance the merchantUrl field                                                                                     | string |         |
 | SESSION_URL_OUTCOME_SUFFIX         | Suffix concatenated to the merchant url to enhance the resultUrl field in the order build to NPG                                                           | string |         |
@@ -47,7 +46,13 @@ These are all environment variables needed by the application:
 | NPG_TCP_KEEPIDLE                   | Configures the idle time after tcp starts sending keepalive probes, in seconds                                                                             | string |         |
 | NPG_TCP_KEEPINTVL                  | Configures the time between individual keepalive probes, in seconds                                                                                        | string |         |
 | NPG_TCP_KEEPCNT                    | Configures the maximum number of TCP keepalive probes                                                                                                      | string |         |
-
+| JWT_ISSUER_URI                     | JWT Issuer URI                                                                                                                                             | string |         |
+| JWT_ISSUER_READ_TIMEOUT            | Timeout for requests towards JWT Issuer                                                                                                                    | string |         |
+| JWT_ISSUER_CONNECTION_TIMEOUT      | Timeout for establishing connections towards JWT Issuer                                                                                                    | string |         |
+| JWT_ISSUER_API_KEY                 | Jwt issuer service API key                                                                                                                                 | string |         |
+| SECURITY_API_KEY_PRIMARY           | Primary API Key used to secure payment-requests service's APIs                                                                                             | string |         |
+| SECURITY_API_KEY_SECONDARY         | Secondary API Key used to secure payment-requests service's APIs                                                                                           | string |         |
+| SECURITY_API_KEYS_SECURED_PATHS    | Comma-separated list of secured API paths                                                                                                                  | string |         |
 (*): for Mongo connection string options
 see [docs](https://www.mongodb.com/docs/drivers/java/sync/v4.3/fundamentals/connection/connection-options/#connection-options)
 

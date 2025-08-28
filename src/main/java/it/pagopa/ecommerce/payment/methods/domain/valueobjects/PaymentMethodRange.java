@@ -2,8 +2,8 @@ package it.pagopa.ecommerce.payment.methods.domain.valueobjects;
 
 import org.springframework.lang.NonNull;
 
-import javax.validation.ValidationException;
-import javax.validation.constraints.PositiveOrZero;
+import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.io.Serializable;
 
 public class PaymentMethodRange implements Serializable {

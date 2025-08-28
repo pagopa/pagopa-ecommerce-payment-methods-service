@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.controller.v1;
 
 import it.pagopa.ecommerce.commons.annotations.Warmup;
-import it.pagopa.ecommerce.commons.exceptions.JWTTokenGenerationException;
 import it.pagopa.ecommerce.commons.exceptions.NpgResponseException;
 import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
@@ -20,14 +19,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static it.pagopa.ecommerce.payment.methods.utils.HttpUtils.getAuthenticationToken;
 
 @RestController
 @Slf4j
@@ -37,9 +36,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     private PaymentMethodService paymentMethodService;
 
     private static final String X_CLIENT_ID = "X-Client-ID";
+    private static final String X_API_KEY = "x-api-key";
 
     @Value("${warmup.payment.method.id}")
     String warmupPaymentMethodID;
+    @Value("${security.apiKey.primary}")
+    String primaryApiKey;
 
     @ExceptionHandler(
         {
@@ -52,7 +54,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 MismatchedSecurityTokenException.class,
                 SessionAlreadyAssociatedToTransaction.class,
                 NoBundleFoundException.class,
-                JWTTokenGenerationException.class,
+                JwtIssuerResponseException.class,
                 NpgResponseException.class
         }
     )
@@ -273,7 +275,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         )
                 )
                 .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
-                .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId))
+                .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId.base64()))
                 .map(ResponseEntity::ok);
     }
 
@@ -289,21 +291,6 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .map(ignored -> ResponseEntity.noContent().build());
     }
 
-    private Mono<String> getAuthenticationToken(ServerWebExchange exchange) {
-        return Mono.justOrEmpty(
-                Optional.ofNullable(
-                        exchange.getRequest()
-                                .getHeaders()
-                                .get("Authorization")
-                )
-                        .orElse(List.of())
-                        .stream()
-                        .findFirst()
-                        .filter(header -> header.startsWith("Bearer "))
-                        .map(header -> header.substring("Bearer ".length()))
-        );
-    }
-
     @Warmup
     public void getAllPaymentMethodsWarmupMethod() {
         WebClient
@@ -311,6 +298,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 .get()
                 .uri("http://localhost:8080/payment-methods")
                 .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_API_KEY, primaryApiKey)
                 .retrieve()
                 .bodyToMono(PaymentMethodsResponseDto.class)
                 .block(Duration.ofSeconds(30));
@@ -333,6 +321,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                 )
                 .bodyValue(request)
                 .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_API_KEY, primaryApiKey)
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));
@@ -348,6 +337,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                         warmupPaymentMethodID
                 )
                 .header(X_CLIENT_ID, PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.toString())
+                .header(X_API_KEY, primaryApiKey)
                 .retrieve()
                 .toBodilessEntity()
                 .block(Duration.ofSeconds(30));

@@ -1,7 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.infrastructure;
 
 import it.pagopa.ecommerce.commons.annotations.ValueObject;
-import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.lang.NonNull;
 
 @ValueObject
@@ -20,7 +20,7 @@ public record CardDataDocument(
      * @param expiringDate   card expiring date
      * @param circuit        card circuit
      */
-    @PersistenceConstructor
+    @PersistenceCreator
     public CardDataDocument {
         // Do nothing
     }
