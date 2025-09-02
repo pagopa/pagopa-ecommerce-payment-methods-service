@@ -54,6 +54,9 @@ stages:
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
               goals: 'clean validate'
               sonarQubeRunAnalysis: false
+            displayName: 'Maven clean validate'
+            env:
+              GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
           - task: Maven@4
             inputs:
@@ -66,6 +69,9 @@ stages:
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
               goals: 'clean verify'
               sonarQubeRunAnalysis: true
+            displayName: 'Maven clean verify'
+            env:
+              GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
           - task: SonarCloudPublish@3
             displayName: 'Publish SonarCloud results on build summary'
@@ -91,6 +97,8 @@ stages:
             displayName: 'Change payment-method branch name ecommerce-local .env'
           - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
             displayName: 'Run app with docker-compose'
+            env:
+              GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
           - script: |
               timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8083/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
             displayName: 'Health check'
