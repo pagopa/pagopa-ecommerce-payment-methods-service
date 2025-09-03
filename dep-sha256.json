@@ -5,7 +5,7 @@
       "artifactId": "spring-boot-starter-data-mongodb-reactive",
       "groupId": "org.springframework.boot",
       "version": "3.4.5",
-      "sha256": "6vDWVfR4uXQl7p2gCjvE0GUwPcEFWOK5A2dpoLurliE="
+      "sha256": "6vDWVfR4uXQl7p2gCjvE0GUwPcEFWOK5A2dpoLurliI="
     },
     {
       "id": "org.springframework.boot:spring-boot-starter:jar:3.4.5",
