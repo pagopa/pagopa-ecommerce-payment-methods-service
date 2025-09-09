@@ -53,7 +53,7 @@ These are all environment variables needed by the application:
 | SECURITY_API_KEY_PRIMARY           | Primary API Key used to secure payment-requests service's APIs                                                                                             | string |         |
 | SECURITY_API_KEY_SECONDARY         | Secondary API Key used to secure payment-requests service's APIs                                                                                           | string |         |
 | SECURITY_API_KEYS_SECURED_PATHS    | Comma-separated list of secured API paths                                                                                                                  | string |         |
-| GITHUB_TOKEN                       | GitHub Personal Access Token with packages:read permission for accessing pagopa-ecommerce-commons from GitHub Packages                                     | string |         |
+
 (*): for Mongo connection string options
 see [docs](https://www.mongodb.com/docs/drivers/java/sync/v4.3/fundamentals/connection/connection-options/#connection-options)
 
