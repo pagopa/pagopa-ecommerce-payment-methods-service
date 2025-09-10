@@ -1,11 +1,11 @@
 package it.pagopa.ecommerce.payment.methods.infrastructure;
 
-import it.pagopa.ecommerce.commons.redis.templatewrappers.RedisTemplateWrapper;
-import org.springframework.data.redis.core.RedisTemplate;
+import it.pagopa.ecommerce.commons.redis.reactivetemplatewrappers.ReactiveRedisTemplateWrapper;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 
 import java.time.Duration;
 
-public class NpgSessionsTemplateWrapper extends RedisTemplateWrapper<NpgSessionDocument> {
+public class NpgSessionsTemplateWrapper extends ReactiveRedisTemplateWrapper<NpgSessionDocument> {
     /**
      * Primary constructor
      *
@@ -14,7 +14,7 @@ public class NpgSessionsTemplateWrapper extends RedisTemplateWrapper<NpgSessionD
      * @param ttl           time to live for keys
      */
     public NpgSessionsTemplateWrapper(
-            RedisTemplate<String, NpgSessionDocument> redisTemplate,
+            ReactiveRedisTemplate<String, NpgSessionDocument> redisTemplate,
             String keyspace,
             Duration ttl
     ) {
