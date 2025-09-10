@@ -34,11 +34,10 @@ public abstract class PaymentMethodServiceCommon {
                 .findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
                 .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
-                .map(
+                .flatMap(
                         ignore -> npgSessionsTemplateWrapper.findById(orderId)
                 )
-                .doOnNext(doc -> log.info("Found session for order id {}: {}", orderId, doc.isPresent()))
-                .flatMap(doc -> doc.map(Mono::just).orElse(Mono.error(new OrderIdNotFoundException(orderId))))
+                .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(doc -> {
                     String transactionId = doc.transactionId();
                     if (transactionId == null) {
