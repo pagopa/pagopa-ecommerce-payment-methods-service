@@ -10,6 +10,8 @@ public record SessionUrlConfig(
         String outcomeSuffix,
         String cancelSuffix,
 
-        String notificationUrl
+        String notificationUrl,
+
+        String walletPrefixPath
 ) {
 }

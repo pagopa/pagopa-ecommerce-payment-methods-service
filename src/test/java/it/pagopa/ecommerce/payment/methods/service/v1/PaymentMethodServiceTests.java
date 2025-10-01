@@ -70,7 +70,8 @@ class PaymentMethodServiceTests {
             URI.create("http://localhost:1234"),
             "/esito",
             "/annulla",
-            "https://localhost/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
+            "https://localhost/sessions/{orderId}/outcomes?sessionToken={sessionToken}",
+            "/ecommerce-fe"
     );
 
     private final String npgDefaultApiKey = UUID.randomUUID().toString();
@@ -522,7 +523,7 @@ class PaymentMethodServiceTests {
         Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
                 .thenThrow(new JwtIssuerResponseException(HttpStatus.BAD_GATEWAY, "error jwtIssuwe"));
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
                 .expectError(JwtIssuerResponseException.class)
                 .verify();
     }
@@ -568,7 +569,7 @@ class PaymentMethodServiceTests {
                                     )
                     );
 
-            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null))
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
                     .expectNext(expected)
                     .verifyComplete();
 
@@ -1043,4 +1044,77 @@ class PaymentMethodServiceTests {
         assertFalse(samePositionForAllelements);
     }
 
+    @Test
+    void shouldCreateSessionForValidPaymentMethodAndIOClient() {
+        UUID correlationId = UUID.randomUUID();
+        try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
+            uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
+            PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+            PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
+            String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+            FieldsDto npgResponse = TestUtil.npgResponse();
+            ClientIdDto xClientId = ClientIdDto.IO;
+            String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+            Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+            Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+                    .thenReturn(Mono.just(paymentMethodDocument));
+            Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+                    .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
+            Mockito.when(
+                    npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            )
+                    .thenReturn(
+                            Mono.just(npgResponse)
+                    );
+            Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+
+            CreateSessionResponseDto expected = new CreateSessionResponseDto()
+                    .orderId(orderId)
+                    .correlationId(correlationId)
+                    .paymentMethodData(
+                            new CardFormFieldsDto()
+                                    .paymentMethod(PaymentMethodService.SessionPaymentMethod.CARDS.value)
+                                    .form(
+                                            npgResponse.getFields().stream().map(
+                                                    field -> new FieldDto()
+                                                            .id(field.getId())
+                                                            .type(field.getType())
+                                                            .propertyClass(field.getPropertyClass())
+                                                            .src(URI.create(field.getSrc()))
+                                            )
+                                                    .collect(Collectors.toList())
+                                    )
+                    );
+
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, xClientId))
+                    .expectNext(expected)
+                    .verifyComplete();
+
+            ArgumentCaptor<URI> resultUrlCaptor = ArgumentCaptor.forClass(URI.class);
+            ArgumentCaptor<URI> cancelUrlCaptor = ArgumentCaptor.forClass(URI.class);
+
+            Mockito.verify(npgClient, times(1)).buildForm(
+                    any(),
+                    any(),
+                    resultUrlCaptor.capture(),
+                    any(),
+                    cancelUrlCaptor.capture(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+            );
+            String resultUrlPath = resultUrlCaptor.getValue().getPath();
+            String cancelUrlPath = cancelUrlCaptor.getValue().getPath();
+
+            assertTrue(
+                    () -> TestUtil.urlContainsRandomTQueryParam(resultUrlCaptor.getValue())
+                            && resultUrlPath.startsWith(sessionUrlConfig.walletPrefixPath())
+                            && TestUtil.urlContainsRandomTQueryParam(cancelUrlCaptor.getValue())
+                            && cancelUrlPath.startsWith(sessionUrlConfig.walletPrefixPath())
+            );
+        }
+    }
 }
