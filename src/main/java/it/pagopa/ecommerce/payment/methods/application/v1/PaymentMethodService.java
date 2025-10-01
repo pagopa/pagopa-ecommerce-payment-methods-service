@@ -653,7 +653,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     /**
      * Build the outcome (success or cancel) URL to pass to NPG when creating a
-     * session for a given payment method
+     * session for a given client ID
      *
      * @param basePath  the base path
      * @param suffix    the wanted suffix

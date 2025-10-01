@@ -838,7 +838,6 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorOnNonExistingSession() {
-        String sessionId = "sessionId";
         String orderId = "orderId";
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
@@ -1082,7 +1081,7 @@ class PaymentMethodServiceTests {
                                                             .propertyClass(field.getPropertyClass())
                                                             .src(URI.create(field.getSrc()))
                                             )
-                                                    .collect(Collectors.toList())
+                                                    .toList()
                                     )
                     );
 
