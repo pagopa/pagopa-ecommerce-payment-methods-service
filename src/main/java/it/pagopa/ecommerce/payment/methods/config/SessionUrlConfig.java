@@ -12,6 +12,6 @@ public record SessionUrlConfig(
 
         String notificationUrl,
 
-        String walletPrefixPath
+        String ioPrefixPath
 ) {
 }

@@ -670,7 +670,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
         // IO? add the wallet-specific prefix
         if (ClientIdDto.IO.equals(xClientId)) {
-            builder.path(sessionUrlConfig.walletPrefixPath());
+            builder.path(sessionUrlConfig.ioPrefixPath());
         }
 
         return builder

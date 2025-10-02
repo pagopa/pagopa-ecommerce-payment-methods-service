@@ -1110,9 +1110,9 @@ class PaymentMethodServiceTests {
 
             assertTrue(
                     () -> TestUtil.urlContainsRandomTQueryParam(resultUrlCaptor.getValue())
-                            && resultUrlPath.startsWith(sessionUrlConfig.walletPrefixPath())
+                            && resultUrlPath.startsWith(sessionUrlConfig.ioPrefixPath())
                             && TestUtil.urlContainsRandomTQueryParam(cancelUrlCaptor.getValue())
-                            && cancelUrlPath.startsWith(sessionUrlConfig.walletPrefixPath())
+                            && cancelUrlPath.startsWith(sessionUrlConfig.ioPrefixPath())
             );
         }
     }
