@@ -244,9 +244,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     public Mono<ResponseEntity<CreateSessionResponseDto>> createSession(
                                                                         String id,
                                                                         String lang,
+                                                                        ClientIdDto xClientId,
                                                                         ServerWebExchange exchange
     ) {
-        return paymentMethodService.createSessionForPaymentMethod(id, lang).map(ResponseEntity::ok);
+        return paymentMethodService.createSessionForPaymentMethod(id, lang, xClientId).map(ResponseEntity::ok);
     }
 
     @Override

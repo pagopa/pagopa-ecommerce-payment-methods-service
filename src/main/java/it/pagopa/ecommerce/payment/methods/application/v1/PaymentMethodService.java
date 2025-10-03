@@ -320,7 +320,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
                                                                         String id,
-                                                                        String language
+                                                                        String language,
+                                                                        ClientIdDto xClientId
     ) {
         log.info(
                 "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
@@ -364,12 +365,19 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
-                    URI resultUrl = UriComponentsBuilder
-                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix()))
-                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
-                    URI cancelUrl = UriComponentsBuilder
-                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix()))
-                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
+
+                    URI resultUrl = buildSessionOutcomeUrlWithClientPath(
+                            returnUrlBasePath,
+                            sessionUrlConfig.outcomeSuffix(),
+                            xClientId
+                    );
+
+                    URI cancelUrl = buildSessionOutcomeUrlWithClientPath(
+                            returnUrlBasePath,
+                            sessionUrlConfig.cancelSuffix(),
+                            xClientId
+                    );
+
                     URI notificationUrl = UriComponentsBuilder
                             .fromUriString(sessionUrlConfig.notificationUrl())
                             .build(
@@ -641,5 +649,34 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         });
         onUsBundle.ifPresent(orderedBundles::addFirst);
         return orderedBundles.stream().toList();
+    }
+
+    /**
+     * Build the outcome (success or cancel) URL to pass to NPG when creating a
+     * session for a given client ID
+     *
+     * @param basePath  the base path
+     * @param suffix    the wanted suffix
+     * @param xClientId the client ID that will dynamically modify the URL, if
+     *                  needed
+     * @return URI
+     */
+    private URI buildSessionOutcomeUrlWithClientPath(
+                                                     URI basePath,
+                                                     String suffix,
+                                                     ClientIdDto xClientId
+    ) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(basePath);
+
+        // IO? add the wallet-specific prefix
+        if (ClientIdDto.IO.equals(xClientId)) {
+            builder.path(sessionUrlConfig.ioPrefixPath());
+        }
+
+        return builder
+                .path(suffix)
+                .queryParam("t", Instant.now().toEpochMilli())
+                .build()
+                .toUri();
     }
 }

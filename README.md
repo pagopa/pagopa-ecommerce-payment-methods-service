@@ -42,6 +42,7 @@ These are all environment variables needed by the application:
 | SESSION_URL_OUTCOME_SUFFIX         | Suffix concatenated to the merchant url to enhance the resultUrl field in the order build to NPG                                                           | string |         |
 | SESSION_URL_CANCEL_SUFFIX          | Suffix concatenated to the merchant url to enhance the cancelUrl field in the order build to NPG                                                           | string |         |
 | SESSION_URL_NOTIFICATION_URL       | Url used into npg order build request to enhance the notificationUrl field                                                                                 | string |         |
+| SESSION_URL_IO_PREFIX_PATH         | Client-specific string to add as a prefix when building the session output URLs path                                                                       | string |         |
 | NPG_SO_KEEPALIVE                   | Whether tcp keepalive is enabled for payment gateway connections                                                                                           | string |         |
 | NPG_TCP_KEEPIDLE                   | Configures the idle time after tcp starts sending keepalive probes, in seconds                                                                             | string |         |
 | NPG_TCP_KEEPINTVL                  | Configures the time between individual keepalive probes, in seconds                                                                                        | string |         |
