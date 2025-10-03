@@ -324,9 +324,11 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                                         ClientIdDto xClientId
     ) {
         log.info(
-                "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
-                id
+                "[Payment Method service] create new NPG sessions using paymentMethodId: {} , and client: {}",
+                id,
+                xClientId
         );
+
         return paymentMethodRepository.findById(id)
                 .map(PaymentMethodDocument::getPaymentMethodName)
                 .map(NpgClient.PaymentMethod::fromServiceName)
@@ -377,6 +379,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                             sessionUrlConfig.cancelSuffix(),
                             xClientId
                     );
+
+                    log.info("resultUrl: {} | cancelUrl: {}", resultUrl, cancelUrl);
 
                     URI notificationUrl = UriComponentsBuilder
                             .fromUriString(sessionUrlConfig.notificationUrl())
