@@ -118,7 +118,7 @@ microservice-chart:
     SESSION_URL_OUTCOME_SUFFIX: "/esito"
     SESSION_URL_CANCEL_SUFFIX: "/esito"
     SESSION_URL_NOTIFICATION_URL: "https://api.uat.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
-    SESSION_URL_IO_PREFIX_PATH: "/ecommerce-fe"
+    SESSION_URL_IO_PREFIX_PATH: "https://uat.ecommerce.pagopa.it"
     NPG_SESSIONS_TTL: "900"
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
     SERVICE_LOGGING_LEVEL: "info"
