@@ -367,13 +367,13 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
 
                     URI resultUrl = buildSessionOutcomeUrlWithClientPath(
-                            returnUrlBasePath,
+                            // returnUrlBasePath,
                             sessionUrlConfig.outcomeSuffix(),
                             xClientId
                     );
 
                     URI cancelUrl = buildSessionOutcomeUrlWithClientPath(
-                            returnUrlBasePath,
+                            // returnUrlBasePath,
                             sessionUrlConfig.cancelSuffix(),
                             xClientId
                     );
@@ -662,21 +662,31 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
      * @return URI
      */
     private URI buildSessionOutcomeUrlWithClientPath(
-                                                     URI basePath,
+                                                     // URI basePath,
                                                      String suffix,
                                                      ClientIdDto xClientId
     ) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(basePath);
+
+        URI base = ClientIdDto.IO.equals(xClientId) ? sessionUrlConfig.ioBasePath() : sessionUrlConfig.basePath();
+
+        // UriComponentsBuilder builder = UriComponentsBuilder.fromUri(basePath);
 
         // IO? add the wallet-specific prefix
-        if (ClientIdDto.IO.equals(xClientId)) {
-            builder.path(sessionUrlConfig.ioPrefixPath());
-        }
+        // if (ClientIdDto.IO.equals(xClientId)) {
+        // builder.path(sessionUrlConfig.ioPrefixPath());
+        // }
 
-        return builder
+        // return builder
+        // .path(suffix)
+        // .queryParam("t", Instant.now().toEpochMilli())
+        // .build()
+        // .toUri();
+        return UriComponentsBuilder
+                .fromUri(base)
                 .path(suffix)
                 .queryParam("t", Instant.now().toEpochMilli())
                 .build()
                 .toUri();
+
     }
 }

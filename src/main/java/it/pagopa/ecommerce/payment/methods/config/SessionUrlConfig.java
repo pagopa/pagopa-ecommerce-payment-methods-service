@@ -7,6 +7,7 @@ import java.net.URI;
 @ConfigurationProperties(prefix = "session-url")
 public record SessionUrlConfig(
         URI basePath,
+        URI ioBasePath,
         String outcomeSuffix,
         String cancelSuffix,
 
