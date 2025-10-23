@@ -68,6 +68,7 @@ class PaymentMethodServiceTests {
 
     private final SessionUrlConfig sessionUrlConfig = new SessionUrlConfig(
             URI.create("http://localhost:1234"),
+            URI.create("http://localhost:1234"),
             "/esito",
             "/annulla",
             "https://localhost/sessions/{orderId}/outcomes?sessionToken={sessionToken}",
@@ -1110,9 +1111,9 @@ class PaymentMethodServiceTests {
 
             assertTrue(
                     () -> TestUtil.urlContainsRandomTQueryParam(resultUrlCaptor.getValue())
-                            && resultUrlPath.startsWith(sessionUrlConfig.ioPrefixPath())
+                            && resultUrlPath.startsWith(sessionUrlConfig.ioBasePath().toString())
                             && TestUtil.urlContainsRandomTQueryParam(cancelUrlCaptor.getValue())
-                            && cancelUrlPath.startsWith(sessionUrlConfig.ioPrefixPath())
+                            && cancelUrlPath.startsWith(sessionUrlConfig.ioBasePath().toString())
             );
         }
     }
