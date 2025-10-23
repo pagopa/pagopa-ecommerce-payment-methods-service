@@ -90,8 +90,7 @@ class PaymentMethodServiceTests {
             URI.create("http://localhost:1234"),
             "/esito",
             "/annulla",
-            "https://localhost/sessions/{orderId}/outcomes?sessionToken={sessionToken}",
-            "/ecommerce-fe"
+            "https://localhost/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
     );
 
     private final String npgDefaultApiKey = UUID.randomUUID().toString();
