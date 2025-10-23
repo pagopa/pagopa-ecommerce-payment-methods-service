@@ -1,27 +1,21 @@
 package it.pagopa.ecommerce.payment.methods.service.v1;
 
-import it.pagopa.ecommerce.commons.client.NpgClient;
-import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
-import it.pagopa.ecommerce.commons.generated.jwtissuer.v1.dto.CreateTokenResponseDto;
-import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
-import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
-import it.pagopa.ecommerce.commons.utils.ReactiveUniqueIdUtils;
-import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
-import it.pagopa.ecommerce.payment.methods.client.AfmClient;
-import it.pagopa.ecommerce.payment.methods.client.JwtTokenIssuerClient;
-import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
-import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
-import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
-import it.pagopa.ecommerce.payment.methods.exception.*;
-import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
-import it.pagopa.ecommerce.payment.methods.server.model.*;
-import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
-import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
-import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
-import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
+import static com.mongodb.assertions.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,24 +29,49 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
+
+import it.pagopa.ecommerce.commons.client.NpgClient;
+import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
+import it.pagopa.ecommerce.commons.generated.jwtissuer.v1.dto.CreateTokenResponseDto;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.CardDataResponseDto;
+import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
+import it.pagopa.ecommerce.commons.utils.ReactiveUniqueIdUtils;
+import it.pagopa.ecommerce.payment.methods.application.v1.PaymentMethodService;
+import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.client.JwtTokenIssuerClient;
+import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
+import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
+import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
+import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
+import it.pagopa.ecommerce.payment.methods.exception.JwtIssuerResponseException;
+import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
+import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CardFormFieldsDto;
+import it.pagopa.ecommerce.payment.methods.server.model.ClientIdDto;
+import it.pagopa.ecommerce.payment.methods.server.model.CreateSessionResponseDto;
+import it.pagopa.ecommerce.payment.methods.server.model.FieldDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PatchSessionRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementTypeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
+import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodStatusDto;
+import it.pagopa.ecommerce.payment.methods.server.model.RangeDto;
+import it.pagopa.ecommerce.payment.methods.server.model.SessionPaymentMethodResponseDto;
+import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
+import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
+import it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto;
+import it.pagopa.generated.ecommerce.gec.v1.dto.TransferDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.mongodb.assertions.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.test.properties")
@@ -68,10 +87,10 @@ class PaymentMethodServiceTests {
 
     private final SessionUrlConfig sessionUrlConfig = new SessionUrlConfig(
             URI.create("http://localhost:1234"),
+            URI.create("http://localhost:1234"),
             "/esito",
             "/annulla",
-            "https://localhost/sessions/{orderId}/outcomes?sessionToken={sessionToken}",
-            "/ecommerce-fe"
+            "https://localhost/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
     );
 
     private final String npgDefaultApiKey = UUID.randomUUID().toString();
@@ -1105,15 +1124,20 @@ class PaymentMethodServiceTests {
                     any(),
                     any()
             );
-            String resultUrlPath = resultUrlCaptor.getValue().getPath();
-            String cancelUrlPath = cancelUrlCaptor.getValue().getPath();
+            URI result = resultUrlCaptor.getValue();
+            URI cancel = cancelUrlCaptor.getValue();
 
             assertTrue(
-                    () -> TestUtil.urlContainsRandomTQueryParam(resultUrlCaptor.getValue())
-                            && resultUrlPath.startsWith(sessionUrlConfig.ioPrefixPath())
-                            && TestUtil.urlContainsRandomTQueryParam(cancelUrlCaptor.getValue())
-                            && cancelUrlPath.startsWith(sessionUrlConfig.ioPrefixPath())
+                    TestUtil.urlContainsRandomTQueryParam(result)
+                            && TestUtil.urlContainsRandomTQueryParam(cancel)
+                            && sessionUrlConfig.ioBasePath().getScheme().equals(result.getScheme())
+                            && sessionUrlConfig.ioBasePath().getScheme().equals(cancel.getScheme())
+                            && sessionUrlConfig.ioBasePath().getHost().equals(result.getHost())
+                            && sessionUrlConfig.ioBasePath().getHost().equals(cancel.getHost())
+                            && result.getPath().endsWith(sessionUrlConfig.outcomeSuffix())
+                            && cancel.getPath().endsWith(sessionUrlConfig.cancelSuffix())
             );
+
         }
     }
 }
