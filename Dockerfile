@@ -1,20 +1,27 @@
 FROM amazoncorretto:21-alpine@sha256:6a98c4402708fe8d16e946b4b5bac396379ec5104c1661e2a27b2b45cf9e2d16 AS build
 WORKDIR /workspace/app
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git gettext
 
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
-#validate step will execute the scm plugin to perform checkout and installation of the pagopa-commons library
-RUN ./mvnw validate -DskipTests
-RUN ./mvnw dependency:copy-dependencies
-RUN ./mvnw dependency:go-offline
+COPY settings.xml.template /tmp/
+COPY dep-sha256.json .
+
+RUN --mount=type=secret,id=GITHUB_TOKEN,env=GITHUB_TOKEN \
+    mkdir -p ~/.m2 && \
+    envsubst < /tmp/settings.xml.template > ~/.m2/settings.xml && \
+    ./mvnw dependency:copy-dependencies
+
+RUN --mount=type=secret,id=GITHUB_TOKEN,env=GITHUB_TOKEN \
+    ./mvnw dependency:go-offline
 
 COPY src src
 COPY api-spec api-spec
 COPY eclipse-style.xml eclipse-style.xml
-RUN ./mvnw install -DskipTests
+RUN --mount=type=secret,id=GITHUB_TOKEN,env=GITHUB_TOKEN \
+    ./mvnw install -DskipTests
 RUN mkdir target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
 
 FROM amazoncorretto:21-alpine@sha256:6a98c4402708fe8d16e946b4b5bac396379ec5104c1661e2a27b2b45cf9e2d16

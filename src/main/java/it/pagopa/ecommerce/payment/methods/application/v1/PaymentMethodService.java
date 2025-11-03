@@ -4,7 +4,7 @@ import it.pagopa.ecommerce.commons.client.JwtIssuerClient;
 import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.generated.jwtissuer.v1.dto.CreateTokenRequestDto;
 import it.pagopa.ecommerce.commons.generated.npg.v1.dto.FieldsDto;
-import it.pagopa.ecommerce.commons.utils.UniqueIdUtils;
+import it.pagopa.ecommerce.commons.utils.ReactiveUniqueIdUtils;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommon;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
@@ -80,7 +80,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     private final String npgDefaultApiKey;
 
-    private final UniqueIdUtils uniqueIdUtils;
+    private final ReactiveUniqueIdUtils uniqueIdUtils;
 
     private final int npgNotificationTokenValidityTime;
 
@@ -95,7 +95,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
             SessionUrlConfig sessionUrlConfig,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
             @Value("${npg.client.apiKey}") String npgDefaultApiKey,
-            UniqueIdUtils uniqueIdUtils,
+            ReactiveUniqueIdUtils uniqueIdUtils,
             @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
             JwtTokenIssuerClient jwtTokenIssuerClient
     ) {
@@ -320,7 +320,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     public Mono<CreateSessionResponseDto> createSessionForPaymentMethod(
                                                                         String id,
-                                                                        String language
+                                                                        String language,
+                                                                        ClientIdDto xClientId
     ) {
         log.info(
                 "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
@@ -364,12 +365,19 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
                     URI returnUrlBasePath = sessionUrlConfig.basePath();
-                    URI resultUrl = UriComponentsBuilder
-                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.outcomeSuffix()))
-                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
-                    URI cancelUrl = UriComponentsBuilder
-                            .fromUri(returnUrlBasePath.resolve(sessionUrlConfig.cancelSuffix()))
-                            .queryParam("t", Instant.now().toEpochMilli()).build().toUri();
+
+                    URI resultUrl = buildSessionOutcomeUrlWithClientPath(
+                            returnUrlBasePath,
+                            sessionUrlConfig.outcomeSuffix(),
+                            xClientId
+                    );
+
+                    URI cancelUrl = buildSessionOutcomeUrlWithClientPath(
+                            returnUrlBasePath,
+                            sessionUrlConfig.cancelSuffix(),
+                            xClientId
+                    );
+
                     URI notificationUrl = UriComponentsBuilder
                             .fromUriString(sessionUrlConfig.notificationUrl())
                             .build(
@@ -395,11 +403,11 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                             language // language
 
                     ).map(form -> Tuples.of(form, sessionPaymentMethod, orderId, correlationId));
-                }).map(data -> {
+                }).flatMap(data -> {
                     FieldsDto fields = data.getT1();
                     String orderId = data.getT3();
                     UUID correlationId = data.getT4();
-                    npgSessionsTemplateWrapper
+                    return npgSessionsTemplateWrapper
                             .save(
                                     new NpgSessionDocument(
                                             orderId,
@@ -409,8 +417,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                             null,
                                             null
                                     )
-                            );
-                    return data;
+                            ).thenReturn(data);
                 }).map(data -> {
                     FieldsDto fields = data.getT1();
                     SessionPaymentMethod paymentMethod = data.getT2();
@@ -450,61 +457,57 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         return paymentMethodRepository
                 .findById(id)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
-                .map(
+                .flatMap(
                         el -> npgSessionsTemplateWrapper.findById(orderId)
                 )
+                .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(
-                        session -> session.map(
-                                sx -> {
-                                    Mono<SessionPaymentMethodResponseDto> response;
-                                    if (sx.cardData() != null) {
-                                        log.info("Cache hit for orderId: {}", orderId);
-                                        response = Mono.just(
-                                                new SessionPaymentMethodResponseDto()
-                                                        .bin(sx.cardData().bin())
-                                                        .sessionId(sx.sessionId())
-                                                        .brand(sx.cardData().circuit())
-                                                        .expiringDate(sx.cardData().expiringDate())
-                                                        .lastFourDigits(sx.cardData().lastFourDigits())
-                                        );
-                                    } else {
-                                        log.info("Cache miss for orderId: {}", orderId);
-                                        response = npgClient.getCardData(
-                                                UUID.fromString(sx.correlationId()),
-                                                sx.sessionId(),
-                                                npgDefaultApiKey
-                                        )
-                                                .doOnSuccess(
-                                                        el -> npgSessionsTemplateWrapper.save(
-                                                                new NpgSessionDocument(
-                                                                        sx.orderId(),
-                                                                        sx.correlationId(),
-                                                                        sx.sessionId(),
-                                                                        sx.securityToken(),
-                                                                        new CardDataDocument(
-                                                                                el.getBin(),
-                                                                                el.getLastFourDigits(),
-                                                                                el.getExpiringDate(),
-                                                                                el.getCircuit()
-                                                                        ),
-                                                                        null
-                                                                )
+                        sx -> {
+                            Mono<SessionPaymentMethodResponseDto> response;
+                            if (sx.cardData() != null) {
+                                log.info("Cache hit for orderId: {}", orderId);
+                                response = Mono.just(
+                                        new SessionPaymentMethodResponseDto()
+                                                .bin(sx.cardData().bin())
+                                                .sessionId(sx.sessionId())
+                                                .brand(sx.cardData().circuit())
+                                                .expiringDate(sx.cardData().expiringDate())
+                                                .lastFourDigits(sx.cardData().lastFourDigits())
+                                );
+                            } else {
+                                log.info("Cache miss for orderId: {}", orderId);
+                                response = npgClient.getCardData(
+                                        UUID.fromString(sx.correlationId()),
+                                        sx.sessionId(),
+                                        npgDefaultApiKey
+                                )
+                                        .flatMap(
+                                                el -> npgSessionsTemplateWrapper.save(
+                                                        new NpgSessionDocument(
+                                                                sx.orderId(),
+                                                                sx.correlationId(),
+                                                                sx.sessionId(),
+                                                                sx.securityToken(),
+                                                                new CardDataDocument(
+                                                                        el.getBin(),
+                                                                        el.getLastFourDigits(),
+                                                                        el.getExpiringDate(),
+                                                                        el.getCircuit()
+                                                                ),
+                                                                null
                                                         )
-                                                )
-                                                .map(
-                                                        el -> new SessionPaymentMethodResponseDto().bin(el.getBin())
-                                                                .sessionId(sx.sessionId())
-                                                                .brand(el.getCircuit())
-                                                                .expiringDate(el.getExpiringDate())
-                                                                .lastFourDigits(el.getLastFourDigits())
-                                                );
-                                    }
-                                    return response;
-                                }
-
-                        ).orElse(
-                                Mono.error(new OrderIdNotFoundException(orderId))
-                        )
+                                                ).thenReturn(el)
+                                        )
+                                        .map(
+                                                el -> new SessionPaymentMethodResponseDto().bin(el.getBin())
+                                                        .sessionId(sx.sessionId())
+                                                        .brand(el.getCircuit())
+                                                        .expiringDate(el.getExpiringDate())
+                                                        .lastFourDigits(el.getLastFourDigits())
+                                        );
+                            }
+                            return response;
+                        }
                 );
     }
 
@@ -515,8 +518,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     ) {
         return paymentMethodRepository.findById(paymentMethodId)
                 .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .map(ignore -> npgSessionsTemplateWrapper.findById(orderId))
-                .flatMap(document -> document.map(Mono::just).orElse(Mono.empty()))
+                .flatMap(ignore -> npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
                     // Session associated to the order is associated to a different transaction id,
@@ -539,10 +541,10 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                         return Mono.just(document);
                     }
                 })
-                .map(d -> {
+                .flatMap(d -> {
                     // Transaction already associated to session, retry case
                     if (d.transactionId() != null) {
-                        return d;
+                        return Mono.just(d);
                     } else {
                         NpgSessionDocument updatedDocument = new NpgSessionDocument(
                                 d.orderId(),
@@ -552,9 +554,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                 d.cardData(),
                                 updateData.getTransactionId()
                         );
-                        npgSessionsTemplateWrapper.save(updatedDocument);
-
-                        return updatedDocument;
+                        return npgSessionsTemplateWrapper.save(updatedDocument).thenReturn(updatedDocument);
                     }
                 });
     }
@@ -649,5 +649,34 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         });
         onUsBundle.ifPresent(orderedBundles::addFirst);
         return orderedBundles.stream().toList();
+    }
+
+    /**
+     * Build the outcome (success or cancel) URL to pass to NPG when creating a
+     * session for a given client ID
+     *
+     * @param basePath  the base path
+     * @param suffix    the wanted suffix
+     * @param xClientId the client ID that will dynamically modify the URL, if
+     *                  needed
+     * @return URI
+     */
+    private URI buildSessionOutcomeUrlWithClientPath(
+                                                     URI basePath,
+                                                     String suffix,
+                                                     ClientIdDto xClientId
+    ) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(basePath);
+
+        // IO? add the wallet-specific prefix
+        if (ClientIdDto.IO.equals(xClientId)) {
+            builder.path(sessionUrlConfig.ioPrefixPath());
+        }
+
+        return builder
+                .path(suffix)
+                .queryParam("t", Instant.now().toEpochMilli())
+                .build()
+                .toUri();
     }
 }

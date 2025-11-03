@@ -190,6 +190,12 @@ paths:
           description: language selection
           schema:
             $ref: '#/components/schemas/Lang'
+        - in: header
+          name: X-Client-Id
+          required: false
+          description: Transaction origin (populated by APIM policy)
+          schema:
+            $ref: '#/components/schemas/ClientId'
       responses:
         200:
           description: Payment form data successfully created
@@ -773,6 +779,14 @@ components:
           description: Transaction id to associate to this session
       required:
         - transactionId
+    ClientId:
+      type: string
+      description: Enumerations of client ids
+      enum:
+        - IO
+        - CHECKOUT
+        - CHECKOUT_CART
+        - WISP_REDIRECT
   requestBodies:
     PaymentMethodRequest:
       required: true
