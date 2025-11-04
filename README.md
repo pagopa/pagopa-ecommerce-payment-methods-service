@@ -1,5 +1,8 @@
 ## pagopa-ecommerce-payment-methods-service
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-ecommerce-payment-methods-service&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=pagopa_pagopa-ecommerce-payment-methods-service)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-ecommerce-payment-methods-service&metric=coverage)](https://sonarcloud.io/summary/new_code?id=pagopa_pagopa-ecommerce-payment-methods-service)
+
 ## What is this?
 
 This is a PagoPA microservice that handles payment methods' lifecycle and workflow.
