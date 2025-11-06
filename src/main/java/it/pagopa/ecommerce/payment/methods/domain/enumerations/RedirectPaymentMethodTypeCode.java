@@ -11,5 +11,5 @@ public enum RedirectPaymentMethodTypeCode {
     RBPS,
     RICO,
     KLRN,
-    RFBK
+    RFPB
 }
