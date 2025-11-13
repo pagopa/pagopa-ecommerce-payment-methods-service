@@ -364,18 +364,17 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                     String notificationSessionToken = data.getT3();
                     SessionPaymentMethod sessionPaymentMethod = SessionPaymentMethod
                             .fromValue(paymentMethod.serviceName);
-                    URI returnUrlBasePath = sessionUrlConfig.basePath();
+                    URI returnUrlBasePath = ClientIdDto.IO.equals(xClientId) ? sessionUrlConfig.ioBasePath()
+                            : sessionUrlConfig.basePath();
 
                     URI resultUrl = buildSessionOutcomeUrlWithClientPath(
                             returnUrlBasePath,
-                            sessionUrlConfig.outcomeSuffix(),
-                            xClientId
+                            sessionUrlConfig.outcomeSuffix()
                     );
 
                     URI cancelUrl = buildSessionOutcomeUrlWithClientPath(
                             returnUrlBasePath,
-                            sessionUrlConfig.cancelSuffix(),
-                            xClientId
+                            sessionUrlConfig.cancelSuffix()
                     );
 
                     URI notificationUrl = UriComponentsBuilder
@@ -655,28 +654,20 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
      * Build the outcome (success or cancel) URL to pass to NPG when creating a
      * session for a given client ID
      *
-     * @param basePath  the base path
-     * @param suffix    the wanted suffix
-     * @param xClientId the client ID that will dynamically modify the URL, if
-     *                  needed
+     * @param basePath the base path
+     * @param suffix   the wanted suffix
      * @return URI
      */
     private URI buildSessionOutcomeUrlWithClientPath(
                                                      URI basePath,
-                                                     String suffix,
-                                                     ClientIdDto xClientId
+                                                     String suffix
     ) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(basePath);
-
-        // IO? add the wallet-specific prefix
-        if (ClientIdDto.IO.equals(xClientId)) {
-            builder.path(sessionUrlConfig.ioPrefixPath());
-        }
-
-        return builder
+        return UriComponentsBuilder
+                .fromUri(basePath)
                 .path(suffix)
                 .queryParam("t", Instant.now().toEpochMilli())
                 .build()
                 .toUri();
+
     }
 }
