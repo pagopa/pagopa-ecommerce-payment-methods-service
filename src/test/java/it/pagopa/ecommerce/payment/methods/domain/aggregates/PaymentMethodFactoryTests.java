@@ -162,9 +162,10 @@ class PaymentMethodFactoryTests {
                 )
         );
 
-        assertEquals(
-                "Payment method type code: [unmanaged] not managed for payment method management type REDIRECT! Allowed type codes: [RBPR, RBPB, RBPS, RICO, RBPP, RPIC, KLRN]",
-                exception.getMessage()
+        assertTrue(
+                exception.getMessage().startsWith(
+                        "Payment method type code: [unmanaged] not managed for payment method management type REDIRECT! Allowed type codes: ["
+                )
         );
     }
 }

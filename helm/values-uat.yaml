@@ -20,7 +20,7 @@ microservice-chart:
     envSecret: {}
   image:
     repository: pagopaucommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "3.3.0"
+    tag: "3.5.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -115,10 +115,10 @@ microservice-chart:
     NPG_READ_TIMEOUT: "10000"
     NPG_CONNECTION_TIMEOUT: "10000"
     SESSION_URL_BASEPATH: "https://uat.checkout.pagopa.it"
+    SESSION_URL_BASEPATH_IO: "https://uat.ecommerce.pagopa.it"
     SESSION_URL_OUTCOME_SUFFIX: "/esito"
     SESSION_URL_CANCEL_SUFFIX: "/esito"
     SESSION_URL_NOTIFICATION_URL: "https://api.uat.platform.pagopa.it/ecommerce/npg/notifications/v1/sessions/{orderId}/outcomes?sessionToken={sessionToken}"
-    SESSION_URL_IO_PREFIX_PATH: "/ecommerce-fe"
     NPG_SESSIONS_TTL: "900"
     NPG_NOTIFICATION_JWT_VALIDITY_TIME: "900"
     SERVICE_LOGGING_LEVEL: "info"
