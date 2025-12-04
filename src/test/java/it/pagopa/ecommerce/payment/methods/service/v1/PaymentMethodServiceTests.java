@@ -292,7 +292,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentMethodCreated = paymentMethodService
-                .retrievePaymentMethods(101, clientIdEnumIo.getValue())
+                .retrievePaymentMethods(101L, clientIdEnumIo.getValue())
                 .collectList().block();
 
         assertEquals(0, paymentMethodCreated.size());
@@ -309,7 +309,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentmethodCreated = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumIo.getValue())
+                .retrievePaymentMethods(50L, clientIdEnumIo.getValue())
                 .collectList().block();
 
         assertEquals(1, paymentmethodCreated.size());
@@ -328,7 +328,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
 
         List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumCheckout.getValue())
+                .retrievePaymentMethods(50L, clientIdEnumCheckout.getValue())
                 .collectList().block();
 
         assertEquals(maxSize, paymentMethodRetrieved.size());
