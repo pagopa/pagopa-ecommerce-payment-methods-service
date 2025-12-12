@@ -69,6 +69,18 @@ paths:
             enum:
               - IO
               - CHECKOUT
+        - name: deviceVersion
+          in: query
+          description: The user device version
+          required: false
+          schema:
+            type: string
+        - name: devicePlatform
+          in: query
+          description: The user device platform
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Payment method successfully retrieved

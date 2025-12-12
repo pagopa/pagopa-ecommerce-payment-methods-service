@@ -138,7 +138,8 @@ class PaymentMethodsControllerTests {
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
         Mockito.when(
-                paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount(), clientIdCheckout.getValue())
+                paymentMethodService
+                        .retrievePaymentMethods((int) TestUtil.getTestAmount(), clientIdCheckout.getValue(), null)
         ).thenReturn(
                 Flux.just(paymentMethod)
         );
@@ -202,7 +203,9 @@ class PaymentMethodsControllerTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount(), clientIdIO.getValue()))
+        Mockito.when(
+                paymentMethodService.retrievePaymentMethods((int) TestUtil.getTestAmount(), clientIdIO.getValue(), null)
+        )
                 .thenReturn(
                         Flux.just(paymentMethod)
                 );
