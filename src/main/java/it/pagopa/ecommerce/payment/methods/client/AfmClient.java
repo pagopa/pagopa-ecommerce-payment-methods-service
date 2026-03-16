@@ -111,7 +111,7 @@ public class AfmClient {
                                 .queryParam("allCcp", allCCP)
                                 .queryParam("maxOccurrences", maxOccurrences)
                                 .queryParam("onusFirst", true)
-                                .queryParam("orderBy", "fee") // TODO update to feerandom
+                                .queryParam("orderBy", "feerandom")
                                 .build()
                 )
                 .header(HEADER_APIM_KEY, afmKey)
