@@ -110,6 +110,8 @@ public class AfmClient {
                         uriBuilder -> uriBuilder
                                 .queryParam("allCcp", allCCP)
                                 .queryParam("maxOccurrences", maxOccurrences)
+                                .queryParam("onusFirst", true)
+                                .queryParam("orderBy", "fee") // TODO update to feerandom
                                 .build()
                 )
                 .header(HEADER_APIM_KEY, afmKey)
