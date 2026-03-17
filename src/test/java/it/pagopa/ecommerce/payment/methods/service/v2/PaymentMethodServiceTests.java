@@ -11,7 +11,6 @@ import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodManagementT
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
-import it.pagopa.ecommerce.payment.methods.v2.server.model.BundleDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.CalculateFeeResponseDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.TransferDto;
 import org.junit.jupiter.api.Test;
@@ -27,9 +26,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
