@@ -629,8 +629,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                                 // A null value is considered as "any" in the AFM domain
                                                                 Optional.ofNullable(t.getPaymentMethod())
                                                                         .orElseGet(
-                                                                                () -> paymentMethodDocument
-                                                                                        .getPaymentMethodTypeCode()
+                                                                                paymentMethodDocument::getPaymentMethodTypeCode
                                                                         )
                                                         )
                                                         .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
