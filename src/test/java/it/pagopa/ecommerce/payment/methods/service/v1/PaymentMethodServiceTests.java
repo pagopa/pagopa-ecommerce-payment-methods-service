@@ -602,7 +602,6 @@ class PaymentMethodServiceTests {
     @Test
     void shouldCreateSessionWithJwtException() {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
 
@@ -627,7 +626,6 @@ class PaymentMethodServiceTests {
         try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
             PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-            PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
             String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
             FieldsDto npgResponse = TestUtil.npgResponse();
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
@@ -699,7 +697,7 @@ class PaymentMethodServiceTests {
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId))
                 .thenReturn(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)));
         StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, any()))
-                .expectErrorMatches(e -> e instanceof PaymentMethodNotFoundException)
+                .expectErrorMatches(PaymentMethodNotFoundException.class::isInstance)
                 .verify();
 
     }
@@ -708,8 +706,6 @@ class PaymentMethodServiceTests {
     void shouldReturnErrorForInvalidSessionId() {
         String paymentMethodId = "paymentMethodId";
         String sessionId = "sessionId";
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Mono.empty());
@@ -729,8 +725,6 @@ class PaymentMethodServiceTests {
         String sessionId = "sessionId";
         String correlationId = UUID.randomUUID().toString();
         CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
                 .bin(npgResponse.getBin())
                 .sessionId(sessionId)
@@ -762,8 +756,6 @@ class PaymentMethodServiceTests {
         String sessionId = "sessionId";
         String correlationId = UUID.randomUUID().toString();
         CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
                 .bin(npgResponse.getBin()).sessionId(sessionId).expiringDate(npgResponse.getExpiringDate())
                 .lastFourDigits(npgResponse.getLastFourDigits())
@@ -1156,7 +1148,6 @@ class PaymentMethodServiceTests {
         try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
             PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-            PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
             String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
             FieldsDto npgResponse = TestUtil.npgResponse();
             ClientIdDto xClientId = ClientIdDto.IO;

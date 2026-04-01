@@ -14,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.util.concurrent.TimeUnit;
-import java.util.Objects;
 
 @Configuration
 public class WebClientsConfig implements WebFluxConfigurer {

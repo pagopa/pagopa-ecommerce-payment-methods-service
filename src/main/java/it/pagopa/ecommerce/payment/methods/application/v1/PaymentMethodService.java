@@ -228,24 +228,23 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
          * method management ONBOARDABLE_ONLY) since payment logic to handle card method
          * is implemented in new app only
          */
-        if (clientId.equals(ClientIdDto.IO.toString()) && deviceVersion == null) {
-            if (paymentMethod.getPaymentMethodTypeCode().value().equals("CP")) {
-                return new PaymentMethod(
-                        paymentMethod.getPaymentMethodID(),
-                        paymentMethod.getPaymentMethodName(),
-                        paymentMethod.getPaymentMethodDescription(),
-                        paymentMethod.getPaymentMethodStatus(),
-                        paymentMethod.getPaymentMethodTypeCode(),
-                        paymentMethod.getPaymentMethodRanges(),
-                        paymentMethod.getPaymentMethodAsset(),
-                        paymentMethod.getClientIdEnum(),
-                        new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE_ONLY), // forcilbly set
-                                                                                                      // onboardable
-                                                                                                      // only to method
-                                                                                                      // management
-                        paymentMethod.getPaymentMethodBrandAsset()
-                );
-            }
+        if (clientId.equals(ClientIdDto.IO.toString()) && deviceVersion == null
+                && paymentMethod.getPaymentMethodTypeCode().value().equals("CP")) {
+            return new PaymentMethod(
+                    paymentMethod.getPaymentMethodID(),
+                    paymentMethod.getPaymentMethodName(),
+                    paymentMethod.getPaymentMethodDescription(),
+                    paymentMethod.getPaymentMethodStatus(),
+                    paymentMethod.getPaymentMethodTypeCode(),
+                    paymentMethod.getPaymentMethodRanges(),
+                    paymentMethod.getPaymentMethodAsset(),
+                    paymentMethod.getClientIdEnum(),
+                    new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE_ONLY), // forcilbly set
+                                                                                                  // onboardable
+                                                                                                  // only to method
+                                                                                                  // management
+                    paymentMethod.getPaymentMethodBrandAsset()
+            );
         }
         return paymentMethod;
     }
@@ -628,10 +627,11 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                         .onUs(t.getOnUs())
                                                         .paymentMethod(
                                                                 // A null value is considered as "any" in the AFM domain
-                                                                t.getPaymentMethod() == null
-                                                                        ? paymentMethodDocument
-                                                                                .getPaymentMethodTypeCode()
-                                                                        : t.getPaymentMethod()
+                                                                Optional.ofNullable(t.getPaymentMethod())
+                                                                        .orElseGet(
+                                                                                () -> paymentMethodDocument
+                                                                                        .getPaymentMethodTypeCode()
+                                                                        )
                                                         )
                                                         .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
                                                         .taxPayerFee(t.getTaxPayerFee())
