@@ -537,6 +537,69 @@ class PaymentMethodServiceTests {
     }
 
     @Test
+    void shouldCreateSessionWithNullNameMap() {
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId))
+                .thenReturn(
+                        Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto())
+                );
+
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldCreateSessionWithEmptyNameMap() {
+        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId))
+                .thenReturn(
+                        Mono.just(
+                                new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                        .name(java.util.Collections.emptyMap())
+                        )
+                );
+
+        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldCreateSessionWithNameMapWithoutItLocale() {
+        UUID correlationId = UUID.randomUUID();
+        try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
+            uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
+            PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
+            String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
+            FieldsDto npgResponse = TestUtil.npgResponse();
+            String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+            Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId))
+                    .thenReturn(
+                            Mono.just(
+                                    new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                            .name(java.util.Map.of("en", "CARDS"))
+                            )
+                    );
+            Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+                    .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
+            Mockito.when(
+                    npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            ).thenReturn(Mono.just(npgResponse));
+            Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+
+            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+                    .expectNextCount(1)
+                    .verifyComplete();
+        }
+    }
+
+    @Test
     void shouldCreateSessionWithJwtException() {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
