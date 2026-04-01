@@ -1,27 +1,26 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
+import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 public abstract class PaymentMethodServiceCommon {
 
-    private final PaymentMethodRepository paymentMethodRepository;
+    private final PaymentMethodsHandlerClient paymentMethodsHandlerClient;
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
 
     protected PaymentMethodServiceCommon(
-            PaymentMethodRepository paymentMethodRepository,
+            PaymentMethodsHandlerClient paymentMethodsHandlerClient,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
     ) {
-        this.paymentMethodRepository = paymentMethodRepository;
+        this.paymentMethodsHandlerClient = paymentMethodsHandlerClient;
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
     }
 
@@ -30,9 +29,8 @@ public abstract class PaymentMethodServiceCommon {
                                               String orderId,
                                               String securityToken
     ) {
-        return paymentMethodRepository
-                .findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+        return paymentMethodsHandlerClient
+                .validatePaymentMethodExists(paymentMethodId)
                 .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
                 .flatMap(
                         ignore -> npgSessionsTemplateWrapper.findById(orderId)

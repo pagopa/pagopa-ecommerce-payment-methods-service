@@ -4,6 +4,7 @@ import io.vavr.Tuple;
 import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommon;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
+import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
@@ -35,9 +36,10 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     public PaymentMethodService(
             PaymentMethodRepository paymentMethodRepository,
             AfmClient afmClient,
-            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
+            PaymentMethodsHandlerClient paymentMethodsHandlerClient
     ) {
-        super(paymentMethodRepository, npgSessionsTemplateWrapper);
+        super(paymentMethodsHandlerClient, npgSessionsTemplateWrapper);
         this.paymentMethodRepository = paymentMethodRepository;
         this.afmClient = afmClient;
     }

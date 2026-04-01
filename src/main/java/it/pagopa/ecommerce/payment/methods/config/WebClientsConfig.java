@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
 @Configuration
 public class WebClientsConfig implements WebFluxConfigurer {
@@ -74,6 +75,27 @@ public class WebClientsConfig implements WebFluxConfigurer {
         ).clientConnector(
                 new ReactorClientHttpConnector(httpClient)
         ).baseUrl(uri).build();
+    }
+
+    @Bean(name = "paymentMethodsHandlerWebClient")
+    public it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsApi paymentMethodsHandlerWebClient(
+                                                                                                         @Value(
+                                                                                                             "${paymentMethodsHandler.uri}"
+                                                                                                         ) String handlerUri,
+                                                                                                         @Value(
+                                                                                                             "${paymentMethodsHandler.readTimeout}"
+                                                                                                         ) int readTimeout,
+                                                                                                         @Value(
+                                                                                                             "${paymentMethodsHandler.connectionTimeout}"
+                                                                                                         ) int connectionTimeout
+    ) {
+        final var webClient = createWebClient(
+                handlerUri,
+                createClientWithTimeouts(readTimeout, connectionTimeout)
+        );
+        return new it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsApi(
+                new it.pagopa.generated.ecommerce.handler.v1.ApiClient(webClient)
+        );
     }
 
     private HttpClient createClientWithTimeouts(
