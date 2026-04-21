@@ -99,6 +99,8 @@ microservice-chart:
     MONGO_HEARTBEAT_FREQUENCY_MS: "5000"
     REDIS_PORT: "6380"
     REDIS_SSL_ENABLED: "true"
+    REDIS_TIMEOUT: "1s"
+    REDIS_CONNECTION_TIMEOUT: "1s"
     AFM_URI: "https://api.platform.pagopa.it/afm/calculator-service/v1/fees"
     AFM_URI_V2: "https://api.platform.pagopa.it/afm/calculator-service/v2/fees"
     AFM_READ_TIMEOUT: "10000"
