@@ -21,6 +21,7 @@ import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToT
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
+import it.pagopa.ecommerce.payment.methods.utils.NpgPaymentMethodMapping;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
@@ -368,13 +369,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 id
         );
         return paymentMethodsHandlerClient.validatePaymentMethodExists(id)
-                .map(response -> {
-                    var nameMap = response.getName();
-                    String paymentMethodName = (nameMap != null && !nameMap.isEmpty())
-                            ? nameMap.getOrDefault("it", nameMap.values().iterator().next())
-                            : null;
-                    return NpgClient.PaymentMethod.fromServiceName(paymentMethodName);
-                })
+                .map(response -> NpgPaymentMethodMapping.fromPaymentTypeCode(response.getPaymentTypeCode()))
                 .flatMap(
                         paymentMethod -> uniqueIdUtils.generateUniqueId()
                                 .map(orderId -> Tuples.of(orderId, paymentMethod))
