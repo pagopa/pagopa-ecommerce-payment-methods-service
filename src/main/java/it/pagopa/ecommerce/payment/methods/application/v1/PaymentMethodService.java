@@ -39,7 +39,6 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
@@ -478,7 +477,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                                             .propertyClass(field.getPropertyClass())
                                                                             .src(URI.create(field.getSrc()))
                                                             )
-                                                            .collect(Collectors.toList())
+                                                            .toList()
                                             )
                             );
                 });
