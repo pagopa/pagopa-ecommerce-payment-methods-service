@@ -560,7 +560,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
-                                        .name(java.util.Collections.emptyMap())
+                                        .paymentTypeCode("UNKNOWN_CODE")
                         )
                 );
 
@@ -583,7 +583,8 @@ class PaymentMethodServiceTests {
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
-                                            .name(java.util.Map.of("en", "CARDS"))
+                                            .name(java.util.Map.of("en", "Cards"))
+                                            .paymentTypeCode("CP")
                             )
                     );
             Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
@@ -610,6 +611,7 @@ class PaymentMethodServiceTests {
                 Mono.just(
                         new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
                                 .name(java.util.Map.of("it", "CARDS"))
+                                .paymentTypeCode("CP")
                 )
         );
         Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
@@ -634,6 +636,7 @@ class PaymentMethodServiceTests {
                     Mono.just(
                             new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
                                     .name(java.util.Map.of("it", "CARDS"))
+                                    .paymentTypeCode("CP")
                     )
             );
             Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
@@ -1158,6 +1161,7 @@ class PaymentMethodServiceTests {
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
                                             .name(java.util.Map.of("it", "CARDS"))
+                                            .paymentTypeCode("CP")
                             )
                     );
             Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))

@@ -38,6 +38,9 @@ public final class NpgPaymentMethodMapping {
      * @throws IllegalArgumentException if no mapping exists for the given code
      */
     public static NpgClient.PaymentMethod fromPaymentTypeCode(String paymentTypeCode) {
+        if (paymentTypeCode == null) {
+            throw new IllegalArgumentException("Payment type code must not be null");
+        }
         String serviceName = PAYMENT_TYPE_CODE_TO_SERVICE_NAME.get(paymentTypeCode);
         if (serviceName == null) {
             throw new IllegalArgumentException(
