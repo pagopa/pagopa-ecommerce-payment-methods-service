@@ -37,7 +37,7 @@
 		<spotless.version>2.28.0</spotless.version>
 		<ecs-logging-version>1.5.0</ecs-logging-version>
 		<pagopa-ecommerce-commons.version>3.2.0</pagopa-ecommerce-commons.version>
-		<mock-web-server.version>5.0.0-alpha.14</mock-web-server.version>
+        <mock-web-server.version>5.3.2</mock-web-server.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -156,7 +156,7 @@
 			<dependency>
 				<groupId>io.opentelemetry</groupId>
 				<artifactId>opentelemetry-bom</artifactId>
-				<version>1.29.0</version>
+				<version>1.60.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
