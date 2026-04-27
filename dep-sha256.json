@@ -1184,18 +1184,25 @@
       "sha256": "G-UqATwGT445Iu44iZ8PWci9eMbHcabhR40FxA7BGCM="
     },
     {
-      "id": "io.opentelemetry:opentelemetry-api:jar:1.29.0",
+      "id": "io.opentelemetry:opentelemetry-api:jar:1.60.1",
       "artifactId": "opentelemetry-api",
       "groupId": "io.opentelemetry",
-      "version": "1.29.0",
-      "sha256": "WGFqzAqNmPishbZn1ZNf1M5R2XPfBf6Yq_yycXHom2U="
+      "version": "1.60.1",
+      "sha256": "jk6pS76blNgjrG592nx0YkZZoTUsrwUpoH9D-GtsoNU="
     },
     {
-      "id": "io.opentelemetry:opentelemetry-context:jar:1.29.0",
+      "id": "io.opentelemetry:opentelemetry-context:jar:1.60.1",
       "artifactId": "opentelemetry-context",
       "groupId": "io.opentelemetry",
-      "version": "1.29.0",
-      "sha256": "KcCij8j4oCbd6MT_rFrVXxt0CadeiqguIAxbhgRD-PI="
+      "version": "1.60.1",
+      "sha256": "8xH4d3zxyogkwAoc754PFj2e_Cc4QNf2JbeYKynw1Tw="
+    },
+    {
+      "id": "io.opentelemetry:opentelemetry-common:jar:1.60.1",
+      "artifactId": "opentelemetry-common",
+      "groupId": "io.opentelemetry",
+      "version": "1.60.1",
+      "sha256": "aZmjkyNvqljx2VScAVLBKYZCNfBZYnqscKfARZpQPFY="
     },
     {
       "id": "org.springframework.boot:spring-boot-starter-test:jar:3.4.5",
@@ -1443,18 +1450,11 @@
       "sha256": "LeYLB-MgSJMEK-0afPm9cyKNt08uXnNk688ytdNFF7g="
     },
     {
-      "id": "com.squareup.okhttp3:okhttp:jar:5.0.0-alpha.14",
+      "id": "com.squareup.okhttp3:okhttp:jar:5.3.2",
       "artifactId": "okhttp",
       "groupId": "com.squareup.okhttp3",
-      "version": "5.0.0-alpha.14",
-      "sha256": "8OP_y7pnRKtJGKVaoy_09Aj80h5Fq4vV94g6F5OyolM="
-    },
-    {
-      "id": "com.squareup.okio:okio-jvm:jar:3.9.0",
-      "artifactId": "okio-jvm",
-      "groupId": "com.squareup.okio",
-      "version": "3.9.0",
-      "sha256": "3cOG_xS9JdXJNBZxlur0WxjeTyjhxVpNs3rllMv9N-Q="
+      "version": "5.3.2",
+      "sha256": "5yCjg_3D6x30qsd6CF5ht3MINzZBUd6GcJP9vK_LRKo="
     },
     {
       "id": "org.jetbrains.kotlin:kotlin-stdlib:jar:1.9.25",
@@ -1471,18 +1471,32 @@
       "sha256": "rOKhDcji1f00kl7KwD5JiLLA-FFlDJS4zvSbob0RFHg="
     },
     {
-      "id": "com.squareup.okhttp3:mockwebserver:jar:5.0.0-alpha.14",
-      "artifactId": "mockwebserver",
-      "groupId": "com.squareup.okhttp3",
-      "version": "5.0.0-alpha.14",
-      "sha256": "tV-FtN1d8vUNK3venFBUf4fypFlDtq4n89J2kszGOeE="
+      "id": "com.squareup.okio:okio:jar:3.16.4",
+      "artifactId": "okio",
+      "groupId": "com.squareup.okio",
+      "version": "3.16.4",
+      "sha256": "yZZPOUxM0yt5vzOK-_ovIpciHu4IMReHBhzqVfh91g4="
     },
     {
-      "id": "com.squareup.okhttp3:mockwebserver3:jar:5.0.0-alpha.14",
+      "id": "com.squareup.okio:okio-jvm:jar:3.16.4",
+      "artifactId": "okio-jvm",
+      "groupId": "com.squareup.okio",
+      "version": "3.16.4",
+      "sha256": "IZa5k800272Rnn4B9XpHgbWL7oD4YQYWPih8IDQ6lqc="
+    },
+    {
+      "id": "com.squareup.okhttp3:mockwebserver:jar:5.3.2",
+      "artifactId": "mockwebserver",
+      "groupId": "com.squareup.okhttp3",
+      "version": "5.3.2",
+      "sha256": "YWSleDrLhyePQu8FgdLeIivWvMAKLoM2EbLt3wx7hmk="
+    },
+    {
+      "id": "com.squareup.okhttp3:mockwebserver3:jar:5.3.2",
       "artifactId": "mockwebserver3",
       "groupId": "com.squareup.okhttp3",
-      "version": "5.0.0-alpha.14",
-      "sha256": "11KA5R1xyl8jp0gL_GlmoYPwYy5I9QKEFFXo9M5LPow="
+      "version": "5.3.2",
+      "sha256": "U6bgJOzCs_RdBNCFFhxsEFJqNEuAvz8NTmoTwzwYOZg="
     },
     {
       "id": "junit:junit:jar:4.13.2",
@@ -1497,6 +1511,13 @@
       "groupId": "org.hamcrest",
       "version": "2.2",
       "sha256": "CU9dkrS32ciiv1PMadNWJDronDSZRXvLS5L37Tv5WHk="
+    },
+    {
+      "id": "com.squareup.okhttp3:okhttp-jvm:jar:5.3.2",
+      "artifactId": "okhttp-jvm",
+      "groupId": "com.squareup.okhttp3",
+      "version": "5.3.2",
+      "sha256": "x3H0gHW3Y_bDIgVeIRKalLfeTB-vP49YrOMgsMlRejA="
     }
   ]
 }
