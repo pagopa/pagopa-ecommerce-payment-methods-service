@@ -16,7 +16,7 @@ resources:
     - repository: pagopaEcommerceLocal
       type: github
       name: pagopa/pagopa-ecommerce-local
-      ref: PIDM-1632-align-env-methods-service
+      ref: PIDM-1632-align-env-methods-service # RESTORE WITH MAIN BEFORE PUSH
       endpoint: 'io-azure-devops-github-ro'
 
 stages:
