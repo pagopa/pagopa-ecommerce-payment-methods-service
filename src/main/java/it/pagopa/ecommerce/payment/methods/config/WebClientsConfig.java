@@ -76,6 +76,27 @@ public class WebClientsConfig implements WebFluxConfigurer {
         ).baseUrl(uri).build();
     }
 
+    @Bean(name = "paymentMethodsHandlerWebClient")
+    public it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsApi paymentMethodsHandlerWebClient(
+                                                                                                         @Value(
+                                                                                                             "${paymentMethodsHandler.uri}"
+                                                                                                         ) String handlerUri,
+                                                                                                         @Value(
+                                                                                                             "${paymentMethodsHandler.readTimeout}"
+                                                                                                         ) int readTimeout,
+                                                                                                         @Value(
+                                                                                                             "${paymentMethodsHandler.connectionTimeout}"
+                                                                                                         ) int connectionTimeout
+    ) {
+        final var webClient = createWebClient(
+                handlerUri,
+                createClientWithTimeouts(readTimeout, connectionTimeout)
+        );
+        return new it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsApi(
+                new it.pagopa.generated.ecommerce.handler.v1.ApiClient(webClient)
+        );
+    }
+
     private HttpClient createClientWithTimeouts(
                                                 int readTimeout,
                                                 int connectionTimeout

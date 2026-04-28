@@ -16,7 +16,7 @@ resources:
     - repository: pagopaEcommerceLocal
       type: github
       name: pagopa/pagopa-ecommerce-local
-      ref: main
+      ref: PIDM-1632-align-env-methods-service # RESTORE WITH MAIN BEFORE PUSH
       endpoint: 'io-azure-devops-github-ro'
 
 stages:
@@ -107,7 +107,7 @@ stages:
               echo "##[debug] Change placeholder for ecommerce-payment-method-service set branch: $(BRANCH_NAME)"
               sed -i "s|^ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=.*$|ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=$(BRANCH_NAME)|" .env
             displayName: 'Change payment-method branch name ecommerce-local .env'
-          - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
+          - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-ecommerce-payment-methods-handler pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
             displayName: 'Run app with docker-compose'
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
