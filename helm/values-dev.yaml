@@ -24,7 +24,7 @@ microservice-chart:
       AFM_KEY: afm-api-key-blue
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercepaymentmethodsservice
-    tag: "3.6.0"
+    tag: "3.7.0"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -109,6 +109,8 @@ microservice-chart:
     MONGO_HEARTBEAT_FREQUENCY_MS: "5000"
     REDIS_PORT: "6380"
     REDIS_SSL_ENABLED: "true"
+    REDIS_TIMEOUT: "2s"
+    REDIS_CONNECTION_TIMEOUT: "2s"
     AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
     AFM_URI_V2: "https://api.uat.platform.pagopa.it/afm/calculator-service/v2/fees"
     AFM_READ_TIMEOUT: "10000"
