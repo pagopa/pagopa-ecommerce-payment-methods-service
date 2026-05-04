@@ -546,7 +546,8 @@ class PaymentMethodServiceTests {
                         Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto())
                 );
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+        StepVerifier
+                .create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, ClientIdDto.CHECKOUT))
                 .expectError(IllegalArgumentException.class)
                 .verify();
     }
@@ -564,7 +565,8 @@ class PaymentMethodServiceTests {
                         )
                 );
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+        StepVerifier
+                .create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, ClientIdDto.CHECKOUT))
                 .expectError(IllegalArgumentException.class)
                 .verify();
     }
@@ -594,7 +596,11 @@ class PaymentMethodServiceTests {
             ).thenReturn(Mono.just(npgResponse));
             Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
 
-            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+            StepVerifier
+                    .create(
+                            paymentMethodService
+                                    .createSessionForPaymentMethod(paymentMethodId, null, ClientIdDto.CHECKOUT)
+                    )
                     .expectNextCount(1)
                     .verifyComplete();
         }
@@ -617,7 +623,8 @@ class PaymentMethodServiceTests {
         Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
                 .thenThrow(new JwtIssuerResponseException(HttpStatus.BAD_GATEWAY, "error jwtIssuwe"));
 
-        StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+        StepVerifier
+                .create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, ClientIdDto.CHECKOUT))
                 .expectError(JwtIssuerResponseException.class)
                 .verify();
     }
@@ -668,7 +675,11 @@ class PaymentMethodServiceTests {
                                     )
                     );
 
-            StepVerifier.create(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, any()))
+            StepVerifier
+                    .create(
+                            paymentMethodService
+                                    .createSessionForPaymentMethod(paymentMethodId, null, ClientIdDto.CHECKOUT)
+                    )
                     .expectNext(expected)
                     .verifyComplete();
 
@@ -700,7 +711,7 @@ class PaymentMethodServiceTests {
         String paymentMethodId = "paymentMethodId";
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                 .thenReturn(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)));
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, any(), "CHECKOUT"))
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, "orderId", "CHECKOUT"))
                 .expectErrorMatches(PaymentMethodNotFoundException.class::isInstance)
                 .verify();
 
@@ -1183,7 +1194,7 @@ class PaymentMethodServiceTests {
             ClientIdDto xClientId = ClientIdDto.IO;
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
             Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "IO"))
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()

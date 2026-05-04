@@ -440,7 +440,9 @@ class PaymentMethodsControllerTests {
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, null);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), "CHECKOUT", requestBody))
+        Mockito.when(
+                paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), "CHECKOUT", requestBody)
+        )
                 .thenReturn(Mono.just(updatedDocument));
 
         webClient
@@ -512,7 +514,9 @@ class PaymentMethodsControllerTests {
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, newTransactionId);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), "CHECKOUT", requestBody))
+        Mockito.when(
+                paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), "CHECKOUT", requestBody)
+        )
                 .thenReturn(Mono.just(updatedDocument));
 
         webClient
@@ -539,7 +543,9 @@ class PaymentMethodsControllerTests {
         NpgSessionDocument originalSession = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, "ANOTHER_TRANSACTION_ID");
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), "CHECKOUT", requestBody))
+        Mockito.when(
+                paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), "CHECKOUT", requestBody)
+        )
                 .thenReturn(
                         Mono.error(
                                 new SessionAlreadyAssociatedToTransaction(

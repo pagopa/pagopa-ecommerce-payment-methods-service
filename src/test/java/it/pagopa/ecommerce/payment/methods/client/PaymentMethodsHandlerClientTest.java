@@ -48,6 +48,7 @@ class PaymentMethodsHandlerClientTest {
     void init() {
         final var handlerApi = clientsConfig
                 .paymentMethodsHandlerWebClient("http://localhost:9002", 5000, 5000, API_KEY);
+        handlerApi.getApiClient().setBasePath("http://localhost:9002");
         client = new PaymentMethodsHandlerClient(handlerApi);
     }
 
