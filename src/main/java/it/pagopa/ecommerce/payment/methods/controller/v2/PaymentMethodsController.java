@@ -67,7 +67,10 @@ public class PaymentMethodsController implements V2Api {
                                 orderId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
+                .flatMap(
+                        securityToken -> paymentMethodService
+                                .isSessionValid(id, orderId, securityToken, "CHECKOUT")
+                )
                 .map(
                         transactionId -> new SessionGetTransactionIdResponseDto()
                                 .transactionId(transactionId.value())

@@ -39,6 +39,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
@@ -367,7 +368,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
                 id
         );
-        return paymentMethodsHandlerClient.validatePaymentMethodExists(id)
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(id, xClientId.getValue())
                 .map(response -> NpgPaymentMethodMapping.fromPaymentTypeCode(response.getPaymentTypeCode()))
                 .flatMap(
                         paymentMethod -> uniqueIdUtils.generateUniqueId()
@@ -477,7 +478,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                                             .propertyClass(field.getPropertyClass())
                                                                             .src(URI.create(field.getSrc()))
                                                             )
-                                                            .toList()
+                                                            .collect(Collectors.toList())
                                             )
                             );
                 });
@@ -485,7 +486,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
                                                                         String id,
-                                                                        String orderId
+                                                                        String orderId,
+                                                                        String clientId
     ) {
         log.info(
                 "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and orderId: {}",
@@ -493,7 +495,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 orderId
         );
         return paymentMethodsHandlerClient
-                .validatePaymentMethodExists(id)
+                .validatePaymentMethodExists(id, clientId)
                 .flatMap(
                         el -> npgSessionsTemplateWrapper.findById(orderId)
                 )
@@ -551,9 +553,10 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     public Mono<NpgSessionDocument> updateSession(
                                                   String paymentMethodId,
                                                   String orderId,
+                                                  String clientId,
                                                   PatchSessionRequestDto updateData
     ) {
-        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId)
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, clientId)
                 .flatMap(ignore -> npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
@@ -621,10 +624,10 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                         .onUs(t.getOnUs())
                                                         .paymentMethod(
                                                                 // A null value is considered as "any" in the AFM domain
-                                                                Optional.ofNullable(t.getPaymentMethod())
-                                                                        .orElseGet(
-                                                                                paymentMethodDocument::getPaymentMethodTypeCode
-                                                                        )
+                                                                t.getPaymentMethod() == null
+                                                                        ? paymentMethodDocument
+                                                                                .getPaymentMethodTypeCode()
+                                                                        : t.getPaymentMethod()
                                                         )
                                                         .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
                                                         .taxPayerFee(t.getTaxPayerFee())

@@ -47,8 +47,8 @@ class PaymentMethodsHandlerClientTest {
     @BeforeEach
     void init() {
         final var handlerApi = clientsConfig
-                .paymentMethodsHandlerWebClient("http://localhost:9002", 5000, 5000);
-        client = new PaymentMethodsHandlerClient(handlerApi, API_KEY);
+                .paymentMethodsHandlerWebClient("http://localhost:9002", 5000, 5000, API_KEY);
+        client = new PaymentMethodsHandlerClient(handlerApi);
     }
 
     @Test
@@ -109,7 +109,7 @@ class PaymentMethodsHandlerClientTest {
                         .setBody(new ObjectMapper().writeValueAsString(responseDto))
         );
 
-        StepVerifier.create(client.validatePaymentMethodExists(PAYMENT_METHOD_ID))
+        StepVerifier.create(client.validatePaymentMethodExists(PAYMENT_METHOD_ID, "CHECKOUT"))
                 .expectNextMatches(r -> r.getName().get("it").equals("CARDS"))
                 .verifyComplete();
 

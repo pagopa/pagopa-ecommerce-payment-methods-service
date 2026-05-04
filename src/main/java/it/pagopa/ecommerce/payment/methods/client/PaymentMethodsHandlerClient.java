@@ -5,7 +5,6 @@ import it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsApi;
 import it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -15,17 +14,12 @@ import reactor.core.publisher.Mono;
 @Component
 public class PaymentMethodsHandlerClient {
 
-    private static final String X_API_KEY_HEADER = "x-api-key";
-
     private final PaymentMethodsApi paymentMethodsApi;
-    private final String apiKey;
 
     public PaymentMethodsHandlerClient(
-            @Qualifier("paymentMethodsHandlerWebClient") PaymentMethodsApi paymentMethodsApi,
-            @Value("${paymentMethodsHandler.apiKey}") String apiKey
+            @Qualifier("paymentMethodsHandlerWebClient") PaymentMethodsApi paymentMethodsApi
     ) {
         this.paymentMethodsApi = paymentMethodsApi;
-        this.apiKey = apiKey;
     }
 
     /**
@@ -39,13 +33,7 @@ public class PaymentMethodsHandlerClient {
                                                            String paymentMethodId,
                                                            String clientId
     ) {
-        return paymentMethodsApi.getApiClient().getWebClient()
-                .get()
-                .uri("/payment-methods/{id}", paymentMethodId)
-                .header("x-client-id", clientId)
-                .header(X_API_KEY_HEADER, apiKey)
-                .retrieve()
-                .bodyToMono(PaymentMethodResponseDto.class)
+        return paymentMethodsApi.getPaymentMethod(paymentMethodId, clientId)
                 .onErrorResume(
                         WebClientResponseException.class,
                         e -> {
@@ -68,10 +56,14 @@ public class PaymentMethodsHandlerClient {
      * Validate that a payment method exists by calling the handler service.
      *
      * @param paymentMethodId the payment method ID
+     * @param clientId        the client ID to validate against
      * @return a Mono that completes with the response if the payment method exists,
      *         or errors with PaymentMethodNotFoundException
      */
-    public Mono<PaymentMethodResponseDto> validatePaymentMethodExists(String paymentMethodId) {
-        return getPaymentMethod(paymentMethodId, "CHECKOUT");
+    public Mono<PaymentMethodResponseDto> validatePaymentMethodExists(
+                                                                      String paymentMethodId,
+                                                                      String clientId
+    ) {
+        return getPaymentMethod(paymentMethodId, clientId);
     }
 }

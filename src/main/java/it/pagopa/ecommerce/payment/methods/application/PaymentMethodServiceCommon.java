@@ -27,10 +27,11 @@ public abstract class PaymentMethodServiceCommon {
     public Mono<TransactionId> isSessionValid(
                                               String paymentMethodId,
                                               String orderId,
-                                              String securityToken
+                                              String securityToken,
+                                              String clientId
     ) {
         return paymentMethodsHandlerClient
-                .validatePaymentMethodExists(paymentMethodId)
+                .validatePaymentMethodExists(paymentMethodId, clientId)
                 .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
                 .flatMap(
                         ignore -> npgSessionsTemplateWrapper.findById(orderId)

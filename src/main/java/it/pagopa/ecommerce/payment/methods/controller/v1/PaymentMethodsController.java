@@ -260,7 +260,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                          ServerWebExchange exchange
     ) {
         log.info("[Payment Method controller] Retrieve card data from NPG");
-        return paymentMethodService.getCardDataInformation(id, orderId)
+        return paymentMethodService.getCardDataInformation(id, orderId, ClientIdDto.CHECKOUT.getValue())
                 .map(ResponseEntity::ok);
     }
 
@@ -278,7 +278,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 orderId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
+                .flatMap(
+                        securityToken -> paymentMethodService
+                                .isSessionValid(id, orderId, securityToken, ClientIdDto.CHECKOUT.getValue())
+                )
                 .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId.base64()))
                 .map(ResponseEntity::ok);
     }
@@ -291,7 +294,10 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                     ServerWebExchange exchange
     ) {
         return patchSessionRequestDto
-                .flatMap(updateData -> paymentMethodService.updateSession(id, orderId, updateData))
+                .flatMap(
+                        updateData -> paymentMethodService
+                                .updateSession(id, orderId, ClientIdDto.CHECKOUT.getValue(), updateData)
+                )
                 .map(ignored -> ResponseEntity.noContent().build());
     }
 
