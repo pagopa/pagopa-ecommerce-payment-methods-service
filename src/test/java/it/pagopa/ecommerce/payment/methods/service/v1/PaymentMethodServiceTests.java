@@ -632,13 +632,14 @@ class PaymentMethodServiceTests {
             FieldsDto npgResponse = TestUtil.npgResponse();
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
             Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT")).thenReturn(
-                    Mono.just(
-                            new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
-                                    .name(java.util.Map.of("it", "CARDS"))
-                                    .paymentTypeCode("CP")
-                    )
-            );
+            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+                    .thenReturn(
+                            Mono.just(
+                                    new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                            .name(java.util.Map.of("it", "CARDS"))
+                                            .paymentTypeCode("CP")
+                            )
+                    );
             Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
                     .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
             Mockito.when(
@@ -820,7 +821,12 @@ class PaymentMethodServiceTests {
         StepVerifier
                 .create(
                         paymentMethodService
-                                .isSessionValid(paymentMethodId, npgSessionDocument.orderId(), "OTHER_SECURITY_TOKEN", "CHECKOUT")
+                                .isSessionValid(
+                                        paymentMethodId,
+                                        npgSessionDocument.orderId(),
+                                        "OTHER_SECURITY_TOKEN",
+                                        "CHECKOUT"
+                                )
                 )
                 .expectError(InvalidSessionException.class)
                 .verify();
@@ -852,7 +858,12 @@ class PaymentMethodServiceTests {
         StepVerifier
                 .create(
                         paymentMethodService
-                                .isSessionValid("NON_EXISTING_METHOD_ID", "NON_EXISTING_ORDER_ID", "SECURITY_TOKEN", "CHECKOUT")
+                                .isSessionValid(
+                                        "NON_EXISTING_METHOD_ID",
+                                        "NON_EXISTING_ORDER_ID",
+                                        "SECURITY_TOKEN",
+                                        "CHECKOUT"
+                                )
                 )
                 .expectError(PaymentMethodNotFoundException.class)
                 .verify();
@@ -885,7 +896,10 @@ class PaymentMethodServiceTests {
                 patchSessionRequestDto.getTransactionId()
         );
 
-        StepVerifier.create(paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto))
+        StepVerifier
+                .create(
+                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                )
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).save(any());
@@ -909,7 +923,10 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
 
-        StepVerifier.create(paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto))
+        StepVerifier
+                .create(
+                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                )
                 .expectNext(npgSessionDocument)
                 .verifyComplete();
     }
@@ -932,7 +949,10 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
 
-        StepVerifier.create(paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto))
+        StepVerifier
+                .create(
+                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                )
                 .expectError(SessionAlreadyAssociatedToTransaction.class)
                 .verify();
     }
@@ -951,7 +971,10 @@ class PaymentMethodServiceTests {
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto))
+        StepVerifier
+                .create(
+                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                )
                 .expectError(OrderIdNotFoundException.class)
                 .verify();
     }
@@ -969,7 +992,10 @@ class PaymentMethodServiceTests {
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                 .thenReturn(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)));
 
-        StepVerifier.create(paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto))
+        StepVerifier
+                .create(
+                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                )
                 .expectError(PaymentMethodNotFoundException.class)
                 .verify();
     }
