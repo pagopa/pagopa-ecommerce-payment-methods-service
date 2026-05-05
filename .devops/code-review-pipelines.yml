@@ -116,6 +116,22 @@ stages:
             displayName: 'Health check'
           - script: yarn global add newman
             displayName: 'newman installation'
+          - script: |
+              echo "=== Container status ==="
+              docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+              echo ""
+              echo "=== NPG mock logs ==="
+              docker logs pagopa-NPG-mock --tail 20 2>&1 || echo "NPG mock container not found!"
+              echo ""
+              echo "=== Network connectivity from service to NPG mock ==="
+              docker exec pagopa-ecommerce-payment-methods-service wget -qO- http://pagopa-npg-mock:3000/ --timeout=5 2>&1 || echo "FAILED: service cannot reach NPG mock"
+              echo ""
+              echo "=== Docker network containers ==="
+              docker network inspect pagopa-ecommerce-net --format '{{range .Containers}}{{.Name}} {{end}}' 2>&1 || echo "Network not found"
+              echo ""
+              echo "=== Service logs (errors) ==="
+              docker logs pagopa-ecommerce-payment-methods-service --tail 50 2>&1 | grep -i "error\|exception\|npg\|404\|handler" || echo "No errors found"
+            displayName: 'Debug - Check containers and connectivity'
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
             displayName: 'Run api test'
             continueOnError: false
