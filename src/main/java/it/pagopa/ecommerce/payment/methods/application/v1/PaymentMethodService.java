@@ -229,23 +229,24 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
          * method management ONBOARDABLE_ONLY) since payment logic to handle card method
          * is implemented in new app only
          */
-        if (clientId.equals(ClientIdDto.IO.toString()) && deviceVersion == null
-                && paymentMethod.getPaymentMethodTypeCode().value().equals("CP")) {
-            return new PaymentMethod(
-                    paymentMethod.getPaymentMethodID(),
-                    paymentMethod.getPaymentMethodName(),
-                    paymentMethod.getPaymentMethodDescription(),
-                    paymentMethod.getPaymentMethodStatus(),
-                    paymentMethod.getPaymentMethodTypeCode(),
-                    paymentMethod.getPaymentMethodRanges(),
-                    paymentMethod.getPaymentMethodAsset(),
-                    paymentMethod.getClientIdEnum(),
-                    new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE_ONLY), // forcilbly set
-                                                                                                  // onboardable
-                                                                                                  // only to method
-                                                                                                  // management
-                    paymentMethod.getPaymentMethodBrandAsset()
-            );
+        if (clientId.equals(ClientIdDto.IO.toString()) && deviceVersion == null) {
+            if (paymentMethod.getPaymentMethodTypeCode().value().equals("CP")) {
+                return new PaymentMethod(
+                        paymentMethod.getPaymentMethodID(),
+                        paymentMethod.getPaymentMethodName(),
+                        paymentMethod.getPaymentMethodDescription(),
+                        paymentMethod.getPaymentMethodStatus(),
+                        paymentMethod.getPaymentMethodTypeCode(),
+                        paymentMethod.getPaymentMethodRanges(),
+                        paymentMethod.getPaymentMethodAsset(),
+                        paymentMethod.getClientIdEnum(),
+                        new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE_ONLY), // forcilbly set
+                                                                                                      // onboardable
+                                                                                                      // only to method
+                                                                                                      // management
+                        paymentMethod.getPaymentMethodBrandAsset()
+                );
+            }
         }
         return paymentMethod;
     }
@@ -486,19 +487,14 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
                                                                         String id,
-                                                                        String orderId,
-                                                                        String clientId
+                                                                        String orderId
     ) {
         log.info(
                 "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and orderId: {}",
                 id,
                 orderId
         );
-        return paymentMethodsHandlerClient
-                .validatePaymentMethodExists(id, clientId)
-                .flatMap(
-                        el -> npgSessionsTemplateWrapper.findById(orderId)
-                )
+        return npgSessionsTemplateWrapper.findById(orderId)
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(
                         sx -> {
@@ -551,13 +547,10 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     }
 
     public Mono<NpgSessionDocument> updateSession(
-                                                  String paymentMethodId,
                                                   String orderId,
-                                                  String clientId,
                                                   PatchSessionRequestDto updateData
     ) {
-        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, clientId)
-                .flatMap(ignore -> npgSessionsTemplateWrapper.findById(orderId))
+        return npgSessionsTemplateWrapper.findById(orderId)
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
                     // Session associated to the order is associated to a different transaction id,

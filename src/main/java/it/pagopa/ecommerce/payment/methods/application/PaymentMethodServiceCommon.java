@@ -24,18 +24,19 @@ public abstract class PaymentMethodServiceCommon {
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
     }
 
+    protected PaymentMethodsHandlerClient getPaymentMethodsHandlerClient() {
+        return paymentMethodsHandlerClient;
+    }
+
+    protected NpgSessionsTemplateWrapper getNpgSessionsTemplateWrapper() {
+        return npgSessionsTemplateWrapper;
+    }
+
     public Mono<TransactionId> isSessionValid(
-                                              String paymentMethodId,
                                               String orderId,
-                                              String securityToken,
-                                              String clientId
+                                              String securityToken
     ) {
-        return paymentMethodsHandlerClient
-                .validatePaymentMethodExists(paymentMethodId, clientId)
-                .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
-                .flatMap(
-                        ignore -> npgSessionsTemplateWrapper.findById(orderId)
-                )
+        return npgSessionsTemplateWrapper.findById(orderId)
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(doc -> {
                     String transactionId = doc.transactionId();

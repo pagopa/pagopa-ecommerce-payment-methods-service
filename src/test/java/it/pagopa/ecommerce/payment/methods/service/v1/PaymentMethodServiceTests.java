@@ -711,7 +711,7 @@ class PaymentMethodServiceTests {
         String paymentMethodId = "paymentMethodId";
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                 .thenReturn(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)));
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, "orderId", "CHECKOUT"))
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, "orderId"))
                 .expectErrorMatches(PaymentMethodNotFoundException.class::isInstance)
                 .verify();
 
@@ -724,7 +724,7 @@ class PaymentMethodServiceTests {
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Mono.empty());
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId, "CHECKOUT"))
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
                 .expectErrorMatches(OrderIdNotFoundException.class::isInstance)
                 .verify();
 
@@ -755,7 +755,7 @@ class PaymentMethodServiceTests {
         Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
         Mockito.when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
         /* Tests */
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId, "CHECKOUT"))
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
@@ -783,7 +783,7 @@ class PaymentMethodServiceTests {
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
 
         /* Tests */
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId, "CHECKOUT"))
+        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
@@ -807,10 +807,8 @@ class PaymentMethodServiceTests {
         StepVerifier
                 .create(
                         paymentMethodService.isSessionValid(
-                                paymentMethodId,
                                 npgSessionDocument.orderId(),
-                                npgSessionDocument.securityToken(),
-                                "CHECKOUT"
+                                npgSessionDocument.securityToken()
                         )
                 )
                 .expectNext(transactionId)
@@ -833,10 +831,8 @@ class PaymentMethodServiceTests {
                 .create(
                         paymentMethodService
                                 .isSessionValid(
-                                        paymentMethodId,
                                         npgSessionDocument.orderId(),
-                                        "OTHER_SECURITY_TOKEN",
-                                        "CHECKOUT"
+                                        "OTHER_SECURITY_TOKEN"
                                 )
                 )
                 .expectError(InvalidSessionException.class)
@@ -855,7 +851,7 @@ class PaymentMethodServiceTests {
         StepVerifier
                 .create(
                         paymentMethodService
-                                .isSessionValid(paymentMethodId, "NON_EXISTING_ORDER_ID", "SECURITY_TOKEN", "CHECKOUT")
+                                .isSessionValid("NON_EXISTING_ORDER_ID", "SECURITY_TOKEN")
                 )
                 .expectError(OrderIdNotFoundException.class)
                 .verify();
@@ -870,10 +866,8 @@ class PaymentMethodServiceTests {
                 .create(
                         paymentMethodService
                                 .isSessionValid(
-                                        "NON_EXISTING_METHOD_ID",
                                         "NON_EXISTING_ORDER_ID",
-                                        "SECURITY_TOKEN",
-                                        "CHECKOUT"
+                                        "SECURITY_TOKEN"
                                 )
                 )
                 .expectError(PaymentMethodNotFoundException.class)
@@ -909,7 +903,7 @@ class PaymentMethodServiceTests {
 
         StepVerifier
                 .create(
-                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                        paymentMethodService.updateSession(orderId, patchSessionRequestDto)
                 )
                 .expectNext(expectedResponse)
                 .verifyComplete();
@@ -936,7 +930,7 @@ class PaymentMethodServiceTests {
 
         StepVerifier
                 .create(
-                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                        paymentMethodService.updateSession(orderId, patchSessionRequestDto)
                 )
                 .expectNext(npgSessionDocument)
                 .verifyComplete();
@@ -962,7 +956,7 @@ class PaymentMethodServiceTests {
 
         StepVerifier
                 .create(
-                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                        paymentMethodService.updateSession(orderId, patchSessionRequestDto)
                 )
                 .expectError(SessionAlreadyAssociatedToTransaction.class)
                 .verify();
@@ -984,7 +978,7 @@ class PaymentMethodServiceTests {
 
         StepVerifier
                 .create(
-                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                        paymentMethodService.updateSession(orderId, patchSessionRequestDto)
                 )
                 .expectError(OrderIdNotFoundException.class)
                 .verify();
@@ -1005,7 +999,7 @@ class PaymentMethodServiceTests {
 
         StepVerifier
                 .create(
-                        paymentMethodService.updateSession(paymentMethodId, orderId, "CHECKOUT", patchSessionRequestDto)
+                        paymentMethodService.updateSession(orderId, patchSessionRequestDto)
                 )
                 .expectError(PaymentMethodNotFoundException.class)
                 .verify();
