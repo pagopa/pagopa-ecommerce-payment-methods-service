@@ -709,10 +709,9 @@ class PaymentMethodServiceTests {
     @Test
     void shouldRetrieveCardDataForInvalidPaymentMethodId() {
         String paymentMethodId = "paymentMethodId";
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
-                .thenReturn(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)));
+        Mockito.when(npgSessionsTemplateWrapper.findById("orderId")).thenReturn(Mono.empty());
         StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, "orderId"))
-                .expectErrorMatches(PaymentMethodNotFoundException.class::isInstance)
+                .expectErrorMatches(OrderIdNotFoundException.class::isInstance)
                 .verify();
 
     }
@@ -859,8 +858,7 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorForNonExistingMethod() {
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(anyString(), anyString()))
-                .thenReturn(Mono.error(new PaymentMethodNotFoundException("NOT_FOUND")));
+        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.empty());
 
         StepVerifier
                 .create(
@@ -870,7 +868,7 @@ class PaymentMethodServiceTests {
                                         "SECURITY_TOKEN"
                                 )
                 )
-                .expectError(PaymentMethodNotFoundException.class)
+                .expectError(OrderIdNotFoundException.class)
                 .verify();
     }
 
@@ -987,21 +985,17 @@ class PaymentMethodServiceTests {
     @Test
     void shouldReturnErrorOnNonExistingPaymentMethod() {
         String orderId = "orderId";
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
-                .thenReturn(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)));
+        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.empty());
 
         StepVerifier
                 .create(
                         paymentMethodService.updateSession(orderId, patchSessionRequestDto)
                 )
-                .expectError(PaymentMethodNotFoundException.class)
+                .expectError(OrderIdNotFoundException.class)
                 .verify();
     }
 
