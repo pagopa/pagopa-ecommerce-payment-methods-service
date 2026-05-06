@@ -4,7 +4,6 @@ import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -46,9 +45,9 @@ import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.JwtIssuerResponseException;
+import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToTransaction;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
@@ -835,6 +834,27 @@ class PaymentMethodServiceTests {
                                 )
                 )
                 .expectError(InvalidSessionException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorForMismatchedSecurityToken() {
+        String correlationId = UUID.randomUUID().toString();
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
+        NpgSessionDocument npgSessionDocument = TestUtil
+                .npgSessionDocument("orderId", correlationId, "sessionId", false, transactionId.value());
+
+        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
+
+        StepVerifier
+                .create(
+                        paymentMethodService
+                                .isSessionValid(
+                                        npgSessionDocument.orderId(),
+                                        "WRONG_SECURITY_TOKEN"
+                                )
+                )
+                .expectError(MismatchedSecurityTokenException.class)
                 .verify();
     }
 
