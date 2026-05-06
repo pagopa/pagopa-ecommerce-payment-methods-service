@@ -24,14 +24,6 @@ public abstract class PaymentMethodServiceCommon {
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
     }
 
-    protected PaymentMethodsHandlerClient getPaymentMethodsHandlerClient() {
-        return paymentMethodsHandlerClient;
-    }
-
-    protected NpgSessionsTemplateWrapper getNpgSessionsTemplateWrapper() {
-        return npgSessionsTemplateWrapper;
-    }
-
     public Mono<TransactionId> isSessionValid(
                                               String orderId,
                                               String securityToken
