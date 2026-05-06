@@ -1,7 +1,6 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
-import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
@@ -13,14 +12,11 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public abstract class PaymentMethodServiceCommon {
 
-    private final PaymentMethodsHandlerClient paymentMethodsHandlerClient;
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
 
     protected PaymentMethodServiceCommon(
-            PaymentMethodsHandlerClient paymentMethodsHandlerClient,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
     ) {
-        this.paymentMethodsHandlerClient = paymentMethodsHandlerClient;
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
     }
 

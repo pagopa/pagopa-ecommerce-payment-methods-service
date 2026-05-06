@@ -717,10 +717,9 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorForInvalidSessionId() {
-        String paymentMethodId = "paymentMethodId";
         String sessionId = "sessionId";
         Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Mono.empty());
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, sessionId))
+        StepVerifier.create(paymentMethodService.getCardDataInformation("paymentMethodId", sessionId))
                 .expectErrorMatches(OrderIdNotFoundException.class::isInstance)
                 .verify();
 
@@ -731,7 +730,6 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrieveCardDataWithCacheMiss() {
-        String paymentMethodId = "paymentMethodId";
         String orderId = "orderId";
         String sessionId = "sessionId";
         String correlationId = UUID.randomUUID().toString();
@@ -749,7 +747,7 @@ class PaymentMethodServiceTests {
         Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
         Mockito.when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
         /* Tests */
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
+        StepVerifier.create(paymentMethodService.getCardDataInformation("paymentMethodId", orderId))
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
@@ -760,7 +758,6 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldRetrieveCardDataWithCacheHit() {
-        String paymentMethodId = "paymentMethodId";
         String orderId = "orderId";
         String sessionId = "sessionId";
         String correlationId = UUID.randomUUID().toString();
@@ -775,7 +772,7 @@ class PaymentMethodServiceTests {
         Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
 
         /* Tests */
-        StepVerifier.create(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
+        StepVerifier.create(paymentMethodService.getCardDataInformation("paymentMethodId", orderId))
                 .expectNext(expectedResponse)
                 .verifyComplete();
         Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
@@ -785,8 +782,6 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnTransactionIdForValidSession() {
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         String correlationId = UUID.randomUUID().toString();
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
         NpgSessionDocument npgSessionDocument = TestUtil
@@ -807,8 +802,6 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorForInvalidSession() {
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         String correlationId = UUID.randomUUID().toString();
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, null);
@@ -850,9 +843,6 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorForSessionNotFound() {
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
-
         Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.empty());
 
         StepVerifier
@@ -884,9 +874,6 @@ class PaymentMethodServiceTests {
     void shouldUpdateSessionData() {
         String sessionId = "sessionId";
         String orderId = "orderId";
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
         String correlationId = UUID.randomUUID().toString();
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
@@ -919,9 +906,6 @@ class PaymentMethodServiceTests {
         String sessionId = "sessionId";
         String orderId = "orderId";
         String correlationId = UUID.randomUUID().toString();
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
@@ -943,9 +927,6 @@ class PaymentMethodServiceTests {
         String sessionId = "sessionId";
         String orderId = "orderId";
         String correlationId = UUID.randomUUID().toString();
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
@@ -965,9 +946,6 @@ class PaymentMethodServiceTests {
     @Test
     void shouldReturnErrorOnNonExistingSession() {
         String orderId = "orderId";
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        String paymentMethodId = paymentMethodDocument.getPaymentMethodID();
         String transactionId = "transactionId";
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);

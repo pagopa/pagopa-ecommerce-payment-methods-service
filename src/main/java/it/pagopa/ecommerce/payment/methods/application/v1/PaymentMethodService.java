@@ -104,7 +104,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
             JwtTokenIssuerClient jwtTokenIssuerClient,
             PaymentMethodsHandlerClient paymentMethodsHandlerClient
     ) {
-        super(paymentMethodsHandlerClient, npgSessionsTemplateWrapper);
+        super(npgSessionsTemplateWrapper);
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
