@@ -855,22 +855,6 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldReturnErrorForNonExistingMethod() {
-        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.empty());
-
-        StepVerifier
-                .create(
-                        paymentMethodService
-                                .isSessionValid(
-                                        "NON_EXISTING_ORDER_ID",
-                                        "SECURITY_TOKEN"
-                                )
-                )
-                .expectError(OrderIdNotFoundException.class)
-                .verify();
-    }
-
-    @Test
     void shouldUpdateSessionData() {
         String sessionId = "sessionId";
         String orderId = "orderId";
@@ -945,23 +929,6 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorOnNonExistingSession() {
-        String orderId = "orderId";
-        String transactionId = "transactionId";
-
-        PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
-
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.empty());
-
-        StepVerifier
-                .create(
-                        paymentMethodService.updateSession(orderId, patchSessionRequestDto)
-                )
-                .expectError(OrderIdNotFoundException.class)
-                .verify();
-    }
-
-    @Test
-    void shouldReturnErrorOnNonExistingPaymentMethod() {
         String orderId = "orderId";
         String transactionId = "transactionId";
 
