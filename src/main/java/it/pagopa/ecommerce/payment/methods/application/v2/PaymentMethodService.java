@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 @Service(PaymentMethodService.QUALIFIER_NAME)
 @ApplicationService
@@ -37,7 +36,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
             AfmClient afmClient,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
     ) {
-        super(paymentMethodRepository, npgSessionsTemplateWrapper);
+        super(npgSessionsTemplateWrapper);
         this.paymentMethodRepository = paymentMethodRepository;
         this.afmClient = afmClient;
     }

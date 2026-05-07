@@ -175,7 +175,7 @@ class PaymentMethodsControllerTests {
         String securityToken = "securityToken";
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
-        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any()))
+        Mockito.when(paymentMethodService.isSessionValid(any(), any()))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -196,7 +196,7 @@ class PaymentMethodsControllerTests {
                 .expectBody(SessionGetTransactionIdResponseDto.class)
                 .isEqualTo(expected);
         verify(paymentMethodService, times(1))
-                .isSessionValid(paymentMethodId, orderId, securityToken);
+                .isSessionValid(orderId, securityToken);
     }
 
 }

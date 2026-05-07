@@ -278,7 +278,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 orderId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(orderId, securityToken))
                 .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId.base64()))
                 .map(ResponseEntity::ok);
     }
@@ -291,7 +291,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                     ServerWebExchange exchange
     ) {
         return patchSessionRequestDto
-                .flatMap(updateData -> paymentMethodService.updateSession(id, orderId, updateData))
+                .flatMap(updateData -> paymentMethodService.updateSession(orderId, updateData))
                 .map(ignored -> ResponseEntity.noContent().build());
     }
 
