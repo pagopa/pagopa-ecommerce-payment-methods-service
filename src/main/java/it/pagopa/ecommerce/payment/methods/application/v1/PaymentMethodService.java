@@ -183,7 +183,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     public Flux<PaymentMethod> retrievePaymentMethods(
                                                       Integer amount,
-                                                      String clientId
+                                                      String clientId,
+                                                      String deviceVersion
     ) {
         log.info("[Payment Method Aggregate] Retrieve Aggregate");
 
@@ -193,20 +194,55 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                 range -> range.getFirst().longValue() <= amount
                                         && range.getSecond().longValue() >= amount
                         )
-        ).sort(
-                (
-                 paymentMethodDocument1,
-                 paymentMethodDocument2
-                ) -> {
-                    if (paymentMethodDocument1.getPaymentMethodTypeCode().equals("CP"))
-                        return -1;
-                    if (paymentMethodDocument2.getPaymentMethodTypeCode().equals("CP"))
-                        return 1;
-                    else
-                        return paymentMethodDocument1.getPaymentMethodDescription()
-                                .compareTo(paymentMethodDocument2.getPaymentMethodDescription());
-                }
-        ).map(this::docToAggregate);
+        )
+                .sort(
+                        (
+                         paymentMethodDocument1,
+                         paymentMethodDocument2
+                        ) -> {
+                            if (paymentMethodDocument1.getPaymentMethodTypeCode().equals("CP"))
+                                return -1;
+                            if (paymentMethodDocument2.getPaymentMethodTypeCode().equals("CP"))
+                                return 1;
+                            else
+                                return paymentMethodDocument1.getPaymentMethodDescription()
+                                        .compareTo(paymentMethodDocument2.getPaymentMethodDescription());
+                        }
+                ).map(this::docToAggregate)
+                .map(doc -> filterMethods(doc, clientId, deviceVersion));
+    }
+
+    private PaymentMethod filterMethods(
+                                        PaymentMethod paymentMethod,
+                                        String clientId,
+                                        String deviceVersion
+    ) {
+        /*
+         * only for app IO (client id IO) and old app version (deviceVersion parameter
+         * null) we should return card payment methods only for onboarding (aka with
+         * method management ONBOARDABLE_ONLY) since payment logic to handle card method
+         * is implemented in new app only
+         */
+        if (clientId.equals(ClientIdDto.IO.toString()) && deviceVersion == null) {
+            if (paymentMethod.getPaymentMethodTypeCode().value().equals("CP")) {
+                return new PaymentMethod(
+                        paymentMethod.getPaymentMethodID(),
+                        paymentMethod.getPaymentMethodName(),
+                        paymentMethod.getPaymentMethodDescription(),
+                        paymentMethod.getPaymentMethodStatus(),
+                        paymentMethod.getPaymentMethodTypeCode(),
+                        paymentMethod.getPaymentMethodRanges(),
+                        paymentMethod.getPaymentMethodAsset(),
+                        paymentMethod.getClientIdEnum(),
+                        new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE_ONLY), // forcilbly set
+                                                                                                      // onboardable
+                                                                                                      // only to method
+                                                                                                      // management
+                        paymentMethod.getPaymentMethodBrandAsset()
+                );
+            }
+        }
+        return paymentMethod;
     }
 
     public Mono<PaymentMethod> updatePaymentMethodStatus(

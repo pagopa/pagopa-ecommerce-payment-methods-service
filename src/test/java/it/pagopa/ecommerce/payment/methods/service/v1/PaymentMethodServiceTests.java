@@ -11,16 +11,17 @@ import static org.mockito.Mockito.times;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import it.pagopa.ecommerce.payment.methods.domain.valueobjects.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -276,7 +277,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodCreated = paymentMethodService
-                .retrievePaymentMethods(null, clientIdEnumCheckout.getValue()).blockFirst();
+                .retrievePaymentMethods(null, clientIdEnumCheckout.getValue(), null).blockFirst();
 
         assertEquals(paymentMethodCreated.getPaymentMethodID(), paymentMethod.getPaymentMethodID());
     }
@@ -292,7 +293,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentMethodCreated = paymentMethodService
-                .retrievePaymentMethods(101, clientIdEnumIo.getValue())
+                .retrievePaymentMethods(101, clientIdEnumIo.getValue(), null)
                 .collectList().block();
 
         assertEquals(0, paymentMethodCreated.size());
@@ -309,7 +310,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentmethodCreated = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumIo.getValue())
+                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), null)
                 .collectList().block();
 
         assertEquals(1, paymentmethodCreated.size());
@@ -328,7 +329,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
 
         List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumCheckout.getValue())
+                .retrievePaymentMethods(50, clientIdEnumCheckout.getValue(), null)
                 .collectList().block();
 
         assertEquals(maxSize, paymentMethodRetrieved.size());
@@ -356,7 +357,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
 
         List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
-                .retrievePaymentMethods(null, clientIdEnumCheckout.getValue())
+                .retrievePaymentMethods(null, clientIdEnumCheckout.getValue(), null)
                 .collectList().block();
 
         assertEquals(maxSize, paymentMethodRetrieved.size());
@@ -1139,5 +1140,172 @@ class PaymentMethodServiceTests {
             );
 
         }
+    }
+
+    @Test
+    void shouldRemapMethodManagementForOldIoApp() {
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
+        PaymentMethod cardPaymentMethodAggregate = new PaymentMethod(
+                new PaymentMethodID(UUID.randomUUID()),
+                new PaymentMethodName("CARDS"),
+                new PaymentMethodDescription("card"),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType("CP"),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset("asset"),
+                clientIdEnumIo,
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
+                new PaymentMethodBrandAssets(Optional.empty())
+        );
+        PaymentMethod redirectPaymentMethodAggregate = new PaymentMethod(
+                new PaymentMethodID(UUID.randomUUID()),
+                new PaymentMethodName("redirect"),
+                new PaymentMethodDescription("redirect"),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType("RPIC"),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset("asset"),
+                clientIdEnumIo,
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT),
+                new PaymentMethodBrandAssets(Optional.empty())
+        );
+
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+                .thenReturn(
+                        Flux.just(
+                                TestUtil.getTestPaymentDoc(cardPaymentMethodAggregate),
+                                TestUtil.getTestPaymentDoc(redirectPaymentMethodAggregate)
+                        )
+                );
+
+        List<PaymentMethod> paymentMethods = paymentMethodService
+                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), null)
+                .collectList().block();
+
+        assertEquals(2, paymentMethods.size());
+        PaymentMethod cardPaymentMethod = paymentMethods.stream()
+                .filter(m -> m.getPaymentMethodTypeCode().value().equals("CP")).findFirst().orElseThrow();
+        PaymentMethod redirectPaymentMethod = paymentMethods.stream()
+                .filter(m -> m.getPaymentMethodTypeCode().value().equals("RPIC")).findFirst().orElseThrow();
+        assertEquals(
+                PaymentMethodManagementTypeDto.ONBOARDABLE_ONLY,
+                cardPaymentMethod.getPaymentMethodManagement().value()
+        );
+        assertEquals(
+                PaymentMethodManagementTypeDto.REDIRECT,
+                redirectPaymentMethod.getPaymentMethodManagement().value()
+        );
+    }
+
+    @Test
+    void shouldNotRemapMethodManagementForNewIoApp() {
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
+        PaymentMethod cardPaymentMethodAggregate = new PaymentMethod(
+                new PaymentMethodID(UUID.randomUUID()),
+                new PaymentMethodName("CARDS"),
+                new PaymentMethodDescription("card"),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType("CP"),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset("asset"),
+                clientIdEnumIo,
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
+                new PaymentMethodBrandAssets(Optional.empty())
+        );
+        PaymentMethod redirectPaymentMethodAggregate = new PaymentMethod(
+                new PaymentMethodID(UUID.randomUUID()),
+                new PaymentMethodName("redirect"),
+                new PaymentMethodDescription("redirect"),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType("RPIC"),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset("asset"),
+                clientIdEnumIo,
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT),
+                new PaymentMethodBrandAssets(Optional.empty())
+        );
+
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+                .thenReturn(
+                        Flux.just(
+                                TestUtil.getTestPaymentDoc(cardPaymentMethodAggregate),
+                                TestUtil.getTestPaymentDoc(redirectPaymentMethodAggregate)
+                        )
+                );
+
+        List<PaymentMethod> paymentMethods = paymentMethodService
+                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), "0.0.0")
+                .collectList().block();
+
+        assertEquals(2, paymentMethods.size());
+        PaymentMethod cardPaymentMethod = paymentMethods.stream()
+                .filter(m -> m.getPaymentMethodTypeCode().value().equals("CP")).findFirst().orElseThrow();
+        PaymentMethod redirectPaymentMethod = paymentMethods.stream()
+                .filter(m -> m.getPaymentMethodTypeCode().value().equals("RPIC")).findFirst().orElseThrow();
+        assertEquals(
+                PaymentMethodManagementTypeDto.ONBOARDABLE,
+                cardPaymentMethod.getPaymentMethodManagement().value()
+        );
+        assertEquals(
+                PaymentMethodManagementTypeDto.REDIRECT,
+                redirectPaymentMethod.getPaymentMethodManagement().value()
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = "0.0.0")
+    @NullSource
+    void shouldNotRemapMethodManagementForOtherClientThanIOApp(String deviceVersion) {
+        PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdCheckout();
+        PaymentMethod cardPaymentMethodAggregate = new PaymentMethod(
+                new PaymentMethodID(UUID.randomUUID()),
+                new PaymentMethodName("CARDS"),
+                new PaymentMethodDescription("card"),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType("CP"),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset("asset"),
+                PaymentMethodRequestDto.ClientIdEnum.IO,
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.ONBOARDABLE),
+                new PaymentMethodBrandAssets(Optional.empty())
+        );
+        PaymentMethod redirectPaymentMethodAggregate = new PaymentMethod(
+                new PaymentMethodID(UUID.randomUUID()),
+                new PaymentMethodName("redirect"),
+                new PaymentMethodDescription("redirect"),
+                new PaymentMethodStatus(PaymentMethodStatusEnum.ENABLED),
+                new PaymentMethodType("RPIC"),
+                List.of(new PaymentMethodRange(0L, 100L)),
+                new PaymentMethodAsset("asset"),
+                PaymentMethodRequestDto.ClientIdEnum.IO,
+                new PaymentMethodManagement(PaymentMethodManagementTypeDto.REDIRECT),
+                new PaymentMethodBrandAssets(Optional.empty())
+        );
+
+        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+                .thenReturn(
+                        Flux.just(
+                                TestUtil.getTestPaymentDoc(cardPaymentMethodAggregate),
+                                TestUtil.getTestPaymentDoc(redirectPaymentMethodAggregate)
+                        )
+                );
+
+        List<PaymentMethod> paymentMethods = paymentMethodService
+                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), deviceVersion)
+                .collectList().block();
+
+        assertEquals(2, paymentMethods.size());
+        PaymentMethod cardPaymentMethod = paymentMethods.stream()
+                .filter(m -> m.getPaymentMethodTypeCode().value().equals("CP")).findFirst().orElseThrow();
+        PaymentMethod redirectPaymentMethod = paymentMethods.stream()
+                .filter(m -> m.getPaymentMethodTypeCode().value().equals("RPIC")).findFirst().orElseThrow();
+        assertEquals(
+                PaymentMethodManagementTypeDto.ONBOARDABLE,
+                cardPaymentMethod.getPaymentMethodManagement().value()
+        );
+        assertEquals(
+                PaymentMethodManagementTypeDto.REDIRECT,
+                redirectPaymentMethod.getPaymentMethodManagement().value()
+        );
     }
 }

@@ -161,32 +161,9 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
                 .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
-                .bundles(sortAndShuffleBundleList(bundles))
+                .bundles(bundles)
                 .asset(paymentMethodDocument.getPaymentMethodAsset())
                 .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
     }
 
-    private List<BundleDto> sortAndShuffleBundleList(List<BundleDto> bundles) {
-        Map<Long, List<BundleDto>> bundleMap = new TreeMap<>();
-        Optional<BundleDto> onUsBundle = bundles
-                .stream()
-                .filter(BundleDto::getOnUs)
-                .findFirst();
-        bundles
-                .stream()
-                .filter(Predicate.not(BundleDto::getOnUs))
-                .forEach(bundle -> {
-                    Long fees = bundle.getTaxPayerFee();
-                    List<BundleDto> bundlesPerFee = bundleMap.getOrDefault(fees, new ArrayList<>());
-                    bundlesPerFee.add(bundle);
-                    bundleMap.put(fees, bundlesPerFee);
-                });
-        Deque<BundleDto> orderedBundles = new LinkedList<>();
-        bundleMap.values().forEach(bundlesPerFee -> {
-            Collections.shuffle(bundlesPerFee);
-            orderedBundles.addAll(bundlesPerFee);
-        });
-        onUsBundle.ifPresent(orderedBundles::addFirst);
-        return orderedBundles.stream().toList();
-    }
 }

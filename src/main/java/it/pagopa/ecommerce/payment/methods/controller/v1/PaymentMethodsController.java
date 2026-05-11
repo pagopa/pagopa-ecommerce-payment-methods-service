@@ -141,9 +141,12 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     public Mono<ResponseEntity<PaymentMethodsResponseDto>> getAllPaymentMethods(
                                                                                 String xClientId,
                                                                                 BigDecimal amount,
+                                                                                String deviceVersion,
+                                                                                String devicePlatform,
                                                                                 ServerWebExchange exchange
     ) {
-        return paymentMethodService.retrievePaymentMethods(amount != null ? amount.intValue() : null, xClientId)
+        return paymentMethodService
+                .retrievePaymentMethods(amount != null ? amount.intValue() : null, xClientId, deviceVersion)
                 .map(PaymentMethodsController::paymentMethodToDto)
                 .collectList()
                 .map(

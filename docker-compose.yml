@@ -13,7 +13,7 @@ services:
 
   mongo:
     container_name: pagopa-ecommerce-mongo
-    image: mongo
+    image: mongo@sha256:d343c378b5c6e2fe373174abcf4a877be0dfc721b5d0b9d582204dccb1c00b86
     environment:
       MONGO_INITDB_ROOT_USERNAME: $MONGO_USERNAME
       MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
@@ -26,7 +26,7 @@ services:
       interval: 10s
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express@sha256:1b23d7976f0210dbec74045c209e52fbb26d29b2e873d6c6fa3d3f0ae32c2a64
     ports:
       - "8081:8081"
     networks:
