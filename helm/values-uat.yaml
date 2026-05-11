@@ -101,8 +101,8 @@ microservice-chart:
     REDIS_SSL_ENABLED: "true"
     REDIS_TIMEOUT: "2s"
     REDIS_CONNECTION_TIMEOUT: "2s"
-    AFM_URI: "https://api.uat.platform.pagopa.it/afm/calculator-service/v1/fees"
-    AFM_URI_V2: "https://api.uat.platform.pagopa.it/afm/calculator-service/v2/fees"
+    AFM_URI: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v1/fees"
+    AFM_URI_V2: "https://api.uat.platform.pagopa.it/ecommerce/mock/gec/v2/fees"
     AFM_READ_TIMEOUT: "10000"
     AFM_CONNECTION_TIMEOUT: "10000"
     SPRING_MAX_IN_MEM_SIZE: "16777216"
@@ -138,7 +138,7 @@ microservice-chart:
     MONGO_PASSWORD: mongo-ecommerce-password
     REDIS_PASSWORD: redis-ecommerce-access-key
     REDIS_HOST: redis-ecommerce-hostname
-    AFM_KEY: afm-api-key
+    AFM_KEY: ecommerce-load-test-subscription-key
     OTEL_EXPORTER_OTLP_HEADERS: elastic-otel-token-header
     NPG_API_KEY: npg-api-key
     JWT_ISSUER_API_KEY: ecommerce-jwt-issuer-service-active-api-key
