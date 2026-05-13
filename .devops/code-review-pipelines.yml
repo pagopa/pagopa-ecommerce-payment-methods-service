@@ -70,8 +70,12 @@ stages:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
           #  NEW STEP: bootstrap pagopa-ecommerce-commons delete before merge
-          - script: |
-              mvn org.apache.maven.plugins:maven-scm-plugin:2.0.0-M3:bootstrap
+          - task: Maven@4
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'org.apache.maven.plugins:maven-scm-plugin:2.0.0-M3:bootstrap'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '21'
             displayName: "Bootstrap pagopa-ecommerce-commons"
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
