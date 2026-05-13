@@ -29,6 +29,7 @@ stages:
     jobs:
       - job: make_buildEndUnitTest
         steps:
+          - checkout: self
           - task: Cache@2
             inputs:
               key: 'maven | "$(Agent.OS)" | pom.xml'
