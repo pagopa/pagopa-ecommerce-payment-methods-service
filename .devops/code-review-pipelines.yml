@@ -68,6 +68,24 @@ stages:
                 EOF
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
+          - task: Bash@3
+            displayName: 'Install pagopa-ecommerce-commons from branch'
+            inputs:
+              targetType: 'inline'
+              script: |
+                git clone \
+                  --branch PIDM-1763-amount-int-to-long \
+                  --depth 1 \
+                  https://token:${GITHUB_TOKEN}@github.com/pagopa/pagopa-ecommerce-commons.git \
+                  /tmp/pagopa-ecommerce-commons
+                
+                cd /tmp/pagopa-ecommerce-commons
+                
+                mvn install -DskipTests \
+                  -s $(Pipeline.Workspace)/.m2/settings.xml \
+                  -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)
+            env:
+              GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
           - task: Maven@4
             inputs:
