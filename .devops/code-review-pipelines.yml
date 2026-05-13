@@ -79,9 +79,9 @@ stages:
               jdkArchitectureOption: 'x64'
               publishJUnitResults: false
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
-              goals: 'clean verify'
+              goals: 'clean validate  verify'
               sonarQubeRunAnalysis: true
-            displayName: 'Maven clean verify'
+            displayName: 'Maven clean validate  verify'
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
