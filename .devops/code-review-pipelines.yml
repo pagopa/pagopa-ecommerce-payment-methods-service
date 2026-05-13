@@ -86,6 +86,8 @@ stages:
                   -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
+              JAVA_HOME: /usr/lib/jvm/temurin-21-amd64
+
 
           - task: Maven@4
             inputs:
