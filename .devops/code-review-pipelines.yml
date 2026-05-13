@@ -68,25 +68,34 @@ stages:
                 EOF
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
+          # 1. Clona la commons (solo git, niente java)
           - task: Bash@3
-            displayName: 'Install pagopa-ecommerce-commons from branch'
+            displayName: 'Checkout pagopa-ecommerce-commons branch'
             inputs:
               targetType: 'inline'
               script: |
                 git clone \
-                  --branch PIDM-1763-amount-int-to-long \
+                  --branch ${{ parameters.COMMONS_BRANCH }} \
                   --depth 1 \
                   https://token:${GITHUB_TOKEN}@github.com/pagopa/pagopa-ecommerce-commons.git \
                   /tmp/pagopa-ecommerce-commons
-                
-                cd /tmp/pagopa-ecommerce-commons
-                
-                mvn install -DskipTests \
-                  -s $(Pipeline.Workspace)/.m2/settings.xml \
-                  -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
-              JAVA_HOME: /usr/lib/jvm/temurin-21-amd64
+
+          # 2. Builda e installa con Maven@4 (Java 21 configurato correttamente)
+          - task: Maven@4
+            displayName: 'Install pagopa-ecommerce-commons from branch'
+            inputs:
+              mavenPomFile: '/tmp/pagopa-ecommerce-commons/pom.xml'
+              mavenOptions: '-Xmx3072m $(MAVEN_OPTS)'
+              options: "-s $(Pipeline.Workspace)/.m2/settings.xml"
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '21'
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: false
+              goals: 'clean install -DskipTests'
+            env:
+              GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
 
           - task: Maven@4
