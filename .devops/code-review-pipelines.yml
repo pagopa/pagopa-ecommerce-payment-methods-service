@@ -77,7 +77,7 @@ stages:
                 git clone \
                   --branch PIDM-1763-amount-int-to-long \
                   --depth 1 \
-                  --recurse-submodules \ 
+                  --recurse-submodules \
                   https://token:${GITHUB_TOKEN}@github.com/pagopa/pagopa-ecommerce-commons.git \
                   /tmp/pagopa-ecommerce-commons
             env:
