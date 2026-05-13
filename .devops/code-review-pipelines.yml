@@ -75,7 +75,7 @@ stages:
               targetType: 'inline'
               script: |
                 git clone \
-                  --branch ${{ parameters.COMMONS_BRANCH }} \
+                  --branch PIDM-1763-amount-int-to-long \
                   --depth 1 \
                   https://token:${GITHUB_TOKEN}@github.com/pagopa/pagopa-ecommerce-commons.git \
                   /tmp/pagopa-ecommerce-commons
