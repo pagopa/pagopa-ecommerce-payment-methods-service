@@ -18,6 +18,11 @@ resources:
       name: pagopa/pagopa-ecommerce-local
       ref: main
       endpoint: 'io-azure-devops-github-ro'
+    - repository: pagopaEcommerceCommons
+      type: github
+      name: pagopa/pagopa-ecommerce-commons
+      ref: main
+      endpoint: 'io-azure-devops-github-ro'
 
 stages:
   - stage: BuildEndUnitTest
@@ -69,14 +74,17 @@ stages:
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
-          #  NEW STEP: bootstrap pagopa-ecommerce-commons delete before merge
+          - checkout: pagopaEcommerceCommons
+
           - task: Maven@4
+            displayName: "Build + install pagopa-ecommerce-commons (PR local)"
             inputs:
               mavenPomFile: 'pom.xml'
-              goals: 'org.apache.maven.plugins:maven-scm-plugin:2.0.0-M3:bootstrap'
+              goals: 'clean install -DskipTests'
+              options: "-s $(Pipeline.Workspace)/.m2/settings.xml"
               javaHomeOption: 'JDKVersion'
               jdkVersionOption: '21'
-            displayName: "Bootstrap pagopa-ecommerce-commons"
+              jdkArchitectureOption: 'x64'
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
 
