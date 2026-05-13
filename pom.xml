@@ -381,6 +381,14 @@
 					<scmVersion>PIDM-1763-amount-int-to-long</scmVersion>
 					<goals>install -DskipTests</goals>
 				</configuration>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>bootstrap</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
