@@ -82,6 +82,21 @@ stages:
                   /tmp/pagopa-ecommerce-commons
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
+          - task: Bash@3
+            displayName: 'DEBUG OpenAPI file'
+            inputs:
+              targetType: 'inline'
+              script: |
+                cd /tmp/pagopa-ecommerce-commons
+
+                echo "=== PWD ==="
+                pwd
+
+                echo "=== CHECK FILE EXISTS ==="
+                ls -l clients/api-specs/npg.yaml
+
+                echo "=== FILE CONTENT START ==="
+                head -50 clients/api-specs/npg.yaml
 
           # 2. Builda e installa con Maven@4 (Java 21 configurato correttamente)
           - task: Maven@4
