@@ -34,7 +34,7 @@ stages:
           - checkout: pagopaEcommerceCommons
           - task: Cache@2
             inputs:
-              key: 'maven | "$(Agent.OS)" | pom.xml'
+              key: 'maven | "$(Agent.OS)" | $(Build.SourcesDirectory)/pom.xml'
               restoreKeys: |
                 maven | "$(Agent.OS)"
                 maven
