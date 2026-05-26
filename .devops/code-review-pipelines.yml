@@ -113,18 +113,15 @@ stages:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
           - script: |
               timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8083/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
-            displayName: 'Health check'
+            displayName: 'Health check - Payment Methods Service'
+          - script: |
+              timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8082/q/health/live)" != "200" ]]; do sleep 5; done' || exit 1
+            displayName: 'Health check - Payment Methods Handler'
           - script: yarn global add newman
             displayName: 'newman installation'
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
             displayName: 'Run api test'
             continueOnError: false
-          - script: docker logs pagopa-ecommerce-payment-methods-service 2>&1 | tail -200
-            displayName: 'Debug - Payment Methods Service logs'
-            condition: always()
-          - script: docker logs pagopa-ecommerce-payment-methods-handler 2>&1 | tail -100
-            displayName: 'Debug - Handler logs'
-            condition: always()
 
           - task: PublishTestResults@2
             inputs:
