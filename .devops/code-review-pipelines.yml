@@ -119,6 +119,13 @@ stages:
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
             displayName: 'Run api test'
             continueOnError: false
+          - script: docker logs pagopa-ecommerce-payment-methods-service 2>&1 | tail -200
+            displayName: 'Debug - Payment Methods Service logs'
+            condition: always()
+          - script: docker logs pagopa-ecommerce-payment-methods-handler 2>&1 | tail -100
+            displayName: 'Debug - Handler logs'
+            condition: always()
+
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'
