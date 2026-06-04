@@ -1,7 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.client;
 
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
-import it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsApi;
+import it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsHandlerApi;
 import it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,10 +14,10 @@ import reactor.core.publisher.Mono;
 @Component
 public class PaymentMethodsHandlerClient {
 
-    private final PaymentMethodsApi paymentMethodsApi;
+    private final PaymentMethodsHandlerApi paymentMethodsApi;
 
     public PaymentMethodsHandlerClient(
-            @Qualifier("paymentMethodsHandlerWebClient") PaymentMethodsApi paymentMethodsApi
+            @Qualifier("paymentMethodsHandlerWebClient") PaymentMethodsHandlerApi paymentMethodsApi
     ) {
         this.paymentMethodsApi = paymentMethodsApi;
     }

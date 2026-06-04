@@ -233,7 +233,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/api-spec/handler-v1/api.yaml</inputSpec>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-infra/82d51c6460738ab53bc013da6e17ceb339c38f28/src/domains/ecommerce-app/api/ecommerce-payment-methods-handler/v1/_openapi.json.tpl</inputSpec>
 							<generatorName>java</generatorName>
 							<library>webclient</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
@@ -248,6 +248,7 @@
 							</configOptions>
 							<modelPackage>it.pagopa.generated.ecommerce.handler.v1.dto</modelPackage>
 							<apiPackage>it.pagopa.generated.ecommerce.handler.v1.api</apiPackage>
+							<apiNameSuffix>Api</apiNameSuffix>
 							<modelNameSuffix>dto</modelNameSuffix>
 						</configuration>
 					</execution>
