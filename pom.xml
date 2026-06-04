@@ -87,7 +87,7 @@
 		<dependency>
 			<groupId>it.pagopa</groupId>
 			<artifactId>pagopa-ecommerce-commons</artifactId>
-			<version>${pagopa-ecommerce-commons.version}</version>
+			<version>3.3.2-PIDM-1763-amount-int-to-long-SNAPSHOT-b5d38e4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
