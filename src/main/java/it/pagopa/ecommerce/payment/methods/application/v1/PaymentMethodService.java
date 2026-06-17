@@ -104,7 +104,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
             JwtTokenIssuerClient jwtTokenIssuerClient,
             PaymentMethodsHandlerClient paymentMethodsHandlerClient
     ) {
-        super(npgSessionsTemplateWrapper);
+        super(npgSessionsTemplateWrapper, paymentMethodsHandlerClient);
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
@@ -487,14 +487,16 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
                                                                         String id,
-                                                                        String orderId
+                                                                        String orderId,
+                                                                        ClientIdDto xClientId
     ) {
         log.info(
                 "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and orderId: {}",
                 id,
                 orderId
         );
-        return npgSessionsTemplateWrapper.findById(orderId)
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(id, xClientId.getValue())
+                .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(
                         sx -> {
@@ -547,10 +549,13 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     }
 
     public Mono<NpgSessionDocument> updateSession(
+                                                  String paymentMethodId,
                                                   String orderId,
-                                                  PatchSessionRequestDto updateData
+                                                  PatchSessionRequestDto updateData,
+                                                  ClientIdDto xClientId
     ) {
-        return npgSessionsTemplateWrapper.findById(orderId)
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, xClientId.getValue())
+                .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
                     // Session associated to the order is associated to a different transaction id,

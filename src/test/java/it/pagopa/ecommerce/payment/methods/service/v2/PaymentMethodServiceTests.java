@@ -30,17 +30,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
+import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
+
 class PaymentMethodServiceTests {
 
     private final AfmClient afmClient = mock(AfmClient.class);
 
     private final PaymentMethodRepository paymentMethodRepository = mock(PaymentMethodRepository.class);
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper = mock(NpgSessionsTemplateWrapper.class);
+    private final PaymentMethodsHandlerClient paymentMethodsHandlerClient = mock(PaymentMethodsHandlerClient.class);
 
     private final PaymentMethodService paymentMethodService = new PaymentMethodService(
             paymentMethodRepository,
             afmClient,
-            npgSessionsTemplateWrapper
+            npgSessionsTemplateWrapper,
+            paymentMethodsHandlerClient
     );
 
     @Test

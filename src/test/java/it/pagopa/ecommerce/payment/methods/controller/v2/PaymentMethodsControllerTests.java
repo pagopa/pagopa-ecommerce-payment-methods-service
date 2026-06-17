@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -175,7 +176,7 @@ class PaymentMethodsControllerTests {
         String securityToken = "securityToken";
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
-        Mockito.when(paymentMethodService.isSessionValid(any(), any()))
+        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any(), any()))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -189,6 +190,7 @@ class PaymentMethodsControllerTests {
                                 .build(paymentMethodId, orderId)
                 )
                 .header("x-api-key", "primary-key")
+                .header("X-Client-Id", "CHECKOUT")
                 .headers(h -> h.setBearerAuth(securityToken))
                 .exchange()
                 .expectStatus()
@@ -196,7 +198,7 @@ class PaymentMethodsControllerTests {
                 .expectBody(SessionGetTransactionIdResponseDto.class)
                 .isEqualTo(expected);
         verify(paymentMethodService, times(1))
-                .isSessionValid(orderId, securityToken);
+                .isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), any());
     }
 
 }

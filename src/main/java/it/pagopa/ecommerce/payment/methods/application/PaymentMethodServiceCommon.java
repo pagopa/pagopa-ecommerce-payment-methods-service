@@ -1,11 +1,13 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
 import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
+import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
+import it.pagopa.ecommerce.payment.methods.server.model.ClientIdDto;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -13,18 +15,24 @@ import reactor.core.publisher.Mono;
 public abstract class PaymentMethodServiceCommon {
 
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
+    private final PaymentMethodsHandlerClient paymentMethodsHandlerClient;
 
     protected PaymentMethodServiceCommon(
-            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
+            PaymentMethodsHandlerClient paymentMethodsHandlerClient
     ) {
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
+        this.paymentMethodsHandlerClient = paymentMethodsHandlerClient;
     }
 
     public Mono<TransactionId> isSessionValid(
+                                              String paymentMethodId,
                                               String orderId,
-                                              String securityToken
+                                              String securityToken,
+                                              ClientIdDto xClientId
     ) {
-        return npgSessionsTemplateWrapper.findById(orderId)
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, xClientId.getValue())
+                .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(doc -> {
                     String transactionId = doc.transactionId();

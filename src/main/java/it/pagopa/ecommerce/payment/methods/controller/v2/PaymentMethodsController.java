@@ -5,6 +5,7 @@ import it.pagopa.ecommerce.payment.methods.application.v2.PaymentMethodService;
 import it.pagopa.ecommerce.payment.methods.exception.AfmResponseException;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.server.model.ClientIdDto;
 import it.pagopa.ecommerce.payment.methods.server.model.PaymentMethodRequestDto;
 import it.pagopa.ecommerce.payment.methods.server.model.ProblemJsonDto;
 import it.pagopa.ecommerce.payment.methods.v2.server.api.V2Api;
@@ -57,8 +58,10 @@ public class PaymentMethodsController implements V2Api {
     public Mono<ResponseEntity<SessionGetTransactionIdResponseDto>> getTransactionIdForSession(
                                                                                                String id,
                                                                                                String orderId,
+                                                                                               String xClientId,
                                                                                                ServerWebExchange exchange
     ) {
+        ClientIdDto clientId = ClientIdDto.fromValue(xClientId);
         return getAuthenticationToken(exchange)
                 .doOnNext(
                         req -> log.info(
@@ -67,7 +70,7 @@ public class PaymentMethodsController implements V2Api {
                                 orderId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(orderId, securityToken))
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken, clientId))
                 .map(
                         transactionId -> new SessionGetTransactionIdResponseDto()
                                 .transactionId(transactionId.value())
