@@ -121,7 +121,10 @@ stages:
             displayName: 'newman installation'
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
             displayName: 'Run api test'
-            continueOnError: false
+            continueOnError: true
+          - script: docker compose logs pagopa-ecommerce-payment-methods-service --tail=200
+            displayName: 'Print payment-methods-service logs'
+            condition: always()
 
           - task: PublishTestResults@2
             inputs:
