@@ -146,7 +146,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                                                 ServerWebExchange exchange
     ) {
         return paymentMethodService
-                .retrievePaymentMethods(amount != null ? amount.intValue() : null, xClientId, deviceVersion)
+                .retrievePaymentMethods(amount != null ? amount.longValue() : null, xClientId, deviceVersion)
                 .map(PaymentMethodsController::paymentMethodToDto)
                 .collectList()
                 .map(
