@@ -248,7 +248,7 @@
 							</configOptions>
 							<modelPackage>it.pagopa.generated.ecommerce.handler.v1.dto</modelPackage>
 							<apiPackage>it.pagopa.generated.ecommerce.handler.v1.api</apiPackage>
-							<apiNameSuffix>Api</apiNameSuffix>
+							<apiNameSuffix>HandlerApi</apiNameSuffix>
 							<modelNameSuffix>dto</modelNameSuffix>
 						</configuration>
 					</execution>

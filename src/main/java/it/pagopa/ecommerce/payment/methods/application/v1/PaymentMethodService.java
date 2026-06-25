@@ -495,7 +495,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 id,
                 orderId
         );
-        return paymentMethodsHandlerClient.validatePaymentMethodExists(id, xClientId != null ? xClientId.getValue() : null)
+        return paymentMethodsHandlerClient
+                .validatePaymentMethodExists(id, xClientId != null ? xClientId.getValue() : null)
                 .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(
