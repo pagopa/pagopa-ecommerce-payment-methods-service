@@ -297,7 +297,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentMethodCreated = paymentMethodService
-                .retrievePaymentMethods(101, clientIdEnumIo.getValue(), null)
+                .retrievePaymentMethods(101L, clientIdEnumIo.getValue(), null)
                 .collectList().block();
 
         assertEquals(0, paymentMethodCreated.size());
@@ -314,7 +314,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentmethodCreated = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), null)
+                .retrievePaymentMethods(50L, clientIdEnumIo.getValue(), null)
                 .collectList().block();
 
         assertEquals(1, paymentmethodCreated.size());
@@ -333,7 +333,7 @@ class PaymentMethodServiceTests {
                 .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
 
         List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumCheckout.getValue(), null)
+                .retrievePaymentMethods(50L, clientIdEnumCheckout.getValue(), null)
                 .collectList().block();
 
         assertEquals(maxSize, paymentMethodRetrieved.size());
@@ -1280,7 +1280,7 @@ class PaymentMethodServiceTests {
                 );
 
         List<PaymentMethod> paymentMethods = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), null)
+                .retrievePaymentMethods(50L, clientIdEnumIo.getValue(), null)
                 .collectList().block();
 
         assertEquals(2, paymentMethods.size());
@@ -1335,7 +1335,7 @@ class PaymentMethodServiceTests {
                 );
 
         List<PaymentMethod> paymentMethods = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), "0.0.0")
+                .retrievePaymentMethods(50L, clientIdEnumIo.getValue(), "0.0.0")
                 .collectList().block();
 
         assertEquals(2, paymentMethods.size());
@@ -1392,7 +1392,7 @@ class PaymentMethodServiceTests {
                 );
 
         List<PaymentMethod> paymentMethods = paymentMethodService
-                .retrievePaymentMethods(50, clientIdEnumIo.getValue(), deviceVersion)
+                .retrievePaymentMethods(50L, clientIdEnumIo.getValue(), deviceVersion)
                 .collectList().block();
 
         assertEquals(2, paymentMethods.size());

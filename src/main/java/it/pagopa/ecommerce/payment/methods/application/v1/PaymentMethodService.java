@@ -188,7 +188,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     }
 
     public Flux<PaymentMethod> retrievePaymentMethods(
-                                                      Integer amount,
+                                                      Long amount,
                                                       String clientId,
                                                       String deviceVersion
     ) {
@@ -197,8 +197,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         return paymentMethodRepository.findByClientId(clientId).filter(
                 doc -> amount == null || doc.getPaymentMethodRanges().stream()
                         .anyMatch(
-                                range -> range.getFirst().longValue() <= amount
-                                        && range.getSecond().longValue() >= amount
+                                range -> range.getFirst() <= amount
+                                        && range.getSecond() >= amount
                         )
         )
                 .sort(
