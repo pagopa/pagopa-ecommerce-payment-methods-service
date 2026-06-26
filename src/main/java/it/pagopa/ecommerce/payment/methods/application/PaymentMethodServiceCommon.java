@@ -31,7 +31,8 @@ public abstract class PaymentMethodServiceCommon {
                                               String securityToken,
                                               ClientIdDto xClientId
     ) {
-        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, xClientId.getValue())
+        return paymentMethodsHandlerClient
+                .validatePaymentMethodExists(paymentMethodId, xClientId != null ? xClientId.getValue() : null)
                 .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(doc -> {
