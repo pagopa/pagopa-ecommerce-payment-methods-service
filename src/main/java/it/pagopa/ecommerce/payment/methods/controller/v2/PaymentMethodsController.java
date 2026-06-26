@@ -61,7 +61,7 @@ public class PaymentMethodsController implements V2Api {
                                                                                                String xClientId,
                                                                                                ServerWebExchange exchange
     ) {
-        ClientIdDto clientId = ClientIdDto.fromValue(xClientId);
+        ClientIdDto clientId = xClientId != null ? ClientIdDto.fromValue(xClientId) : null;
         return getAuthenticationToken(exchange)
                 .doOnNext(
                         req -> log.info(
