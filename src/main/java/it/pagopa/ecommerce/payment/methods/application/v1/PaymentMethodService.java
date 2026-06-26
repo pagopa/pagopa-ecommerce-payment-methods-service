@@ -307,8 +307,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                     Integer maxOccurrences
     ) {
         log.info("[Payment Method] Retrieve bundles list");
-        return paymentMethodRepository.findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null)
                 .flatMap(
                         pm -> Mono.just(paymentOptionDto).map(
                                 po -> Tuples.of(
@@ -321,7 +320,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                                 .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
                                                                 .toList()
                                                 )
-                                                .paymentMethod(pm.getPaymentMethodTypeCode())
+                                                .paymentMethod(pm.getPaymentTypeCode())
                                                 .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
                                                 .touchpoint(po.getTouchpoint())
                                                 .transferList(
@@ -600,13 +599,21 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     private CalculateFeeResponseDto bundleOptionToResponse(
                                                            it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle,
-                                                           PaymentMethodDocument paymentMethodDocument
+                                                           it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto paymentMethod
     ) {
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
-                .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
-                .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
-                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
+                .paymentMethodName(
+                        paymentMethod.getName()
+                                .getOrDefault("it", paymentMethod.getName().values().stream().findFirst().orElse(""))
+                )
+                .paymentMethodDescription(
+                        paymentMethod.getDescription().getOrDefault(
+                                "it",
+                                paymentMethod.getDescription().values().stream().findFirst().orElse("")
+                        )
+                )
+                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethod.getStatus().getValue()))
                 .bundles(
                         sortAndShuffleBundleList(
                                 bundle.getBundleOptions() != null ? bundle.getBundleOptions()
@@ -625,8 +632,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                         .paymentMethod(
                                                                 // A null value is considered as "any" in the AFM domain
                                                                 t.getPaymentMethod() == null
-                                                                        ? paymentMethodDocument
-                                                                                .getPaymentMethodTypeCode()
+                                                                        ? paymentMethod.getPaymentTypeCode()
                                                                         : t.getPaymentMethod()
                                                         )
                                                         .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
@@ -636,8 +642,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                         ).toList() : new ArrayList<>()
                         )
                 )
-                .asset(paymentMethodDocument.getPaymentMethodAsset())
-                .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
+                .asset(paymentMethod.getPaymentMethodAsset())
+                .brandAssets(paymentMethod.getPaymentMethodsBrandAssets());
     }
 
     private PaymentMethod docToAggregate(PaymentMethodDocument doc) {

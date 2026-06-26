@@ -27,7 +27,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 
@@ -438,22 +437,16 @@ class PaymentMethodServiceTests {
         String paymentMethodId = UUID.randomUUID().toString();
         CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
-        PaymentMethodDocument paymentMethodDocument = new PaymentMethodDocument(
-                UUID.randomUUID().toString(),
-                NpgClient.PaymentMethod.CARDS.serviceName,
-                "Description",
-                PaymentMethodStatusEnum.ENABLED.getCode(),
-                "asset",
-                List.of(Pair.of(0L, 100L)),
-                "CP",
-                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
-                PaymentMethodManagementTypeDto.ONBOARDABLE.getValue(),
-                null
-        );
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+        it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto paymentMethodResponseDto = new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                .paymentTypeCode("CP")
+                .name(java.util.Map.of("it", "CARDS"))
+                .description(java.util.Map.of("it", "Description"))
+                .status(it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED)
+                .paymentMethodAsset("asset");
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
-                                paymentMethodDocument
+                                paymentMethodResponseDto
                         )
                 );
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
@@ -462,9 +455,9 @@ class PaymentMethodServiceTests {
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
-        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals("CARDS", serviceResponse.getPaymentMethodName());
         assertEquals(
-                paymentMethodDocument.getPaymentMethodDescription(),
+                "Description",
                 serviceResponse.getPaymentMethodDescription()
         );
     }
@@ -476,21 +469,17 @@ class PaymentMethodServiceTests {
         calculateFeeRequestDto.setIdPspList(null);
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
 
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
-                                new PaymentMethodDocument(
-                                        UUID.randomUUID().toString(),
-                                        NpgClient.PaymentMethod.CARDS.serviceName,
-                                        "",
-                                        PaymentMethodStatusEnum.ENABLED.getCode(),
-                                        "asset",
-                                        List.of(Pair.of(0L, 100L)),
-                                        "CP",
-                                        PaymentMethodRequestDto.ClientIdEnum.IO.getValue(),
-                                        PaymentMethodManagementTypeDto.ONBOARDABLE.getValue(),
-                                        null
-                                )
+                                new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                        .paymentTypeCode("CP")
+                                        .name(java.util.Map.of("it", "CARDS"))
+                                        .description(java.util.Map.of("it", "description"))
+                                        .status(
+                                                it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED
+                                        )
+                                        .paymentMethodAsset("asset")
                         )
                 );
 
@@ -510,21 +499,17 @@ class PaymentMethodServiceTests {
         BundleOptionDto gecResponse = TestUtil.getBundleOptionWithAnyValueDtoClientResponse();
         String paymentTypeCode = "CP";
 
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
-                                new PaymentMethodDocument(
-                                        UUID.randomUUID().toString(),
-                                        NpgClient.PaymentMethod.CARDS.serviceName,
-                                        "",
-                                        PaymentMethodStatusEnum.ENABLED.getCode(),
-                                        "asset",
-                                        List.of(Pair.of(0L, 100L)),
-                                        paymentTypeCode,
-                                        PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
-                                        PaymentMethodManagementTypeDto.ONBOARDABLE.getValue(),
-                                        null
-                                )
+                                new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                        .paymentTypeCode(paymentTypeCode)
+                                        .name(java.util.Map.of("it", "CARDS"))
+                                        .description(java.util.Map.of("it", "description"))
+                                        .status(
+                                                it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED
+                                        )
+                                        .paymentMethodAsset("asset")
                         )
                 );
 
@@ -999,22 +984,17 @@ class PaymentMethodServiceTests {
         CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         gecResponse.setBundleOptions(invalidTransferDto);
-        PaymentMethodDocument paymentMethodDocument = new PaymentMethodDocument(
-                UUID.randomUUID().toString(),
-                NpgClient.PaymentMethod.CARDS.serviceName,
-                "Description",
-                PaymentMethodStatusEnum.ENABLED.getCode(),
-                "asset",
-                List.of(Pair.of(0L, 100L)),
-                "CP",
-                PaymentMethodRequestDto.ClientIdEnum.CHECKOUT.getValue(),
-                PaymentMethodManagementTypeDto.ONBOARDABLE.getValue(),
-                null
-        );
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
-                                paymentMethodDocument
+                                new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                        .paymentTypeCode("CP")
+                                        .name(java.util.Map.of("it", "CARDS"))
+                                        .description(java.util.Map.of("it", "Description"))
+                                        .status(
+                                                it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED
+                                        )
+                                        .paymentMethodAsset("asset")
                         )
                 );
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
@@ -1033,19 +1013,28 @@ class PaymentMethodServiceTests {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferListAllNotOnUs();
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
-                .thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+                .thenReturn(
+                        Mono.just(
+                                new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                        .paymentTypeCode("CP")
+                                        .name(java.util.Map.of("it", "CARDS"))
+                                        .description(java.util.Map.of("it", "description"))
+                                        .status(
+                                                it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED
+                                        )
+                                        .paymentMethodAsset("asset")
+                        )
+                );
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
-        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals("CARDS", serviceResponse.getPaymentMethodName());
         assertEquals(
-                paymentMethodDocument.getPaymentMethodDescription(),
+                "description",
                 serviceResponse.getPaymentMethodDescription()
         );
         for (int i = 0; i < gecResponse.getBundleOptions().size() - 2; i++) {
@@ -1079,19 +1068,28 @@ class PaymentMethodServiceTests {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferListOnlyOneOnUs();
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
-                .thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+                .thenReturn(
+                        Mono.just(
+                                new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                        .paymentTypeCode("CP")
+                                        .name(java.util.Map.of("it", "CARDS"))
+                                        .description(java.util.Map.of("it", "description"))
+                                        .status(
+                                                it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED
+                                        )
+                                        .paymentMethodAsset("asset")
+                        )
+                );
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
-        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals("CARDS", serviceResponse.getPaymentMethodName());
         assertEquals(
-                paymentMethodDocument.getPaymentMethodDescription(),
+                "description",
                 serviceResponse.getPaymentMethodDescription()
         );
         assertTrue(serviceResponse.getBundles().get(0).getOnUs());
@@ -1112,19 +1110,28 @@ class PaymentMethodServiceTests {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferMixedWithSameFees();
-        PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
-        PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
-        Mockito.when(paymentMethodRepository.findById(paymentMethodId))
-                .thenReturn(Mono.just(paymentMethodDocument));
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+                .thenReturn(
+                        Mono.just(
+                                new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                                        .paymentTypeCode("CP")
+                                        .name(java.util.Map.of("it", "CARDS"))
+                                        .description(java.util.Map.of("it", "description"))
+                                        .status(
+                                                it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED
+                                        )
+                                        .paymentMethodAsset("asset")
+                        )
+                );
         Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
         assertEquals(gecResponse.getBundleOptions().size(), serviceResponse.getBundles().size());
-        assertEquals(paymentMethodDocument.getPaymentMethodName(), serviceResponse.getPaymentMethodName());
+        assertEquals("CARDS", serviceResponse.getPaymentMethodName());
         assertEquals(
-                paymentMethodDocument.getPaymentMethodDescription(),
+                "description",
                 serviceResponse.getPaymentMethodDescription()
         );
         assertTrue(serviceResponse.getBundles().get(0).getOnUs());

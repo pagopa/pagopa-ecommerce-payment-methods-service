@@ -6,16 +6,14 @@ import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommo
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodDocument;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.*;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.TransferListItemDto;
+import it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -29,18 +27,17 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     protected static final String QUALIFIER_NAME = "paymentMethodServiceV2";
 
-    private final PaymentMethodRepository paymentMethodRepository;
     private final AfmClient afmClient;
+    private final PaymentMethodsHandlerClient paymentMethodsHandlerClient;
 
     public PaymentMethodService(
-            PaymentMethodRepository paymentMethodRepository,
             AfmClient afmClient,
             NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
             PaymentMethodsHandlerClient paymentMethodsHandlerClient
     ) {
         super(npgSessionsTemplateWrapper, paymentMethodsHandlerClient);
-        this.paymentMethodRepository = paymentMethodRepository;
         this.afmClient = afmClient;
+        this.paymentMethodsHandlerClient = paymentMethodsHandlerClient;
     }
 
     public Mono<CalculateFeeResponseDto> computeFee(
@@ -55,8 +52,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 feeRequestDto.getPaymentNotices().size() > 1,
                 feeRequestDto.getPaymentNotices().stream().map(PaymentNoticeDto::getPaymentAmount).toList()
         );
-        return paymentMethodRepository.findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null)
                 .flatMap(
                         paymentMethod -> afmClient.getFeesForNotices(
                                 createGecFeeRequest(paymentMethod, feeRequestDto),
@@ -90,7 +86,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     }
 
     private PaymentOptionMultiDto createGecFeeRequest(
-                                                      PaymentMethodDocument paymentMethod,
+                                                      PaymentMethodResponseDto paymentMethod,
                                                       CalculateFeeRequestDto feeRequestDto
     ) {
         final var paymentNotices = feeRequestDto.getPaymentNotices().stream()
@@ -125,14 +121,14 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                 .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
                                 .toList()
                 )
-                .paymentMethod(paymentMethod.getPaymentMethodTypeCode())
+                .paymentMethod(paymentMethod.getPaymentTypeCode())
                 .touchpoint(feeRequestDto.getTouchpoint())
                 .paymentNotice(paymentNotices);
     }
 
     private CalculateFeeResponseDto bundleOptionToResponse(
                                                            it.pagopa.generated.ecommerce.gec.v2.dto.BundleOptionDto bundle,
-                                                           PaymentMethodDocument paymentMethodDocument
+                                                           PaymentMethodResponseDto paymentMethod
     ) {
         final var bundles = Optional.ofNullable(bundle.getBundleOptions())
                 .orElse(List.of())
@@ -150,7 +146,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                 .paymentMethod(
                                         // A null value is considered as "any" in the AFM domain
                                         Optional.ofNullable(t.getPaymentMethod())
-                                                .orElse(paymentMethodDocument.getPaymentMethodTypeCode())
+                                                .orElse(paymentMethod.getPaymentTypeCode())
                                 )
                                 .taxPayerFee(t.getTaxPayerFee())
                                 .touchpoint(t.getTouchpoint())
@@ -159,12 +155,20 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
-                .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
-                .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
-                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
+                .paymentMethodName(
+                        paymentMethod.getName()
+                                .getOrDefault("it", paymentMethod.getName().values().stream().findFirst().orElse(""))
+                )
+                .paymentMethodDescription(
+                        paymentMethod.getDescription().getOrDefault(
+                                "it",
+                                paymentMethod.getDescription().values().stream().findFirst().orElse("")
+                        )
+                )
+                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethod.getStatus().getValue()))
                 .bundles(bundles)
-                .asset(paymentMethodDocument.getPaymentMethodAsset())
-                .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
+                .asset(paymentMethod.getPaymentMethodAsset())
+                .brandAssets(paymentMethod.getPaymentMethodsBrandAssets());
     }
 
 }
