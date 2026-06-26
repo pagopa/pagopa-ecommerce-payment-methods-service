@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
@@ -1408,5 +1409,60 @@ class PaymentMethodServiceTests {
                 PaymentMethodManagementTypeDto.REDIRECT,
                 redirectPaymentMethod.getPaymentMethodManagement().value()
         );
+    }
+
+    @Test
+    void shouldReturnTransactionIdForValidSessionWithNullClientId() {
+        String correlationId = UUID.randomUUID().toString();
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
+        NpgSessionDocument npgSessionDocument = TestUtil
+                .npgSessionDocument("orderId", correlationId, "sessionId", false, transactionId.value());
+
+        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), isNull()))
+                .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
+
+        StepVerifier
+                .create(
+                        paymentMethodService.isSessionValid(
+                                "paymentMethodId",
+                                npgSessionDocument.orderId(),
+                                npgSessionDocument.securityToken(),
+                                null
+                        )
+                )
+                .expectNext(transactionId)
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldRetrieveCardDataWithNullClientId() {
+        String orderId = "orderId";
+        String sessionId = "sessionId";
+        String correlationId = UUID.randomUUID().toString();
+        CardDataResponseDto npgResponse = TestUtil.npgCardDataResponse();
+        SessionPaymentMethodResponseDto expectedResponse = new SessionPaymentMethodResponseDto()
+                .bin(npgResponse.getBin())
+                .sessionId(sessionId)
+                .expiringDate(npgResponse.getExpiringDate())
+                .lastFourDigits(npgResponse.getLastFourDigits())
+                .brand(npgResponse.getCircuit());
+        NpgSessionDocument npgSessionDocument = TestUtil
+                .npgSessionDocument(orderId, correlationId, sessionId, false, null);
+
+        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
+        Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+        Mockito.when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), isNull()))
+                .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
+
+        StepVerifier
+                .create(paymentMethodService.getCardDataInformation("paymentMethodId", orderId, null))
+                .expectNext(expectedResponse)
+                .verifyComplete();
+        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
+        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).save(any());
+        Mockito.verify(npgClient, Mockito.times(1))
+                .getCardData(eq(UUID.fromString(correlationId)), eq(sessionId), any());
     }
 }
