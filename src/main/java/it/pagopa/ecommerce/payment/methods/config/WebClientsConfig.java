@@ -98,7 +98,6 @@ public class WebClientsConfig implements WebFluxConfigurer {
         var apiClient = new it.pagopa.generated.ecommerce.handler.v1.ApiClient(webClient);
         apiClient.setBasePath(handlerUri);
         apiClient.setApiKey(apiKey);
-        apiClient.addDefaultHeader("Ocp-Apim-Subscription-Key", apiKey);
         return new it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsHandlerApi(apiClient);
     }
 

@@ -70,7 +70,7 @@ class PaymentMethodsHandlerClientTest {
                 .verifyComplete();
 
         RecordedRequest request = mockWebServer.takeRequest();
-        assertThat(request.getHeader("x-api-key")).isEqualTo(API_KEY);
+        assertThat(request.getHeader("Ocp-Apim-Subscription-Key")).isEqualTo(API_KEY);
         assertThat(request.getHeader("x-client-id")).isEqualTo("CHECKOUT");
         assertThat(request.getPath()).isEqualTo("/payment-methods/" + PAYMENT_METHOD_ID);
     }
