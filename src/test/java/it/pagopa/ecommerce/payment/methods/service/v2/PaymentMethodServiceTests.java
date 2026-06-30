@@ -39,7 +39,7 @@ class PaymentMethodServiceTests {
             paymentMethodsHandlerClient
     );
 
-    private final PaymentMethodResponseDto PAYMENT_METHOD_RESPONSE_DTO = new PaymentMethodResponseDto()
+    private final PaymentMethodResponseDto paymentMethodResponseDto = new PaymentMethodResponseDto()
             .paymentTypeCode("CP")
             .name(Map.of("it", "CARDS"))
             .description(Map.of("it", "Description"))
@@ -53,7 +53,7 @@ class PaymentMethodServiceTests {
         final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
         final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
-                .thenReturn(Mono.just(PAYMENT_METHOD_RESPONSE_DTO));
+                .thenReturn(Mono.just(paymentMethodResponseDto));
         Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
@@ -75,7 +75,7 @@ class PaymentMethodServiceTests {
         final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
 
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
-                .thenReturn(Mono.just(PAYMENT_METHOD_RESPONSE_DTO));
+                .thenReturn(Mono.just(paymentMethodResponseDto));
 
         Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
@@ -94,7 +94,7 @@ class PaymentMethodServiceTests {
         String paymentTypeCode = "CP";
 
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
-                .thenReturn(Mono.just(PAYMENT_METHOD_RESPONSE_DTO));
+                .thenReturn(Mono.just(paymentMethodResponseDto));
 
         Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
@@ -116,7 +116,7 @@ class PaymentMethodServiceTests {
         final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
         gecResponse.setBundleOptions(invalidTransferDto);
         Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
-                .thenReturn(Mono.just(PAYMENT_METHOD_RESPONSE_DTO));
+                .thenReturn(Mono.just(paymentMethodResponseDto));
         Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
