@@ -233,7 +233,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-ecommerce-payment-methods-handler/PIDM-2116-remove-x-client-id-get-payment-method/api-spec/v1/api.yaml</inputSpec>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pagopa-infra/refs/tags/v1.894.0/src/domains/ecommerce-app/api/ecommerce-payment-methods-handler/v1/_openapi.json.tpl</inputSpec>
 							<generatorName>java</generatorName>
 							<library>webclient</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
@@ -248,7 +248,7 @@
 							</configOptions>
 							<modelPackage>it.pagopa.generated.ecommerce.handler.v1.dto</modelPackage>
 							<apiPackage>it.pagopa.generated.ecommerce.handler.v1.api</apiPackage>
-							<apiNameSuffix>HandlerApi</apiNameSuffix>
+							<apiNameSuffix>Api</apiNameSuffix>
 							<modelNameSuffix>dto</modelNameSuffix>
 						</configuration>
 					</execution>
