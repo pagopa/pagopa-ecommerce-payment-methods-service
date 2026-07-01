@@ -298,6 +298,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Client-Id
+          required: false
+          description: Transaction origin (populated by APIM policy)
+          schema:
+            $ref: '#/components/schemas/ClientId'
       responses:
         '200':
           description: Session payment method successfully retrieved
@@ -336,6 +342,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Client-Id
+          required: false
+          description: Transaction origin (populated by APIM policy)
+          schema:
+            $ref: '#/components/schemas/ClientId'
       requestBody:
         $ref: "#/components/requestBodies/PatchSession"
       responses:
@@ -379,6 +391,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Client-Id
+          required: false
+          description: Transaction origin (populated by APIM policy)
+          schema:
+            $ref: '#/components/schemas/ClientId'
       security:
         - BearerAuth: []
         - ApiKeyAuth: []

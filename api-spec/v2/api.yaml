@@ -88,6 +88,17 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Client-Id
+          required: false
+          description: Transaction origin (populated by APIM policy)
+          schema:
+            type: string
+            enum:
+              - IO
+              - CHECKOUT
+              - CHECKOUT_CART
+              - WISP_REDIRECT
       security:
         - BearerAuth: []
         - ApiKeyAuth: []

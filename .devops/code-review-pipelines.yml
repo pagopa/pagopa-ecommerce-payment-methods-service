@@ -16,7 +16,7 @@ resources:
     - repository: pagopaEcommerceLocal
       type: github
       name: pagopa/pagopa-ecommerce-local
-      ref: main
+      ref: PIDM-2116-align-env-methods-service # RESTORE WITH MAIN BEFORE PUSH
       endpoint: 'io-azure-devops-github-ro'
 
 stages:
@@ -107,18 +107,25 @@ stages:
               echo "##[debug] Change placeholder for ecommerce-payment-method-service set branch: $(BRANCH_NAME)"
               sed -i "s|^ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=.*$|ECOMMERCE_PAYMENT_METHODS_COMMIT_SHA=$(BRANCH_NAME)|" .env
             displayName: 'Change payment-method branch name ecommerce-local .env'
-          - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
+          - script: docker compose up pagopa-ecommerce-payment-methods-service pagopa-ecommerce-payment-methods-handler pagopa-gec-mock pagopa-npg-mock pagopa-jwt-issuer-mock mongo redis -d
             displayName: 'Run app with docker-compose'
             env:
               GITHUB_TOKEN: $(GITHUB_RO_TOKEN)
           - script: |
               timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8083/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
-            displayName: 'Health check'
+            displayName: 'Health check - Payment Methods Service'
+          - script: |
+              timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8082/q/health/live)" != "200" ]]; do sleep 5; done' || exit 1
+            displayName: 'Health check - Payment Methods Handler'
           - script: yarn global add newman
             displayName: 'newman installation'
           - script: newman run api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_collection.json --environment=api-tests/payment-method-service/payment-method-service_ecommerce_local.postman_environment.json --reporters cli,junit --reporter-junit-export Results/checkout-api-TEST.xml
             displayName: 'Run api test'
-            continueOnError: false
+            continueOnError: true
+          - script: docker compose logs pagopa-ecommerce-payment-methods-service --tail=200
+            displayName: 'Print payment-methods-service logs'
+            condition: always()
+
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'

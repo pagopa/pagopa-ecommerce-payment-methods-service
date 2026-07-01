@@ -31,6 +31,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -175,7 +177,39 @@ class PaymentMethodsControllerTests {
         String securityToken = "securityToken";
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
-        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any()))
+        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any(), any()))
+                .thenReturn(Mono.just(transactionId));
+
+        SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
+                .base64EncodedTransactionId(transactionId.base64())
+                .transactionId(transactionId.value());
+        webClient
+                .get()
+                .uri(
+                        builder -> builder
+                                .path("/v2/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
+                )
+                .header("x-api-key", "primary-key")
+                .header("X-Client-Id", "CHECKOUT")
+                .headers(h -> h.setBearerAuth(securityToken))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(SessionGetTransactionIdResponseDto.class)
+                .isEqualTo(expected);
+        verify(paymentMethodService, times(1))
+                .isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), any());
+    }
+
+    @Test
+    void shouldReturnTransactionIdForValidSessionWithNullClientId() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String orderId = "orderId";
+        String securityToken = "securityToken";
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
+
+        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any(), isNull()))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -196,7 +230,7 @@ class PaymentMethodsControllerTests {
                 .expectBody(SessionGetTransactionIdResponseDto.class)
                 .isEqualTo(expected);
         verify(paymentMethodService, times(1))
-                .isSessionValid(paymentMethodId, orderId, securityToken);
+                .isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), isNull());
     }
 
 }
