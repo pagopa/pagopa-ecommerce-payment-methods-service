@@ -604,8 +604,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
                 .paymentMethodName(
-                        paymentMethod.getName()
-                                .getOrDefault("it", paymentMethod.getName().values().stream().findFirst().orElse(""))
+                        NpgPaymentMethodMapping.fromPaymentTypeCode(paymentMethod.getPaymentTypeCode()).name()
                 )
                 .paymentMethodDescription(
                         paymentMethod.getDescription().getOrDefault(
