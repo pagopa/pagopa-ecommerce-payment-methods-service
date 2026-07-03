@@ -21,7 +21,6 @@ import it.pagopa.ecommerce.payment.methods.exception.SessionAlreadyAssociatedToT
 import it.pagopa.ecommerce.payment.methods.infrastructure.*;
 import it.pagopa.ecommerce.payment.methods.server.model.*;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
-import it.pagopa.ecommerce.payment.methods.utils.NpgPaymentMethodMapping;
 import it.pagopa.ecommerce.payment.methods.utils.PaymentMethodStatusEnum;
 import it.pagopa.generated.ecommerce.gec.v1.dto.PspSearchCriteriaDto;
 import it.pagopa.generated.ecommerce.gec.v1.dto.TransferListItemDto;
@@ -369,7 +368,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 id
         );
         return paymentMethodsHandlerClient.validatePaymentMethodExists(id, xClientId.getValue())
-                .map(response -> NpgPaymentMethodMapping.fromPaymentTypeCode(response.getPaymentTypeCode()))
+                .map(response -> NpgClient.PaymentMethod.fromMethodTypeCode(response.getPaymentTypeCode()))
                 .flatMap(
                         paymentMethod -> uniqueIdUtils.generateUniqueId()
                                 .map(orderId -> Tuples.of(orderId, paymentMethod))
@@ -604,7 +603,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
                 .paymentMethodName(
-                        NpgPaymentMethodMapping.fromPaymentTypeCode(paymentMethod.getPaymentTypeCode()).name()
+                        NpgClient.PaymentMethod.fromMethodTypeCode(paymentMethod.getPaymentTypeCode()).name()
                 )
                 .paymentMethodDescription(
                         paymentMethod.getDescription().getOrDefault(

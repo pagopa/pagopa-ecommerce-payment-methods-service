@@ -7,8 +7,8 @@ import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.exception.NoBundleFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
+import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.payment.methods.utils.ApplicationService;
-import it.pagopa.ecommerce.payment.methods.utils.NpgPaymentMethodMapping;
 import it.pagopa.ecommerce.payment.methods.v2.server.model.*;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentNoticeItemDto;
 import it.pagopa.generated.ecommerce.gec.v2.dto.PaymentOptionMultiDto;
@@ -157,7 +157,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
                 .paymentMethodName(
-                        NpgPaymentMethodMapping.fromPaymentTypeCode(paymentMethod.getPaymentTypeCode()).name()
+                        NpgClient.PaymentMethod.fromMethodTypeCode(paymentMethod.getPaymentTypeCode()).name()
                 )
                 .paymentMethodDescription(
                         paymentMethod.getDescription().getOrDefault(
