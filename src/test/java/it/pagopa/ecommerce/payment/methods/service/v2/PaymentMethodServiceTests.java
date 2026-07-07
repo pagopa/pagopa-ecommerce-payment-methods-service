@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PaymentMethodServiceTests {
 
@@ -52,9 +53,9 @@ class PaymentMethodServiceTests {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
         final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
                 .thenReturn(Mono.just(paymentMethodResponseDto));
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -74,7 +75,7 @@ class PaymentMethodServiceTests {
         calculateFeeRequestDto.setIdPspList(null);
         final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
                 .thenReturn(Mono.just(paymentMethodResponseDto));
 
         Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
