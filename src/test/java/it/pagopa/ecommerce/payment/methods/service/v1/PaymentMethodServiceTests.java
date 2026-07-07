@@ -4,10 +4,14 @@ import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.List;
@@ -24,7 +28,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -126,7 +129,7 @@ class PaymentMethodServiceTests {
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(
+        when(
                 paymentMethodFactory.newPaymentMethod(
                         any(),
                         any(),
@@ -142,7 +145,7 @@ class PaymentMethodServiceTests {
         )
                 .thenReturn(Mono.just(paymentMethod));
 
-        Mockito.when(
+        when(
                 paymentMethodRepository.save(
                         paymentMethodDocument
                 )
@@ -177,7 +180,7 @@ class PaymentMethodServiceTests {
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(
+        when(
                 paymentMethodFactory.newPaymentMethod(
                         any(),
                         any(),
@@ -193,7 +196,7 @@ class PaymentMethodServiceTests {
         )
                 .thenReturn(Mono.just(paymentMethod));
 
-        Mockito.when(
+        when(
                 paymentMethodRepository.save(
                         paymentMethodDocument
                 )
@@ -228,7 +231,7 @@ class PaymentMethodServiceTests {
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(
+        when(
                 paymentMethodFactory.newPaymentMethod(
                         any(),
                         any(),
@@ -244,7 +247,7 @@ class PaymentMethodServiceTests {
         )
                 .thenReturn(Mono.just(paymentMethod));
 
-        Mockito.when(
+        when(
                 paymentMethodRepository.save(
                         paymentMethodDocument
                 )
@@ -277,7 +280,7 @@ class PaymentMethodServiceTests {
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         PaymentMethod paymentMethodCreated = paymentMethodService
@@ -293,7 +296,7 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentMethodCreated = paymentMethodService
@@ -310,7 +313,7 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
         PaymentMethodRequestDto.ClientIdEnum clientIdEnumIo = TestUtil.getClientIdIO();
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(Flux.just(paymentMethodDocument));
 
         List<PaymentMethod> paymentmethodCreated = paymentMethodService
@@ -329,7 +332,7 @@ class PaymentMethodServiceTests {
         List<PaymentMethodDocument> paymentMethodDocumentList = paymentMethodList.stream()
                 .map(pm -> TestUtil.getTestPaymentDoc(pm)).collect(Collectors.toList());
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
                 .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
 
         List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
@@ -357,7 +360,7 @@ class PaymentMethodServiceTests {
         List<PaymentMethodDocument> paymentMethodDocumentList = paymentMethodList.stream()
                 .map(pm -> TestUtil.getTestPaymentDoc(pm)).collect(Collectors.toList());
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumCheckout.getValue()))
                 .thenReturn(Flux.fromIterable(paymentMethodDocumentList));
 
         List<PaymentMethod> paymentMethodRetrieved = paymentMethodService
@@ -383,12 +386,12 @@ class PaymentMethodServiceTests {
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
         paymentMethodDocument.setPaymentMethodStatus(PaymentMethodStatusEnum.DISABLED.getCode());
-        Mockito.when(paymentMethodRepository.findById(paymentMethod.getPaymentMethodID().value().toString()))
+        when(paymentMethodRepository.findById(paymentMethod.getPaymentMethodID().value().toString()))
                 .thenReturn(
                         Mono.just(TestUtil.getTestPaymentDoc(paymentMethod))
                 );
 
-        Mockito.when(
+        when(
                 paymentMethodRepository.save(
                         paymentMethodDocument
                 )
@@ -417,7 +420,7 @@ class PaymentMethodServiceTests {
 
         PaymentMethodDocument paymentMethodDocument = TestUtil.getTestPaymentDoc(paymentMethod);
 
-        Mockito.when(
+        when(
                 paymentMethodRepository.findByPaymentMethodIDAndClientId(
                         paymentMethod.getPaymentMethodID().value().toString(),
                         clientIdIO.getValue()
@@ -443,13 +446,13 @@ class PaymentMethodServiceTests {
                 .description(java.util.Map.of("it", "Description"))
                 .status(it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED)
                 .paymentMethodAsset("asset");
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
                                 paymentMethodResponseDto
                         )
                 );
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFees(any(), any(), anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -469,7 +472,7 @@ class PaymentMethodServiceTests {
         calculateFeeRequestDto.setIdPspList(null);
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -483,7 +486,7 @@ class PaymentMethodServiceTests {
                         )
                 );
 
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFees(any(), any(), anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -499,7 +502,7 @@ class PaymentMethodServiceTests {
         BundleOptionDto gecResponse = TestUtil.getBundleOptionWithAnyValueDtoClientResponse();
         String paymentTypeCode = "CP";
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -513,7 +516,7 @@ class PaymentMethodServiceTests {
                         )
                 );
 
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFees(any(), any(), anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -526,7 +529,7 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                 .thenReturn(
                         Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto())
                 );
@@ -542,7 +545,7 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -559,14 +562,14 @@ class PaymentMethodServiceTests {
     @Test
     void shouldCreateSessionWithNameMapWithoutItLocale() {
         UUID correlationId = UUID.randomUUID();
-        try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
+        try (MockedStatic<UUID> uuidStaticMock = mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
             PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
             String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
             FieldsDto npgResponse = TestUtil.npgResponse();
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
-            Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+            when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -574,12 +577,12 @@ class PaymentMethodServiceTests {
                                             .paymentTypeCode("CP")
                             )
                     );
-            Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+            when(jwtTokenIssuerClient.createJWTToken(any()))
                     .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
-            Mockito.when(
+            when(
                     npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
             ).thenReturn(Mono.just(npgResponse));
-            Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+            when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
 
             StepVerifier
                     .create(
@@ -597,15 +600,15 @@ class PaymentMethodServiceTests {
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
         String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
 
-        Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT")).thenReturn(
+        when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT")).thenReturn(
                 Mono.just(
                         new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
                                 .name(java.util.Map.of("it", "CARDS"))
                                 .paymentTypeCode("CP")
                 )
         );
-        Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+        when(jwtTokenIssuerClient.createJWTToken(any()))
                 .thenThrow(new JwtIssuerResponseException(HttpStatus.BAD_GATEWAY, "error jwtIssuwe"));
 
         StepVerifier
@@ -617,14 +620,14 @@ class PaymentMethodServiceTests {
     @Test
     void shouldCreateSessionForValidPaymentMethod() {
         UUID correlationId = UUID.randomUUID();
-        try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
+        try (MockedStatic<UUID> uuidStaticMock = mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
             PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
             String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
             FieldsDto npgResponse = TestUtil.npgResponse();
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
-            Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+            when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -632,15 +635,15 @@ class PaymentMethodServiceTests {
                                             .paymentTypeCode("CP")
                             )
                     );
-            Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+            when(jwtTokenIssuerClient.createJWTToken(any()))
                     .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
-            Mockito.when(
+            when(
                     npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
             )
                     .thenReturn(
                             Mono.just(npgResponse)
                     );
-            Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+            when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
 
             CreateSessionResponseDto expected = new CreateSessionResponseDto()
                     .orderId(orderId)
@@ -671,7 +674,7 @@ class PaymentMethodServiceTests {
             // Check url contain random t queryparams
             ArgumentCaptor<URI> resultUrlCaptor = ArgumentCaptor.forClass(URI.class);
             ArgumentCaptor<URI> cancelUrl = ArgumentCaptor.forClass(URI.class);
-            Mockito.verify(npgClient, times(1)).buildForm(
+            verify(npgClient, times(1)).buildForm(
                     any(),
                     any(),
                     resultUrlCaptor.capture(),
@@ -694,9 +697,9 @@ class PaymentMethodServiceTests {
     @Test
     void shouldReturnOrderIdNotFoundForInvalidOrderId() {
         String paymentMethodId = "paymentMethodId";
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), any()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
-        Mockito.when(npgSessionsTemplateWrapper.findById("orderId")).thenReturn(Mono.empty());
+        when(npgSessionsTemplateWrapper.findById("orderId")).thenReturn(Mono.empty());
         StepVerifier
                 .create(paymentMethodService.getCardDataInformation(paymentMethodId, "orderId", ClientIdDto.CHECKOUT))
                 .expectErrorMatches(OrderIdNotFoundException.class::isInstance)
@@ -707,17 +710,17 @@ class PaymentMethodServiceTests {
     @Test
     void shouldReturnErrorForInvalidSessionId() {
         String sessionId = "sessionId";
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq("paymentMethodId"), any()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq("paymentMethodId"), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
-        Mockito.when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Mono.empty());
+        when(npgSessionsTemplateWrapper.findById(sessionId)).thenReturn(Mono.empty());
         StepVerifier
                 .create(paymentMethodService.getCardDataInformation("paymentMethodId", sessionId, ClientIdDto.CHECKOUT))
                 .expectErrorMatches(OrderIdNotFoundException.class::isInstance)
                 .verify();
 
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(0)).save(any());
-        Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any(), any());
+        verify(npgSessionsTemplateWrapper, times(1)).findById(any());
+        verify(npgSessionsTemplateWrapper, times(0)).save(any());
+        verify(npgClient, times(0)).getCardData(any(), any(), any());
     }
 
     @Test
@@ -735,19 +738,19 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument(orderId, correlationId, sessionId, false, null);
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
-        Mockito.when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq("paymentMethodId"), any()))
+        when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
+        when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+        when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq("paymentMethodId"), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
         /* Tests */
         StepVerifier
                 .create(paymentMethodService.getCardDataInformation("paymentMethodId", orderId, ClientIdDto.CHECKOUT))
                 .expectNext(expectedResponse)
                 .verifyComplete();
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).save(any());
-        Mockito.verify(npgClient, Mockito.times(1))
+        verify(npgSessionsTemplateWrapper, times(1)).findById(any());
+        verify(npgSessionsTemplateWrapper, times(1)).save(any());
+        verify(npgClient, times(1))
                 .getCardData(eq(UUID.fromString(correlationId)), eq(sessionId), any());
     }
 
@@ -764,18 +767,18 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument(orderId, correlationId, sessionId, true, null);
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
+        when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq("paymentMethodId"), any()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq("paymentMethodId"), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
         /* Tests */
         StepVerifier
                 .create(paymentMethodService.getCardDataInformation("paymentMethodId", orderId, ClientIdDto.CHECKOUT))
                 .expectNext(expectedResponse)
                 .verifyComplete();
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(0)).save(any());
-        Mockito.verify(npgClient, Mockito.times(0)).getCardData(any(), any(), any());
+        verify(npgSessionsTemplateWrapper, times(1)).findById(any());
+        verify(npgSessionsTemplateWrapper, times(0)).save(any());
+        verify(npgClient, times(0)).getCardData(any(), any(), any());
     }
 
     @Test
@@ -785,8 +788,8 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, transactionId.value());
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -808,8 +811,8 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, null);
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -833,8 +836,8 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, transactionId.value());
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -853,8 +856,8 @@ class PaymentMethodServiceTests {
 
     @Test
     void shouldReturnErrorForSessionNotFound() {
-        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.empty());
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.empty());
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -881,9 +884,9 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument(orderId, correlationId, sessionId, true, null);
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
+        when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         NpgSessionDocument expectedResponse = new NpgSessionDocument(
@@ -902,7 +905,7 @@ class PaymentMethodServiceTests {
                 )
                 .expectNext(expectedResponse)
                 .verifyComplete();
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).save(any());
+        verify(npgSessionsTemplateWrapper, times(1)).save(any());
     }
 
     @Test
@@ -916,8 +919,8 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument(orderId, correlationId, sessionId, true, transactionId);
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -940,8 +943,8 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument(orderId, correlationId, sessionId, true, "ANOTHER_TRANSACTION_ID");
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -960,8 +963,8 @@ class PaymentMethodServiceTests {
 
         PatchSessionRequestDto patchSessionRequestDto = new PatchSessionRequestDto().transactionId(transactionId);
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.empty());
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
+        when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.empty());
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), any()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -984,7 +987,7 @@ class PaymentMethodServiceTests {
         CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
         gecResponse.setBundleOptions(invalidTransferDto);
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -997,7 +1000,7 @@ class PaymentMethodServiceTests {
                                         .paymentMethodAsset("asset")
                         )
                 );
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFees(any(), any(), anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         StepVerifier.create(
@@ -1013,7 +1016,7 @@ class PaymentMethodServiceTests {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferListAllNotOnUs();
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -1026,7 +1029,7 @@ class PaymentMethodServiceTests {
                                         .paymentMethodAsset("asset")
                         )
                 );
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFees(any(), any(), anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -1068,7 +1071,7 @@ class PaymentMethodServiceTests {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferListOnlyOneOnUs();
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -1081,7 +1084,7 @@ class PaymentMethodServiceTests {
                                         .paymentMethodAsset("asset")
                         )
                 );
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFees(any(), any(), anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -1110,7 +1113,7 @@ class PaymentMethodServiceTests {
         final var paymentMethodId = UUID.randomUUID().toString();
         final var calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
         final var gecResponse = TestUtil.getBundleOptionDtoClientResponseWithUnsortedTransferMixedWithSameFees();
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -1123,7 +1126,7 @@ class PaymentMethodServiceTests {
                                         .paymentMethodAsset("asset")
                         )
                 );
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFees(any(), any(), anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         it.pagopa.ecommerce.payment.methods.server.model.CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -1170,15 +1173,15 @@ class PaymentMethodServiceTests {
     @Test
     void shouldCreateSessionForValidPaymentMethodAndIOClient() {
         UUID correlationId = UUID.randomUUID();
-        try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
+        try (MockedStatic<UUID> uuidStaticMock = mockStatic(UUID.class)) {
             uuidStaticMock.when(UUID::randomUUID).thenReturn(correlationId);
             PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
             String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
             FieldsDto npgResponse = TestUtil.npgResponse();
             ClientIdDto xClientId = ClientIdDto.IO;
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
-            Mockito.when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "IO"))
+            when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
+            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "IO"))
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -1186,15 +1189,15 @@ class PaymentMethodServiceTests {
                                             .paymentTypeCode("CP")
                             )
                     );
-            Mockito.when(jwtTokenIssuerClient.createJWTToken(any()))
+            when(jwtTokenIssuerClient.createJWTToken(any()))
                     .thenReturn(Mono.just(new CreateTokenResponseDto().token("sessionToken")));
-            Mockito.when(
+            when(
                     npgClient.buildForm(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
             )
                     .thenReturn(
                             Mono.just(npgResponse)
                     );
-            Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+            when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
 
             CreateSessionResponseDto expected = new CreateSessionResponseDto()
                     .orderId(orderId)
@@ -1221,7 +1224,7 @@ class PaymentMethodServiceTests {
             ArgumentCaptor<URI> resultUrlCaptor = ArgumentCaptor.forClass(URI.class);
             ArgumentCaptor<URI> cancelUrlCaptor = ArgumentCaptor.forClass(URI.class);
 
-            Mockito.verify(npgClient, times(1)).buildForm(
+            verify(npgClient, times(1)).buildForm(
                     any(),
                     any(),
                     resultUrlCaptor.capture(),
@@ -1279,7 +1282,7 @@ class PaymentMethodServiceTests {
                 new PaymentMethodBrandAssets(Optional.empty())
         );
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(
                         Flux.just(
                                 TestUtil.getTestPaymentDoc(cardPaymentMethodAggregate),
@@ -1334,7 +1337,7 @@ class PaymentMethodServiceTests {
                 new PaymentMethodBrandAssets(Optional.empty())
         );
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(
                         Flux.just(
                                 TestUtil.getTestPaymentDoc(cardPaymentMethodAggregate),
@@ -1391,7 +1394,7 @@ class PaymentMethodServiceTests {
                 new PaymentMethodBrandAssets(Optional.empty())
         );
 
-        Mockito.when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
+        when(paymentMethodRepository.findByClientId(clientIdEnumIo.getValue()))
                 .thenReturn(
                         Flux.just(
                                 TestUtil.getTestPaymentDoc(cardPaymentMethodAggregate),
@@ -1425,8 +1428,8 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, transactionId.value());
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), isNull()))
+        when(npgSessionsTemplateWrapper.findById(any())).thenReturn(Mono.just(npgSessionDocument));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), isNull()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
@@ -1457,19 +1460,19 @@ class PaymentMethodServiceTests {
         NpgSessionDocument npgSessionDocument = TestUtil
                 .npgSessionDocument(orderId, correlationId, sessionId, false, null);
 
-        Mockito.when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
-        Mockito.when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
-        Mockito.when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), isNull()))
+        when(npgSessionsTemplateWrapper.findById(orderId)).thenReturn(Mono.just(npgSessionDocument));
+        when(npgSessionsTemplateWrapper.save(any())).thenReturn(Mono.just(true));
+        when(npgClient.getCardData(any(), any(), any())).thenReturn(Mono.just(npgResponse));
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(any(), isNull()))
                 .thenReturn(Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()));
 
         StepVerifier
                 .create(paymentMethodService.getCardDataInformation("paymentMethodId", orderId, null))
                 .expectNext(expectedResponse)
                 .verifyComplete();
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).findById(any());
-        Mockito.verify(npgSessionsTemplateWrapper, Mockito.times(1)).save(any());
-        Mockito.verify(npgClient, Mockito.times(1))
+        verify(npgSessionsTemplateWrapper, times(1)).findById(any());
+        verify(npgSessionsTemplateWrapper, times(1)).save(any());
+        verify(npgClient, times(1))
                 .getCardData(eq(UUID.fromString(correlationId)), eq(sessionId), any());
     }
 }
