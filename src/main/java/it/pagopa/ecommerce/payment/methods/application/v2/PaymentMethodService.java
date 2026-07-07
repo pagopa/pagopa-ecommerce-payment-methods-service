@@ -160,12 +160,18 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                         NpgClient.PaymentMethod.fromMethodTypeCode(paymentMethod.getPaymentTypeCode()).name()
                 )
                 .paymentMethodDescription(
-                        paymentMethod.getDescription().getOrDefault(
-                                "it",
-                                paymentMethod.getDescription().values().stream().findFirst().orElse("")
-                        )
+                        paymentMethod.getDescription() != null
+                                ? paymentMethod.getDescription().getOrDefault(
+                                        "it",
+                                        paymentMethod.getDescription().values().stream().findFirst().orElse("")
+                                )
+                                : ""
                 )
-                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethod.getStatus().getValue()))
+                .paymentMethodStatus(
+                        paymentMethod.getStatus() != null
+                                ? PaymentMethodStatusDto.valueOf(paymentMethod.getStatus().getValue())
+                                : null
+                )
                 .bundles(bundles)
                 .asset(paymentMethod.getPaymentMethodAsset())
                 .brandAssets(paymentMethod.getPaymentMethodsBrandAssets());
