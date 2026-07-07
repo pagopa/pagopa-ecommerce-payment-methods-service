@@ -78,7 +78,7 @@ class PaymentMethodServiceTests {
         when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
                 .thenReturn(Mono.just(paymentMethodResponseDto));
 
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -94,10 +94,10 @@ class PaymentMethodServiceTests {
         final var gecResponse = TestUtil.V2.getBundleOptionWithAnyValueDtoClientResponse();
         String paymentTypeCode = "CP";
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
                 .thenReturn(Mono.just(paymentMethodResponseDto));
 
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
@@ -116,9 +116,9 @@ class PaymentMethodServiceTests {
         final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
         final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
         gecResponse.setBundleOptions(invalidTransferDto);
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
                 .thenReturn(Mono.just(paymentMethodResponseDto));
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         StepVerifier.create(
