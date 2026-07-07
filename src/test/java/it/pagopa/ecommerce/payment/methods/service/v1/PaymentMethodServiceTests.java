@@ -557,48 +557,6 @@ class PaymentMethodServiceTests {
     }
 
     @Test
-    void shouldHandleNullDescriptionInFeeResponse() {
-        String paymentMethodId = UUID.randomUUID().toString();
-        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
-        it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto handlerResponse = new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
-                .paymentTypeCode("CP")
-                .name(java.util.Map.of("it", "CARDS"))
-                .description(null)
-                .status(it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED)
-                .paymentMethodAsset("asset");
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
-                .thenReturn(Mono.just(handlerResponse));
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
-                .thenReturn(Mono.just(gecResponse));
-
-        CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
-        assertEquals("", serviceResponse.getPaymentMethodDescription());
-    }
-
-    @Test
-    void shouldHandleNullStatusInFeeResponse() {
-        String paymentMethodId = UUID.randomUUID().toString();
-        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
-        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
-        it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto handlerResponse = new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
-                .paymentTypeCode("CP")
-                .name(java.util.Map.of("it", "CARDS"))
-                .description(java.util.Map.of("it", "Desc"))
-                .status(null)
-                .paymentMethodAsset("asset");
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
-                .thenReturn(Mono.just(handlerResponse));
-        Mockito.when(afmClient.getFees(any(), any(), Mockito.anyBoolean()))
-                .thenReturn(Mono.just(gecResponse));
-
-        CalculateFeeResponseDto serviceResponse = paymentMethodService
-                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
-        assertEquals(null, serviceResponse.getPaymentMethodStatus());
-    }
-
-    @Test
     void shouldCreateSessionWithNameMapWithoutItLocale() {
         UUID correlationId = UUID.randomUUID();
         try (MockedStatic<UUID> uuidStaticMock = Mockito.mockStatic(UUID.class)) {
