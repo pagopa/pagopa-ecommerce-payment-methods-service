@@ -141,9 +141,9 @@ class PaymentMethodServiceTests {
                 .status(PaymentMethodResponseDto.StatusEnum.ENABLED)
                 .paymentMethodAsset("asset");
 
-        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
                 .thenReturn(Mono.just(handlerResponse));
-        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
+        when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
                 .thenReturn(Mono.just(gecResponse));
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
