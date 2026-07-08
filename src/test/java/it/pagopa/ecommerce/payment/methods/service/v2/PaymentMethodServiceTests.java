@@ -129,4 +129,26 @@ class PaymentMethodServiceTests {
                 .verify();
     }
 
+    @Test
+    void shouldUseFallbackPaymentTypeCodeForRedirectPaymentMethod() {
+        final var paymentMethodId = UUID.randomUUID().toString();
+        final var calculateFeeRequestDto = TestUtil.V2.getMultiNoticeFeesRequest();
+        final var gecResponse = TestUtil.V2.getBundleOptionDtoClientResponse();
+        final var handlerResponse = new PaymentMethodResponseDto()
+                .paymentTypeCode("RBPR")
+                .name(Map.of("it", "Poste"))
+                .description(Map.of("it", "Paga con Poste"))
+                .status(PaymentMethodResponseDto.StatusEnum.ENABLED)
+                .paymentMethodAsset("asset");
+
+        Mockito.when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null))
+                .thenReturn(Mono.just(handlerResponse));
+        Mockito.when(afmClient.getFeesForNotices(any(), any(), Mockito.anyBoolean()))
+                .thenReturn(Mono.just(gecResponse));
+
+        CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
+        assertEquals("RBPR", serviceResponse.getPaymentMethodName());
+    }
+
 }

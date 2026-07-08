@@ -525,6 +525,27 @@ class PaymentMethodServiceTests {
     }
 
     @Test
+    void shouldUseFallbackPaymentTypeCodeForRedirectPaymentMethod() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        CalculateFeeRequestDto calculateFeeRequestDto = TestUtil.getCalculateFeeRequest();
+        BundleOptionDto gecResponse = TestUtil.getBundleOptionDtoClientResponse();
+        it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto handlerResponse = new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
+                .paymentTypeCode("RBPR")
+                .name(java.util.Map.of("it", "Poste"))
+                .description(java.util.Map.of("it", "Paga con Poste"))
+                .status(it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED)
+                .paymentMethodAsset("asset");
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(eq(paymentMethodId), isNull()))
+                .thenReturn(Mono.just(handlerResponse));
+        when(afmClient.getFees(any(), any(), anyBoolean()))
+                .thenReturn(Mono.just(gecResponse));
+
+        CalculateFeeResponseDto serviceResponse = paymentMethodService
+                .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
+        assertEquals("RBPR", serviceResponse.getPaymentMethodName());
+    }
+
+    @Test
     void shouldCreateSessionWithNullNameMap() {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
