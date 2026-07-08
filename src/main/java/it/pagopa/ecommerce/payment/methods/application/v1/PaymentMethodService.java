@@ -602,9 +602,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     ) {
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
-                .paymentMethodName(
-                        NpgClient.PaymentMethod.fromMethodTypeCode(paymentMethod.getPaymentTypeCode()).name()
-                )
+                .paymentMethodName(resolvePaymentMethodName(paymentMethod.getPaymentTypeCode()))
                 .paymentMethodDescription(
                         paymentMethod.getDescription().getOrDefault(
                                 "it",
@@ -642,6 +640,20 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 )
                 .asset(paymentMethod.getPaymentMethodAsset())
                 .brandAssets(paymentMethod.getPaymentMethodsBrandAssets());
+    }
+
+    /**
+     * Resolves the payment method name for the fees response. For NPG-managed
+     * methods (CARDS, PAYPAL, etc.) returns the enum constant name. For redirect
+     * methods (RBPR, RBPS, etc.) that are not in the NPG enum, returns the
+     * paymentTypeCode directly.
+     */
+    private String resolvePaymentMethodName(String paymentTypeCode) {
+        try {
+            return NpgClient.PaymentMethod.fromMethodTypeCode(paymentTypeCode).name();
+        } catch (IllegalArgumentException e) {
+            return paymentTypeCode;
+        }
     }
 
     private PaymentMethod docToAggregate(PaymentMethodDocument doc) {
