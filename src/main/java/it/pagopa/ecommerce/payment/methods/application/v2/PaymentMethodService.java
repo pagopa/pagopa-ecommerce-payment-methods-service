@@ -156,7 +156,9 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
-                .paymentMethodName(resolvePaymentMethodName(paymentMethod.getPaymentTypeCode()))
+                .paymentMethodName(
+                        resolvePaymentMethodName(paymentMethod.getPaymentTypeCode(), paymentMethod.getName())
+                )
                 .paymentMethodDescription(resolveLocalizedValue(paymentMethod.getDescription()))
                 .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethod.getStatus().getValue()))
                 .bundles(bundles)

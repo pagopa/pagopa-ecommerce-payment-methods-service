@@ -148,7 +148,7 @@ class PaymentMethodServiceTests {
 
         CalculateFeeResponseDto serviceResponse = paymentMethodService
                 .computeFee(calculateFeeRequestDto, paymentMethodId, null).block();
-        assertEquals("RBPR", serviceResponse.getPaymentMethodName());
+        assertEquals("Poste", serviceResponse.getPaymentMethodName());
     }
 
 }

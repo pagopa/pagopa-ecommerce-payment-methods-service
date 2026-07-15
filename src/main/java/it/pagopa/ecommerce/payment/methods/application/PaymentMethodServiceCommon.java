@@ -32,13 +32,16 @@ public abstract class PaymentMethodServiceCommon {
      * Resolves the payment method name for the fees response. For NPG-managed
      * methods (CARDS, PAYPAL, etc.) returns the enum constant name. For redirect
      * methods (RBPR, RBPS, etc.) that are not in the NPG enum, returns the
-     * paymentTypeCode directly.
+     * localized name from the handler response.
      */
-    protected String resolvePaymentMethodName(String paymentTypeCode) {
+    protected String resolvePaymentMethodName(
+                                              String paymentTypeCode,
+                                              Map<String, String> nameMap
+    ) {
         try {
             return NpgClient.PaymentMethod.fromMethodTypeCode(paymentTypeCode).name();
         } catch (IllegalArgumentException e) {
-            return paymentTypeCode;
+            return resolveLocalizedValue(nameMap);
         }
     }
 
