@@ -16,7 +16,7 @@ resources:
     - repository: pagopaEcommerceLocal
       type: github
       name: pagopa/pagopa-ecommerce-local
-      ref: PIDM-2116-fix-traefik-payment-methods-service
+      ref: main
       endpoint: 'io-azure-devops-github-ro'
 
 stages:
