@@ -9,6 +9,7 @@ import it.pagopa.ecommerce.payment.methods.application.BundleOptions;
 import it.pagopa.ecommerce.payment.methods.application.PaymentMethodServiceCommon;
 import it.pagopa.ecommerce.payment.methods.client.AfmClient;
 import it.pagopa.ecommerce.payment.methods.client.JwtTokenIssuerClient;
+import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.config.SessionUrlConfig;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethod;
 import it.pagopa.ecommerce.payment.methods.domain.aggregates.PaymentMethodFactory;
@@ -86,6 +87,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     private final JwtTokenIssuerClient jwtTokenIssuerClient;
 
+    private final PaymentMethodsHandlerClient paymentMethodsHandlerClient;
+
     @Autowired
     public PaymentMethodService(
             AfmClient afmClient,
@@ -97,9 +100,10 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
             @Value("${npg.client.apiKey}") String npgDefaultApiKey,
             ReactiveUniqueIdUtils uniqueIdUtils,
             @Value("${npg.notification.jwt.validity.time}") int npgNotificationTokenValidityTime,
-            JwtTokenIssuerClient jwtTokenIssuerClient
+            JwtTokenIssuerClient jwtTokenIssuerClient,
+            PaymentMethodsHandlerClient paymentMethodsHandlerClient
     ) {
-        super(paymentMethodRepository, npgSessionsTemplateWrapper);
+        super(npgSessionsTemplateWrapper, paymentMethodsHandlerClient);
         this.afmClient = afmClient;
         this.npgClient = npgClient;
         this.paymentMethodFactory = paymentMethodFactory;
@@ -110,6 +114,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
         this.uniqueIdUtils = uniqueIdUtils;
         this.npgNotificationTokenValidityTime = npgNotificationTokenValidityTime;
         this.jwtTokenIssuerClient = jwtTokenIssuerClient;
+        this.paymentMethodsHandlerClient = paymentMethodsHandlerClient;
     }
 
     public Mono<PaymentMethod> createPaymentMethod(
@@ -301,8 +306,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                     Integer maxOccurrences
     ) {
         log.info("[Payment Method] Retrieve bundles list");
-        return paymentMethodRepository.findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, null)
                 .flatMap(
                         pm -> Mono.just(paymentOptionDto).map(
                                 po -> Tuples.of(
@@ -315,7 +319,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                                 .map(idPsp -> new PspSearchCriteriaDto().idPsp(idPsp))
                                                                 .toList()
                                                 )
-                                                .paymentMethod(pm.getPaymentMethodTypeCode())
+                                                .paymentMethod(pm.getPaymentTypeCode())
                                                 .primaryCreditorInstitution(po.getPrimaryCreditorInstitution())
                                                 .touchpoint(po.getTouchpoint())
                                                 .transferList(
@@ -363,9 +367,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
                 id
         );
-        return paymentMethodRepository.findById(id)
-                .map(PaymentMethodDocument::getPaymentMethodName)
-                .map(NpgClient.PaymentMethod::fromServiceName)
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(id, xClientId)
+                .map(response -> NpgClient.PaymentMethod.fromMethodTypeCode(response.getPaymentTypeCode()))
                 .flatMap(
                         paymentMethod -> uniqueIdUtils.generateUniqueId()
                                 .map(orderId -> Tuples.of(orderId, paymentMethod))
@@ -482,19 +485,17 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     public Mono<SessionPaymentMethodResponseDto> getCardDataInformation(
                                                                         String id,
-                                                                        String orderId
+                                                                        String orderId,
+                                                                        ClientIdDto xClientId
     ) {
         log.info(
                 "[Payment Method service] Retrieve card data from NPG using paymentMethodId: {} and orderId: {}",
                 id,
                 orderId
         );
-        return paymentMethodRepository
-                .findById(id)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(id)))
-                .flatMap(
-                        el -> npgSessionsTemplateWrapper.findById(orderId)
-                )
+        return paymentMethodsHandlerClient
+                .validatePaymentMethodExists(id, xClientId)
+                .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(
                         sx -> {
@@ -549,11 +550,12 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
     public Mono<NpgSessionDocument> updateSession(
                                                   String paymentMethodId,
                                                   String orderId,
-                                                  PatchSessionRequestDto updateData
+                                                  PatchSessionRequestDto updateData,
+                                                  ClientIdDto xClientId
     ) {
-        return paymentMethodRepository.findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .flatMap(ignore -> npgSessionsTemplateWrapper.findById(orderId))
+        return paymentMethodsHandlerClient
+                .validatePaymentMethodExists(paymentMethodId, xClientId)
+                .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {
                     // Session associated to the order is associated to a different transaction id,
@@ -596,13 +598,15 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
 
     private CalculateFeeResponseDto bundleOptionToResponse(
                                                            it.pagopa.generated.ecommerce.gec.v1.dto.BundleOptionDto bundle,
-                                                           PaymentMethodDocument paymentMethodDocument
+                                                           it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto paymentMethod
     ) {
         return new CalculateFeeResponseDto()
                 .belowThreshold(bundle.getBelowThreshold())
-                .paymentMethodName(paymentMethodDocument.getPaymentMethodName())
-                .paymentMethodDescription(paymentMethodDocument.getPaymentMethodDescription())
-                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethodDocument.getPaymentMethodStatus()))
+                .paymentMethodName(
+                        resolvePaymentMethodName(paymentMethod.getPaymentTypeCode(), paymentMethod.getName())
+                )
+                .paymentMethodDescription(resolveLocalizedValue(paymentMethod.getDescription()))
+                .paymentMethodStatus(PaymentMethodStatusDto.valueOf(paymentMethod.getStatus().getValue()))
                 .bundles(
                         sortAndShuffleBundleList(
                                 bundle.getBundleOptions() != null ? bundle.getBundleOptions()
@@ -621,8 +625,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                         .paymentMethod(
                                                                 // A null value is considered as "any" in the AFM domain
                                                                 t.getPaymentMethod() == null
-                                                                        ? paymentMethodDocument
-                                                                                .getPaymentMethodTypeCode()
+                                                                        ? paymentMethod.getPaymentTypeCode()
                                                                         : t.getPaymentMethod()
                                                         )
                                                         .primaryCiIncurredFee(t.getPrimaryCiIncurredFee())
@@ -632,8 +635,8 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                         ).toList() : new ArrayList<>()
                         )
                 )
-                .asset(paymentMethodDocument.getPaymentMethodAsset())
-                .brandAssets(paymentMethodDocument.getPaymentMethodsBrandAssets());
+                .asset(paymentMethod.getPaymentMethodAsset())
+                .brandAssets(paymentMethod.getPaymentMethodsBrandAssets());
     }
 
     private PaymentMethod docToAggregate(PaymentMethodDocument doc) {

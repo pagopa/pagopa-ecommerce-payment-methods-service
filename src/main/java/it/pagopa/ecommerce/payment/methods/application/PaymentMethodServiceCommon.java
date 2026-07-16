@@ -1,42 +1,67 @@
 package it.pagopa.ecommerce.payment.methods.application;
 
+import it.pagopa.ecommerce.commons.client.NpgClient;
 import it.pagopa.ecommerce.commons.domain.v2.TransactionId;
+import it.pagopa.ecommerce.payment.methods.client.PaymentMethodsHandlerClient;
 import it.pagopa.ecommerce.payment.methods.exception.InvalidSessionException;
 import it.pagopa.ecommerce.payment.methods.exception.MismatchedSecurityTokenException;
 import it.pagopa.ecommerce.payment.methods.exception.OrderIdNotFoundException;
-import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionDocument;
 import it.pagopa.ecommerce.payment.methods.infrastructure.NpgSessionsTemplateWrapper;
-import it.pagopa.ecommerce.payment.methods.infrastructure.PaymentMethodRepository;
+import it.pagopa.ecommerce.payment.methods.server.model.ClientIdDto;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @Slf4j
 public abstract class PaymentMethodServiceCommon {
 
-    private final PaymentMethodRepository paymentMethodRepository;
     private final NpgSessionsTemplateWrapper npgSessionsTemplateWrapper;
+    private final PaymentMethodsHandlerClient paymentMethodsHandlerClient;
 
     protected PaymentMethodServiceCommon(
-            PaymentMethodRepository paymentMethodRepository,
-            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper
+            NpgSessionsTemplateWrapper npgSessionsTemplateWrapper,
+            PaymentMethodsHandlerClient paymentMethodsHandlerClient
     ) {
-        this.paymentMethodRepository = paymentMethodRepository;
         this.npgSessionsTemplateWrapper = npgSessionsTemplateWrapper;
+        this.paymentMethodsHandlerClient = paymentMethodsHandlerClient;
+    }
+
+    /**
+     * Resolves the payment method name for the fees response. For NPG-managed
+     * methods (CARDS, PAYPAL, etc.) returns the enum constant name. For redirect
+     * methods (RBPR, RBPS, etc.) that are not in the NPG enum, returns the
+     * localized name from the handler response.
+     */
+    protected String resolvePaymentMethodName(
+                                              String paymentTypeCode,
+                                              Map<String, String> nameMap
+    ) {
+        try {
+            return NpgClient.PaymentMethod.fromMethodTypeCode(paymentTypeCode).name();
+        } catch (IllegalArgumentException e) {
+            return resolveLocalizedValue(nameMap);
+        }
+    }
+
+    /**
+     * Extracts a localized description from a map, falling back to the first
+     * available value or empty string.
+     */
+    protected String resolveLocalizedValue(Map<String, String> localizedMap) {
+        return localizedMap.getOrDefault("it", localizedMap.values().stream().findFirst().orElse(""));
     }
 
     public Mono<TransactionId> isSessionValid(
                                               String paymentMethodId,
                                               String orderId,
-                                              String securityToken
+                                              String securityToken,
+                                              ClientIdDto xClientId
     ) {
-        return paymentMethodRepository
-                .findById(paymentMethodId)
-                .switchIfEmpty(Mono.error(new PaymentMethodNotFoundException(paymentMethodId)))
-                .doOnError(e -> log.info("Error while looking for payment method with id {}: ", paymentMethodId, e))
-                .flatMap(
-                        ignore -> npgSessionsTemplateWrapper.findById(orderId)
-                )
+        return paymentMethodsHandlerClient
+                .validatePaymentMethodExists(paymentMethodId, xClientId)
+                .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(doc -> {
                     String transactionId = doc.transactionId();

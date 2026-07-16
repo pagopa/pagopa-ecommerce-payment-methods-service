@@ -14,7 +14,6 @@ import it.pagopa.ecommerce.payment.methods.utils.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.HttpStatus;
@@ -33,6 +32,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PaymentMethodsController.class)
@@ -59,7 +59,7 @@ class PaymentMethodsControllerTests {
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        Mockito.when(
+        when(
                 paymentMethodService
                         .createPaymentMethod(any())
         )
@@ -113,7 +113,7 @@ class PaymentMethodsControllerTests {
 
         PaymentMethodResponseDto methodResponse = TestUtil.getPaymentMethodResponse(paymentMethod);
 
-        Mockito.when(
+        when(
                 paymentMethodService
                         .createPaymentMethod(any())
         )
@@ -137,7 +137,7 @@ class PaymentMethodsControllerTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
-        Mockito.when(
+        when(
                 paymentMethodService
                         .retrievePaymentMethods(TestUtil.getTestAmount(), clientIdCheckout.getValue(), null)
         ).thenReturn(
@@ -203,7 +203,7 @@ class PaymentMethodsControllerTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
-        Mockito.when(
+        when(
                 paymentMethodService.retrievePaymentMethods(TestUtil.getTestAmount(), clientIdIO.getValue(), null)
         )
                 .thenReturn(
@@ -236,7 +236,7 @@ class PaymentMethodsControllerTests {
 
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
 
-        Mockito.when(
+        when(
                 paymentMethodService.updatePaymentMethodStatus(
                         paymentMethod.getPaymentMethodID().value().toString(),
                         PaymentMethodStatusEnum.ENABLED
@@ -300,7 +300,7 @@ class PaymentMethodsControllerTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdCheckout = TestUtil.getClientIdCheckout();
 
-        Mockito.when(
+        when(
                 paymentMethodService.retrievePaymentMethodById(
                         paymentMethod.getPaymentMethodID().value().toString(),
                         clientIdCheckout.getValue()
@@ -354,7 +354,7 @@ class PaymentMethodsControllerTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         PaymentMethodRequestDto.ClientIdEnum clientIdIO = TestUtil.getClientIdIO();
 
-        Mockito.when(
+        when(
                 paymentMethodService.retrievePaymentMethodById(
                         paymentMethod.getPaymentMethodID().value().toString(),
                         clientIdIO.getValue()
@@ -382,7 +382,7 @@ class PaymentMethodsControllerTests {
         CalculateFeeRequestDto requestBody = TestUtil.getCalculateFeeRequest();
         CalculateFeeResponseDto serviceResponse = TestUtil
                 .getCalculateFeeResponseFromClientResponse(TestUtil.getBundleOptionDtoClientResponse());
-        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+        when(paymentMethodService.computeFee(any(), any(), any()))
                 .thenReturn(Mono.just(serviceResponse));
 
         webClient
@@ -439,7 +439,10 @@ class PaymentMethodsControllerTests {
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, null);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
+        when(
+                paymentMethodService
+                        .updateSession(eq(paymentMethodId), eq(originalSession.orderId()), eq(requestBody), any())
+        )
                 .thenReturn(Mono.just(updatedDocument));
 
         webClient
@@ -511,7 +514,10 @@ class PaymentMethodsControllerTests {
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, newTransactionId);
         NpgSessionDocument updatedDocument = TestUtil.patchSessionResponse(originalSession, newTransactionId);
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
+        when(
+                paymentMethodService
+                        .updateSession(eq(paymentMethodId), eq(originalSession.orderId()), eq(requestBody), any())
+        )
                 .thenReturn(Mono.just(updatedDocument));
 
         webClient
@@ -538,7 +544,10 @@ class PaymentMethodsControllerTests {
         NpgSessionDocument originalSession = TestUtil
                 .npgSessionDocument("orderId", correlationId, "sessionId", false, "ANOTHER_TRANSACTION_ID");
 
-        Mockito.when(paymentMethodService.updateSession(paymentMethodId, originalSession.orderId(), requestBody))
+        when(
+                paymentMethodService
+                        .updateSession(eq(paymentMethodId), eq(originalSession.orderId()), eq(requestBody), any())
+        )
                 .thenReturn(
                         Mono.error(
                                 new SessionAlreadyAssociatedToTransaction(
@@ -568,7 +577,7 @@ class PaymentMethodsControllerTests {
     void shouldPostCreateSession() {
         String paymentMethodId = UUID.randomUUID().toString();
         CreateSessionResponseDto responseDto = TestUtil.createSessionResponseDto(paymentMethodId);
-        Mockito.when(paymentMethodService.createSessionForPaymentMethod(any(), any(), any()))
+        when(paymentMethodService.createSessionForPaymentMethod(any(), any(), any()))
                 .thenReturn(Mono.just(responseDto));
         webClient
                 .post()
@@ -620,7 +629,7 @@ class PaymentMethodsControllerTests {
                 .sessionId("sessionId")
                 .bin("123456").brand("VISA").expiringDate("0424")
                 .lastFourDigits("1234");
-        Mockito.when(paymentMethodService.getCardDataInformation(paymentMethodId, orderId))
+        when(paymentMethodService.getCardDataInformation(eq(paymentMethodId), eq(orderId), any()))
                 .thenReturn(Mono.just(response));
 
         webClient
@@ -753,7 +762,7 @@ class PaymentMethodsControllerTests {
         String securityToken = "securityToken";
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
+        when(paymentMethodService.isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), any()))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -779,7 +788,7 @@ class PaymentMethodsControllerTests {
         String orderId = "orderId";
         String securityToken = "securityToken";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
+        when(paymentMethodService.isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), any()))
                 .thenReturn(Mono.error(new InvalidSessionException(orderId)));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(409).title("Invalid session").detail("Invalid session");
@@ -805,7 +814,7 @@ class PaymentMethodsControllerTests {
         String orderId = "orderId";
         String securityToken = "securityToken";
 
-        Mockito.when(paymentMethodService.isSessionValid(paymentMethodId, orderId, securityToken))
+        when(paymentMethodService.isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), any()))
                 .thenReturn(Mono.error(new OrderIdNotFoundException(orderId)));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Order id not found");
@@ -832,7 +841,7 @@ class PaymentMethodsControllerTests {
         String securityToken = "securityToken";
         String transactionId = "transactionId";
 
-        Mockito.when(paymentMethodService.isSessionValid(eq(paymentMethodId), eq(orderId), any()))
+        when(paymentMethodService.isSessionValid(eq(paymentMethodId), eq(orderId), any(), any()))
                 .thenReturn(Mono.error(new MismatchedSecurityTokenException(orderId, transactionId)));
 
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail("Order id not found");
@@ -856,7 +865,7 @@ class PaymentMethodsControllerTests {
     void shouldReturn404ForNoBundleReturned() {
         String paymentMethodId = UUID.randomUUID().toString();
         CalculateFeeRequestDto requestBody = TestUtil.getCalculateFeeRequest();
-        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+        when(paymentMethodService.computeFee(any(), any(), any()))
                 .thenReturn(Mono.error(new NoBundleFoundException("paymentMethodId", 100, "CHECKOUT")));
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail(
                 "No bundle found for payment method with id: [paymentMethodId] and transaction amount: [100] for touch point: [CHECKOUT]"
@@ -878,7 +887,7 @@ class PaymentMethodsControllerTests {
     void shouldReturnBadGatewayForNpgException() {
         String paymentMethodId = UUID.randomUUID().toString();
 
-        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, null))
+        when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, null))
                 .thenReturn(
                         Mono.error(
                                 new NpgResponseException(
@@ -907,7 +916,7 @@ class PaymentMethodsControllerTests {
     void shouldReturnBadRequestForIllegalArgumentException() {
         String paymentMethodId = UUID.randomUUID().toString();
 
-        Mockito.when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, null))
+        when(paymentMethodService.createSessionForPaymentMethod(paymentMethodId, null, null))
                 .thenReturn(
                         Mono.error(
                                 new IllegalArgumentException(

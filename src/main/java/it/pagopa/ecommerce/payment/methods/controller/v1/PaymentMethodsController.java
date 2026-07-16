@@ -257,10 +257,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     public Mono<ResponseEntity<SessionPaymentMethodResponseDto>> getSessionPaymentMethod(
                                                                                          String id,
                                                                                          String orderId,
+                                                                                         ClientIdDto xClientId,
                                                                                          ServerWebExchange exchange
     ) {
         log.info("[Payment Method controller] Retrieve card data from NPG");
-        return paymentMethodService.getCardDataInformation(id, orderId)
+        return paymentMethodService.getCardDataInformation(id, orderId, xClientId)
                 .map(ResponseEntity::ok);
     }
 
@@ -268,6 +269,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
     public Mono<ResponseEntity<SessionGetTransactionIdResponseDto>> getTransactionIdForSession(
                                                                                                String id,
                                                                                                String orderId,
+                                                                                               ClientIdDto xClientId,
                                                                                                ServerWebExchange exchange
     ) {
         return getAuthenticationToken(exchange)
@@ -278,7 +280,7 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                 orderId
                         )
                 )
-                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken))
+                .flatMap(securityToken -> paymentMethodService.isSessionValid(id, orderId, securityToken, xClientId))
                 .map(transactionId -> new SessionGetTransactionIdResponseDto().transactionId(transactionId.base64()))
                 .map(ResponseEntity::ok);
     }
@@ -288,10 +290,11 @@ public class PaymentMethodsController implements PaymentMethodsApi {
                                                     String id,
                                                     String orderId,
                                                     Mono<PatchSessionRequestDto> patchSessionRequestDto,
+                                                    ClientIdDto xClientId,
                                                     ServerWebExchange exchange
     ) {
         return patchSessionRequestDto
-                .flatMap(updateData -> paymentMethodService.updateSession(id, orderId, updateData))
+                .flatMap(updateData -> paymentMethodService.updateSession(id, orderId, updateData, xClientId))
                 .map(ignored -> ResponseEntity.noContent().build());
     }
 

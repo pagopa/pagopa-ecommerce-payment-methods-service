@@ -14,7 +14,6 @@ import it.pagopa.ecommerce.payment.methods.v2.server.model.SessionGetTransaction
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.HttpStatus;
@@ -31,8 +30,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(it.pagopa.ecommerce.payment.methods.controller.v2.PaymentMethodsController.class)
@@ -57,7 +59,7 @@ class PaymentMethodsControllerTests {
         final CalculateFeeRequestDto requestBody = TestUtil.V2.getMultiNoticeFeesRequest();
         final CalculateFeeResponseDto serviceResponse = TestUtil.V2
                 .getCalculateFeeResponseFromClientResponse(TestUtil.getBundleOptionDtoClientResponse());
-        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+        when(paymentMethodService.computeFee(any(), any(), any()))
                 .thenReturn(Mono.just(serviceResponse));
 
         webClient
@@ -126,7 +128,7 @@ class PaymentMethodsControllerTests {
     void shouldReturn404ForNoBundleReturned() {
         String paymentMethodId = UUID.randomUUID().toString();
         CalculateFeeRequestDto requestBody = TestUtil.V2.getMultiNoticeFeesRequest();
-        Mockito.when(paymentMethodService.computeFee(any(), any(), any()))
+        when(paymentMethodService.computeFee(any(), any(), any()))
                 .thenReturn(Mono.error(new NoBundleFoundException("paymentMethodId", 100, "CHECKOUT")));
         ProblemJsonDto expected = new ProblemJsonDto().status(404).title("Not found").detail(
                 "No bundle found for payment method with id: [paymentMethodId] and transaction amount: [100] for touch point: [CHECKOUT]"
@@ -175,7 +177,39 @@ class PaymentMethodsControllerTests {
         String securityToken = "securityToken";
         TransactionId transactionId = new TransactionId(UUID.randomUUID());
 
-        Mockito.when(paymentMethodService.isSessionValid(any(), any(), any()))
+        when(paymentMethodService.isSessionValid(any(), any(), any(), any()))
+                .thenReturn(Mono.just(transactionId));
+
+        SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
+                .base64EncodedTransactionId(transactionId.base64())
+                .transactionId(transactionId.value());
+        webClient
+                .get()
+                .uri(
+                        builder -> builder
+                                .path("/v2/payment-methods/{paymentMethodId}/sessions/{orderId}/transactionId")
+                                .build(paymentMethodId, orderId)
+                )
+                .header("x-api-key", "primary-key")
+                .header("X-Client-Id", "CHECKOUT")
+                .headers(h -> h.setBearerAuth(securityToken))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(SessionGetTransactionIdResponseDto.class)
+                .isEqualTo(expected);
+        verify(paymentMethodService, times(1))
+                .isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), any());
+    }
+
+    @Test
+    void shouldReturnTransactionIdForValidSessionWithNullClientId() {
+        String paymentMethodId = UUID.randomUUID().toString();
+        String orderId = "orderId";
+        String securityToken = "securityToken";
+        TransactionId transactionId = new TransactionId(UUID.randomUUID());
+
+        when(paymentMethodService.isSessionValid(any(), any(), any(), isNull()))
                 .thenReturn(Mono.just(transactionId));
 
         SessionGetTransactionIdResponseDto expected = new SessionGetTransactionIdResponseDto()
@@ -196,7 +230,7 @@ class PaymentMethodsControllerTests {
                 .expectBody(SessionGetTransactionIdResponseDto.class)
                 .isEqualTo(expected);
         verify(paymentMethodService, times(1))
-                .isSessionValid(paymentMethodId, orderId, securityToken);
+                .isSessionValid(eq(paymentMethodId), eq(orderId), eq(securityToken), isNull());
     }
 
 }
