@@ -1,6 +1,7 @@
 package it.pagopa.ecommerce.payment.methods.client;
 
 import it.pagopa.ecommerce.payment.methods.exception.PaymentMethodNotFoundException;
+import it.pagopa.ecommerce.payment.methods.server.model.ClientIdDto;
 import it.pagopa.generated.ecommerce.handler.v1.api.PaymentMethodsHandlerApi;
 import it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,8 @@ public class PaymentMethodsHandlerClient {
      * Retrieve a payment method by ID from the payment-methods-handler service.
      *
      * @param paymentMethodId the payment method ID
-     * @param clientId        the client ID (e.g. IO, CHECKOUT, CHECKOUT_CART)
+     * @param clientId        the client ID (e.g. IO, CHECKOUT, CHECKOUT_CART),
+     *                        nullable
      * @return a Mono containing the payment method response
      */
     public Mono<PaymentMethodResponseDto> getPaymentMethod(
@@ -56,14 +58,15 @@ public class PaymentMethodsHandlerClient {
      * Validate that a payment method exists by calling the handler service.
      *
      * @param paymentMethodId the payment method ID
-     * @param clientId        the client ID to validate against
+     * @param clientId        the client ID enum, nullable. If not null, its value
+     *                        is sent as the x-client-id header.
      * @return a Mono that completes with the response if the payment method exists,
      *         or errors with PaymentMethodNotFoundException
      */
     public Mono<PaymentMethodResponseDto> validatePaymentMethodExists(
                                                                       String paymentMethodId,
-                                                                      String clientId
+                                                                      ClientIdDto clientId
     ) {
-        return getPaymentMethod(paymentMethodId, clientId);
+        return getPaymentMethod(paymentMethodId, clientId != null ? clientId.getValue() : null);
     }
 }

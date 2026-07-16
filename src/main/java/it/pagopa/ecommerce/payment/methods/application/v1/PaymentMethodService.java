@@ -367,7 +367,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 "[Payment Method service] create new NPG sessions using paymentMethodId: {}",
                 id
         );
-        return paymentMethodsHandlerClient.validatePaymentMethodExists(id, xClientId.getValue())
+        return paymentMethodsHandlerClient.validatePaymentMethodExists(id, xClientId)
                 .map(response -> NpgClient.PaymentMethod.fromMethodTypeCode(response.getPaymentTypeCode()))
                 .flatMap(
                         paymentMethod -> uniqueIdUtils.generateUniqueId()
@@ -494,7 +494,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                 orderId
         );
         return paymentMethodsHandlerClient
-                .validatePaymentMethodExists(id, xClientId != null ? xClientId.getValue() : null)
+                .validatePaymentMethodExists(id, xClientId)
                 .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(
@@ -554,7 +554,7 @@ public class PaymentMethodService extends PaymentMethodServiceCommon {
                                                   ClientIdDto xClientId
     ) {
         return paymentMethodsHandlerClient
-                .validatePaymentMethodExists(paymentMethodId, xClientId != null ? xClientId.getValue() : null)
+                .validatePaymentMethodExists(paymentMethodId, xClientId)
                 .then(npgSessionsTemplateWrapper.findById(orderId))
                 .switchIfEmpty(Mono.error(new OrderIdNotFoundException(orderId)))
                 .flatMap(document -> {

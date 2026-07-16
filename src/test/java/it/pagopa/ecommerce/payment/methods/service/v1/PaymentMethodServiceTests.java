@@ -550,7 +550,7 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
 
-        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, ClientIdDto.CHECKOUT))
                 .thenReturn(
                         Mono.just(new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto())
                 );
@@ -566,7 +566,7 @@ class PaymentMethodServiceTests {
         PaymentMethod paymentMethod = TestUtil.getNPGPaymentMethod();
         String paymentMethodId = paymentMethod.getPaymentMethodID().value().toString();
 
-        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, ClientIdDto.CHECKOUT))
                 .thenReturn(
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -590,7 +590,7 @@ class PaymentMethodServiceTests {
             FieldsDto npgResponse = TestUtil.npgResponse();
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
             when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, ClientIdDto.CHECKOUT))
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -622,7 +622,7 @@ class PaymentMethodServiceTests {
         String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
 
         when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT")).thenReturn(
+        when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, ClientIdDto.CHECKOUT)).thenReturn(
                 Mono.just(
                         new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
                                 .name(java.util.Map.of("it", "CARDS"))
@@ -648,7 +648,7 @@ class PaymentMethodServiceTests {
             FieldsDto npgResponse = TestUtil.npgResponse();
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
             when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "CHECKOUT"))
+            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, ClientIdDto.CHECKOUT))
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
@@ -1202,7 +1202,7 @@ class PaymentMethodServiceTests {
             ClientIdDto xClientId = ClientIdDto.IO;
             String orderId = UUID.randomUUID().toString().replace("-", "").substring(0, 15);
             when(uniqueIdUtils.generateUniqueId()).thenReturn(Mono.just(orderId));
-            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, "IO"))
+            when(paymentMethodsHandlerClient.validatePaymentMethodExists(paymentMethodId, ClientIdDto.IO))
                     .thenReturn(
                             Mono.just(
                                     new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()

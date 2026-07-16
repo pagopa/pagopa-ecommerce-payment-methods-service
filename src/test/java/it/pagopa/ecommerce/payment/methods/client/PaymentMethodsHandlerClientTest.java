@@ -109,7 +109,13 @@ class PaymentMethodsHandlerClientTest {
                         .setBody(new ObjectMapper().writeValueAsString(responseDto))
         );
 
-        StepVerifier.create(client.validatePaymentMethodExists(PAYMENT_METHOD_ID, "CHECKOUT"))
+        StepVerifier
+                .create(
+                        client.validatePaymentMethodExists(
+                                PAYMENT_METHOD_ID,
+                                it.pagopa.ecommerce.payment.methods.server.model.ClientIdDto.CHECKOUT
+                        )
+                )
                 .expectNextMatches(r -> r.getName().get("it").equals("CARDS"))
                 .verifyComplete();
 
