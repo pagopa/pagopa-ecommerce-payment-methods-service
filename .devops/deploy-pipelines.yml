@@ -34,7 +34,7 @@ parameters:
       - False
       - True
   # Required for TAS tests
-  - name: ref
+  - name: tas_ref
     displayName: "TAS repo branch/tag"
     type: string
     default: main
@@ -103,7 +103,8 @@ stages:
   - stage: 'Deploy_for_DEV'
     displayName: 'Deploy DEV'
     dependsOn: Build_for_DEV
-    condition: or(succeeded(), ${{ parameters.SKIP_BUILD }}, eq(${{parameters.DEV_DEPLOY}}, true) )
+    #condition: or(succeeded(), ${{ parameters.SKIP_BUILD }}, eq(${{parameters.DEV_DEPLOY}}, true) )
+    condition: false
     jobs:
       - deployment: "deploy"
         environment: 'DEV'
@@ -158,7 +159,7 @@ stages:
               suite: checkout
               environment: dev
               mode: async
-              ref: ${{ parameters.ref }}
+              ref: ${{ parameters.tas_ref }}
               verifyOrchestrator: true
               publishTests: true
               stepName: TAS_E2E_dev
@@ -189,7 +190,7 @@ stages:
               suite: tas_pass
               environment: dev
               mode: async
-              ref: ${{ parameters.ref }}
+              ref: ${{ parameters.tas_ref }}
               verifyOrchestrator: true
               publishTests: true
               stepName: TAS_INTEGRATION_dev
@@ -387,7 +388,7 @@ stages:
               suite: checkout
               environment: uat
               mode: async
-              ref: ${{ parameters.ref }}
+              ref: ${{ parameters.tas_ref }}
               verifyOrchestrator: true
               publishTests: true
               stepName: TAS_E2E_uat
@@ -418,7 +419,7 @@ stages:
               suite: tas_pass
               environment: uat
               mode: async
-              ref: ${{ parameters.ref }}
+              ref: ${{ parameters.tas_ref }}
               verifyOrchestrator: true
               publishTests: true
               stepName: TAS_INTEGRATION_uat
