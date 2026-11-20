@@ -50,7 +50,7 @@ public abstract class PaymentMethodServiceCommon {
      * available value or empty string.
      */
     protected String resolveLocalizedValue(Map<String, String> localizedMap) {
-        return localizedMap.getOrDefault("it", localizedMap.values().stream().findFirst().orElse(""));
+        return localizedMap.getOrDefault("IT", localizedMap.values().stream().findFirst().orElse(""));
     }
 
     public Mono<TransactionId> isSessionValid(
