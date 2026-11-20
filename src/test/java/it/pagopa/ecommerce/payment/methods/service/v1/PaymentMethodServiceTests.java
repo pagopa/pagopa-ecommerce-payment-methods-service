@@ -1139,8 +1139,8 @@ class PaymentMethodServiceTests {
                         Mono.just(
                                 new it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto()
                                         .paymentTypeCode("CP")
-                                        .name(java.util.Map.of("it", "CARDS"))
-                                        .description(java.util.Map.of("it", "description"))
+                                        .name(java.util.Map.of("IT", "CARDS"))
+                                        .description(java.util.Map.of("IT", "description"))
                                         .status(
                                                 it.pagopa.generated.ecommerce.handler.v1.dto.PaymentMethodResponseDto.StatusEnum.ENABLED
                                         )
